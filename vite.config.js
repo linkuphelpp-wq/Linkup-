@@ -5,10 +5,11 @@ import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
 export default defineConfig({
+  base: '/Linkup-/',
   build: {
     minify: false,
     sourcemap: false,
-    reportCompressedSize: false, // يمنع حساب gzip الذي يسبب الانهيار
+    reportCompressedSize: false,
     chunkSizeWarningLimit: 4000,
   },
   plugins: [
@@ -16,9 +17,8 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      // تبسيط إعدادات PWA لتخفيف المعالجة
       workbox: {
-        globPatterns: [], // لا حاجة لمسح الملفات الآن
+        globPatterns: [],
       },
       manifest: {
         name: 'LinkUp',
@@ -27,7 +27,7 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
-        icons: [] // سنضيف الأيقونات يدوياً إذا نجح البناء
+        icons: []
       }
     })
   ],
