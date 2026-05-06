@@ -17,17 +17,32 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      workbox: {
-        globPatterns: [],
-      },
+      includeAssets: ['favicon.svg', 'icon-192.svg', 'icon-512.svg'],
       manifest: {
         name: 'LinkUp',
         short_name: 'LinkUp',
+        description: 'تطبيق مكالمات صوت وفيديو',
         theme_color: '#1e293b',
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/',
-        icons: []
+        icons: [
+          {
+            src: 'icon-192.svg',
+            sizes: '192x192',
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
+          },
+          {
+            src: 'icon-512.svg',
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
+          }
+        ]
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}']
       }
     })
   ],
