@@ -4,6 +4,9 @@ import { X } from 'lucide-react';
 export default function InstallGuide({ onDismiss, deferredPrompt, isInstalled }) {
   const [showSteps, setShowSteps] = useState(false);
 
+  // ✅ استخدام BASE_URL لضمان تحميل الأيقونة بشكل صحيح
+  const base = import.meta.env.BASE_URL;
+
   if (isInstalled) return null;
 
   const handleAutoInstall = async () => {
@@ -41,7 +44,7 @@ export default function InstallGuide({ onDismiss, deferredPrompt, isInstalled })
             {/* الإطار الأساسي */}
             <div className="relative w-20 h-20 rounded-[1.75rem] bg-white p-1 shadow-xl">
               <img
-                src="/icon-512.png"  // استخدم المسار الصحيح لأيقونتك
+                src={`${base}icon-512.png`}  // ✅ مسار ديناميكي يضمن الظهور
                 alt="أيقونة التطبيق"
                 className="w-full h-full rounded-2xl object-cover"
               />
