@@ -57116,7 +57116,6 @@ function IncomingCallModal({ open, caller, callType, onAccept, onReject }) {
 //#region src/components/common/InstallGuide.jsx
 function InstallGuide({ onDismiss, deferredPrompt, isInstalled }) {
 	const [showSteps, setShowSteps] = (0, import_react.useState)(false);
-	const base = "/Linkup-/";
 	if (isInstalled) return null;
 	const handleAutoInstall = async () => {
 		if (deferredPrompt) {
@@ -57143,7 +57142,7 @@ function InstallGuide({ onDismiss, deferredPrompt, isInstalled }) {
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 blur-md opacity-75" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "relative w-20 h-20 rounded-[1.75rem] bg-white p-1 shadow-xl",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-								src: `${base}icon-512.png`,
+								src: "/Linkup-/icon-512.png",
 								alt: "أيقونة التطبيق",
 								className: "w-full h-full rounded-2xl object-cover"
 							})
