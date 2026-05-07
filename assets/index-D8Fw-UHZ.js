@@ -66397,16 +66397,14 @@ function MainMenuScreen({ onNavigate, username }) {
 		icon: Users,
 		onClick: () => onNavigate?.("contacts"),
 		gradient: "from-cyan-500 to-blue-600",
-		shadowColor: "shadow-cyan-200",
-		lightBg: "bg-cyan-50"
+		shadowColor: "shadow-cyan-200"
 	}, {
 		label: "الإعدادات",
 		desc: "تخصيص التطبيق",
 		icon: Settings,
 		onClick: () => onNavigate?.("settings"),
 		gradient: "from-violet-500 to-purple-600",
-		shadowColor: "shadow-violet-200",
-		lightBg: "bg-violet-50"
+		shadowColor: "shadow-violet-200"
 	}];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-white to-rose-50 pb-32 text-right overflow-hidden",
@@ -66496,9 +66494,9 @@ function MainMenuScreen({ onNavigate, username }) {
 							damping: 15
 						},
 						whileHover: { y: -5 },
-						className: "relative bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5),0_20px_40px_-12px_rgba(0,0,0,0.1)] border border-white/50",
+						className: "relative bg-white/70 backdrop-blur-md rounded-3xl p-6 pt-14 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5),0_20px_40px_-12px_rgba(0,0,0,0.1)] border border-white/50 mt-4",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "absolute -top-10 left-1/2 -translate-x-1/2",
+							className: "absolute -top-12 left-1/2 -translate-x-1/2",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 								initial: {
 									scale: 0,
@@ -66515,25 +66513,22 @@ function MainMenuScreen({ onNavigate, username }) {
 									damping: 15
 								},
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
-									className: "w-20 h-20 border-4 border-white shadow-xl ring-4 ring-purple-500/10",
+									className: "w-24 h-24 border-4 border-white shadow-xl ring-4 ring-purple-500/10",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
 										src: user?.photoURL,
 										className: "object-cover"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-										className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white text-2xl font-bold",
+										className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white text-3xl font-bold",
 										children: displayName.charAt(0)
 									})]
 								})
 							})
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "mt-10 text-center",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-								className: "text-xl font-bold text-gray-800",
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "mt-2 text-center",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+								className: "text-2xl font-bold text-gray-800",
 								children: displayName
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-gray-500 mt-1",
-								children: "نشط الآن"
-							})]
+							})
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
