@@ -44757,15 +44757,15 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 }
 //#endregion
 //#region node_modules/@radix-ui/react-compose-refs/dist/index.mjs
-function setRef(ref, value) {
+function setRef$1(ref, value) {
 	if (typeof ref === "function") return ref(value);
 	else if (ref !== null && ref !== void 0) ref.current = value;
 }
-function composeRefs(...refs) {
+function composeRefs$1(...refs) {
 	return (node) => {
 		let hasCleanup = false;
 		const cleanups = refs.map((ref) => {
-			const cleanup = setRef(ref, node);
+			const cleanup = setRef$1(ref, node);
 			if (!hasCleanup && typeof cleanup == "function") hasCleanup = true;
 			return cleanup;
 		});
@@ -44773,13 +44773,13 @@ function composeRefs(...refs) {
 			for (let i = 0; i < cleanups.length; i++) {
 				const cleanup = cleanups[i];
 				if (typeof cleanup == "function") cleanup();
-				else setRef(refs[i], null);
+				else setRef$1(refs[i], null);
 			}
 		};
 	};
 }
-function useComposedRefs(...refs) {
-	return import_react.useCallback(composeRefs(...refs), refs);
+function useComposedRefs$1(...refs) {
+	return import_react.useCallback(composeRefs$1(...refs), refs);
 }
 //#endregion
 //#region node_modules/@radix-ui/react-slot/dist/index.mjs
@@ -44831,7 +44831,7 @@ function createSlotClone$4(ownerName) {
 		if (import_react.isValidElement(children)) {
 			const childrenRef = getElementRef$5(children);
 			const props2 = mergeProps$4(slotProps, children.props);
-			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
+			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
 			return import_react.cloneElement(children, props2);
 		}
 		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
@@ -52105,7 +52105,7 @@ function composeContextScopes(...scopes) {
 //#region node_modules/@radix-ui/react-id/dist/index.mjs
 var useReactId = import_react[" useId ".trim().toString()] || (() => void 0);
 var count$1 = 0;
-function useId$1(deterministicId) {
+function useId$3(deterministicId) {
 	const [id, setId] = import_react.useState(useReactId());
 	useLayoutEffect2(() => {
 		if (!deterministicId) setId((reactId) => reactId ?? String(count$1++));
@@ -52114,7 +52114,7 @@ function useId$1(deterministicId) {
 }
 //#endregion
 //#region node_modules/@radix-ui/react-use-controllable-state/dist/index.mjs
-var useInsertionEffect$2 = import_react[" useInsertionEffect ".trim().toString()] || useLayoutEffect2;
+var useInsertionEffect$3 = import_react[" useInsertionEffect ".trim().toString()] || useLayoutEffect2;
 function useControllableState({ prop, defaultProp, onChange = () => {}, caller }) {
 	const [uncontrolledProp, setUncontrolledProp, onChangeRef] = useUncontrolledState({
 		defaultProp,
@@ -52146,7 +52146,7 @@ function useUncontrolledState({ defaultProp, onChange }) {
 	const [value, setValue] = import_react.useState(defaultProp);
 	const prevValueRef = import_react.useRef(value);
 	const onChangeRef = import_react.useRef(onChange);
-	useInsertionEffect$2(() => {
+	useInsertionEffect$3(() => {
 		onChangeRef.current = onChange;
 	}, [onChange]);
 	import_react.useEffect(() => {
@@ -52203,7 +52203,7 @@ function createSlotClone$3(ownerName) {
 		if (import_react.isValidElement(children)) {
 			const childrenRef = getElementRef$4(children);
 			const props2 = mergeProps$3(slotProps, children.props);
-			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
+			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
 			return import_react.cloneElement(children, props2);
 		}
 		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
@@ -52317,7 +52317,7 @@ var DismissableLayer = import_react.forwardRef((props, forwardedRef) => {
 	const [node, setNode] = import_react.useState(null);
 	const ownerDocument = node?.ownerDocument ?? globalThis?.document;
 	const [, force] = import_react.useState({});
-	const composedRefs = useComposedRefs(forwardedRef, (node2) => setNode(node2));
+	const composedRefs = useComposedRefs$1(forwardedRef, (node2) => setNode(node2));
 	const layers = Array.from(context.layers);
 	const [highestLayerWithOutsidePointerEventsDisabled] = [...context.layersWithOutsidePointerEventsDisabled].slice(-1);
 	const highestLayerWithOutsidePointerEventsDisabledIndex = layers.indexOf(highestLayerWithOutsidePointerEventsDisabled);
@@ -52397,7 +52397,7 @@ var BRANCH_NAME = "DismissableLayerBranch";
 var DismissableLayerBranch = import_react.forwardRef((props, forwardedRef) => {
 	const context = import_react.useContext(DismissableLayerContext);
 	const ref = import_react.useRef(null);
-	const composedRefs = useComposedRefs(forwardedRef, ref);
+	const composedRefs = useComposedRefs$1(forwardedRef, ref);
 	import_react.useEffect(() => {
 		const node = ref.current;
 		if (node) {
@@ -52512,7 +52512,7 @@ function createSlotClone$2(ownerName) {
 		if (import_react.isValidElement(children)) {
 			const childrenRef = getElementRef$3(children);
 			const props2 = mergeProps$2(slotProps, children.props);
-			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
+			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
 			return import_react.cloneElement(children, props2);
 		}
 		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
@@ -52608,7 +52608,7 @@ var FocusScope = import_react.forwardRef((props, forwardedRef) => {
 	const onMountAutoFocus = useCallbackRef$1(onMountAutoFocusProp);
 	const onUnmountAutoFocus = useCallbackRef$1(onUnmountAutoFocusProp);
 	const lastFocusedElementRef = import_react.useRef(null);
-	const composedRefs = useComposedRefs(forwardedRef, (node) => setContainer(node));
+	const composedRefs = useComposedRefs$1(forwardedRef, (node) => setContainer(node));
 	const focusScope = import_react.useRef({
 		paused: false,
 		pause() {
@@ -52821,7 +52821,7 @@ function createSlotClone$1(ownerName) {
 		if (import_react.isValidElement(children)) {
 			const childrenRef = getElementRef$2(children);
 			const props2 = mergeProps$1(slotProps, children.props);
-			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
+			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
 			return import_react.cloneElement(children, props2);
 		}
 		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
@@ -52927,7 +52927,7 @@ var Presence = (props) => {
 	const { present, children } = props;
 	const presence = usePresence$2(present);
 	const child = typeof children === "function" ? children({ present: presence.isPresent }) : import_react.Children.only(children);
-	const ref = useComposedRefs(presence.ref, getElementRef$1(child));
+	const ref = useComposedRefs$1(presence.ref, getElementRef$1(child));
 	return typeof children === "function" || presence.isPresent ? import_react.cloneElement(child, { ref }) : null;
 };
 Presence.displayName = "Presence";
@@ -53054,7 +53054,7 @@ function createSlotClone(ownerName) {
 		if (import_react.isValidElement(children)) {
 			const childrenRef = getElementRef(children);
 			const props2 = mergeProps(slotProps, children.props);
-			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
+			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
 			return import_react.cloneElement(children, props2);
 		}
 		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
@@ -53998,9 +53998,9 @@ var Dialog$1 = (props) => {
 		scope: __scopeDialog,
 		triggerRef,
 		contentRef,
-		contentId: useId$1(),
-		titleId: useId$1(),
-		descriptionId: useId$1(),
+		contentId: useId$3(),
+		titleId: useId$3(),
+		descriptionId: useId$3(),
 		open,
 		onOpenChange: setOpen,
 		onOpenToggle: import_react.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
@@ -54013,7 +54013,7 @@ var TRIGGER_NAME = "DialogTrigger";
 var DialogTrigger = import_react.forwardRef((props, forwardedRef) => {
 	const { __scopeDialog, ...triggerProps } = props;
 	const context = useDialogContext(TRIGGER_NAME, __scopeDialog);
-	const composedTriggerRef = useComposedRefs(forwardedRef, context.triggerRef);
+	const composedTriggerRef = useComposedRefs$1(forwardedRef, context.triggerRef);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.button, {
 		type: "button",
 		"aria-haspopup": "dialog",
@@ -54098,7 +54098,7 @@ DialogContent$1.displayName = CONTENT_NAME;
 var DialogContentModal = import_react.forwardRef((props, forwardedRef) => {
 	const context = useDialogContext(CONTENT_NAME, props.__scopeDialog);
 	const contentRef = import_react.useRef(null);
-	const composedRefs = useComposedRefs(forwardedRef, context.contentRef, contentRef);
+	const composedRefs = useComposedRefs$1(forwardedRef, context.contentRef, contentRef);
 	import_react.useEffect(() => {
 		const content = contentRef.current;
 		if (content) return hideOthers(content);
@@ -54154,7 +54154,7 @@ var DialogContentImpl = import_react.forwardRef((props, forwardedRef) => {
 	const { __scopeDialog, trapFocus, onOpenAutoFocus, onCloseAutoFocus, ...contentProps } = props;
 	const context = useDialogContext(CONTENT_NAME, __scopeDialog);
 	const contentRef = import_react.useRef(null);
-	const composedRefs = useComposedRefs(forwardedRef, contentRef);
+	const composedRefs = useComposedRefs$1(forwardedRef, contentRef);
 	useFocusGuards();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FocusScope, {
 		asChild: true,
@@ -64019,6 +64019,193 @@ var MotionConfigContext = (0, import_react.createContext)({
 	reducedMotion: "never"
 });
 //#endregion
+//#region node_modules/framer-motion/dist/es/utils/use-composed-ref.mjs
+/**
+* Taken from https://github.com/radix-ui/primitives/blob/main/packages/react/compose-refs/src/compose-refs.tsx
+*/
+/**
+* Set a given ref to a given value
+* This utility takes care of different types of refs: callback refs and RefObject(s)
+*/
+function setRef(ref, value) {
+	if (typeof ref === "function") return ref(value);
+	else if (ref !== null && ref !== void 0) ref.current = value;
+}
+/**
+* A utility to compose multiple refs together
+* Accepts callback refs and RefObject(s)
+*/
+function composeRefs(...refs) {
+	return (node) => {
+		let hasCleanup = false;
+		const cleanups = refs.map((ref) => {
+			const cleanup = setRef(ref, node);
+			if (!hasCleanup && typeof cleanup === "function") hasCleanup = true;
+			return cleanup;
+		});
+		if (hasCleanup) return () => {
+			for (let i = 0; i < cleanups.length; i++) {
+				const cleanup = cleanups[i];
+				if (typeof cleanup === "function") cleanup();
+				else setRef(refs[i], null);
+			}
+		};
+	};
+}
+/**
+* A custom hook that composes multiple refs
+* Accepts callback refs and RefObject(s)
+*/
+function useComposedRefs(...refs) {
+	return import_react.useCallback(composeRefs(...refs), refs);
+}
+//#endregion
+//#region node_modules/framer-motion/dist/es/components/AnimatePresence/PopChild.mjs
+/**
+* Measurement functionality has to be within a separate component
+* to leverage snapshot lifecycle.
+*/
+var PopChildMeasure = class extends import_react.Component {
+	getSnapshotBeforeUpdate(prevProps) {
+		const element = this.props.childRef.current;
+		if (isHTMLElement(element) && prevProps.isPresent && !this.props.isPresent && this.props.pop !== false) {
+			const parent = element.offsetParent;
+			const parentWidth = isHTMLElement(parent) ? parent.offsetWidth || 0 : 0;
+			const parentHeight = isHTMLElement(parent) ? parent.offsetHeight || 0 : 0;
+			const computedStyle = getComputedStyle(element);
+			const size = this.props.sizeRef.current;
+			size.height = parseFloat(computedStyle.height);
+			size.width = parseFloat(computedStyle.width);
+			size.top = element.offsetTop;
+			size.left = element.offsetLeft;
+			size.right = parentWidth - size.width - size.left;
+			size.bottom = parentHeight - size.height - size.top;
+		}
+		return null;
+	}
+	/**
+	* Required with getSnapshotBeforeUpdate to stop React complaining.
+	*/
+	componentDidUpdate() {}
+	render() {
+		return this.props.children;
+	}
+};
+function PopChild({ children, isPresent, anchorX, anchorY, root, pop }) {
+	const id = (0, import_react.useId)();
+	const ref = (0, import_react.useRef)(null);
+	const size = (0, import_react.useRef)({
+		width: 0,
+		height: 0,
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0
+	});
+	const { nonce } = (0, import_react.useContext)(MotionConfigContext);
+	const composedRef = useComposedRefs(ref, children.props?.ref ?? children?.ref);
+	/**
+	* We create and inject a style block so we can apply this explicit
+	* sizing in a non-destructive manner by just deleting the style block.
+	*
+	* We can't apply size via render as the measurement happens
+	* in getSnapshotBeforeUpdate (post-render), likewise if we apply the
+	* styles directly on the DOM node, we might be overwriting
+	* styles set via the style prop.
+	*/
+	(0, import_react.useInsertionEffect)(() => {
+		const { width, height, top, left, right, bottom } = size.current;
+		if (isPresent || pop === false || !ref.current || !width || !height) return;
+		const x = anchorX === "left" ? `left: ${left}` : `right: ${right}`;
+		const y = anchorY === "bottom" ? `bottom: ${bottom}` : `top: ${top}`;
+		ref.current.dataset.motionPopId = id;
+		const style = document.createElement("style");
+		if (nonce) style.nonce = nonce;
+		const parent = root ?? document.head;
+		parent.appendChild(style);
+		if (style.sheet) style.sheet.insertRule(`
+          [data-motion-pop-id="${id}"] {
+            position: absolute !important;
+            width: ${width}px !important;
+            height: ${height}px !important;
+            ${x}px !important;
+            ${y}px !important;
+          }
+        `);
+		return () => {
+			ref.current?.removeAttribute("data-motion-pop-id");
+			if (parent.contains(style)) parent.removeChild(style);
+		};
+	}, [isPresent]);
+	return (0, import_jsx_runtime.jsx)(PopChildMeasure, {
+		isPresent,
+		childRef: ref,
+		sizeRef: size,
+		pop,
+		children: pop === false ? children : import_react.cloneElement(children, { ref: composedRef })
+	});
+}
+//#endregion
+//#region node_modules/framer-motion/dist/es/components/AnimatePresence/PresenceChild.mjs
+var PresenceChild = ({ children, initial, isPresent, onExitComplete, custom, presenceAffectsLayout, mode, anchorX, anchorY, root }) => {
+	const presenceChildren = useConstant(newChildrenMap);
+	const id = (0, import_react.useId)();
+	let isReusedContext = true;
+	let context = (0, import_react.useMemo)(() => {
+		isReusedContext = false;
+		return {
+			id,
+			initial,
+			isPresent,
+			custom,
+			onExitComplete: (childId) => {
+				presenceChildren.set(childId, true);
+				for (const isComplete of presenceChildren.values()) if (!isComplete) return;
+				onExitComplete && onExitComplete();
+			},
+			register: (childId) => {
+				presenceChildren.set(childId, false);
+				return () => presenceChildren.delete(childId);
+			}
+		};
+	}, [
+		isPresent,
+		presenceChildren,
+		onExitComplete
+	]);
+	/**
+	* If the presence of a child affects the layout of the components around it,
+	* we want to make a new context value to ensure they get re-rendered
+	* so they can detect that layout change.
+	*/
+	if (presenceAffectsLayout && isReusedContext) context = { ...context };
+	(0, import_react.useMemo)(() => {
+		presenceChildren.forEach((_, key) => presenceChildren.set(key, false));
+	}, [isPresent]);
+	/**
+	* If there's no `motion` components to fire exit animations, we want to remove this
+	* component immediately.
+	*/
+	import_react.useEffect(() => {
+		!isPresent && !presenceChildren.size && onExitComplete && onExitComplete();
+	}, [isPresent]);
+	children = (0, import_jsx_runtime.jsx)(PopChild, {
+		pop: mode === "popLayout",
+		isPresent,
+		anchorX,
+		anchorY,
+		root,
+		children
+	});
+	return (0, import_jsx_runtime.jsx)(PresenceContext.Provider, {
+		value: context,
+		children
+	});
+};
+function newChildrenMap() {
+	return /* @__PURE__ */ new Map();
+}
+//#endregion
 //#region node_modules/framer-motion/dist/es/components/AnimatePresence/use-presence.mjs
 /**
 * When a component is the child of `AnimatePresence`, it can use `usePresence`
@@ -64058,6 +64245,175 @@ function usePresence$1(subscribe = true) {
 	]);
 	return !isPresent && onExitComplete ? [false, safeToRemove] : [true];
 }
+//#endregion
+//#region node_modules/framer-motion/dist/es/components/AnimatePresence/utils.mjs
+var getChildKey = (child) => child.key || "";
+function onlyElements(children) {
+	const filtered = [];
+	import_react.Children.forEach(children, (child) => {
+		if ((0, import_react.isValidElement)(child)) filtered.push(child);
+	});
+	return filtered;
+}
+//#endregion
+//#region node_modules/framer-motion/dist/es/components/AnimatePresence/index.mjs
+/**
+* `AnimatePresence` enables the animation of components that have been removed from the tree.
+*
+* When adding/removing more than a single child, every child **must** be given a unique `key` prop.
+*
+* Any `motion` components that have an `exit` property defined will animate out when removed from
+* the tree.
+*
+* ```jsx
+* import { motion, AnimatePresence } from 'framer-motion'
+*
+* export const Items = ({ items }) => (
+*   <AnimatePresence>
+*     {items.map(item => (
+*       <motion.div
+*         key={item.id}
+*         initial={{ opacity: 0 }}
+*         animate={{ opacity: 1 }}
+*         exit={{ opacity: 0 }}
+*       />
+*     ))}
+*   </AnimatePresence>
+* )
+* ```
+*
+* You can sequence exit animations throughout a tree using variants.
+*
+* If a child contains multiple `motion` components with `exit` props, it will only unmount the child
+* once all `motion` components have finished animating out. Likewise, any components using
+* `usePresence` all need to call `safeToRemove`.
+*
+* @public
+*/
+var AnimatePresence = ({ children, custom, initial = true, onExitComplete, presenceAffectsLayout = true, mode = "sync", propagate = false, anchorX = "left", anchorY = "top", root }) => {
+	const [isParentPresent, safeToRemove] = usePresence$1(propagate);
+	/**
+	* Filter any children that aren't ReactElements. We can only track components
+	* between renders with a props.key.
+	*/
+	const presentChildren = (0, import_react.useMemo)(() => onlyElements(children), [children]);
+	/**
+	* Track the keys of the currently rendered children. This is used to
+	* determine which children are exiting.
+	*/
+	const presentKeys = propagate && !isParentPresent ? [] : presentChildren.map(getChildKey);
+	/**
+	* If `initial={false}` we only want to pass this to components in the first render.
+	*/
+	const isInitialRender = (0, import_react.useRef)(true);
+	/**
+	* A ref containing the currently present children. When all exit animations
+	* are complete, we use this to re-render the component with the latest children
+	* *committed* rather than the latest children *rendered*.
+	*/
+	const pendingPresentChildren = (0, import_react.useRef)(presentChildren);
+	/**
+	* Track which exiting children have finished animating out.
+	*/
+	const exitComplete = useConstant(() => /* @__PURE__ */ new Map());
+	/**
+	* Track which components are currently processing exit to prevent duplicate processing.
+	*/
+	const exitingComponents = (0, import_react.useRef)(/* @__PURE__ */ new Set());
+	/**
+	* Save children to render as React state. To ensure this component is concurrent-safe,
+	* we check for exiting children via an effect.
+	*/
+	const [diffedChildren, setDiffedChildren] = (0, import_react.useState)(presentChildren);
+	const [renderedChildren, setRenderedChildren] = (0, import_react.useState)(presentChildren);
+	useIsomorphicLayoutEffect(() => {
+		isInitialRender.current = false;
+		pendingPresentChildren.current = presentChildren;
+		/**
+		* Update complete status of exiting children.
+		*/
+		for (let i = 0; i < renderedChildren.length; i++) {
+			const key = getChildKey(renderedChildren[i]);
+			if (!presentKeys.includes(key)) {
+				if (exitComplete.get(key) !== true) exitComplete.set(key, false);
+			} else {
+				exitComplete.delete(key);
+				exitingComponents.current.delete(key);
+			}
+		}
+	}, [
+		renderedChildren,
+		presentKeys.length,
+		presentKeys.join("-")
+	]);
+	const exitingChildren = [];
+	if (presentChildren !== diffedChildren) {
+		let nextChildren = [...presentChildren];
+		/**
+		* Loop through all the currently rendered components and decide which
+		* are exiting.
+		*/
+		for (let i = 0; i < renderedChildren.length; i++) {
+			const child = renderedChildren[i];
+			const key = getChildKey(child);
+			if (!presentKeys.includes(key)) {
+				nextChildren.splice(i, 0, child);
+				exitingChildren.push(child);
+			}
+		}
+		/**
+		* If we're in "wait" mode, and we have exiting children, we want to
+		* only render these until they've all exited.
+		*/
+		if (mode === "wait" && exitingChildren.length) nextChildren = exitingChildren;
+		setRenderedChildren(onlyElements(nextChildren));
+		setDiffedChildren(presentChildren);
+		/**
+		* Early return to ensure once we've set state with the latest diffed
+		* children, we can immediately re-render.
+		*/
+		return null;
+	}
+	/**
+	* If we've been provided a forceRender function by the LayoutGroupContext,
+	* we can use it to force a re-render amongst all surrounding components once
+	* all components have finished animating out.
+	*/
+	const { forceRender } = (0, import_react.useContext)(LayoutGroupContext);
+	return (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: renderedChildren.map((child) => {
+		const key = getChildKey(child);
+		const isPresent = propagate && !isParentPresent ? false : presentChildren === renderedChildren || presentKeys.includes(key);
+		const onExit = () => {
+			if (exitingComponents.current.has(key)) return;
+			if (exitComplete.has(key)) {
+				exitingComponents.current.add(key);
+				exitComplete.set(key, true);
+			} else return;
+			let isEveryExitComplete = true;
+			exitComplete.forEach((isExitComplete) => {
+				if (!isExitComplete) isEveryExitComplete = false;
+			});
+			if (isEveryExitComplete) {
+				forceRender?.();
+				setRenderedChildren(pendingPresentChildren.current);
+				propagate && safeToRemove?.();
+				onExitComplete && onExitComplete();
+			}
+		};
+		return (0, import_jsx_runtime.jsx)(PresenceChild, {
+			isPresent,
+			initial: !isInitialRender.current || initial ? void 0 : false,
+			custom,
+			presenceAffectsLayout,
+			mode,
+			root,
+			onExitComplete: isPresent ? void 0 : onExit,
+			anchorX,
+			anchorY,
+			children: child
+		}, key);
+	}) });
+};
 //#endregion
 //#region node_modules/framer-motion/dist/es/context/LazyContext.mjs
 var LazyContext = (0, import_react.createContext)({ strict: false });
@@ -66122,8 +66478,17 @@ var AppIcon = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 	})
 });
 function WelcomeModal({ open, onClose, onLearnMore }) {
-	if (!open) return null;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	const [isVisible, setIsVisible] = (0, import_react.useState)(open);
+	useEffect(() => {
+		if (open) setIsVisible(true);
+	}, [open]);
+	const handleClose = () => {
+		setIsVisible(false);
+		setTimeout(() => {
+			onClose?.();
+		}, 300);
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: isVisible && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 			initial: {
@@ -66187,7 +66552,7 @@ function WelcomeModal({ open, onClose, onLearnMore }) {
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex flex-col gap-3",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-									onClick: onClose,
+									onClick: handleClose,
 									className: "w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold shadow-md hover:shadow-lg transition-all",
 									children: "متابعة"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
@@ -66202,7 +66567,7 @@ function WelcomeModal({ open, onClose, onLearnMore }) {
 				})]
 			})
 		})
-	});
+	}) });
 }
 //#endregion
 //#region src/components/common/UsernameModal.jsx
