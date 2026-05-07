@@ -1,6 +1,6 @@
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react'; // استيراد useState
 
 const AppIcon = () => (
   <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
@@ -15,16 +15,15 @@ const AppIcon = () => (
 export default function WelcomeModal({ open, onClose, onLearnMore }) {
   const [isVisible, setIsVisible] = useState(open);
 
-  // تحديث الحالة المرئية عند تغيير خاصية open من الخارج
   useEffect(() => {
     if (open) setIsVisible(true);
   }, [open]);
 
   const handleClose = () => {
-    setIsVisible(false); // بدء حركة الاختفاء
+    setIsVisible(false);
     setTimeout(() => {
-      onClose?.(); // استدعاء دالة الإغلاق الأصلية بعد انتهاء الحركة
-    }, 300); // يجب أن يتطابق الوقت مع مدة الحركة
+      onClose?.();
+    }, 300);
   };
 
   return (
@@ -34,7 +33,7 @@ export default function WelcomeModal({ open, onClose, onLearnMore }) {
           <motion.div
             initial={{ opacity: 0, scale: 0.5, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.5, y: 40 }} // حركة الخروج (عكس حركة الدخول)
+            exit={{ opacity: 0, scale: 0.5, y: 40 }}
             transition={{
               type: 'spring',
               stiffness: 300,
@@ -43,15 +42,12 @@ export default function WelcomeModal({ open, onClose, onLearnMore }) {
             }}
             className="w-full max-w-md"
           >
-            {/* البطاقة العائمة الزجاجية */}
             <div className="relative overflow-hidden rounded-3xl">
-              {/* خلفية متدرجة مع كرات متوهجة */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-cyan-50">
                 <div className="absolute -top-40 -right-40 w-60 h-60 bg-blue-300/40 rounded-full blur-3xl" />
                 <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-cyan-300/40 rounded-full blur-3xl" />
               </div>
               
-              {/* المحتوى الزجاجي */}
               <div className="relative backdrop-blur-xl bg-white/60 rounded-3xl p-8 shadow-2xl border border-white/50">
                 <div className="text-center">
                   <motion.div
@@ -75,7 +71,7 @@ export default function WelcomeModal({ open, onClose, onLearnMore }) {
                   
                   <div className="flex flex-col gap-3">
                     <Button
-                      onClick={handleClose} // استدعاء دالة الإغلاق الجديدة
+                      onClick={handleClose}
                       className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold shadow-md hover:shadow-lg transition-all"
                     >
                       متابعة
