@@ -66479,7 +66479,7 @@ var AppIcon = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 });
 function WelcomeModal({ open, onClose, onLearnMore }) {
 	const [isVisible, setIsVisible] = (0, import_react.useState)(open);
-	useEffect(() => {
+	(0, import_react.useEffect)(() => {
 		if (open) setIsVisible(true);
 	}, [open]);
 	const handleClose = () => {
