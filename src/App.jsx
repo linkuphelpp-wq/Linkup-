@@ -383,7 +383,7 @@ function App() {
     support: 'تواصل مع المطور', groups: 'المجموعات', createGroup: 'إنشاء مجموعة', groupChat: 'محادثة المجموعة', groupInfo: 'معلومات المجموعة',
   }[currentScreen] || 'LinkUp';
 
-  const pagesWithOwnHeader = ['atheer','about','privacy','support','createGroup','data','lock','changeEmail','resetPasswordProfile','forgotpassword','resetpassword','contacts','chat','groupChat','groupInfo'];
+  const pagesWithOwnHeader = ['atheer','about','privacy','support','createGroup','data','lock','changeEmail','resetPasswordProfile','forgotpassword','resetpassword','contacts','chat','groupChat','groupInfo','settings'];
 
   const renderContent = () => {
     if (currentScreen === 'mainMenu') return <MainMenuScreen onNavigate={navigateTo} username={myUsername} />;
@@ -421,7 +421,6 @@ function App() {
       <WelcomeModal open={showWelcomeModal} onClose={handleWelcomeClose} onLearnMore={handleWelcomeLearnMore} />
       <UsernameModal open={showUsernameModal} onConfirm={handleUsernameConfirm} userId={user?.uid} />
       <WarningModal open={warningModalOpen} message={warningMessage} onClose={() => setWarningModalOpen(false)} />
-
       {/* 🆕 شريط التنبيه بعدم وجود اتصال */}
       {!isOnline && (
         <div className="fixed top-0 left-0 right-0 z-[200] bg-yellow-400 text-black text-center py-2 text-sm font-bold shadow-md animate-pulse">

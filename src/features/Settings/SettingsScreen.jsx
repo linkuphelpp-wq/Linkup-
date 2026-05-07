@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield, Palette, Mic, Speaker, Lock, RefreshCw,
   MessageCircle, Share2, Sparkles, Check, Crown,
-  AlertTriangle, X, TabletSmartphone, User, ChevronRight, Zap
+  AlertTriangle, X, TabletSmartphone, User, ChevronRight, Zap, ChevronLeft
 } from 'lucide-react';
 import { db, auth } from '../../firebase/config';
 import { collection, query, where, getDocs, writeBatch, doc, deleteDoc } from 'firebase/firestore';
@@ -27,9 +27,7 @@ const SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onTog
       onClick={toggle ? undefined : onClick}
       className="group relative overflow-hidden rounded-2xl bg-white border border-gray-100/80 cursor-pointer transition-all shadow-sm hover:shadow-lg p-4"
     >
-      {/* طبقة التأثير الخلفي عند التحويم */}
       <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-transparent to-blue-500/0 group-hover:from-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" />
-      
       <div className="relative flex items-center gap-4">
         <div className={`p-3 rounded-xl bg-gradient-to-br ${gradientFrom} ${gradientTo} text-white shadow-md group-hover:shadow-lg transition-all group-hover:scale-110`}>
           <Icon className="w-5 h-5" />
@@ -163,17 +161,21 @@ export default function SettingsScreen({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-24">
-      {/* الهيدر الزجاجي */}
+      {/* الهيدر الزجاجي المستقل */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-20 bg-white/60 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-12 pb-4 text-center shadow-sm"
+        className="sticky top-0 z-30 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-16 pb-4 text-center shadow-sm"
       >
-        <div className="flex items-center justify-center gap-3 mb-1">
-          <Zap className="w-7 h-7 text-purple-600" />
-          <h1 className="text-3xl font-black text-gray-800 tracking-tight">الإعدادات</h1>
+        <div className="flex items-center justify-between">
+          {/* زر الرجوع (اختياري، لكن يمكن إضافته للتناسق) */}
+          <button onClick={() => window.history.back()} className="p-2 rounded-full hover:bg-gray-100">
+            <ChevronLeft className="w-5 h-5 text-gray-600" />
+          </button>
+          <h1 className="text-2xl font-black text-gray-800 tracking-tight flex-1">الإعدادات</h1>
+          <div className="w-8" /> {/* للحفاظ على التمركز */}
         </div>
-        <p className="text-sm text-gray-500">تحكم كامل في تطبيقك كما تحب</p>
+        <p className="text-sm text-gray-500 mt-1">تحكم كامل في تطبيقك كما تحب</p>
       </motion.div>
 
       {/* المحتوى الرئيسي مع أقسام متحركة */}
