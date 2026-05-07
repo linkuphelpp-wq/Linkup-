@@ -146,44 +146,29 @@ export default function ProfileScreen({ user, onUpdateProfile, onLogout, onChang
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right" dir="rtl">
-      {/* الهيدر الزجاجي */}
-      <motion.div
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-20 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-12 pb-4 text-center shadow-sm"
-        style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}
-      >
-        <div className="flex items-center justify-center gap-2 mb-1">
-          <Crown className="w-6 h-6 text-purple-500" />
-          <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500">
-            الملف الشخصي
-          </h1>
-        </div>
-        <p className="text-sm text-gray-500">معلومات حسابك وإعداداته</p>
-      </motion.div>
 
       {/* المحتوى الرئيسي */}
-      <div className="px-4 py-6 space-y-8 max-w-lg mx-auto w-full">
+      <div className="px-4 pt-16 pb-6 space-y-8 max-w-lg mx-auto w-full">
         
         {/* بطاقة الملف الشخصي العليا */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 20 }}
-          className="relative overflow-hidden rounded-3xl bg-white border border-gray-100/80 shadow-lg"
+          className="relative mt-8 rounded-3xl bg-white border border-gray-100/80 shadow-lg"
         >
           {/* شريط زخرفي علوي */}
-          <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-purple-500/5 to-blue-500/5" />
+          <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-purple-500/5 to-blue-500/5 rounded-t-3xl" />
           
           <div className="relative flex flex-col items-center pt-14 pb-8 px-6">
             {/* الصورة الرمزية - تظهر من الأعلى */}
-            <div className="absolute -top-16 left-1/2 -translate-x-1/2">
+            <div className="absolute -top-16 left-1/2 -translate-x-1/2 z-10">
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ delay: 0.25, type: 'spring', stiffness: 200, damping: 15 }}
               >
-                <Avatar className="w-28 h-28 border-4 border-white shadow-xl ring-4 ring-purple-500/10">
+                <Avatar className="w-28 h-28 border-4 border-white shadow-xl ring-4 ring-purple-500/10 bg-white">
                   <AvatarImage src={user?.photoURL} className="object-cover" />
                   <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-500 text-white text-4xl font-bold">
                     {displayName.charAt(0)}
@@ -195,7 +180,7 @@ export default function ProfileScreen({ user, onUpdateProfile, onLogout, onChang
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setShowNameModal(true)}
-                className="absolute -bottom-1 -right-1 w-10 h-10 bg-white text-purple-600 rounded-full flex items-center justify-center shadow-lg border-2 border-purple-100 hover:bg-purple-50 active:scale-90 transition-all"
+                className="absolute -bottom-1 -right-1 w-10 h-10 bg-white text-purple-600 rounded-full flex items-center justify-center shadow-lg border-2 border-purple-100 hover:bg-purple-50 active:scale-90 transition-all z-20"
               >
                 <Pencil className="w-4 h-4" />
               </motion.button>
@@ -208,7 +193,10 @@ export default function ProfileScreen({ user, onUpdateProfile, onLogout, onChang
               transition={{ delay: 0.35 }}
               className="text-center mt-4"
             >
-              <h2 className="text-2xl font-black text-gray-900">{displayName}</h2>
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Crown className="w-5 h-5 text-purple-500" />
+                <h2 className="text-2xl font-black text-gray-900">{displayName}</h2>
+              </div>
               <p className="text-sm text-gray-500 mt-1 font-medium">@{username || 'غير محدد'}</p>
               
               {/* شارة الحالة النشطة */}
