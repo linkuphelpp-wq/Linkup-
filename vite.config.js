@@ -25,7 +25,7 @@ export default defineConfig({
         theme_color: '#1e293b',
         background_color: '#ffffff',
         display: 'standalone',
-        start_url: '/',
+        start_url: '/Linkup-/',
         icons: [
           {
             src: 'icon-192.png',
@@ -44,7 +44,7 @@ export default defineConfig({
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        navigateFallback: '/index.html', // ← هذا هو السطر السحري
+        navigateFallback: '/Linkup-/index.html',
       }
     })
   ],
