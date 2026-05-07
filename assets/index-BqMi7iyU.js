@@ -60040,7 +60040,7 @@ var getSafeName = (contact) => {
 	for (let candidate of candidates) if (candidate && !emailPattern.test(candidate)) return candidate;
 	return "مستخدم";
 };
-var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0 }) => {
+var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0, index = 0 }) => {
 	const [status, setStatus] = (0, import_react.useState)("offline");
 	const [expanded, setExpanded] = (0, import_react.useState)(false);
 	(0, import_react.useEffect)(() => {
@@ -60062,14 +60062,33 @@ var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavo
 		onCall?.(contact, type);
 		setExpanded(false);
 	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+		initial: {
+			opacity: 0,
+			y: 20
+		},
+		animate: {
+			opacity: 1,
+			y: 0
+		},
+		transition: {
+			delay: index * .05,
+			type: "spring",
+			stiffness: 200,
+			damping: 20
+		},
+		whileHover: {
+			y: -3,
+			boxShadow: "0 12px 24px -8px rgba(0,0,0,0.12)"
+		},
 		className: "bg-white rounded-2xl border border-gray-100/80 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "flex items-center justify-between p-3",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center gap-3.5 flex-1 min-w-0",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						whileTap: { scale: .8 },
 						onClick: () => onToggleFavorite?.(contact),
 						className: `shrink-0 p-1 rounded-full transition-all ${isFavorite ? "text-yellow-500 hover:bg-yellow-100" : "text-gray-300 hover:text-yellow-400 hover:bg-gray-100"}`,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-5 h-5 ${isFavorite ? "fill-yellow-500" : ""}` })
@@ -60085,7 +60104,18 @@ var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavo
 								className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white font-bold text-lg",
 								children: safeName.charAt(0)?.toUpperCase() || "م"
 							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${statusDot} shadow-sm` })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
+							animate: { scale: status === "online" ? [
+								1,
+								1.2,
+								1
+							] : 1 },
+							transition: {
+								repeat: status === "online" ? Infinity : 0,
+								duration: 2
+							},
+							className: `absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${statusDot} shadow-sm`
+						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex-1 min-w-0 text-right",
@@ -60097,20 +60127,26 @@ var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavo
 							children: statusText
 						})]
 					}),
-					unreadCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					unreadCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						initial: { scale: 0 },
+						animate: { scale: 1 },
 						className: "min-w-[22px] h-5 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center shadow-md px-1.5",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-[10px] font-bold text-white",
 							children: unreadCount
 						})
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						whileHover: { scale: 1.1 },
+						whileTap: { scale: .9 },
 						onClick: () => onEdit?.(contact),
 						className: "p-2.5 rounded-full bg-gray-50 text-amber-600 hover:bg-amber-100 active:scale-90 transition-all",
 						title: "تعديل الاسم",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-4 h-4" })
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						whileHover: { scale: 1.1 },
+						whileTap: { scale: .9 },
 						onClick: () => setExpanded(!expanded),
 						className: "p-2.5 rounded-full bg-gray-50 text-gray-600 hover:bg-gray-100 active:scale-90 transition-all",
 						title: "خيارات",
@@ -60118,107 +60154,155 @@ var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavo
 					})
 				]
 			})
-		}), expanded && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "px-4 pb-4 pt-1 flex items-center justify-around border-t border-gray-100 mt-1 animate-in slide-in-from-top-2 duration-150",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => handleCallPress("video"),
-					className: "flex flex-col items-center gap-1 text-purple-600 hover:bg-purple-50 p-2 rounded-xl transition-colors",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Video, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs font-medium",
-						children: "فيديو"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => handleCallPress("audio"),
-					className: "flex flex-col items-center gap-1 text-blue-600 hover:bg-blue-50 p-2 rounded-xl transition-colors",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs font-medium",
-						children: "صوت"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => {
-						onChat?.(contact);
-						setExpanded(false);
-					},
-					className: "flex flex-col items-center gap-1 text-gray-600 hover:bg-gray-100 p-2 rounded-xl transition-colors",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs font-medium",
-						children: "محادثة"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => {
-						setExpanded(false);
-						onToggleFavorite?.(contact);
-					},
-					className: "flex flex-col items-center gap-1 text-yellow-500 hover:bg-yellow-50 p-2 rounded-xl transition-colors",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-5 h-5 ${isFavorite ? "fill-yellow-500" : ""}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs font-medium",
-						children: "مفضلة"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => {
-						setExpanded(false);
-						onDelete?.(contact);
-					},
-					className: "flex flex-col items-center gap-1 text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs font-medium",
-						children: "حذف"
-					})]
-				})
-			]
-		})]
-	});
-};
-var DeleteConfirmModal = ({ open, contact, onConfirm, onClose }) => {
-	if (!open) return null;
-	const safeName = getSafeName(contact);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5",
-		onClick: onClose,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
-			onClick: (e) => e.stopPropagation(),
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "text-center mb-4",
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: expanded && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+			initial: {
+				height: 0,
+				opacity: 0
+			},
+			animate: {
+				height: "auto",
+				opacity: 1
+			},
+			exit: {
+				height: 0,
+				opacity: 0
+			},
+			transition: {
+				duration: .2,
+				ease: "easeInOut"
+			},
+			className: "overflow-hidden",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "px-4 pb-4 pt-1 flex items-center justify-around border-t border-gray-100 mt-1",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-8 h-8 text-red-500" })
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+						whileHover: { scale: 1.05 },
+						whileTap: { scale: .95 },
+						onClick: () => handleCallPress("video"),
+						className: "flex flex-col items-center gap-1 text-purple-600 hover:bg-purple-50 p-2 rounded-xl transition-colors",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Video, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs font-medium",
+							children: "فيديو"
+						})]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "text-lg font-bold text-gray-900",
-						children: "تأكيد الحذف"
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+						whileHover: { scale: 1.05 },
+						whileTap: { scale: .95 },
+						onClick: () => handleCallPress("audio"),
+						className: "flex flex-col items-center gap-1 text-blue-600 hover:bg-blue-50 p-2 rounded-xl transition-colors",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs font-medium",
+							children: "صوت"
+						})]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-						className: "text-sm text-gray-500 mt-2",
-						children: [
-							"هل أنت متأكد من حذف ",
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: ["@", safeName] }),
-							"؟"
-						]
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+						whileHover: { scale: 1.05 },
+						whileTap: { scale: .95 },
+						onClick: () => {
+							onChat?.(contact);
+							setExpanded(false);
+						},
+						className: "flex flex-col items-center gap-1 text-gray-600 hover:bg-gray-100 p-2 rounded-xl transition-colors",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs font-medium",
+							children: "محادثة"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+						whileHover: { scale: 1.05 },
+						whileTap: { scale: .95 },
+						onClick: () => {
+							setExpanded(false);
+							onToggleFavorite?.(contact);
+						},
+						className: "flex flex-col items-center gap-1 text-yellow-500 hover:bg-yellow-50 p-2 rounded-xl transition-colors",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-5 h-5 ${isFavorite ? "fill-yellow-500" : ""}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs font-medium",
+							children: "مفضلة"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+						whileHover: { scale: 1.05 },
+						whileTap: { scale: .95 },
+						onClick: () => {
+							setExpanded(false);
+							onDelete?.(contact);
+						},
+						className: "flex flex-col items-center gap-1 text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs font-medium",
+							children: "حذف"
+						})]
 					})
 				]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex gap-3",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-					variant: "outline",
-					onClick: onClose,
-					className: "flex-1 h-11 rounded-xl",
-					children: "إلغاء"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-					onClick: onConfirm,
-					className: "flex-1 h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white",
-					children: "حذف"
-				})]
-			})]
-		})
+			})
+		}) })]
 	});
 };
+var DeleteConfirmModal = ({ open, contact, onConfirm, onClose }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+	initial: { opacity: 0 },
+	animate: { opacity: 1 },
+	exit: { opacity: 0 },
+	className: "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5",
+	onClick: onClose,
+	children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+		initial: {
+			scale: .9,
+			opacity: 0,
+			y: 20
+		},
+		animate: {
+			scale: 1,
+			opacity: 1,
+			y: 0
+		},
+		exit: {
+			scale: .9,
+			opacity: 0,
+			y: 20
+		},
+		transition: {
+			type: "spring",
+			stiffness: 400,
+			damping: 25
+		},
+		className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
+		onClick: (e) => e.stopPropagation(),
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "text-center mb-4",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-8 h-8 text-red-500" })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+					className: "text-lg font-bold text-gray-900",
+					children: "تأكيد الحذف"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+					className: "text-sm text-gray-500 mt-2",
+					children: [
+						"هل أنت متأكد من حذف ",
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: ["@", getSafeName(contact)] }),
+						"؟"
+					]
+				})
+			]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex gap-3",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+				variant: "outline",
+				onClick: onClose,
+				className: "flex-1 h-11 rounded-xl",
+				children: "إلغاء"
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+				onClick: onConfirm,
+				className: "flex-1 h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white",
+				children: "حذف"
+			})]
+		})]
+	})
+}) });
 var EditNameModal = ({ open, contact, onSave, onClose }) => {
 	const [newName, setNewName] = (0, import_react.useState)("");
 	(0, import_react.useEffect)(() => {
@@ -60229,11 +60313,33 @@ var EditNameModal = ({ open, contact, onSave, onClose }) => {
 		onSave(contact, newName.trim());
 		onClose();
 	};
-	if (!open) return null;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+		initial: { opacity: 0 },
+		animate: { opacity: 1 },
+		exit: { opacity: 0 },
 		className: "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5",
 		onClick: onClose,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+			initial: {
+				scale: .9,
+				opacity: 0,
+				y: 20
+			},
+			animate: {
+				scale: 1,
+				opacity: 1,
+				y: 0
+			},
+			exit: {
+				scale: .9,
+				opacity: 0,
+				y: 20
+			},
+			transition: {
+				type: "spring",
+				stiffness: 400,
+				damping: 25
+			},
 			className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
 			onClick: (e) => e.stopPropagation(),
 			children: [
@@ -60262,7 +60368,7 @@ var EditNameModal = ({ open, contact, onSave, onClose }) => {
 				})
 			]
 		})
-	});
+	}) });
 };
 function ContactsScreen({ onCall, onChat }) {
 	const [contacts, setContacts] = (0, import_react.useState)([]);
@@ -60412,12 +60518,36 @@ function ContactsScreen({ onCall, onChat }) {
 		favorites
 	]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-slate-50/50 pb-24",
+		className: "min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-24 text-right",
+		dir: "rtl",
 		children: [
-			showAddModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: showAddModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				initial: { opacity: 0 },
+				animate: { opacity: 1 },
+				exit: { opacity: 0 },
 				className: "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5",
 				onClick: () => setShowAddModal(false),
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+					initial: {
+						scale: .9,
+						opacity: 0,
+						y: 20
+					},
+					animate: {
+						scale: 1,
+						opacity: 1,
+						y: 0
+					},
+					exit: {
+						scale: .9,
+						opacity: 0,
+						y: 20
+					},
+					transition: {
+						type: "spring",
+						stiffness: 400,
+						damping: 25
+					},
 					className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
 					onClick: (e) => e.stopPropagation(),
 					children: [
@@ -60466,7 +60596,7 @@ function ContactsScreen({ onCall, onChat }) {
 						})
 					]
 				})
-			}),
+			}) }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DeleteConfirmModal, {
 				open: !!deleteTarget,
 				contact: deleteTarget,
@@ -60479,34 +60609,46 @@ function ContactsScreen({ onCall, onChat }) {
 				onSave: handleEditSave,
 				onClose: () => setEditTarget(null)
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-12 pb-4",
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.header, {
+				initial: {
+					opacity: 0,
+					y: -30
+				},
+				animate: {
+					opacity: 1,
+					y: 0
+				},
+				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-12 pb-4 shadow-sm",
+				style: { paddingTop: "calc(1rem + env(safe-area-inset-top))" },
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center justify-between mb-5",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LinkUpLogo$1, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								variant: "ghost",
-								size: "icon",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+								whileHover: { scale: 1.1 },
+								whileTap: { scale: .9 },
 								onClick: () => setShowAddModal(true),
-								className: "rounded-full bg-purple-50 text-purple-600 hover:bg-purple-100 h-10 w-10",
+								className: "rounded-full bg-purple-50 text-purple-600 hover:bg-purple-100 h-10 w-10 flex items-center justify-center",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-5 h-5" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								variant: "ghost",
-								size: "icon",
-								className: "rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 h-10 w-10",
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+								whileHover: { scale: 1.1 },
+								whileTap: { scale: .9 },
+								className: "rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 h-10 w-10 flex items-center justify-center",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Funnel, { className: "w-4 h-4" })
 							})]
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "mb-4",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-							className: "text-3xl font-black text-gray-900 tracking-tight",
-							children: "جهات الاتصال"
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-2 mb-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+								className: "text-2xl font-black text-gray-900 tracking-tight",
+								children: "جهات الاتصال"
+							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-500 mt-1",
+							className: "text-sm text-gray-500",
 							children: "تواصل بسهولة مع الأشخاص المهمين لديك"
 						})]
 					}),
@@ -60516,7 +60658,9 @@ function ContactsScreen({ onCall, onChat }) {
 							"all",
 							"favorites",
 							"online"
-						].map((filter) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						].map((filter) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+							whileHover: { scale: 1.05 },
+							whileTap: { scale: .95 },
 							onClick: () => setActiveFilter(filter),
 							className: `flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap shrink-0 transition-all duration-300 ${activeFilter === filter ? "bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-md shadow-purple-500/20" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`,
 							children: [
@@ -60531,7 +60675,16 @@ function ContactsScreen({ onCall, onChat }) {
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
 				className: "flex-1 overflow-y-auto px-5 pt-5",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						initial: {
+							opacity: 0,
+							y: 10
+						},
+						animate: {
+							opacity: 1,
+							y: 0
+						},
+						transition: { delay: .1 },
 						className: "relative mb-6",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
 							placeholder: "ابحث عن اسم أو رقم...",
@@ -60540,7 +60693,10 @@ function ContactsScreen({ onCall, onChat }) {
 							className: "w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-2 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm transition-all"
 						})]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						initial: { opacity: 0 },
+						animate: { opacity: 1 },
+						transition: { delay: .15 },
 						className: "flex items-center justify-between mb-4 px-1",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "text-sm font-bold text-gray-800",
@@ -60550,7 +60706,16 @@ function ContactsScreen({ onCall, onChat }) {
 							children: filteredContacts.length
 						})]
 					}),
-					filteredContacts.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					filteredContacts.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						initial: {
+							opacity: 0,
+							scale: .9
+						},
+						animate: {
+							opacity: 1,
+							scale: 1
+						},
+						transition: { delay: .2 },
 						className: "flex flex-col items-center justify-center py-16 text-center",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -60568,7 +60733,7 @@ function ContactsScreen({ onCall, onChat }) {
 						]
 					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "space-y-3 pb-4",
-						children: filteredContacts.map((contact) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContactCard, {
+						children: filteredContacts.map((contact, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContactCard, {
 							contact,
 							onCall,
 							onChat,
@@ -60576,7 +60741,8 @@ function ContactsScreen({ onCall, onChat }) {
 							onToggleFavorite: toggleFavorite,
 							isFavorite: favorites.includes(contact.uid || contact.username),
 							onEdit: setEditTarget,
-							unreadCount: unreadCounts[contact.uid] || 0
+							unreadCount: unreadCounts[contact.uid] || 0,
+							index
 						}, contact.uid || contact.username))
 					})
 				]
