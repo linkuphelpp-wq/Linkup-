@@ -1,7 +1,6 @@
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { motion } from 'framer-motion'; // ✅ السطر الجديد الوحيد
 import { Button } from '@/components/ui/button';
 
-// نفس أيقونة التطبيق من شاشة المصادقة
 const AppIcon = () => (
   <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
     <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
@@ -13,12 +12,25 @@ const AppIcon = () => (
 );
 
 export default function WelcomeModal({ open, onClose, onLearnMore }) {
+  if (!open) return null; // ✅ ضروري حتى تعمل الحركة بشكل صحيح
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] mx-auto my-8 p-0 border-0 bg-transparent shadow-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5, y: 40 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.5, y: 40 }}
+        transition={{
+          type: 'spring',
+          stiffness: 300,
+          damping: 25,
+          mass: 0.8
+        }}
+        className="w-full max-w-md"
+      >
         {/* البطاقة العائمة الزجاجية */}
         <div className="relative overflow-hidden rounded-3xl">
-          {/* خلفية متدرجة مع كرات متوهجة (نفس شاشة المصادقة) */}
+          {/* خلفية متدرجة مع كرات متوهجة */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-cyan-50">
             <div className="absolute -top-40 -right-40 w-60 h-60 bg-blue-300/40 rounded-full blur-3xl" />
             <div className="absolute -bottom-40 -left-40 w-60 h-60 bg-cyan-300/40 rounded-full blur-3xl" />
@@ -27,9 +39,19 @@ export default function WelcomeModal({ open, onClose, onLearnMore }) {
           {/* المحتوى الزجاجي */}
           <div className="relative backdrop-blur-xl bg-white/60 rounded-3xl p-8 shadow-2xl border border-white/50">
             <div className="text-center">
-              <div className="flex justify-center mb-4">
+              <motion.div
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 260,
+                  damping: 20,
+                  delay: 0.2
+                }}
+                className="flex justify-center mb-4"
+              >
                 <AppIcon />
-              </div>
+              </motion.div>
               
               <h2 className="text-2xl font-bold text-gray-900 mb-2">مرحباً بك في LinkUp!</h2>
               <p className="text-gray-600 mb-6 leading-relaxed">
@@ -54,7 +76,7 @@ export default function WelcomeModal({ open, onClose, onLearnMore }) {
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </motion.div>
+    </div>
   );
 }
