@@ -10040,6 +10040,10 @@ var createLucideIcon = (iconName, iconNode) => {
 	Component.displayName = toPascalCase(iconName);
 	return Component;
 };
+var Activity = createLucideIcon("activity", [["path", {
+	d: "M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2",
+	key: "169zse"
+}]]);
 var ArrowLeft = createLucideIcon("arrow-left", [["path", {
 	d: "m12 19-7-7 7-7",
 	key: "1l729n"
@@ -10070,28 +10074,6 @@ var Bell = createLucideIcon("bell", [["path", {
 	d: "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326",
 	key: "11g9vi"
 }]]);
-var Calendar = createLucideIcon("calendar", [
-	["path", {
-		d: "M8 2v4",
-		key: "1cmpym"
-	}],
-	["path", {
-		d: "M16 2v4",
-		key: "4m81vk"
-	}],
-	["rect", {
-		width: "18",
-		height: "18",
-		x: "3",
-		y: "4",
-		rx: "2",
-		key: "1hopcy"
-	}],
-	["path", {
-		d: "M3 10h18",
-		key: "8toen8"
-	}]
-]);
 var Camera = createLucideIcon("camera", [["path", {
 	d: "M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z",
 	key: "18u6gg"
@@ -10753,22 +10735,6 @@ var Upload = createLucideIcon("upload", [
 	["path", {
 		d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4",
 		key: "ih7n3h"
-	}]
-]);
-var UserCheck = createLucideIcon("user-check", [
-	["path", {
-		d: "m16 11 2 2 4-4",
-		key: "9rsbq5"
-	}],
-	["path", {
-		d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2",
-		key: "1yyitq"
-	}],
-	["circle", {
-		cx: "9",
-		cy: "7",
-		r: "4",
-		key: "nufk8"
 	}]
 ]);
 var UserPlus = createLucideIcon("user-plus", [
@@ -64985,7 +64951,7 @@ var StatCard = ({ icon: Icon, label, value, color, trend, delay = 0 }) => /* @__
 		})
 	]
 });
-var StatusBadge$1 = ({ status }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+var StatusBadge = ({ status }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 	className: `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${status === "banned" ? "bg-red-50 text-red-600 border-red-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"}`,
 	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-1.5 h-1.5 rounded-full ${status === "banned" ? "bg-red-500" : "bg-emerald-500 animate-pulse"}` }), status === "banned" ? "محظور" : "نشط"]
 });
@@ -65405,7 +65371,7 @@ function AdminScreen({ onBack }) {
 													children: ["@", u.username || "غير محدد"]
 												})]
 											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge$1, { status: u.status })
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: u.status })
 										]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 										className: "flex items-center gap-2 justify-end",
@@ -65615,167 +65581,539 @@ function AdminScreen({ onBack }) {
 }
 //#endregion
 //#region src/features/UserManagement/UserManagementScreen.jsx
-var StatusBadge = ({ status }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-	className: `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${status === "banned" ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`,
-	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-1.5 h-1.5 rounded-full ${status === "banned" ? "bg-red-500" : "bg-emerald-500"}` }), status === "banned" ? "محظور" : "نشط"]
-});
-var InfoRow = ({ icon: Icon, label, value }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-	className: "flex items-center gap-3 p-3 bg-gray-50 rounded-xl",
-	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-4 h-4 text-gray-500 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex-1 text-right",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "text-xs text-gray-500 font-medium",
-			children: label
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "text-sm font-bold text-gray-900 truncate",
-			children: value || "—"
-		})]
-	})]
-});
-function UserManagementScreen({ onBack }) {
-	const [users, setUsers] = (0, import_react.useState)([]);
-	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
-	const [selectedUser, setSelectedUser] = (0, import_react.useState)(null);
-	const [loading, setLoading] = (0, import_react.useState)(true);
-	const [refreshing, setRefreshing] = (0, import_react.useState)(false);
-	(0, import_react.useEffect)(() => {
-		const fetchData = async () => {
-			try {
-				setUsers((await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50)), { source: "server" })).docs.map((doc) => ({
-					id: doc.id,
-					...doc.data()
-				})));
-			} catch (e) {
-				console.error("خطأ جلب الخادم:", e);
-			} finally {
-				setLoading(false);
-			}
-		};
-		fetchData();
-		const unsubscribe = onSnapshot(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50)), (snapshot) => {
-			setUsers(snapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data()
-			})));
+var StatRing = ({ value, max, color, label, icon: Icon }) => {
+	const percentage = max > 0 ? value / max * 100 : 0;
+	const circumference = 2 * Math.PI * 36;
+	const offset = circumference - percentage / 100 * circumference;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+		initial: {
+			scale: 0,
+			rotate: -180
+		},
+		animate: {
+			scale: 1,
+			rotate: 0
+		},
+		transition: {
+			type: "spring",
+			stiffness: 200,
+			damping: 15
+		},
+		className: "relative flex flex-col items-center",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+				width: "90",
+				height: "90",
+				className: "transform -rotate-90",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("defs", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("linearGradient", {
+						id: `grad-${label}`,
+						x1: "0%",
+						y1: "0%",
+						x2: "100%",
+						y2: "0%",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", {
+							offset: "0%",
+							stopColor: color.from
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", {
+							offset: "100%",
+							stopColor: color.to
+						})]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("filter", {
+						id: `glow-${label}`,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("feGaussianBlur", {
+							stdDeviation: "2",
+							result: "blur"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("feMerge", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("feMergeNode", { in: "blur" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("feMergeNode", { in: "SourceGraphic" })] })]
+					})] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+						cx: "45",
+						cy: "45",
+						r: "36",
+						fill: "none",
+						stroke: "#f1f5f9",
+						strokeWidth: "6"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.circle, {
+						cx: "45",
+						cy: "45",
+						r: "36",
+						fill: "none",
+						stroke: `url(#grad-${label})`,
+						strokeWidth: "6",
+						strokeLinecap: "round",
+						strokeDasharray: circumference,
+						filter: `url(#glow-${label})`,
+						initial: { strokeDashoffset: circumference },
+						animate: { strokeDashoffset: offset },
+						transition: {
+							duration: 1.8,
+							ease: "easeInOut",
+							delay: .2
+						}
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "absolute inset-0 flex flex-col items-center justify-center",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-4 h-4 text-gray-600 mb-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-base font-black text-gray-900",
+					children: value
+				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-[10px] text-gray-500 mt-1 font-medium",
+				children: label
+			})
+		]
+	});
+};
+var UserCard3D = ({ user, index, onToggleAdmin, onToggleBan, onDelete }) => {
+	const [isHovered, setIsHovered] = (0, import_react.useState)(false);
+	const [mousePos, setMousePos] = (0, import_react.useState)({
+		x: 0,
+		y: 0
+	});
+	const [showActions, setShowActions] = (0, import_react.useState)(false);
+	const handleMouseMove = (e) => {
+		const rect = e.currentTarget.getBoundingClientRect();
+		setMousePos({
+			x: (e.clientX - rect.left) / rect.width - .5,
+			y: (e.clientY - rect.top) / rect.height - .5
 		});
-		return () => unsubscribe();
-	}, []);
-	const handleRefresh = async () => {
-		setRefreshing(true);
-		try {
-			setUsers((await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50)), { source: "server" })).docs.map((doc) => ({
-				id: doc.id,
-				...doc.data()
-			})));
-		} catch (e) {
-			console.error(e);
-		} finally {
-			setRefreshing(false);
-		}
 	};
-	const filteredUsers = users.filter((u) => u.email?.toLowerCase().includes(searchTerm.toLowerCase()) || u.username?.toLowerCase().includes(searchTerm.toLowerCase()) || u.displayName?.toLowerCase().includes(searchTerm.toLowerCase()));
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-slate-50/50 pb-24",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-			className: "sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-16 pb-5",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center justify-between mb-4",
+	const isBanned = user.status === "banned";
+	const isAdmin = user.isAdmin === true;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+		initial: {
+			opacity: 0,
+			y: 30,
+			scale: .9
+		},
+		animate: {
+			opacity: 1,
+			y: 0,
+			scale: 1
+		},
+		transition: {
+			delay: index * .05,
+			type: "spring",
+			stiffness: 200,
+			damping: 20
+		},
+		whileHover: {
+			y: -6,
+			scale: 1.02
+		},
+		onMouseMove: handleMouseMove,
+		onMouseEnter: () => {
+			setIsHovered(true);
+			setShowActions(true);
+		},
+		onMouseLeave: () => {
+			setIsHovered(false);
+			setShowActions(false);
+		},
+		style: {
+			transform: isHovered ? `perspective(800px) rotateX(${mousePos.y * 6}deg) rotateY(${mousePos.x * 6}deg)` : "perspective(800px) rotateX(0deg) rotateY(0deg)",
+			transition: "transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
+		},
+		className: "relative overflow-hidden rounded-2xl bg-white border border-gray-100/80 shadow-md hover:shadow-xl transition-shadow duration-300",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "absolute inset-0 pointer-events-none transition-opacity duration-500",
+				style: {
+					opacity: isHovered ? 1 : 0,
+					background: `radial-gradient(circle at ${(mousePos.x + .5) * 100}% ${(mousePos.y + .5) * 100}%, rgba(139,92,246,0.12) 0%, transparent 50%)`
+				}
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute top-0 left-0 w-full h-1 ${isBanned ? "bg-gradient-to-r from-red-400 to-red-500" : "bg-gradient-to-r from-emerald-400 to-teal-500"}` }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "p-4",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-3",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						variant: "ghost",
-						size: "icon",
-						onClick: onBack,
-						className: "rounded-full hover:bg-gray-100",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "h-5 w-5" })
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "text-2xl font-black text-gray-900 tracking-tight",
-						children: "إدارة المستخدمين"
-					})]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-					variant: "outline",
-					size: "icon",
-					onClick: handleRefresh,
-					disabled: refreshing,
-					className: "rounded-full",
-					title: "تحديث القائمة من الخادم",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: `h-4 w-4 ${refreshing ? "animate-spin" : ""}` })
-				})]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-					placeholder: "البحث بالاسم، البريد، أو المعرف...",
-					value: searchTerm,
-					onChange: (e) => setSearchTerm(e.target.value),
-					className: "pr-12 h-12 rounded-xl bg-white border-gray-200 shadow-sm focus-visible:ring-purple-200"
-				})]
-			})]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
-			className: "flex-1 overflow-y-auto px-5 pt-6",
-			children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "flex justify-center py-12",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" })
-			}) : filteredUsers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "text-center py-16 opacity-50",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserCheck, { className: "w-16 h-16 mx-auto mb-4 text-gray-300" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-gray-600 font-bold text-lg",
-					children: "لا يوجد مستخدمين"
-				})]
-			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "space-y-3",
-				children: filteredUsers.map((u) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					onClick: () => setSelectedUser(selectedUser?.id === u.id ? null : u),
-					className: `bg-white rounded-2xl p-4 border shadow-sm cursor-pointer transition-all ${selectedUser?.id === u.id ? "border-purple-300 shadow-md" : "border-gray-100 hover:border-purple-200 hover:shadow-md"}`,
+					className: "flex items-start gap-3",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-3 mb-3",
+						className: "relative shrink-0",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
+							className: "w-14 h-14 border-2 border-white shadow-md ring-2 ring-purple-100",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
+								src: user.photoURL,
+								className: "object-cover"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
+								className: `text-lg font-bold ${isAdmin ? "bg-gradient-to-br from-amber-400 to-orange-500 text-white" : "bg-gradient-to-br from-purple-500 to-blue-500 text-white"}`,
+								children: user.email?.charAt(0)?.toUpperCase() || "?"
+							})]
+						}), isAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+							initial: { scale: 0 },
+							animate: { scale: 1 },
+							className: "absolute -top-1 -right-1 w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center shadow-md border-2 border-white",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-3 h-3 text-white" })
+						})]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex-1 min-w-0 text-right",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Avatar, {
-								className: "h-12 w-12 ring-2 ring-white shadow-sm",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-									className: "bg-gradient-to-br from-purple-500 to-blue-500 text-white font-bold",
-									children: (u.displayName || u.email || "?").charAt(0).toUpperCase()
-								})
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900 text-sm truncate",
+								children: user.displayName || user.email?.split("@")[0]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-[11px] text-gray-500 mt-0.5 truncate",
+								children: user.email
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-[11px] text-gray-400 mt-0.5 font-mono",
+								children: ["@", user.username || "غير محدد"]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex-1 min-w-0 text-right",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "font-bold text-gray-900 truncate",
-									children: u.displayName || u.email
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									className: "text-xs text-gray-500",
-									children: ["@", u.username || "غير محدد"]
+								className: "flex items-center gap-1.5 mt-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+									className: `inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold ${isBanned ? "bg-red-50 text-red-600 border border-red-100" : "bg-emerald-50 text-emerald-600 border border-emerald-100"}`,
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-1.5 h-1.5 rounded-full ${isBanned ? "bg-red-500" : "bg-emerald-500 animate-pulse"}` }), isBanned ? "محظور" : "نشط"]
+								}), user.warning && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-600 border border-amber-100",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-3 h-3" })
 								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: u.status })
-						]
-					}), selectedUser?.id === u.id && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "grid grid-cols-2 gap-2 pt-3 border-t border-gray-100 animate-in fade-in slide-in-from-top-2",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
-								icon: Mail,
-								label: "البريد الإلكتروني",
-								value: u.email
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
-								icon: Phone,
-								label: "رقم الهاتف",
-								value: u.phone || "غير مسجل"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
-								icon: Calendar,
-								label: "تاريخ الانضمام",
-								value: u.createdAt?.toDate?.().toLocaleDateString("ar-SA") || "—"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
-								icon: UserCheck,
-								label: "حالة الحساب",
-								value: u.status === "banned" ? "محظور" : "نشط"
 							})
 						]
 					})]
-				}, u.id))
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: showActions && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					initial: {
+						opacity: 0,
+						height: 0
+					},
+					animate: {
+						opacity: 1,
+						height: "auto"
+					},
+					exit: {
+						opacity: 0,
+						height: 0
+					},
+					transition: { duration: .2 },
+					className: "overflow-hidden",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-center gap-2 mt-3 pt-3 border-t border-gray-100",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+								whileHover: { scale: 1.15 },
+								whileTap: { scale: .9 },
+								onClick: () => onToggleAdmin(user.id, user.isAdmin),
+								className: `p-2 rounded-xl transition-colors ${isAdmin ? "bg-amber-100 text-amber-600 hover:bg-amber-200" : "bg-gray-50 text-gray-400 hover:bg-amber-50 hover:text-amber-600"}`,
+								title: isAdmin ? "إزالة المشرف" : "تعيين كمشرف",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-4 h-4" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+								whileHover: { scale: 1.15 },
+								whileTap: { scale: .9 },
+								onClick: () => onToggleBan(user.id, user.status),
+								className: `p-2 rounded-xl transition-colors ${isBanned ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" : "bg-red-50 text-red-600 hover:bg-red-100"}`,
+								title: isBanned ? "فك الحظر" : "حظر",
+								children: isBanned ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleX, { className: "w-4 h-4" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+								whileHover: { scale: 1.15 },
+								whileTap: { scale: .9 },
+								onClick: () => onDelete(user.id, user.username),
+								className: "p-2 rounded-xl bg-gray-50 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors",
+								title: "حذف",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" })
+							})
+						]
+					})
+				}) })]
 			})
-		})]
+		]
+	});
+};
+function UserManagementScreen({ onBack }) {
+	const [users, setUsers] = (0, import_react.useState)([]);
+	const [loading, setLoading] = (0, import_react.useState)(true);
+	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
+	const [actionLoading, setActionLoading] = (0, import_react.useState)(null);
+	const [toast, setToast] = (0, import_react.useState)({
+		show: false,
+		message: "",
+		type: "success"
+	});
+	const stats = {
+		total: users?.length || 0,
+		active: (users || []).filter((u) => u.status !== "banned").length,
+		banned: (users || []).filter((u) => u.status === "banned").length,
+		admins: (users || []).filter((u) => u.isAdmin === true).length
+	};
+	const showToast = (message, type = "success") => {
+		setToast({
+			show: true,
+			message,
+			type
+		});
+		setTimeout(() => setToast({
+			show: false,
+			message: "",
+			type: "success"
+		}), 3e3);
+	};
+	(0, import_react.useEffect)(() => {
+		const unsubscribe = onSnapshot(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(100)), (snapshot) => {
+			setUsers(snapshot.docs.map((d) => ({
+				id: d.id,
+				...d.data()
+			})));
+			setLoading(false);
+		});
+		return () => unsubscribe();
+	}, []);
+	const toggleAdmin = async (userId, currentAdmin) => {
+		setActionLoading(`admin-${userId}`);
+		try {
+			await updateDoc(doc(db, "users", userId), { isAdmin: !currentAdmin });
+			showToast(currentAdmin ? "تم إزالة صلاحية المشرف" : "تم تعيينه كمشرف");
+		} catch (e) {
+			showToast("فشل التحديث", "error");
+		} finally {
+			setActionLoading(null);
+		}
+	};
+	const toggleBan = async (userId, currentStatus) => {
+		setActionLoading(`ban-${userId}`);
+		try {
+			await updateDoc(doc(db, "users", userId), { status: currentStatus === "banned" ? "online" : "banned" });
+			showToast(currentStatus === "banned" ? "تم فك الحظر" : "تم حظر المستخدم");
+		} catch (e) {
+			showToast("فشل التحديث", "error");
+		} finally {
+			setActionLoading(null);
+		}
+	};
+	const deleteUser = async (userId, username) => {
+		if (!confirm(`حذف نهائي لـ ${username || userId}؟`)) return;
+		setActionLoading(`delete-${userId}`);
+		try {
+			const batch = writeBatch(db);
+			batch.delete(doc(db, "users", userId));
+			if (username) batch.delete(doc(db, "usernames", username));
+			await batch.commit();
+			showToast("تم الحذف بنجاح");
+		} catch (e) {
+			showToast("فشل الحذف", "error");
+		} finally {
+			setActionLoading(null);
+		}
+	};
+	const filteredUsers = (users || []).filter((u) => u.email?.toLowerCase().includes(searchTerm.toLowerCase()) || u.username?.toLowerCase().includes(searchTerm.toLowerCase()) || (u.displayName || "")?.toLowerCase().includes(searchTerm.toLowerCase()));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right",
+		dir: "rtl",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.header, {
+				initial: {
+					opacity: 0,
+					y: -30
+				},
+				animate: {
+					opacity: 1,
+					y: 0
+				},
+				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-2xl border-b border-gray-200/60 px-5 pt-12 pb-4 shadow-sm",
+				style: { paddingTop: "calc(1rem + env(safe-area-inset-top))" },
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "max-w-7xl mx-auto",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between gap-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+								whileHover: { scale: 1.1 },
+								whileTap: { scale: .9 },
+								onClick: onBack,
+								className: "w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors shrink-0",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-6 h-6 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+									className: "text-2xl font-black text-gray-900 tracking-tight",
+									children: "إدارة المستخدمين"
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-sm text-gray-500 mt-1",
+								children: "تحكم كامل بالمستخدمين وصلاحياتهم"
+							})] })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.span, {
+							initial: { scale: 0 },
+							animate: { scale: 1 },
+							className: "text-xs text-gray-500 font-medium bg-gray-100 px-3 py-1.5 rounded-full",
+							children: [filteredUsers.length, " مستخدم"]
+						})]
+					})
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+				className: "max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-8 space-y-8",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						initial: {
+							opacity: 0,
+							y: 20
+						},
+						animate: {
+							opacity: 1,
+							y: 0
+						},
+						transition: {
+							delay: .1,
+							type: "spring",
+							stiffness: 200,
+							damping: 20
+						},
+						className: "grid grid-cols-2 md:grid-cols-4 gap-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm flex justify-center",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatRing, {
+									value: stats.total,
+									max: Math.max(stats.total, 1),
+									color: {
+										from: "#6366f1",
+										to: "#8b5cf6"
+									},
+									label: "الإجمالي",
+									icon: Users
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm flex justify-center",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatRing, {
+									value: stats.active,
+									max: Math.max(stats.total, 1),
+									color: {
+										from: "#10b981",
+										to: "#14b8a6"
+									},
+									label: "نشط",
+									icon: Activity
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm flex justify-center",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatRing, {
+									value: stats.banned,
+									max: Math.max(stats.total, 1),
+									color: {
+										from: "#ef4444",
+										to: "#f43f5e"
+									},
+									label: "محظور",
+									icon: Shield
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm flex justify-center",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatRing, {
+									value: stats.admins,
+									max: Math.max(stats.total, 1),
+									color: {
+										from: "#f59e0b",
+										to: "#fbbf24"
+									},
+									label: "مشرفين",
+									icon: Crown
+								})
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						initial: {
+							opacity: 0,
+							y: 20
+						},
+						animate: {
+							opacity: 1,
+							y: 0
+						},
+						transition: {
+							delay: .2,
+							type: "spring",
+							stiffness: 200,
+							damping: 20
+						},
+						className: "relative",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							placeholder: "ابحث عن مستخدم بالبريد أو المعرف أو الاسم...",
+							value: searchTerm,
+							onChange: (e) => setSearchTerm(e.target.value),
+							className: "w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-2 focus-visible:ring-purple-500/40 text-sm shadow-sm transition-all"
+						})]
+					}),
+					loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex flex-col items-center justify-center py-16 space-y-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+							animate: { rotate: 360 },
+							transition: {
+								repeat: Infinity,
+								duration: 1,
+								ease: "linear"
+							},
+							className: "w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-500 font-medium",
+							children: "جاري تحميل البيانات..."
+						})]
+					}) : filteredUsers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						initial: {
+							opacity: 0,
+							scale: .9
+						},
+						animate: {
+							opacity: 1,
+							scale: 1
+						},
+						className: "flex flex-col items-center justify-center py-16 text-center",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-4 shadow-inner",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-9 h-9 text-purple-600/70" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-gray-800 font-bold text-lg",
+								children: "لا يوجد مستخدمين مطابقين"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-sm text-gray-500 mt-1.5",
+								children: "جرب مصطلح بحث آخر"
+							})
+						]
+					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3",
+						children: filteredUsers.map((user, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserCard3D, {
+							user,
+							index,
+							onToggleAdmin: toggleAdmin,
+							onToggleBan: toggleBan,
+							onDelete: deleteUser
+						}, user.id))
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: toast.show && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+				initial: {
+					opacity: 0,
+					y: 40
+				},
+				animate: {
+					opacity: 1,
+					y: 0
+				},
+				exit: {
+					opacity: 0,
+					y: 40
+				},
+				className: `fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 ${toast.type === "error" ? "bg-red-600" : "bg-gray-900"} text-white`,
+				children: [toast.type === "error" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-5 h-5 text-emerald-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-sm font-medium",
+					children: toast.message
+				})]
+			}) })
+		]
 	});
 }
 //#endregion
