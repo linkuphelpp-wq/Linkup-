@@ -26,6 +26,7 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '/Linkup-/',
+        scope: '/Linkup-/',
         icons: [
           {
             src: 'icon-192.png',
