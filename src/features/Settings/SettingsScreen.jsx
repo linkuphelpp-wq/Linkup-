@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield, Palette, Mic, Speaker, Lock, RefreshCw,
   MessageCircle, Share2, Sparkles, Check, Crown,
-  AlertTriangle, X, TabletSmartphone, User, ChevronRight, Zap, ChevronLeft
+  AlertTriangle, X, TabletSmartphone, User, ChevronRight, ArrowLeft
 } from 'lucide-react';
 import { db, auth } from '../../firebase/config';
 import { collection, query, where, getDocs, writeBatch, doc, deleteDoc } from 'firebase/firestore';
 
-// ───────── بطاقة الإعداد المحسّنة (تصميم عصري) ─────────
+// ───────── بطاقة الإعداد المحسّنة (بدون تغيير) ─────────
 const SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle, color = 'purple' }) => {
   const colorsMap = {
     purple: 'from-purple-500 to-indigo-500 bg-purple-50 text-purple-600',
@@ -55,7 +55,7 @@ const SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onTog
   );
 };
 
-// ───────── مكون النافذة المنبثقة العصري ─────────
+// ───────── مكون النافذة المنبثقة العصري (بدون تغيير) ─────────
 const SimpleModal = ({ open, onClose, title, children }) => (
   <AnimatePresence>
     {open && (
@@ -87,7 +87,7 @@ const SimpleModal = ({ open, onClose, title, children }) => (
   </AnimatePresence>
 );
 
-// ───────── القسم الواحد (مع حركة ظهور محسّنة) ─────────
+// ───────── القسم الواحد (بدون تغيير) ─────────
 const Section = ({ title, children, delay = 0, icon: Icon }) => (
   <motion.section
     initial={{ opacity: 0, x: -30 }}
@@ -103,11 +103,11 @@ const Section = ({ title, children, delay = 0, icon: Icon }) => (
   </motion.section>
 );
 
-// ───────── المكون الرئيسي (شاشة الإعدادات النهائية) ─────────
+// ───────── المكون الرئيسي (شاشة الإعدادات مع شريط سفلي) ─────────
 export default function SettingsScreen({
   onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile,
   onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker,
-  fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner
+  fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner, onBack
 }) {
   const [showFontModal, setShowFontModal] = useState(false);
   const [showSizeModal, setShowSizeModal] = useState(false);
@@ -160,31 +160,14 @@ export default function SettingsScreen({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-24">
-      {/* 🔥 الشريط العلوي الموحد: زر العودة + العنوان + زر الدرع للمشرف */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32">
+      {/* هيدر بسيط بدون أزرار */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-30 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-14 pb-4 text-center shadow-sm"
+        className="sticky top-0 z-20 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-14 pb-4 text-center shadow-sm"
       >
-        <div className="flex items-center justify-between">
-          {/* زر العودة */}
-          <button onClick={() => window.history.back()} className="p-2 rounded-full hover:bg-gray-100">
-            <ChevronLeft className="w-6 h-6 text-gray-700" />
-          </button>
-
-          {/* العنوان في المنتصف */}
-          <h1 className="text-2xl font-black text-gray-800 tracking-tight flex-1">الإعدادات</h1>
-
-          {/* زر الدرع للمشرف فقط */}
-          {isAdmin ? (
-            <button onClick={onOpenAdmin} className="p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700">
-              <Shield className="w-6 h-6" />
-            </button>
-          ) : (
-            <div className="w-10" /> // حشو للمحافظة على التمركز
-          )}
-        </div>
+        <h1 className="text-2xl font-black text-gray-800 tracking-tight">الإعدادات</h1>
         <p className="text-sm text-gray-500 mt-1">تحكم كامل في تطبيقك كما تحب</p>
       </motion.div>
 
@@ -218,12 +201,12 @@ export default function SettingsScreen({
           {isAdmin && <SettingRow icon={Shield} label="لوحة الإدارة" desc="إدارة المستخدمين والمحتوى" onClick={onOpenAdmin} color="orange" />}
         </Section>
 
-        {/* بطاقات الإجراءات السريعة بتصميم محسّن */}
+        {/* بطاقات الإجراءات السريعة */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, type: 'spring', stiffness: 200, damping: 20 }}
-          className="grid grid-cols-3 gap-3"
+          className="grid grid-cols-3 gap-3 mt-4"
         >
           {[
             { label: 'من هو أثير؟', onClick: onOpenAtheer, gradient: 'from-purple-500 to-indigo-500' },
@@ -244,7 +227,35 @@ export default function SettingsScreen({
         </motion.div>
       </div>
 
-      {/* نوافذ منبثقة محسّنة */}
+      {/* شريط سفلي ثابت (Bottom Bar) مع زر العودة وزر الدرع */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-gray-200/60 px-5 py-2 flex items-center justify-between shadow-lg"
+        style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+      >
+        {/* زر العودة */}
+        <button
+          onClick={() => window.history.back()}
+          className="p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all"
+        >
+          <ArrowLeft className="w-6 h-6 text-gray-700" />
+        </button>
+
+        {/* عنوان صغير أو فارغ */}
+        <span className="text-sm font-medium text-gray-500">القائمة</span>
+
+        {/* زر الدرع للإدارة (يظهر فقط للمشرف) */}
+        {isAdmin ? (
+          <button
+            onClick={onOpenAdmin}
+            className="p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 active:scale-90 transition-all"
+          >
+            <Shield className="w-6 h-6" />
+          </button>
+        ) : (
+          <div className="w-10" />
+        )}
+      </div>
+
+      {/* النوافذ المنبثقة */}
       <SimpleModal open={showSizeModal} onClose={() => setShowSizeModal(false)} title="حجم الخط">
         <div className="space-y-2">
           {sizes.map(s => (

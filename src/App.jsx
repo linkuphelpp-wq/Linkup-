@@ -383,6 +383,7 @@ function App() {
     support: 'تواصل مع المطور', groups: 'المجموعات', createGroup: 'إنشاء مجموعة', groupChat: 'محادثة المجموعة', groupInfo: 'معلومات المجموعة',
   }[currentScreen] || 'LinkUp';
 
+  // ✅ تعديل pagesWithOwnHeader ليشمل settings
   const pagesWithOwnHeader = ['atheer','about','privacy','support','createGroup','data','lock','changeEmail','resetPasswordProfile','forgotpassword','resetpassword','contacts','chat','groupChat','groupInfo','settings'];
 
   const renderContent = () => {
@@ -395,7 +396,31 @@ function App() {
     if (currentScreen === 'usermanagement') return <UserManagementScreen onBack={handleBack} />;
     if (currentScreen === 'profile') return <ProfileScreen user={user} onUpdateProfile={handleUpdateProfile} onLogout={handleLogout} onChangeEmail={() => navigateTo('changeEmail')} onResetPassword={() => navigateTo('resetPasswordProfile')} onSwitchAccount={handleSwitchAccount} />;
     if (currentScreen === 'settings')
-      return <SettingsScreen onOpenAtheer={() => navigateTo('atheer')} onOpenAbout={() => navigateTo('about')} onOpenPrivacy={() => navigateTo('privacy')} onOpenTerms={() => navigateTo('terms')} onOpenDataManagement={() => navigateTo('data')} onOpenAppLock={() => navigateTo('lock')} onOpenProfile={() => navigateTo('profile')} onOpenSupport={() => navigateTo('support')} onOpenReport={() => navigateTo('support')} onResetApp={handleResetApp} muteMicOnJoin={muteMicOnJoin} speakerDefault={speakerDefault} onToggleMuteMic={handleToggleMuteMic} onToggleSpeaker={handleToggleSpeaker} fontSize={fontSize} fontFamily={fontFamily} onSelectFontSize={setFontSize} onSelectFontFamily={setFontFamily} isAdmin={isAdmin} onOpenAdmin={() => navigateTo('admin')} onOpenPartner={() => navigateTo('partner')} />;
+      return (
+        <SettingsScreen
+          onOpenAtheer={() => navigateTo('atheer')}
+          onOpenAbout={() => navigateTo('about')}
+          onOpenPrivacy={() => navigateTo('privacy')}
+          onOpenTerms={() => navigateTo('terms')}
+          onOpenDataManagement={() => navigateTo('data')}
+          onOpenAppLock={() => navigateTo('lock')}
+          onOpenProfile={() => navigateTo('profile')}
+          onOpenSupport={() => navigateTo('support')}
+          onOpenReport={() => navigateTo('support')}
+          onResetApp={handleResetApp}
+          muteMicOnJoin={muteMicOnJoin}
+          speakerDefault={speakerDefault}
+          onToggleMuteMic={handleToggleMuteMic}
+          onToggleSpeaker={handleToggleSpeaker}
+          fontSize={fontSize}
+          fontFamily={fontFamily}
+          onSelectFontSize={setFontSize}
+          onSelectFontFamily={setFontFamily}
+          isAdmin={isAdmin}
+          onOpenAdmin={() => navigateTo('admin')}
+          onOpenPartner={() => navigateTo('partner')}
+        />
+      );
     if (currentScreen === 'contacts') return <ContactsScreen onBack={handleBack} onChat={handleOpenChat} onCall={handleOpenCall} myUsername={myUsername} />;
     if (currentScreen === 'chat') return <ChatScreen contact={currentChatContact} onBack={handleBack} onCall={handleOpenCall} />;
     if (currentScreen === 'atheer') return <AtheerScreen onBack={handleBack} />;
@@ -407,7 +432,13 @@ function App() {
     if (currentScreen === 'partner') return <PartnerScreen onBack={handleBack} />;
     if (currentScreen === 'createGroup') return <CreateGroupScreen onBack={handleBack} />;
     if (currentScreen === 'groups')
-      return <GroupsScreen onBack={handleBack} onOpenCreateGroup={() => navigateTo('createGroup')} onOpenGroup={handleOpenGroup} />;
+      return (
+        <GroupsScreen
+          onBack={handleBack}
+          onOpenCreateGroup={() => navigateTo('createGroup')}
+          onOpenGroup={handleOpenGroup}
+        />
+      );
     if (currentScreen === 'groupChat') return <GroupChatScreen group={currentGroup} onBack={handleBack} onOpenGroupInfo={handleOpenGroupInfo} />;
     if (currentScreen === 'groupInfo') return <GroupInfoScreen group={currentGroup} onBack={handleBack} onOpenChat={handleOpenChat} />;
     return <HomeScreen myId={myId} myUsername={myUsername} user={user} />;
@@ -434,6 +465,7 @@ function App() {
       )}
 
       <div className="min-h-screen flex flex-col bg-slate-50/50 text-gray-900">
+        {/* ✅ إضافة استثناء settings صراحةً */}
         {!pagesWithOwnHeader.includes(currentScreen) && currentScreen !== 'mainMenu' && currentScreen !== 'chat' && currentScreen !== 'notifications' && currentScreen !== 'usermanagement' && currentScreen !== 'groups' && currentScreen !== 'groupChat' && currentScreen !== 'groupInfo' && currentScreen !== 'settings' && (
           <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50 px-5 py-3 flex items-center shadow-sm" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
             <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100"><ArrowLeftIcon /></button>
