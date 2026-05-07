@@ -52483,7 +52483,7 @@ function animateVisualElement(visualElement, definition, options = {}) {
 /**
 * ValueType for "auto"
 */
-var auto = {
+var auto$1 = {
 	test: (v) => v === "auto",
 	parse: (v) => v
 };
@@ -52505,7 +52505,7 @@ var dimensionValueTypes = [
 	degrees,
 	vw,
 	vh,
-	auto
+	auto$1
 ];
 /**
 * Tests a dimensional value against the list of dimension ValueTypes
@@ -73135,6 +73135,153 @@ function App() {
 		})
 	] });
 }
+//#endregion
+//#region \0vite/preload-helper.js
+var scriptRel = "modulepreload";
+var assetsURL = function(dep) {
+	return "/Linkup-/" + dep;
+};
+var seen = {};
+var __vitePreload = function preload(baseModule, deps, importerUrl) {
+	let promise = Promise.resolve();
+	if (deps && deps.length > 0) {
+		const links = document.getElementsByTagName("link");
+		const cspNonceMeta = document.querySelector("meta[property=csp-nonce]");
+		const cspNonce = cspNonceMeta?.nonce || cspNonceMeta?.getAttribute("nonce");
+		function allSettled(promises) {
+			return Promise.all(promises.map((p) => Promise.resolve(p).then((value) => ({
+				status: "fulfilled",
+				value
+			}), (reason) => ({
+				status: "rejected",
+				reason
+			}))));
+		}
+		promise = allSettled(deps.map((dep) => {
+			dep = assetsURL(dep, importerUrl);
+			if (dep in seen) return;
+			seen[dep] = true;
+			const isCss = dep.endsWith(".css");
+			const cssSelector = isCss ? "[rel=\"stylesheet\"]" : "";
+			if (!!importerUrl) for (let i = links.length - 1; i >= 0; i--) {
+				const link = links[i];
+				if (link.href === dep && (!isCss || link.rel === "stylesheet")) return;
+			}
+			else if (document.querySelector(`link[href="${dep}"]${cssSelector}`)) return;
+			const link = document.createElement("link");
+			link.rel = isCss ? "stylesheet" : scriptRel;
+			if (!isCss) link.as = "script";
+			link.crossOrigin = "";
+			link.href = dep;
+			if (cspNonce) link.setAttribute("nonce", cspNonce);
+			document.head.appendChild(link);
+			if (isCss) return new Promise((res, rej) => {
+				link.addEventListener("load", res);
+				link.addEventListener("error", () => rej(/* @__PURE__ */ new Error(`Unable to preload CSS for ${dep}`)));
+			});
+		}));
+	}
+	function handlePreloadError(err) {
+		const e = new Event("vite:preloadError", { cancelable: true });
+		e.payload = err;
+		window.dispatchEvent(e);
+		if (!e.defaultPrevented) throw err;
+	}
+	return promise.then((res) => {
+		for (const item of res || []) {
+			if (item.status !== "rejected") continue;
+			handlePreloadError(item.reason);
+		}
+		return baseModule().catch(handlePreloadError);
+	});
+};
+//#endregion
+//#region ../../../../../@vite-plugin-pwa/virtual:pwa-register
+var autoUpdateMode = "true";
+var selfDestroying = "false";
+var auto = autoUpdateMode === "true";
+var autoDestroy = selfDestroying === "true";
+function registerSW(options = {}) {
+	const { immediate = false, onNeedReload, onNeedRefresh, onOfflineReady, onRegistered, onRegisteredSW, onRegisterError } = options;
+	let wb;
+	let registerPromise;
+	let sendSkipWaitingMessage;
+	const updateServiceWorker = async (_reloadPage = true) => {
+		await registerPromise;
+		if (!auto) sendSkipWaitingMessage?.();
+	};
+	async function register() {
+		if ("serviceWorker" in navigator) {
+			wb = await __vitePreload(async () => {
+				const { Workbox } = await import("./workbox-window.prod.es5-CtgJ0VNB.js");
+				return { Workbox };
+			}, []).then(({ Workbox }) => {
+				return new Workbox("/Linkup-/sw.js", {
+					scope: "/Linkup-/",
+					type: "classic"
+				});
+			}).catch((e) => {
+				onRegisterError?.(e);
+			});
+			if (!wb) return;
+			sendSkipWaitingMessage = () => {
+				wb?.messageSkipWaiting();
+			};
+			if (!autoDestroy) if (auto) {
+				wb.addEventListener("activated", (event) => {
+					if (event.isUpdate || event.isExternal) if (onNeedReload) onNeedReload();
+					else window.location.reload();
+				});
+				wb.addEventListener("installed", (event) => {
+					if (!event.isUpdate) onOfflineReady?.();
+				});
+			} else {
+				let onNeedRefreshCalled = false;
+				const showSkipWaitingPrompt = () => {
+					onNeedRefreshCalled = true;
+					wb?.addEventListener("controlling", (event) => {
+						if (event.isUpdate) if (onNeedReload) onNeedReload();
+						else window.location.reload();
+					});
+					onNeedRefresh?.();
+				};
+				wb.addEventListener("installed", (event) => {
+					if (typeof event.isUpdate === "undefined") if (typeof event.isExternal !== "undefined") if (event.isExternal) showSkipWaitingPrompt();
+					else !onNeedRefreshCalled && onOfflineReady?.();
+					else !onNeedRefreshCalled && onOfflineReady?.();
+					else if (!event.isUpdate) onOfflineReady?.();
+				});
+				wb.addEventListener("waiting", showSkipWaitingPrompt);
+			}
+			wb.register({ immediate }).then((r) => {
+				if (onRegisteredSW) onRegisteredSW("/Linkup-/sw.js", r);
+				else onRegistered?.(r);
+			}).catch((e) => {
+				onRegisterError?.(e);
+			});
+		}
+	}
+	registerPromise = register();
+	return updateServiceWorker;
+}
+//#endregion
+//#region src/registerSW.js
+var updateSW = registerSW({
+	onNeedRefresh() {
+		ue("يوجد تحديث جديد!", {
+			description: "تم تحسين التطبيق، اضغط للتحديث",
+			action: {
+				label: "تحديث الآن",
+				onClick: () => updateSW(true)
+			},
+			duration: 0,
+			position: "top-center"
+		});
+	},
+	onOfflineReady() {
+		ue.success("التطبيق جاهز للعمل بدون إنترنت");
+	}
+});
 //#endregion
 //#region src/main.jsx
 import_client.createRoot(document.getElementById("root")).render(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_react.StrictMode, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(App, {}) }));
