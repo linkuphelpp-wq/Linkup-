@@ -103,7 +103,7 @@ const Section = ({ title, children, delay = 0, icon: Icon }) => (
   </motion.section>
 );
 
-// ───────── المكون الرئيسي (شاشة الإعدادات الجديدة) ─────────
+// ───────── المكون الرئيسي (شاشة الإعدادات النهائية) ─────────
 export default function SettingsScreen({
   onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile,
   onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker,
@@ -161,18 +161,29 @@ export default function SettingsScreen({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-24">
-      {/* 🔧 الهيدر الزجاجي مع padding-top كبير جداً لضمان الظهور */}
+      {/* 🔥 الشريط العلوي الموحد: زر العودة + العنوان + زر الدرع للمشرف */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-30 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-24 pb-4 text-center shadow-sm"
+        className="sticky top-0 z-30 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-14 pb-4 text-center shadow-sm"
       >
         <div className="flex items-center justify-between">
+          {/* زر العودة */}
           <button onClick={() => window.history.back()} className="p-2 rounded-full hover:bg-gray-100">
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
+            <ChevronLeft className="w-6 h-6 text-gray-700" />
           </button>
+
+          {/* العنوان في المنتصف */}
           <h1 className="text-2xl font-black text-gray-800 tracking-tight flex-1">الإعدادات</h1>
-          <div className="w-8" />
+
+          {/* زر الدرع للمشرف فقط */}
+          {isAdmin ? (
+            <button onClick={onOpenAdmin} className="p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700">
+              <Shield className="w-6 h-6" />
+            </button>
+          ) : (
+            <div className="w-10" /> // حشو للمحافظة على التمركز
+          )}
         </div>
         <p className="text-sm text-gray-500 mt-1">تحكم كامل في تطبيقك كما تحب</p>
       </motion.div>

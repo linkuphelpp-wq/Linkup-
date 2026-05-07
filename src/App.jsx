@@ -421,6 +421,7 @@ function App() {
       <WelcomeModal open={showWelcomeModal} onClose={handleWelcomeClose} onLearnMore={handleWelcomeLearnMore} />
       <UsernameModal open={showUsernameModal} onConfirm={handleUsernameConfirm} userId={user?.uid} />
       <WarningModal open={warningModalOpen} message={warningMessage} onClose={() => setWarningModalOpen(false)} />
+
       {/* 🆕 شريط التنبيه بعدم وجود اتصال */}
       {!isOnline && (
         <div className="fixed top-0 left-0 right-0 z-[200] bg-yellow-400 text-black text-center py-2 text-sm font-bold shadow-md animate-pulse">
