@@ -66089,36 +66089,11 @@ var motion = /* @__PURE__ */ createMotionProxy({
 //#endregion
 //#region src/components/common/WelcomeModal.jsx
 var AppIcon = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-	className: "relative w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl shadow-blue-500/30 mb-2",
-	children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-		width: "36",
-		height: "36",
-		viewBox: "0 0 32 32",
-		fill: "none",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-				d: "M22 24C23.5 22.5 24 20 24 16C24 12 23.5 9.5 22 8",
-				stroke: "white",
-				strokeWidth: "2.5",
-				strokeLinecap: "round",
-				strokeLinejoin: "round"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-				d: "M10 24C8.5 22.5 8 20 8 16C8 12 8.5 9.5 10 8",
-				stroke: "white",
-				strokeWidth: "2.5",
-				strokeLinecap: "round",
-				strokeLinejoin: "round"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-				d: "M14 24H18C19.1046 24 20 23.1046 20 22V10C20 8.89543 19.1046 8 18 8H14C12.8954 8 12 8.89543 12 10V22C12 23.1046 12.8954 24 14 24Z",
-				fill: "white",
-				fillOpacity: "0.3",
-				stroke: "white",
-				strokeWidth: "2.5",
-				strokeLinejoin: "round"
-			})
-		]
+	className: "w-24 h-24 rounded-[2rem] bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl shadow-blue-500/20 overflow-hidden",
+	children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+		src: "./icon-512.png",
+		alt: "LinkUp",
+		className: "w-full h-full object-cover"
 	})
 });
 function WelcomeModal({ open, onClose, onLearnMore }) {
@@ -66197,7 +66172,7 @@ function WelcomeModal({ open, onClose, onLearnMore }) {
 							},
 							className: "flex flex-col items-center mb-6",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppIcon, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
-								className: "text-4xl font-black text-gray-900 tracking-tight",
+								className: "text-4xl font-black text-gray-900 tracking-tight mt-3",
 								children: ["Link", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500",
 									children: "Up"
