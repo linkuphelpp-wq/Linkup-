@@ -58,7 +58,6 @@ import { Toaster } from 'sonner';
 import './styles/App.css';
 
 // ───────── الأيقونات المخصصة ─────────
-const UsersIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 const UsersRoundIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>;
 const SettingsIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
 const UserIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
@@ -145,10 +144,7 @@ function App() {
   const [currentScreen, setCurrentScreen] = useState('mainMenu');
   const [navHistory, setNavHistory] = useState(['mainMenu']);
   const [currentGroup, setCurrentGroup] = useState(null);
-
-  // 🆕 حالة الاتصال بالإنترنت
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
@@ -164,7 +160,6 @@ function App() {
   usePresence();
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // 🆕 مراقبة الاتصال بالإنترنت
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -375,6 +370,14 @@ function App() {
     return <IncomingCallModal open={true} caller={incomingCallerInfo} callType={incomingCallType} onAccept={handleAcceptIncoming} onReject={handleRejectIncoming} />;
   }
 
+  // مصفوفة الشاشات التي تمتلك هيدر خاص بها ولا تحتاج لهيدر التطبيق العام
+  const pagesWithOwnHeader = [
+    'atheer','about','privacy','support','createGroup','data',
+    'lock','changeEmail','resetPasswordProfile','forgotpassword',
+    'resetpassword','contacts','chat','groupChat','groupInfo',
+    'settings','mainMenu','notifications','usermanagement','groups','admin'
+  ];
+
   const headerTitle = {
     mainMenu: 'القائمة الرئيسية', profile: 'الملف الشخصي', settings: 'الإعدادات', contacts: 'جهات الاتصال',
     atheer: 'من هو أثير؟', about: 'من نحن', privacy: 'سياسة الخصوصية', terms: 'شروط الخدمة', data: 'إدارة البيانات',
@@ -382,9 +385,6 @@ function App() {
     admin: 'لوحة الإدارة', usermanagement: 'إدارة المستخدمين', notifications: 'الإشعارات', partner: 'تكوين شراكة',
     support: 'تواصل مع المطور', groups: 'المجموعات', createGroup: 'إنشاء مجموعة', groupChat: 'محادثة المجموعة', groupInfo: 'معلومات المجموعة',
   }[currentScreen] || 'LinkUp';
-
-  // ✅ تعديل pagesWithOwnHeader ليشمل settings
-  const pagesWithOwnHeader = ['atheer','about','privacy','support','createGroup','data','lock','changeEmail','resetPasswordProfile','forgotpassword','resetpassword','contacts','chat','groupChat','groupInfo','settings'];
 
   const renderContent = () => {
     if (currentScreen === 'mainMenu') return <MainMenuScreen onNavigate={navigateTo} username={myUsername} />;
@@ -396,31 +396,7 @@ function App() {
     if (currentScreen === 'usermanagement') return <UserManagementScreen onBack={handleBack} />;
     if (currentScreen === 'profile') return <ProfileScreen user={user} onUpdateProfile={handleUpdateProfile} onLogout={handleLogout} onChangeEmail={() => navigateTo('changeEmail')} onResetPassword={() => navigateTo('resetPasswordProfile')} onSwitchAccount={handleSwitchAccount} />;
     if (currentScreen === 'settings')
-      return (
-        <SettingsScreen
-          onOpenAtheer={() => navigateTo('atheer')}
-          onOpenAbout={() => navigateTo('about')}
-          onOpenPrivacy={() => navigateTo('privacy')}
-          onOpenTerms={() => navigateTo('terms')}
-          onOpenDataManagement={() => navigateTo('data')}
-          onOpenAppLock={() => navigateTo('lock')}
-          onOpenProfile={() => navigateTo('profile')}
-          onOpenSupport={() => navigateTo('support')}
-          onOpenReport={() => navigateTo('support')}
-          onResetApp={handleResetApp}
-          muteMicOnJoin={muteMicOnJoin}
-          speakerDefault={speakerDefault}
-          onToggleMuteMic={handleToggleMuteMic}
-          onToggleSpeaker={handleToggleSpeaker}
-          fontSize={fontSize}
-          fontFamily={fontFamily}
-          onSelectFontSize={setFontSize}
-          onSelectFontFamily={setFontFamily}
-          isAdmin={isAdmin}
-          onOpenAdmin={() => navigateTo('admin')}
-          onOpenPartner={() => navigateTo('partner')}
-        />
-      );
+      return <SettingsScreen onOpenAtheer={() => navigateTo('atheer')} onOpenAbout={() => navigateTo('about')} onOpenPrivacy={() => navigateTo('privacy')} onOpenTerms={() => navigateTo('terms')} onOpenDataManagement={() => navigateTo('data')} onOpenAppLock={() => navigateTo('lock')} onOpenProfile={() => navigateTo('profile')} onOpenSupport={() => navigateTo('support')} onOpenReport={() => navigateTo('support')} onResetApp={handleResetApp} muteMicOnJoin={muteMicOnJoin} speakerDefault={speakerDefault} onToggleMuteMic={handleToggleMuteMic} onToggleSpeaker={handleToggleSpeaker} fontSize={fontSize} fontFamily={fontFamily} onSelectFontSize={setFontSize} onSelectFontFamily={setFontFamily} isAdmin={isAdmin} onOpenAdmin={() => navigateTo('admin')} onOpenPartner={() => navigateTo('partner')} onBack={handleBack} />;
     if (currentScreen === 'contacts') return <ContactsScreen onBack={handleBack} onChat={handleOpenChat} onCall={handleOpenCall} myUsername={myUsername} />;
     if (currentScreen === 'chat') return <ChatScreen contact={currentChatContact} onBack={handleBack} onCall={handleOpenCall} />;
     if (currentScreen === 'atheer') return <AtheerScreen onBack={handleBack} />;
@@ -432,19 +408,13 @@ function App() {
     if (currentScreen === 'partner') return <PartnerScreen onBack={handleBack} />;
     if (currentScreen === 'createGroup') return <CreateGroupScreen onBack={handleBack} />;
     if (currentScreen === 'groups')
-      return (
-        <GroupsScreen
-          onBack={handleBack}
-          onOpenCreateGroup={() => navigateTo('createGroup')}
-          onOpenGroup={handleOpenGroup}
-        />
-      );
+      return <GroupsScreen onBack={handleBack} onOpenCreateGroup={() => navigateTo('createGroup')} onOpenGroup={handleOpenGroup} />;
     if (currentScreen === 'groupChat') return <GroupChatScreen group={currentGroup} onBack={handleBack} onOpenGroupInfo={handleOpenGroupInfo} />;
     if (currentScreen === 'groupInfo') return <GroupInfoScreen group={currentGroup} onBack={handleBack} onOpenChat={handleOpenChat} />;
     return <HomeScreen myId={myId} myUsername={myUsername} user={user} />;
   };
 
-  const hideBottomNav = ['chat','notifications','support','usermanagement','admin','createGroup','groupChat','groupInfo','changeEmail','resetPasswordProfile','data','lock','partner','atheer','about','privacy','terms','forgotpassword','resetpassword'].includes(currentScreen);
+  const hideBottomNav = ['chat','notifications','support','usermanagement','admin','createGroup','groupChat','groupInfo','changeEmail','resetPasswordProfile','data','lock','partner','atheer','about','privacy','terms','forgotpassword','resetpassword','settings'].includes(currentScreen);
 
   return (
     <>
@@ -453,7 +423,6 @@ function App() {
       <UsernameModal open={showUsernameModal} onConfirm={handleUsernameConfirm} userId={user?.uid} />
       <WarningModal open={warningModalOpen} message={warningMessage} onClose={() => setWarningModalOpen(false)} />
 
-      {/* 🆕 شريط التنبيه بعدم وجود اتصال */}
       {!isOnline && (
         <div className="fixed top-0 left-0 right-0 z-[200] bg-yellow-400 text-black text-center py-2 text-sm font-bold shadow-md animate-pulse">
           ⚠️ لا يوجد اتصال بالإنترنت - بعض الميزات غير متاحة
@@ -465,8 +434,8 @@ function App() {
       )}
 
       <div className="min-h-screen flex flex-col bg-slate-50/50 text-gray-900">
-        {/* ✅ إضافة استثناء settings صراحةً */}
-        {!pagesWithOwnHeader.includes(currentScreen) && currentScreen !== 'mainMenu' && currentScreen !== 'chat' && currentScreen !== 'notifications' && currentScreen !== 'usermanagement' && currentScreen !== 'groups' && currentScreen !== 'groupChat' && currentScreen !== 'groupInfo' && currentScreen !== 'settings' && (
+        {/* التعديل الجوهري هنا: إخفاء الهيدر تماماً إذا كانت الشاشة ضمن قائمة المستثنين */}
+        {!pagesWithOwnHeader.includes(currentScreen) && (
           <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50 px-5 py-3 flex items-center shadow-sm" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
             <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100"><ArrowLeftIcon /></button>
             <h1 className="text-xl font-bold flex-1 text-right">{headerTitle}</h1>

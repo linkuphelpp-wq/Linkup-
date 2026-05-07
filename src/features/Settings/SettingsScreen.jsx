@@ -8,7 +8,7 @@ import {
 import { db, auth } from '../../firebase/config';
 import { collection, query, where, getDocs, writeBatch, doc, deleteDoc } from 'firebase/firestore';
 
-// ───────── بطاقة الإعداد المحسّنة (بدون تغيير) ─────────
+// ───────── بطاقة الإعداد المحسّنة ─────────
 const SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle, color = 'purple' }) => {
   const colorsMap = {
     purple: 'from-purple-500 to-indigo-500 bg-purple-50 text-purple-600',
@@ -55,7 +55,7 @@ const SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onTog
   );
 };
 
-// ───────── مكون النافذة المنبثقة العصري (بدون تغيير) ─────────
+// ───────── مكون النافذة المنبثقة العصري ─────────
 const SimpleModal = ({ open, onClose, title, children }) => (
   <AnimatePresence>
     {open && (
@@ -87,7 +87,7 @@ const SimpleModal = ({ open, onClose, title, children }) => (
   </AnimatePresence>
 );
 
-// ───────── القسم الواحد (بدون تغيير) ─────────
+// ───────── القسم الواحد ─────────
 const Section = ({ title, children, delay = 0, icon: Icon }) => (
   <motion.section
     initial={{ opacity: 0, x: -30 }}
@@ -103,7 +103,7 @@ const Section = ({ title, children, delay = 0, icon: Icon }) => (
   </motion.section>
 );
 
-// ───────── المكون الرئيسي (شاشة الإعدادات مع شريط سفلي) ─────────
+// ───────── المكون الرئيسي (شاشة الإعدادات) ─────────
 export default function SettingsScreen({
   onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile,
   onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker,
@@ -160,8 +160,8 @@ export default function SettingsScreen({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32">
-      {/* هيدر بسيط بدون أزرار */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right" dir="rtl">
+      {/* هيدر الإعدادات الرئيسي (الذي سيبقى) */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -171,7 +171,7 @@ export default function SettingsScreen({
         <p className="text-sm text-gray-500 mt-1">تحكم كامل في تطبيقك كما تحب</p>
       </motion.div>
 
-      {/* المحتوى الرئيسي مع أقسام متحركة */}
+      {/* المحتوى الرئيسي */}
       <div className="px-4 py-6 space-y-8 max-w-lg mx-auto">
         <Section title="الحساب" delay={0.1} icon={User}>
           <SettingRow icon={User} label="الملف الشخصي" desc="تعديل اسمك وصورتك" onClick={onOpenProfile} color="purple" />
@@ -227,22 +227,19 @@ export default function SettingsScreen({
         </motion.div>
       </div>
 
-      {/* شريط سفلي ثابت (Bottom Bar) مع زر العودة وزر الدرع */}
+      {/* شريط سفلي ثابت */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-gray-200/60 px-5 py-2 flex items-center justify-between shadow-lg"
         style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
       >
-        {/* زر العودة */}
         <button
-          onClick={() => window.history.back()}
+          onClick={onBack}
           className="p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all"
         >
           <ArrowLeft className="w-6 h-6 text-gray-700" />
         </button>
 
-        {/* عنوان صغير أو فارغ */}
         <span className="text-sm font-medium text-gray-500">القائمة</span>
 
-        {/* زر الدرع للإدارة (يظهر فقط للمشرف) */}
         {isAdmin ? (
           <button
             onClick={onOpenAdmin}
@@ -255,7 +252,7 @@ export default function SettingsScreen({
         )}
       </div>
 
-      {/* النوافذ المنبثقة */}
+      {/* النوافذ المنبثقة (Fonts, Sizes, Reset) */}
       <SimpleModal open={showSizeModal} onClose={() => setShowSizeModal(false)} title="حجم الخط">
         <div className="space-y-2">
           {sizes.map(s => (
