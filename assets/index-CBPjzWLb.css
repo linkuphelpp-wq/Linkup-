@@ -4560,6 +4560,10 @@
       background-color: var(--color-purple-100);
     }
 
+    .hover\:bg-purple-200:hover {
+      background-color: var(--color-purple-200);
+    }
+
     .hover\:bg-purple-600:hover {
       background-color: var(--color-purple-600);
     }
@@ -4574,6 +4578,10 @@
 
     .hover\:bg-red-100:hover {
       background-color: var(--color-red-100);
+    }
+
+    .hover\:bg-red-200:hover {
+      background-color: var(--color-red-200);
     }
 
     .hover\:bg-red-400\/30:hover {

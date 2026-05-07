@@ -61740,21 +61740,26 @@ function DataManagementScreen({ onBack }) {
 //#region src/context/AppLockContext.jsx
 var AppLockContext = (0, import_react.createContext)();
 var useAppLock = () => (0, import_react.useContext)(AppLockContext);
+function base64ToArrayBuffer(base64) {
+	const binary = atob(base64);
+	const bytes = new Uint8Array(binary.length);
+	for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+	return bytes.buffer;
+}
+function arrayBufferToBase64(buffer) {
+	const bytes = new Uint8Array(buffer);
+	let binary = "";
+	for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+	return btoa(binary);
+}
 function AppLockProvider({ children }) {
-	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(() => {
-		return localStorage.getItem("app_lock_enabled") === "true";
-	});
-	const [pin, setPin] = (0, import_react.useState)(() => {
-		return localStorage.getItem("app_lock_pin") || "";
-	});
-	const [isLocked, setIsLocked] = (0, import_react.useState)(() => {
-		return lockEnabled && !!localStorage.getItem("app_lock_pin");
-	});
-	const [lockTimeout, setLockTimeout] = (0, import_react.useState)(() => {
-		return parseInt(localStorage.getItem("app_lock_timeout") || "0", 10);
-	});
+	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_enabled") === "true");
+	const [pin, setPin] = (0, import_react.useState)(() => localStorage.getItem("app_lock_pin") || "");
+	const [isLocked, setIsLocked] = (0, import_react.useState)(() => lockEnabled && !!pin);
+	const [lockTimeout, setLockTimeout] = (0, import_react.useState)(() => parseInt(localStorage.getItem("app_lock_timeout") || "0", 10));
 	const [failedAttempts, setFailedAttempts] = (0, import_react.useState)(0);
 	const [lockUntil, setLockUntil] = (0, import_react.useState)(null);
+	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_biometric") === "true");
 	const lastActivityRef = (0, import_react.useState)(Date.now());
 	(0, import_react.useEffect)(() => {
 		if (!lockEnabled || !pin) return;
@@ -61793,9 +61798,13 @@ function AppLockProvider({ children }) {
 		localStorage.removeItem("app_lock_enabled");
 		localStorage.removeItem("app_lock_pin");
 		localStorage.removeItem("app_lock_timeout");
+		localStorage.removeItem("app_lock_biometric");
+		localStorage.removeItem("app_lock_credential_id");
+		localStorage.removeItem("app_lock_public_key");
 		setLockEnabled(false);
 		setPin("");
 		setIsLocked(false);
+		setBiometricEnabled(false);
 		setFailedAttempts(0);
 		setLockUntil(null);
 	}, []);
@@ -61835,6 +61844,95 @@ function AppLockProvider({ children }) {
 	const lockNow = (0, import_react.useCallback)(() => {
 		if (lockEnabled && pin) setIsLocked(true);
 	}, [lockEnabled, pin]);
+	const enableBiometric = async () => {
+		try {
+			const credential = await navigator.credentials.create({ publicKey: {
+				challenge: new Uint8Array([
+					8,
+					12,
+					3,
+					77,
+					94,
+					4,
+					1
+				]),
+				rp: { name: "LinkUp App" },
+				user: {
+					id: new Uint8Array(16),
+					name: "user@linkup.app",
+					displayName: "LinkUp User"
+				},
+				pubKeyCredParams: [{
+					type: "public-key",
+					alg: -7
+				}],
+				authenticatorSelection: {
+					authenticatorAttachment: "platform",
+					userVerification: "required"
+				},
+				timeout: 6e4,
+				attestation: "none"
+			} });
+			if (credential) {
+				const credentialId = arrayBufferToBase64(credential.rawId);
+				localStorage.setItem("app_lock_credential_id", credentialId);
+				localStorage.setItem("app_lock_biometric", "true");
+				setBiometricEnabled(true);
+				return true;
+			}
+		} catch (e) {
+			console.error("Biometric registration failed", e);
+			alert("فشل تفعيل البصمة. قد لا يدعم جهازك هذه الميزة.");
+		}
+		return false;
+	};
+	const verifyBiometric = async () => {
+		if (!biometricEnabled) return {
+			success: false,
+			error: "البصمة غير مفعلة"
+		};
+		const credentialId = localStorage.getItem("app_lock_credential_id");
+		if (!credentialId) return {
+			success: false,
+			error: "بيانات البصمة مفقودة"
+		};
+		try {
+			if (await navigator.credentials.get({ publicKey: {
+				challenge: new Uint8Array([
+					9,
+					34,
+					5,
+					66,
+					12,
+					4,
+					8
+				]),
+				allowCredentials: [{
+					id: base64ToArrayBuffer(credentialId),
+					type: "public-key"
+				}],
+				timeout: 6e4,
+				userVerification: "required"
+			} })) {
+				setIsLocked(false);
+				setFailedAttempts(0);
+				setLockUntil(null);
+				lastActivityRef[1](Date.now());
+				return { success: true };
+			}
+		} catch (e) {
+			console.error("Biometric verification failed", e);
+		}
+		return {
+			success: false,
+			error: "فشل التحقق من البصمة"
+		};
+	};
+	const disableBiometric = () => {
+		localStorage.removeItem("app_lock_biometric");
+		localStorage.removeItem("app_lock_credential_id");
+		setBiometricEnabled(false);
+	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockContext.Provider, {
 		value: {
 			lockEnabled,
@@ -61843,10 +61941,14 @@ function AppLockProvider({ children }) {
 			lockTimeout,
 			failedAttempts,
 			lockUntil,
+			biometricEnabled,
 			enableLock,
 			disableLock,
 			verifyPin,
-			lockNow
+			lockNow,
+			enableBiometric,
+			verifyBiometric,
+			disableBiometric
 		},
 		children
 	});
@@ -61854,7 +61956,7 @@ function AppLockProvider({ children }) {
 //#endregion
 //#region src/features/Settings/AppLockScreen.jsx
 function AppLockScreen({ onBack }) {
-	const { lockEnabled, enableLock, disableLock } = useAppLock();
+	const { lockEnabled, enableLock, disableLock, biometricEnabled, enableBiometric, disableBiometric } = useAppLock();
 	const [enabled, setEnabled] = (0, import_react.useState)(lockEnabled);
 	const [pin, setPin] = (0, import_react.useState)("");
 	const [showPin, setShowPin] = (0, import_react.useState)(false);
@@ -61879,6 +61981,9 @@ function AppLockScreen({ onBack }) {
 		enableLock(pin, 0);
 		setSaved(true);
 		setTimeout(() => setSaved(false), 2e3);
+	};
+	const handleEnableBiometric = async () => {
+		if (await enableBiometric()) alert("تم تفعيل البصمة بنجاح");
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right",
@@ -62004,8 +62109,22 @@ function AppLockScreen({ onBack }) {
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3 text-xs text-gray-500 bg-gray-50 p-4 rounded-xl",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-5 h-5 text-purple-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "يمكنك تفعيل البصمة لاحقاً من إعدادات النظام" })]
+							className: "flex items-center justify-between bg-gray-50 p-4 rounded-xl",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-3",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-6 h-6 text-purple-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-sm font-medium",
+									children: "فتح بالبصمة"
+								})]
+							}), biometricEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: disableBiometric,
+								className: "px-4 py-1.5 rounded-full bg-red-100 text-red-600 text-xs font-bold hover:bg-red-200 transition-colors",
+								children: "إلغاء"
+							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: handleEnableBiometric,
+								className: "px-4 py-1.5 rounded-full bg-purple-100 text-purple-600 text-xs font-bold hover:bg-purple-200 transition-colors",
+								children: "تفعيل"
+							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 							onClick: handleSave,
@@ -69257,7 +69376,7 @@ function PinLockScreen() {
 	const [enteredPin, setEnteredPin] = (0, import_react.useState)("");
 	const [error, setError] = (0, import_react.useState)(false);
 	const [lockedMessage, setLockedMessage] = (0, import_react.useState)("");
-	const { verifyPin } = useAppLock();
+	const { verifyPin, verifyBiometric, biometricEnabled } = useAppLock();
 	const pinLength = (localStorage.getItem("app_lock_pin") || "123456").length;
 	const numbers = [
 		1,
@@ -69283,7 +69402,7 @@ function PinLockScreen() {
 				setError(true);
 				setEnteredPin("");
 				if (result.locked) {
-					setLockedMessage(`محظور لمدة دقيقة`);
+					setLockedMessage("محظور لمدة دقيقة");
 					setTimeout(() => setLockedMessage(""), 6e4);
 				} else setTimeout(() => setError(false), 500);
 			}
@@ -69293,6 +69412,12 @@ function PinLockScreen() {
 		if (lockedMessage) return;
 		setEnteredPin((prev) => prev.slice(0, -1));
 		setError(false);
+	};
+	const handleBiometric = async () => {
+		if (!(await verifyBiometric()).success) {
+			setError(true);
+			setTimeout(() => setError(false), 500);
+		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "fixed inset-0 z-[9999] bg-gradient-to-br from-purple-50 via-white to-blue-50 flex flex-col items-center justify-center text-right",
@@ -69325,9 +69450,21 @@ function PinLockScreen() {
 							stiffness: 200,
 							damping: 15
 						},
+						className: "cursor-pointer",
+						onClick: biometricEnabled ? handleBiometric : void 0,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center shadow-xl shadow-purple-500/20",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-10 h-10 text-white" })
+							className: `w-20 h-20 rounded-2xl flex items-center justify-center shadow-xl ${biometricEnabled ? "bg-gradient-to-br from-emerald-400 to-teal-500 shadow-emerald-500/20" : "bg-gradient-to-br from-purple-600 to-blue-500 shadow-purple-500/20"}`,
+							children: biometricEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-10 h-10 text-white" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "text-white",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+									className: "w-10 h-10",
+									fill: "none",
+									viewBox: "0 0 24 24",
+									stroke: "currentColor",
+									strokeWidth: "1.5",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M12 1v6M12 17v6M5.64 5.64l4.24 4.24M14.12 14.12l4.24 4.24M1 12h6M17 12h6M5.64 18.36l4.24-4.24M14.12 9.88l4.24-4.24" })
+								})
+							})
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
@@ -69346,7 +69483,7 @@ function PinLockScreen() {
 							children: "أدخل رمز PIN"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-sm text-gray-500 mt-1",
-							children: lockedMessage || `أدخل الرمز المكون من ${pinLength} أرقام`
+							children: lockedMessage || (biometricEnabled ? "أو استخدم بصمتك للدخول" : `أدخل الرمز المكون من ${pinLength} أرقام`)
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
