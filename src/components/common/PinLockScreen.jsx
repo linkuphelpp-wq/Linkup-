@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Lock, Delete, Shield } from 'lucide-react';
 import { useAppLock } from '../../context/AppLockContext';
 
@@ -7,30 +7,32 @@ export default function PinLockScreen() {
   const [enteredPin, setEnteredPin] = useState('');
   const [error, setError] = useState(false);
   const [lockedMessage, setLockedMessage] = useState('');
-  const { verifyPin, failedAttempts } = useAppLock();
-
+  const { verifyPin } = useAppLock();
+  
+  // ✅ الحل: جلب طول الـ PIN الفعلي من localStorage
+  const pinLength = (localStorage.getItem('app_lock_pin') || '123456').length;
   const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 
   const handleNumber = (num) => {
     if (lockedMessage) return;
-    if (enteredPin.length >= 6) return;
+    if (enteredPin.length >= pinLength) return;
     
     const newPin = enteredPin + num;
     setEnteredPin(newPin);
     
-    if (newPin.length === 6) {
+    // ✅ يتم التحقق عند بلوغ الطول الصحيح فقط
+    if (newPin.length === pinLength) {
       const result = verifyPin(newPin);
       
       if (result.success) {
         setError(false);
-        // سيختفي القفل تلقائياً
+        // سيختفي القفل تلقائياً من خلال Context
       } else {
         setError(true);
         setEnteredPin('');
         
         if (result.locked) {
-          const minutes = Math.ceil(result.remainingTime / 60);
-          setLockedMessage(`محظور لدقيقة كاملة`);
+          setLockedMessage(`محظور لمدة دقيقة`);
           setTimeout(() => setLockedMessage(''), 60000);
         } else {
           setTimeout(() => setError(false), 500);
@@ -45,12 +47,6 @@ export default function PinLockScreen() {
     setError(false);
   };
 
-  useEffect(() => {
-    setEnteredPin('');
-    setError(false);
-    setLockedMessage('');
-  }, [failedAttempts]);
-
   return (
     <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-purple-50 via-white to-blue-50 flex flex-col items-center justify-center text-right" dir="rtl">
       <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100/60 rounded-full blur-3xl" />
@@ -61,7 +57,6 @@ export default function PinLockScreen() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 flex flex-col items-center gap-8 w-full max-w-xs px-6"
       >
-        {/* الأيقونة */}
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
@@ -72,7 +67,6 @@ export default function PinLockScreen() {
           </div>
         </motion.div>
 
-        {/* العنوان */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -81,18 +75,18 @@ export default function PinLockScreen() {
         >
           <h1 className="text-2xl font-black text-gray-900">أدخل رمز PIN</h1>
           <p className="text-sm text-gray-500 mt-1">
-            {lockedMessage || 'أدخل الرمز المكون من 6 أرقام'}
+            {lockedMessage || `أدخل الرمز المكون من ${pinLength} أرقام`}
           </p>
         </motion.div>
 
-        {/* نقاط PIN */}
+        {/* ✅ نقاط PIN ديناميكية بعدد الطول المطلوب */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
           className="flex gap-4 items-center"
         >
-          {[...Array(6)].map((_, i) => (
+          {[...Array(pinLength)].map((_, i) => (
             <motion.div
               key={i}
               animate={{
@@ -105,7 +99,6 @@ export default function PinLockScreen() {
           ))}
         </motion.div>
 
-        {/* لوحة الأرقام */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
