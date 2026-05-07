@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Users, Video, Phone, MessageCircle, Filter, Sparkles,
   Trash2, Star, UserPlus, X, Check, AlertCircle, Pencil,
-  ChevronDown, ChevronUp
+  ChevronDown, ChevronUp, Zap
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -47,12 +48,11 @@ const getSafeName = (contact) => {
   return 'مستخدم';
 };
 
-// ───────── بطاقة جهة الاتصال (معدّلة) ─────────
-const ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0 }) => {
+// ───────── بطاقة جهة الاتصال (معدّلة بتأثيرات حركية) ─────────
+const ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0, index = 0 }) => {
   const [status, setStatus] = useState('offline');
   const [expanded, setExpanded] = useState(false);
 
-  // 🟢 مراقبة الحالة الحية من Firestore
   useEffect(() => {
     if (!contact.uid) return;
     const unsub = onSnapshot(doc(db, 'users', contact.uid), (snap) => {
@@ -69,7 +69,6 @@ const ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFa
   const statusDot = status === 'online' ? 'bg-emerald-500' : 'bg-gray-300';
   const statusText = status === 'online' ? 'متصل الآن' : 'غير متصل';
 
-  // دالة مساعدة للتحقق من الاتصال قبل الاتصال
   const handleCallPress = (type) => {
     if (status !== 'online') {
       toast.error('المستخدم غير متصل حاليًا', {
@@ -82,17 +81,24 @@ const ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFa
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100/80 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05, type: 'spring', stiffness: 200, damping: 20 }}
+      whileHover={{ y: -3, boxShadow: '0 12px 24px -8px rgba(0,0,0,0.12)' }}
+      className="bg-white rounded-2xl border border-gray-100/80 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+    >
       {/* الصف الرئيسي */}
       <div className="flex items-center justify-between p-3">
         <div className="flex items-center gap-3.5 flex-1 min-w-0">
           {/* نجمة المفضلة */}
-          <button
+          <motion.button
+            whileTap={{ scale: 0.8 }}
             onClick={() => onToggleFavorite?.(contact)}
             className={`shrink-0 p-1 rounded-full transition-all ${isFavorite ? 'text-yellow-500 hover:bg-yellow-100' : 'text-gray-300 hover:text-yellow-400 hover:bg-gray-100'}`}
           >
             <Star className={`w-5 h-5 ${isFavorite ? 'fill-yellow-500' : ''}`} />
-          </button>
+          </motion.button>
 
           {/* الصورة + مؤشر الحالة */}
           <div className="relative shrink-0">
@@ -102,7 +108,11 @@ const ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFa
                 {safeName.charAt(0)?.toUpperCase() || 'م'}
               </AvatarFallback>
             </Avatar>
-            <span className={`absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${statusDot} shadow-sm`} />
+            <motion.span
+              animate={{ scale: status === 'online' ? [1, 1.2, 1] : 1 }}
+              transition={{ repeat: status === 'online' ? Infinity : 0, duration: 2 }}
+              className={`absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${statusDot} shadow-sm`}
+            />
           </div>
 
           {/* الاسم والحالة */}
@@ -113,84 +123,140 @@ const ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFa
 
           {/* عدد غير المقروء */}
           {unreadCount > 0 && (
-            <div className="min-w-[22px] h-5 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center shadow-md px-1.5">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="min-w-[22px] h-5 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center shadow-md px-1.5"
+            >
               <span className="text-[10px] font-bold text-white">{unreadCount}</span>
-            </div>
+            </motion.div>
           )}
 
           {/* زر القلم (تعديل الاسم) */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => onEdit?.(contact)}
             className="p-2.5 rounded-full bg-gray-50 text-amber-600 hover:bg-amber-100 active:scale-90 transition-all"
             title="تعديل الاسم"
           >
             <Pencil className="w-4 h-4" />
-          </button>
+          </motion.button>
 
           {/* زر السهم (توسيع/طي الشريط السفلي) */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => setExpanded(!expanded)}
             className="p-2.5 rounded-full bg-gray-50 text-gray-600 hover:bg-gray-100 active:scale-90 transition-all"
             title="خيارات"
           >
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
+          </motion.button>
         </div>
       </div>
 
-      {/* شريط الأزرار المنسدل (تم إضافة التحقق من الحالة) */}
-      {expanded && (
-        <div className="px-4 pb-4 pt-1 flex items-center justify-around border-t border-gray-100 mt-1 animate-in slide-in-from-top-2 duration-150">
-          <button onClick={() => handleCallPress('video')} className="flex flex-col items-center gap-1 text-purple-600 hover:bg-purple-50 p-2 rounded-xl transition-colors">
-            <Video className="w-5 h-5" />
-            <span className="text-xs font-medium">فيديو</span>
-          </button>
-          <button onClick={() => handleCallPress('audio')} className="flex flex-col items-center gap-1 text-blue-600 hover:bg-blue-50 p-2 rounded-xl transition-colors">
-            <Phone className="w-5 h-5" />
-            <span className="text-xs font-medium">صوت</span>
-          </button>
-          <button onClick={() => { onChat?.(contact); setExpanded(false); }} className="flex flex-col items-center gap-1 text-gray-600 hover:bg-gray-100 p-2 rounded-xl transition-colors">
-            <MessageCircle className="w-5 h-5" />
-            <span className="text-xs font-medium">محادثة</span>
-          </button>
-          <button onClick={() => { setExpanded(false); onToggleFavorite?.(contact); }} className="flex flex-col items-center gap-1 text-yellow-500 hover:bg-yellow-50 p-2 rounded-xl transition-colors">
-            <Star className={`w-5 h-5 ${isFavorite ? 'fill-yellow-500' : ''}`} />
-            <span className="text-xs font-medium">مفضلة</span>
-          </button>
-          <button onClick={() => { setExpanded(false); onDelete?.(contact); }} className="flex flex-col items-center gap-1 text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors">
-            <Trash2 className="w-5 h-5" />
-            <span className="text-xs font-medium">حذف</span>
-          </button>
-        </div>
-      )}
-    </div>
+      {/* شريط الأزرار المنسدل (مع حركة انسيابية) */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 pt-1 flex items-center justify-around border-t border-gray-100 mt-1">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleCallPress('video')}
+                className="flex flex-col items-center gap-1 text-purple-600 hover:bg-purple-50 p-2 rounded-xl transition-colors"
+              >
+                <Video className="w-5 h-5" />
+                <span className="text-xs font-medium">فيديو</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleCallPress('audio')}
+                className="flex flex-col items-center gap-1 text-blue-600 hover:bg-blue-50 p-2 rounded-xl transition-colors"
+              >
+                <Phone className="w-5 h-5" />
+                <span className="text-xs font-medium">صوت</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => { onChat?.(contact); setExpanded(false); }}
+                className="flex flex-col items-center gap-1 text-gray-600 hover:bg-gray-100 p-2 rounded-xl transition-colors"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span className="text-xs font-medium">محادثة</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => { setExpanded(false); onToggleFavorite?.(contact); }}
+                className="flex flex-col items-center gap-1 text-yellow-500 hover:bg-yellow-50 p-2 rounded-xl transition-colors"
+              >
+                <Star className={`w-5 h-5 ${isFavorite ? 'fill-yellow-500' : ''}`} />
+                <span className="text-xs font-medium">مفضلة</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => { setExpanded(false); onDelete?.(contact); }}
+                className="flex flex-col items-center gap-1 text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors"
+              >
+                <Trash2 className="w-5 h-5" />
+                <span className="text-xs font-medium">حذف</span>
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
 // ───────── مودال تأكيد الحذف ─────────
-const DeleteConfirmModal = ({ open, contact, onConfirm, onClose }) => {
-  if (!open) return null;
-  const safeName = getSafeName(contact);
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5" onClick={onClose}>
-      <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
-        <div className="text-center mb-4">
-          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
-            <Trash2 className="w-8 h-8 text-red-500" />
+const DeleteConfirmModal = ({ open, contact, onConfirm, onClose }) => (
+  <AnimatePresence>
+    {open && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.9, opacity: 0, y: 20 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+          className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="text-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
+              <Trash2 className="w-8 h-8 text-red-500" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">تأكيد الحذف</h2>
+            <p className="text-sm text-gray-500 mt-2">
+              هل أنت متأكد من حذف <strong>@{getSafeName(contact)}</strong>؟
+            </p>
           </div>
-          <h2 className="text-lg font-bold text-gray-900">تأكيد الحذف</h2>
-          <p className="text-sm text-gray-500 mt-2">
-            هل أنت متأكد من حذف <strong>@{safeName}</strong>؟
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={onClose} className="flex-1 h-11 rounded-xl">إلغاء</Button>
-          <Button onClick={onConfirm} className="flex-1 h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white">حذف</Button>
-        </div>
-      </div>
-    </div>
-  );
-};
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={onClose} className="flex-1 h-11 rounded-xl">إلغاء</Button>
+            <Button onClick={onConfirm} className="flex-1 h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white">حذف</Button>
+          </div>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
 
 // ───────── مودال تعديل الاسم ─────────
 const EditNameModal = ({ open, contact, onSave, onClose }) => {
@@ -206,26 +272,42 @@ const EditNameModal = ({ open, contact, onSave, onClose }) => {
     onClose();
   };
 
-  if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5" onClick={onClose}>
-      <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold">تعديل الاسم</h2>
-          <button onClick={onClose}><X className="w-5 h-5" /></button>
-        </div>
-        <Input
-          placeholder="الاسم الجديد"
-          value={newName}
-          onChange={e => setNewName(e.target.value)}
-          className="mb-4 h-12"
-          autoFocus
-        />
-        <Button onClick={handleSave} disabled={!newName.trim()} className="w-full h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white">
-          حفظ
-        </Button>
-      </div>
-    </div>
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold">تعديل الاسم</h2>
+              <button onClick={onClose}><X className="w-5 h-5" /></button>
+            </div>
+            <Input
+              placeholder="الاسم الجديد"
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              className="mb-4 h-12"
+              autoFocus
+            />
+            <Button onClick={handleSave} disabled={!newName.trim()} className="w-full h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white">
+              حفظ
+            </Button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
@@ -398,76 +480,132 @@ export default function ContactsScreen({ onCall, onChat }) {
   }, [contacts, activeFilter, searchTerm, favorites]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50/50 pb-24">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-24 text-right" dir="rtl">
       {/* مودال الإضافة */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5" onClick={() => setShowAddModal(false)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold">إضافة جهة اتصال</h2>
-              <button onClick={() => setShowAddModal(false)}><X className="w-5 h-5" /></button>
-            </div>
-            <Input placeholder="أدخل المعرف (username)" value={addUsername} onChange={e => { setAddUsername(e.target.value); setAddError(''); setAddSuccess(''); }} className="mb-3 h-12" disabled={addLoading} />
-            {addError && <p className="text-red-500 text-sm mb-2 flex items-center gap-1"><AlertCircle className="w-4 h-4" /> {addError}</p>}
-            {addSuccess && <p className="text-green-600 text-sm mb-2 flex items-center gap-1"><Check className="w-4 h-4" /> {addSuccess}</p>}
-            <Button onClick={handleAddContact} disabled={addLoading || !addUsername.trim()} className="w-full h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white">
-              {addLoading ? 'جارٍ...' : 'إضافة'}
-            </Button>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {showAddModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5"
+            onClick={() => setShowAddModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold">إضافة جهة اتصال</h2>
+                <button onClick={() => setShowAddModal(false)}><X className="w-5 h-5" /></button>
+              </div>
+              <Input placeholder="أدخل المعرف (username)" value={addUsername} onChange={e => { setAddUsername(e.target.value); setAddError(''); setAddSuccess(''); }} className="mb-3 h-12" disabled={addLoading} />
+              {addError && <p className="text-red-500 text-sm mb-2 flex items-center gap-1"><AlertCircle className="w-4 h-4" /> {addError}</p>}
+              {addSuccess && <p className="text-green-600 text-sm mb-2 flex items-center gap-1"><Check className="w-4 h-4" /> {addSuccess}</p>}
+              <Button onClick={handleAddContact} disabled={addLoading || !addUsername.trim()} className="w-full h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white">
+                {addLoading ? 'جارٍ...' : 'إضافة'}
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <DeleteConfirmModal open={!!deleteTarget} contact={deleteTarget} onConfirm={confirmDelete} onClose={() => setDeleteTarget(null)} />
       <EditNameModal open={!!editTarget} contact={editTarget} onSave={handleEditSave} onClose={() => setEditTarget(null)} />
 
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-12 pb-4">
+      {/* الهيدر الزجاجي العصري */}
+      <motion.header
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-12 pb-4 shadow-sm"
+        style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}
+      >
         <div className="flex items-center justify-between mb-5">
           <LinkUpLogo />
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setShowAddModal(true)} className="rounded-full bg-purple-50 text-purple-600 hover:bg-purple-100 h-10 w-10">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setShowAddModal(true)}
+              className="rounded-full bg-purple-50 text-purple-600 hover:bg-purple-100 h-10 w-10 flex items-center justify-center"
+            >
               <UserPlus className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 h-10 w-10">
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 h-10 w-10 flex items-center justify-center"
+            >
               <Filter className="w-4 h-4" />
-            </Button>
+            </motion.button>
           </div>
         </div>
         <div className="mb-4">
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">جهات الاتصال</h1>
-          <p className="text-sm text-gray-500 mt-1">تواصل بسهولة مع الأشخاص المهمين لديك</p>
+          <div className="flex items-center gap-2 mb-1">
+            <Zap className="w-5 h-5 text-purple-500" />
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">جهات الاتصال</h1>
+          </div>
+          <p className="text-sm text-gray-500">تواصل بسهولة مع الأشخاص المهمين لديك</p>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           {['all', 'favorites', 'online'].map((filter) => (
-            <button key={filter} onClick={() => setActiveFilter(filter)} className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap shrink-0 transition-all duration-300 ${activeFilter === filter ? 'bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-md shadow-purple-500/20' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+            <motion.button
+              key={filter}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setActiveFilter(filter)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap shrink-0 transition-all duration-300 ${activeFilter === filter ? 'bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-md shadow-purple-500/20' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+            >
               {filter === 'all' && <><Sparkles className="w-3.5 h-3.5" /> الكل</>}
               {filter === 'favorites' && 'المفضلة'}
               {filter === 'online' && 'متصل الآن'}
-            </button>
+            </motion.button>
           ))}
         </div>
-      </header>
+      </motion.header>
 
+      {/* المحتوى الرئيسي */}
       <main className="flex-1 overflow-y-auto px-5 pt-5">
-        <div className="relative mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="relative mb-6"
+        >
           <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <Input placeholder="ابحث عن اسم أو رقم..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-2 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm transition-all" />
-        </div>
-        <div className="flex items-center justify-between mb-4 px-1">
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.15 }}
+          className="flex items-center justify-between mb-4 px-1"
+        >
           <h3 className="text-sm font-bold text-gray-800">جهات الاتصال</h3>
           <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">{filteredContacts.length}</span>
-        </div>
+        </motion.div>
 
         {filteredContacts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex flex-col items-center justify-center py-16 text-center"
+          >
             <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
               <Users className="w-9 h-9 text-purple-600/70" />
             </div>
             <p className="text-gray-800 font-bold text-lg">لا توجد جهات اتصال</p>
             <p className="text-sm text-gray-500 mt-1.5 max-w-[200px]">ابدأ بإضافة أصدقائك لبدء التواصل</p>
-          </div>
+          </motion.div>
         ) : (
           <div className="space-y-3 pb-4">
-            {filteredContacts.map(contact => (
+            {filteredContacts.map((contact, index) => (
               <ContactCard
                 key={contact.uid || contact.username}
                 contact={contact}
@@ -478,6 +616,7 @@ export default function ContactsScreen({ onCall, onChat }) {
                 isFavorite={favorites.includes(contact.uid || contact.username)}
                 onEdit={setEditTarget}
                 unreadCount={unreadCounts[contact.uid] || 0}
+                index={index}
               />
             ))}
           </div>
