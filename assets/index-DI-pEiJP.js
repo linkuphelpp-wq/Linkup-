@@ -59070,15 +59070,24 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 					opacity: 1,
 					y: 0
 				},
-				className: "sticky top-0 z-20 bg-white/60 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-12 pb-4 text-center shadow-sm",
+				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-16 pb-4 text-center shadow-sm",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-center gap-3 mb-1",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-7 h-7 text-purple-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-						className: "text-3xl font-black text-gray-800 tracking-tight",
-						children: "الإعدادات"
-					})]
+					className: "flex items-center justify-between",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => window.history.back(),
+							className: "p-2 rounded-full hover:bg-gray-100",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-5 h-5 text-gray-600" })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+							className: "text-2xl font-black text-gray-800 tracking-tight flex-1",
+							children: "الإعدادات"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8" }),
+						" "
+					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-sm text-gray-500",
+					className: "text-sm text-gray-500 mt-1",
 					children: "تحكم كامل في تطبيقك كما تحب"
 				})]
 			}),
@@ -72974,7 +72983,8 @@ function App() {
 		"contacts",
 		"chat",
 		"groupChat",
-		"groupInfo"
+		"groupInfo",
+		"settings"
 	];
 	const renderContent = () => {
 		if (currentScreen === "mainMenu") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MainMenuScreen, {
