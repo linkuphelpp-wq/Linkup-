@@ -10927,59 +10927,55 @@ function SplashScreen({ onFinish }) {
 		return () => clearInterval(timer);
 	}, [onFinish, phase]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: `fixed inset-0 z-[9999] bg-[#040406] flex flex-col items-center justify-center overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${visible ? "opacity-100 scale-100" : "opacity-0 scale-105 pointer-events-none"}`,
+		className: `fixed inset-0 z-[9999] bg-gradient-to-br from-purple-50 via-white to-blue-50 flex flex-col items-center justify-center overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${visible ? "opacity-100 scale-100" : "opacity-0 scale-105 pointer-events-none"}`,
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#0a0a12_0%,_#040406_70%)]" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#f3e8ff_0%,_#ffffff_70%)]" }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "absolute inset-0 opacity-20 pointer-events-none",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[140px] animate-ambient-float" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-blue-600/15 rounded-full blur-[120px] animate-ambient-float animation-delay-3000" })]
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-200/60 rounded-full blur-[140px] animate-ambient-float" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-blue-200/50 rounded-full blur-[120px] animate-ambient-float animation-delay-3000" })]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "relative z-10 flex flex-col items-center px-6",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: `relative mb-10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${phase === "init" ? "opacity-0 translate-y-8 scale-90" : "opacity-100 translate-y-0 scale-100"}`,
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -inset-6 bg-purple-500/10 rounded-full blur-3xl animate-glow-breathe" }),
-							"          ",
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "relative w-20 h-20 rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.8)] flex items-center justify-center overflow-hidden group",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, {
-									className: "w-9 h-9 text-white drop-shadow-lg transition-transform duration-700 group-hover:scale-110",
-									strokeWidth: 1.8
-								})]
-							})
-						]
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -inset-6 bg-purple-300/20 rounded-full blur-3xl animate-glow-breathe" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative w-20 h-20 rounded-2xl bg-white/60 backdrop-blur-xl border border-gray-200/50 shadow-[0_20px_50px_-12px_rgba(139,92,246,0.15)] flex items-center justify-center overflow-hidden group",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-tr from-transparent via-purple-100/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, {
+								className: "w-9 h-9 text-purple-600 drop-shadow-sm transition-transform duration-700 group-hover:scale-110",
+								strokeWidth: 1.8
+							})]
+						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: `text-center transition-all duration-700 delay-150 ease-[cubic-bezier(0.16,1,0.3,1)] ${phase === "init" ? "opacity-0 translate-y-6" : "opacity-100 translate-y-0"}`,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
-							className: "text-5xl font-black text-white tracking-tight drop-shadow-sm",
+							className: "text-5xl font-black text-gray-900 tracking-tight drop-shadow-sm",
 							children: ["Link", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-purple-300 to-blue-400",
+								className: "text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
 								children: "Up"
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "mt-3 text-[11px] text-gray-400 font-medium tracking-[0.3em] uppercase",
+							className: "mt-3 text-[11px] text-gray-500 font-medium tracking-[0.3em] uppercase",
 							children: "التواصل بلا حدود"
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: `mt-14 w-48 transition-all duration-700 delay-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${phase === "init" ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative h-1 bg-gray-800/30 rounded-full overflow-hidden backdrop-blur-sm border border-white/[0.05]",
+							className: "relative h-1 bg-gray-200 rounded-full overflow-hidden backdrop-blur-sm border border-gray-100/50",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "absolute inset-y-0 left-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all duration-100 ease-linear",
 								style: { width: `${progress}%` }
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-[0_0_12px_rgba(139,92,246,0.8)] transition-all duration-100 ease-linear",
+								className: "absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-purple-500 rounded-full shadow-[0_0_12px_rgba(139,92,246,0.5)] transition-all duration-100 ease-linear",
 								style: {
 									left: `calc(${progress}% - 6px)`,
 									opacity: progress > 0 ? 1 : 0
 								}
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-[10px] text-gray-500 mt-5 text-center font-medium tracking-wide",
+							className: "text-[10px] text-gray-400 mt-5 text-center font-medium tracking-wide",
 							children: progress < 30 ? "جاري تهيئة البيئة..." : progress < 70 ? "تحميل المكونات..." : "أهلاً بك"
 						})]
 					})
@@ -10987,15 +10983,15 @@ function SplashScreen({ onFinish }) {
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("style", { children: `
         @keyframes ambient-float {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.2; }
-          50% { transform: translate(-50%, -55%) scale(1.04); opacity: 0.28; }
+          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+          50% { transform: translate(-50%, -55%) scale(1.04); opacity: 0.5; }
         }
         .animate-ambient-float { animation: ambient-float 16s ease-in-out infinite; }
         .animation-delay-3000 { animation-delay: 3s; }
         
         @keyframes glow-breathe {
-          0%, 100% { transform: scale(1); opacity: 0.15; }
-          50% { transform: scale(1.08); opacity: 0.25; }
+          0%, 100% { transform: scale(1); opacity: 0.2; }
+          50% { transform: scale(1.08); opacity: 0.4; }
         }
         .animate-glow-breathe { animation: glow-breathe 4s ease-in-out infinite; }
       ` })
