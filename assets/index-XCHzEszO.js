@@ -10221,20 +10221,6 @@ var Database$1 = createLucideIcon("database", [
 		key: "mv7ke4"
 	}]
 ]);
-var Delete = createLucideIcon("delete", [
-	["path", {
-		d: "M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z",
-		key: "1yo7s0"
-	}],
-	["path", {
-		d: "m12 9 6 6",
-		key: "anjzzh"
-	}],
-	["path", {
-		d: "m18 9-6 6",
-		key: "1fp51s"
-	}]
-]);
 var Download = createLucideIcon("download", [
 	["path", {
 		d: "M12 15V3",
@@ -61753,97 +61739,9 @@ function arrayBufferToBase64(buffer) {
 	return btoa(binary);
 }
 function AppLockProvider({ children }) {
-	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_enabled") === "true");
-	const [pin, setPin] = (0, import_react.useState)(() => localStorage.getItem("app_lock_pin") || "");
-	const [isLocked, setIsLocked] = (0, import_react.useState)(() => lockEnabled && !!pin);
-	const [lockTimeout, setLockTimeout] = (0, import_react.useState)(() => parseInt(localStorage.getItem("app_lock_timeout") || "0", 10));
-	const [failedAttempts, setFailedAttempts] = (0, import_react.useState)(0);
-	const [lockUntil, setLockUntil] = (0, import_react.useState)(null);
-	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_biometric") === "true");
-	const lastActivityRef = (0, import_react.useState)(Date.now());
-	(0, import_react.useEffect)(() => {
-		if (!lockEnabled || !pin) return;
-		const events = [
-			"mousedown",
-			"keydown",
-			"scroll",
-			"touchstart"
-		];
-		const handleActivity = () => {
-			lastActivityRef[1](Date.now());
-		};
-		events.forEach((e) => window.addEventListener(e, handleActivity));
-		const interval = setInterval(() => {
-			if (lockTimeout > 0 && Date.now() - lastActivityRef[0] > lockTimeout * 1e3) setIsLocked(true);
-		}, 1e3);
-		return () => {
-			events.forEach((e) => window.removeEventListener(e, handleActivity));
-			clearInterval(interval);
-		};
-	}, [
-		lockEnabled,
-		pin,
-		lockTimeout
-	]);
-	const enableLock = (0, import_react.useCallback)((newPin, timeout = 0) => {
-		localStorage.setItem("app_lock_enabled", "true");
-		localStorage.setItem("app_lock_pin", newPin);
-		localStorage.setItem("app_lock_timeout", timeout.toString());
-		setLockEnabled(true);
-		setPin(newPin);
-		setLockTimeout(timeout);
-		setIsLocked(false);
-	}, []);
-	const disableLock = (0, import_react.useCallback)(() => {
-		localStorage.removeItem("app_lock_enabled");
-		localStorage.removeItem("app_lock_pin");
-		localStorage.removeItem("app_lock_timeout");
-		localStorage.removeItem("app_lock_biometric");
-		localStorage.removeItem("app_lock_credential_id");
-		localStorage.removeItem("app_lock_public_key");
-		setLockEnabled(false);
-		setPin("");
-		setIsLocked(false);
-		setBiometricEnabled(false);
-		setFailedAttempts(0);
-		setLockUntil(null);
-	}, []);
-	const verifyPin = (0, import_react.useCallback)((enteredPin) => {
-		if (lockUntil && Date.now() < lockUntil) return {
-			success: false,
-			locked: true,
-			remainingTime: Math.ceil((lockUntil - Date.now()) / 1e3)
-		};
-		if (enteredPin === pin) {
-			setIsLocked(false);
-			setFailedAttempts(0);
-			setLockUntil(null);
-			lastActivityRef[1](Date.now());
-			return { success: true };
-		}
-		const newAttempts = failedAttempts + 1;
-		setFailedAttempts(newAttempts);
-		if (newAttempts >= 3) {
-			setLockUntil(Date.now() + 6e4);
-			return {
-				success: false,
-				locked: true,
-				remainingTime: 60
-			};
-		}
-		return {
-			success: false,
-			locked: false,
-			attemptsLeft: 3 - newAttempts
-		};
-	}, [
-		pin,
-		failedAttempts,
-		lockUntil
-	]);
-	const lockNow = (0, import_react.useCallback)(() => {
-		if (lockEnabled && pin) setIsLocked(true);
-	}, [lockEnabled, pin]);
+	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_biometric") === "true");
+	const [isLocked, setIsLocked] = (0, import_react.useState)(() => lockEnabled);
+	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(() => lockEnabled);
 	const enableBiometric = async () => {
 		try {
 			const credential = await navigator.credentials.create({ publicKey: {
@@ -61878,6 +61776,8 @@ function AppLockProvider({ children }) {
 				localStorage.setItem("app_lock_credential_id", credentialId);
 				localStorage.setItem("app_lock_biometric", "true");
 				setBiometricEnabled(true);
+				setLockEnabled(true);
+				setIsLocked(false);
 				return true;
 			}
 		} catch (e) {
@@ -61915,9 +61815,6 @@ function AppLockProvider({ children }) {
 				userVerification: "required"
 			} })) {
 				setIsLocked(false);
-				setFailedAttempts(0);
-				setLockUntil(null);
-				lastActivityRef[1](Date.now());
 				return { success: true };
 			}
 		} catch (e) {
@@ -61932,23 +61829,21 @@ function AppLockProvider({ children }) {
 		localStorage.removeItem("app_lock_biometric");
 		localStorage.removeItem("app_lock_credential_id");
 		setBiometricEnabled(false);
+		setLockEnabled(false);
+		setIsLocked(false);
 	};
+	const lockNow = (0, import_react.useCallback)(() => {
+		if (lockEnabled) setIsLocked(true);
+	}, [lockEnabled]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockContext.Provider, {
 		value: {
 			lockEnabled,
-			pin,
 			isLocked,
-			lockTimeout,
-			failedAttempts,
-			lockUntil,
 			biometricEnabled,
-			enableLock,
-			disableLock,
-			verifyPin,
-			lockNow,
 			enableBiometric,
 			verifyBiometric,
-			disableBiometric
+			disableBiometric,
+			lockNow
 		},
 		children
 	});
@@ -61956,34 +61851,17 @@ function AppLockProvider({ children }) {
 //#endregion
 //#region src/features/Settings/AppLockScreen.jsx
 function AppLockScreen({ onBack }) {
-	const { lockEnabled, enableLock, disableLock, biometricEnabled, enableBiometric, disableBiometric } = useAppLock();
-	const [enabled, setEnabled] = (0, import_react.useState)(lockEnabled);
-	const [pin, setPin] = (0, import_react.useState)("");
-	const [showPin, setShowPin] = (0, import_react.useState)(false);
+	const { lockEnabled, enableBiometric, disableBiometric } = useAppLock();
 	const [saved, setSaved] = (0, import_react.useState)(false);
-	const [oldPin, setOldPin] = (0, import_react.useState)("");
-	const handleToggle = () => {
-		if (enabled) if (oldPin === localStorage.getItem("app_lock_pin")) {
-			disableLock();
-			setEnabled(false);
-			setOldPin("");
-			setPin("");
+	const handleToggle = async () => {
+		if (lockEnabled) {
+			disableBiometric();
 			setSaved(true);
 			setTimeout(() => setSaved(false), 2e3);
-		} else alert("رمز PIN الحالي غير صحيح");
-		else setEnabled(true);
-	};
-	const handleSave = () => {
-		if (pin.length < 4 || pin.length > 6) {
-			alert("يجب أن يكون رمز PIN بين 4 و 6 أرقام");
-			return;
+		} else if (await enableBiometric()) {
+			setSaved(true);
+			setTimeout(() => setSaved(false), 2e3);
 		}
-		enableLock(pin, 0);
-		setSaved(true);
-		setTimeout(() => setSaved(false), 2e3);
-	};
-	const handleEnableBiometric = async () => {
-		if (await enableBiometric()) alert("تم تفعيل البصمة بنجاح");
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right",
@@ -62014,142 +61892,70 @@ function AppLockScreen({ onBack }) {
 				})]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "text-sm text-gray-500 mt-1",
-				children: "حماية إضافية لتطبيقك"
+				children: "حماية إضافية باستخدام بصمتك"
 			})]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
 			className: "px-4 py-6 space-y-6 max-w-lg mx-auto",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-					initial: {
-						opacity: 0,
-						y: 20
-					},
-					animate: {
-						opacity: 1,
-						y: 0
-					},
-					transition: {
-						delay: .1,
-						type: "spring",
-						stiffness: 200,
-						damping: 20
-					},
-					className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm flex items-center justify-between",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+				initial: {
+					opacity: 0,
+					y: 20
+				},
+				animate: {
+					opacity: 1,
+					y: 0
+				},
+				transition: {
+					delay: .1,
+					type: "spring",
+					stiffness: 200,
+					damping: 20
+				},
+				className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center justify-between",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center gap-4",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "p-3 rounded-xl bg-purple-50 text-purple-600",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-6 h-6" })
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-6 h-6" })
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "font-bold text-gray-900",
-							children: "تفعيل القفل الأمني"
+							children: "تفعيل القفل بالبصمة"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-xs text-gray-500 mt-1",
-							children: "طلب رمز PIN عند كل فتح"
+							children: "عند الفتح سيُطلب التحقق من هويتك"
 						})] })]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: handleToggle,
-						className: `w-14 h-8 rounded-full transition-colors relative ${enabled ? "bg-purple-600" : "bg-gray-200"}`,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${enabled ? "translate-x-6" : ""}` })
+						className: `w-14 h-8 rounded-full transition-colors relative ${lockEnabled ? "bg-purple-600" : "bg-gray-200"}`,
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${lockEnabled ? "translate-x-6" : ""}` })
 					})]
-				}),
-				enabled && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-					initial: {
-						opacity: 0,
-						y: 20
-					},
-					animate: {
-						opacity: 1,
-						y: 0
-					},
-					className: "bg-white rounded-2xl p-6 border border-gray-100/80 shadow-sm space-y-5",
-					children: lockEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-							className: "text-sm font-bold text-gray-700 block",
-							children: "أدخل رمز PIN الحالي للإلغاء"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								type: showPin ? "text" : "password",
-								value: oldPin,
-								onChange: (e) => setOldPin(e.target.value),
-								placeholder: "••••••",
-								maxLength: 6,
-								className: "h-14 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200 text-center tracking-[0.5em] text-xl font-mono"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: () => setShowPin(!showPin),
-								className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600",
-								children: showPin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							onClick: handleToggle,
-							className: "w-full h-14 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold text-base shadow-lg shadow-red-500/20 transition-all active:scale-[0.98]",
-							children: "تعطيل القفل"
-						})
-					] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-							className: "text-sm font-bold text-gray-700 block",
-							children: "تعيين رمز PIN جديد"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								type: showPin ? "text" : "password",
-								value: pin,
-								onChange: (e) => setPin(e.target.value.replace(/\D/g, "")),
-								placeholder: "4-6 أرقام",
-								maxLength: 6,
-								className: "h-14 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200 text-center tracking-[0.5em] text-xl font-mono"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: () => setShowPin(!showPin),
-								className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600",
-								children: showPin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center justify-between bg-gray-50 p-4 rounded-xl",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-3",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-6 h-6 text-purple-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-sm font-medium",
-									children: "فتح بالبصمة"
-								})]
-							}), biometricEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: disableBiometric,
-								className: "px-4 py-1.5 rounded-full bg-red-100 text-red-600 text-xs font-bold hover:bg-red-200 transition-colors",
-								children: "إلغاء"
-							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: handleEnableBiometric,
-								className: "px-4 py-1.5 rounded-full bg-purple-100 text-purple-600 text-xs font-bold hover:bg-purple-200 transition-colors",
-								children: "تفعيل"
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							onClick: handleSave,
-							disabled: pin.length < 4,
-							className: "w-full h-14 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] disabled:opacity-50",
-							children: "حفظ القفل"
-						})
-					] })
-				}),
-				saved && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-					initial: {
-						opacity: 0,
-						y: 20
-					},
-					animate: {
-						opacity: 1,
-						y: 0
-					},
-					className: "bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 text-emerald-700",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-sm font-bold",
-						children: "تم الحفظ بنجاح"
-					})]
-				})
-			]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "mt-4 p-4 bg-gray-50 rounded-xl",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-start gap-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-5 h-5 text-purple-500 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-600 leading-relaxed",
+							children: "عند تفعيل القفل، سيُطلب منك التحقق من هويتك باستخدام بصمة إصبعك عند فتح التطبيق. في حال عدم استجابة البصمة، يمكنك استخدام كلمة مرور جهازك (PIN أو النقش) كبديل من خلال نافذة النظام التي ستظهر تلقائياً."
+						})]
+					})
+				})]
+			}), saved && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+				initial: {
+					opacity: 0,
+					y: 20
+				},
+				animate: {
+					opacity: 1,
+					y: 0
+				},
+				className: "bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 text-emerald-700",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-sm font-bold",
+					children: lockEnabled ? "تم تفعيل القفل بنجاح" : "تم تعطيل القفل بنجاح"
+				})]
+			})]
 		})]
 	});
 }
@@ -69373,55 +69179,23 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 //#endregion
 //#region src/components/common/PinLockScreen.jsx
 function PinLockScreen() {
-	const [enteredPin, setEnteredPin] = (0, import_react.useState)("");
+	const [attempting, setAttempting] = (0, import_react.useState)(false);
 	const [error, setError] = (0, import_react.useState)(false);
-	const [lockedMessage, setLockedMessage] = (0, import_react.useState)("");
-	const { verifyPin, verifyBiometric, biometricEnabled } = useAppLock();
-	const pinLength = (localStorage.getItem("app_lock_pin") || "123456").length;
-	const numbers = [
-		1,
-		2,
-		3,
-		4,
-		5,
-		6,
-		7,
-		8,
-		9,
-		0
-	];
-	const handleNumber = (num) => {
-		if (lockedMessage) return;
-		if (enteredPin.length >= pinLength) return;
-		const newPin = enteredPin + num;
-		setEnteredPin(newPin);
-		if (newPin.length === pinLength) {
-			const result = verifyPin(newPin);
-			if (result.success) setError(false);
-			else {
-				setError(true);
-				setEnteredPin("");
-				if (result.locked) {
-					setLockedMessage("محظور لمدة دقيقة");
-					setTimeout(() => setLockedMessage(""), 6e4);
-				} else setTimeout(() => setError(false), 500);
-			}
-		}
-	};
-	const handleDelete = () => {
-		if (lockedMessage) return;
-		setEnteredPin((prev) => prev.slice(0, -1));
+	const { verifyBiometric } = useAppLock();
+	const handleTap = async () => {
+		if (attempting) return;
+		setAttempting(true);
 		setError(false);
-	};
-	const handleBiometric = async () => {
 		if (!(await verifyBiometric()).success) {
 			setError(true);
-			setTimeout(() => setError(false), 500);
+			setTimeout(() => setError(false), 800);
 		}
+		setAttempting(false);
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "fixed inset-0 z-[9999] bg-gradient-to-br from-purple-50 via-white to-blue-50 flex flex-col items-center justify-center text-right",
+		className: "fixed inset-0 z-[9999] bg-gradient-to-br from-purple-50 via-white to-blue-50 flex flex-col items-center justify-center text-right cursor-pointer",
 		dir: "rtl",
+		onClick: handleTap,
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -top-40 -right-40 w-80 h-80 bg-purple-100/60 rounded-full blur-3xl" }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -bottom-40 -left-40 w-80 h-80 bg-blue-100/60 rounded-full blur-3xl" }),
@@ -69434,126 +69208,69 @@ function PinLockScreen() {
 					opacity: 1,
 					y: 0
 				},
-				className: "relative z-10 flex flex-col items-center gap-8 w-full max-w-xs px-6",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				className: "relative z-10 flex flex-col items-center gap-10 w-full max-w-xs px-6 pointer-events-none",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+					initial: { scale: 0 },
+					animate: { scale: 1 },
+					transition: {
+						type: "spring",
+						stiffness: 200,
+						damping: 15
+					},
+					className: "relative",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						animate: error ? { x: [
+							0,
+							-10,
+							10,
+							-10,
+							10,
+							0
+						] } : {},
+						transition: { duration: .5 },
+						className: "w-32 h-32 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-2xl shadow-emerald-500/20",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-16 h-16 text-white" })
+					}), attempting && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 						initial: {
-							scale: 0,
-							rotate: -180
+							opacity: 1,
+							scale: 1
 						},
 						animate: {
-							scale: 1,
-							rotate: 0
+							opacity: 0,
+							scale: 1.8
 						},
 						transition: {
-							type: "spring",
-							stiffness: 200,
-							damping: 15
+							repeat: Infinity,
+							duration: 1.5
 						},
-						className: "cursor-pointer",
-						onClick: biometricEnabled ? handleBiometric : void 0,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: `w-20 h-20 rounded-2xl flex items-center justify-center shadow-xl ${biometricEnabled ? "bg-gradient-to-br from-emerald-400 to-teal-500 shadow-emerald-500/20" : "bg-gradient-to-br from-purple-600 to-blue-500 shadow-purple-500/20"}`,
-							children: biometricEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-10 h-10 text-white" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "text-white",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "w-10 h-10",
-									fill: "none",
-									viewBox: "0 0 24 24",
-									stroke: "currentColor",
-									strokeWidth: "1.5",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M12 1v6M12 17v6M5.64 5.64l4.24 4.24M14.12 14.12l4.24 4.24M1 12h6M17 12h6M5.64 18.36l4.24-4.24M14.12 9.88l4.24-4.24" })
-								})
-							})
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-						initial: {
-							opacity: 0,
-							y: 10
-						},
-						animate: {
-							opacity: 1,
-							y: 0
-						},
-						transition: { delay: .2 },
-						className: "text-center",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+						className: "absolute inset-0 rounded-3xl border-2 border-emerald-400"
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+					initial: {
+						opacity: 0,
+						y: 10
+					},
+					animate: {
+						opacity: 1,
+						y: 0
+					},
+					transition: { delay: .2 },
+					className: "text-center",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 							className: "text-2xl font-black text-gray-900",
-							children: "أدخل رمز PIN"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-500 mt-1",
-							children: lockedMessage || (biometricEnabled ? "أو استخدم بصمتك للدخول" : `أدخل الرمز المكون من ${pinLength} أرقام`)
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-						initial: { opacity: 0 },
-						animate: { opacity: 1 },
-						transition: { delay: .3 },
-						className: "flex gap-4 items-center",
-						children: [...Array(pinLength)].map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-							animate: {
-								scale: error ? [
-									1,
-									1.3,
-									1
-								] : i < enteredPin.length ? [0, 1] : 1,
-								backgroundColor: error ? "#ef4444" : i < enteredPin.length ? "#7c3aed" : "#e5e7eb"
-							},
-							transition: { duration: .3 },
-							className: "w-4 h-4 rounded-full"
-						}, i))
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-						initial: {
-							opacity: 0,
-							y: 20
-						},
-						animate: {
-							opacity: 1,
-							y: 0
-						},
-						transition: { delay: .4 },
-						className: "grid grid-cols-3 gap-3 w-full",
-						children: [
-							numbers.map((num, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-								initial: {
-									opacity: 0,
-									y: 20
-								},
-								animate: {
-									opacity: 1,
-									y: 0
-								},
-								transition: { delay: .5 + index * .03 },
-								whileHover: { scale: 1.05 },
-								whileTap: { scale: .95 },
-								onClick: () => handleNumber(num),
-								disabled: lockedMessage !== "",
-								className: `h-16 rounded-2xl text-2xl font-bold transition-all shadow-sm ${lockedMessage ? "bg-gray-100 text-gray-300 cursor-not-allowed" : "bg-white text-gray-800 border border-gray-100 hover:border-purple-200 hover:shadow-md active:bg-purple-50"}`,
-								children: num
-							}, num)),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-								initial: {
-									opacity: 0,
-									y: 20
-								},
-								animate: {
-									opacity: 1,
-									y: 0
-								},
-								transition: { delay: .8 },
-								whileHover: { scale: 1.05 },
-								whileTap: { scale: .95 },
-								onClick: handleDelete,
-								disabled: lockedMessage !== "" || enteredPin.length === 0,
-								className: "h-16 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center hover:bg-gray-100 transition-all disabled:opacity-30",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Delete, { className: "w-6 h-6 text-gray-600" })
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-16" })
-						]
-					})
-				]
+							children: "التحقق من الهوية"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-500 mt-3",
+							children: error ? "لم نتمكن من التحقق، حاول مرة أخرى" : "انقر في أي مكان للتحقق"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-xs text-gray-400 mt-4",
+							children: "يمكنك أيضاً استخدام كلمة مرور جهازك"
+						})
+					]
+				})]
 			})
 		]
 	});

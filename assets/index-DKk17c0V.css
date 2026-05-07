@@ -1553,6 +1553,10 @@
     gap: calc(var(--spacing) * 8);
   }
 
+  .gap-10 {
+    gap: calc(var(--spacing) * 10);
+  }
+
   :where(.space-y-1 > :not(:last-child)) {
     --tw-space-y-reverse: 0;
     margin-block-start: calc(calc(var(--spacing) * 1) * var(--tw-space-y-reverse));
@@ -1752,6 +1756,10 @@
 
   .border-emerald-100 {
     border-color: var(--color-emerald-100);
+  }
+
+  .border-emerald-400 {
+    border-color: var(--color-emerald-400);
   }
 
   .border-emerald-400\/20 {
@@ -3454,11 +3462,6 @@
     letter-spacing: .3em;
   }
 
-  .tracking-\[0\.5em\] {
-    --tw-tracking: .5em;
-    letter-spacing: .5em;
-  }
-
   .tracking-\[0\.15em\] {
     --tw-tracking: .15em;
     letter-spacing: .15em;
@@ -3909,16 +3912,6 @@
   @supports (color: color-mix(in lab, red, red)) {
     .shadow-red-200 {
       --tw-shadow-color: color-mix(in oklab, var(--color-red-200) var(--tw-shadow-alpha), transparent);
-    }
-  }
-
-  .shadow-red-500\/20 {
-    --tw-shadow-color: #fb2c3633;
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .shadow-red-500\/20 {
-      --tw-shadow-color: color-mix(in oklab, color-mix(in oklab, var(--color-red-500) 20%, transparent) var(--tw-shadow-alpha), transparent);
     }
   }
 
@@ -4560,10 +4553,6 @@
       background-color: var(--color-purple-100);
     }
 
-    .hover\:bg-purple-200:hover {
-      background-color: var(--color-purple-200);
-    }
-
     .hover\:bg-purple-600:hover {
       background-color: var(--color-purple-600);
     }
@@ -4578,10 +4567,6 @@
 
     .hover\:bg-red-100:hover {
       background-color: var(--color-red-100);
-    }
-
-    .hover\:bg-red-200:hover {
-      background-color: var(--color-red-200);
     }
 
     .hover\:bg-red-400\/30:hover {
@@ -4971,20 +4956,12 @@
     scale: .98;
   }
 
-  .active\:bg-purple-50:active {
-    background-color: var(--color-purple-50);
-  }
-
   .disabled\:pointer-events-none:disabled {
     pointer-events: none;
   }
 
   .disabled\:cursor-not-allowed:disabled {
     cursor: not-allowed;
-  }
-
-  .disabled\:opacity-30:disabled {
-    opacity: .3;
   }
 
   .disabled\:opacity-40:disabled {
@@ -6256,10 +6233,6 @@ body {
   --tw-tracking: .3em;
   letter-spacing: .3em;
 }
-.tracking-\[0\.5em\] {
-  --tw-tracking: .5em;
-  letter-spacing: .5em;
-}
 .tracking-\[0\.15em\] {
   --tw-tracking: .15em;
   letter-spacing: .15em;
@@ -6631,9 +6604,6 @@ body {
 }
 .disabled\:cursor-not-allowed:disabled {
   cursor: not-allowed;
-}
-.disabled\:opacity-30:disabled {
-  opacity: .3;
 }
 .disabled\:opacity-40:disabled {
   opacity: .4;
