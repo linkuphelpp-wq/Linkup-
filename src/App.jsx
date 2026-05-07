@@ -146,6 +146,9 @@ function App() {
   const [navHistory, setNavHistory] = useState(['mainMenu']);
   const [currentGroup, setCurrentGroup] = useState(null);
 
+  // 🆕 حالة الاتصال بالإنترنت
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
@@ -160,6 +163,18 @@ function App() {
 
   usePresence();
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // 🆕 مراقبة الاتصال بالإنترنت
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     if (!user?.uid) { setIsAdmin(false); return; }
@@ -406,6 +421,13 @@ function App() {
       <WelcomeModal open={showWelcomeModal} onClose={handleWelcomeClose} onLearnMore={handleWelcomeLearnMore} />
       <UsernameModal open={showUsernameModal} onConfirm={handleUsernameConfirm} userId={user?.uid} />
       <WarningModal open={warningModalOpen} message={warningMessage} onClose={() => setWarningModalOpen(false)} />
+
+      {/* 🆕 شريط التنبيه بعدم وجود اتصال */}
+      {!isOnline && (
+        <div className="fixed top-0 left-0 right-0 z-[200] bg-yellow-400 text-black text-center py-2 text-sm font-bold shadow-md animate-pulse">
+          ⚠️ لا يوجد اتصال بالإنترنت - بعض الميزات غير متاحة
+        </div>
+      )}
 
       {!isAppInstalled && showInstallGuide && modalQueue.length === 0 && (
         <InstallGuide onDismiss={() => setShowInstallGuide(false)} deferredPrompt={deferredPrompt} isInstalled={isAppInstalled} />
