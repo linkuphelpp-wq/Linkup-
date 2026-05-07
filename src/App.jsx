@@ -36,8 +36,10 @@ import IncomingCallModal from './components/common/IncomingCallModal';
 import InstallGuide from './components/common/InstallGuide';
 import GroupChatScreen from './features/groups/GroupChatScreen';
 import GroupInfoScreen from './features/groups/GroupInfoScreen';
+import PinLockScreen from './components/common/PinLockScreen';
 import { usePeer } from './hooks/usePeer';
 import { usePresence } from './hooks/usePresence';
+import { AppLockProvider, useAppLock } from './context/AppLockContext';
 import { db, auth } from './firebase/config';
 import {
   doc,
@@ -114,8 +116,10 @@ const BottomNav = ({ currentScreen, onNavigate, isAdmin, onOpenAdmin, onOpenUser
   </div>
 );
 
-// ───────── المكون الرئيسي ─────────
-function App() {
+// ───────── المكون الداخلي (تم نقله لـ AppContent) ─────────
+function AppContent() {
+  const { isLocked, lockEnabled } = useAppLock();
+
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [user, setUser] = useState(null);
@@ -357,6 +361,11 @@ function App() {
   const handleOpenGroup = (group) => { setCurrentGroup(group); navigateTo('groupChat'); };
   const handleOpenGroupInfo = (group) => { setCurrentGroup(group); navigateTo('groupInfo'); };
 
+  // ✅ شرط إظهار شاشة القفل
+  if (isLocked && lockEnabled) {
+    return <PinLockScreen />;
+  }
+
   if (showOnboarding) return <OnboardingScreen onFinish={handleFinishOnboarding} />;
   if (bannedModalOpen) return <BannedModal open={bannedModalOpen} type={banType} onClose={handleBannedModalClose} />;
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
@@ -370,7 +379,6 @@ function App() {
     return <IncomingCallModal open={true} caller={incomingCallerInfo} callType={incomingCallType} onAccept={handleAcceptIncoming} onReject={handleRejectIncoming} />;
   }
 
-  // مصفوفة الشاشات التي تمتلك هيدر خاص بها ولا تحتاج لهيدر التطبيق العام
   const pagesWithOwnHeader = [
     'atheer','about','privacy','support','createGroup','data',
     'lock','changeEmail','resetPasswordProfile','forgotpassword',
@@ -434,7 +442,6 @@ function App() {
       )}
 
       <div className="min-h-screen flex flex-col bg-slate-50/50 text-gray-900">
-        {/* التعديل الجوهري هنا: إخفاء الهيدر تماماً إذا كانت الشاشة ضمن قائمة المستثنين */}
         {!pagesWithOwnHeader.includes(currentScreen) && (
           <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50 px-5 py-3 flex items-center shadow-sm" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
             <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100"><ArrowLeftIcon /></button>
@@ -459,6 +466,15 @@ function App() {
       )}
       <Toaster richColors position="top-center" />
     </>
+  );
+}
+
+// ───────── المكون الرئيسي الجديد الذي يغلف كل شيء ─────────
+function App() {
+  return (
+    <AppLockProvider>
+      <AppContent />
+    </AppLockProvider>
   );
 }
 
