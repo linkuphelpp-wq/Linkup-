@@ -1673,6 +1673,11 @@
     border-radius: var(--radius-xl);
   }
 
+  .rounded-t-3xl {
+    border-top-left-radius: var(--radius-3xl);
+    border-top-right-radius: var(--radius-3xl);
+  }
+
   .rounded-t-xl {
     border-top-left-radius: var(--radius-xl);
     border-top-right-radius: var(--radius-xl);
@@ -3268,6 +3273,10 @@
 
   .pb-5 {
     padding-bottom: calc(var(--spacing) * 5);
+  }
+
+  .pb-6 {
+    padding-bottom: calc(var(--spacing) * 6);
   }
 
   .pb-8 {
