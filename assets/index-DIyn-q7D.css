@@ -754,6 +754,10 @@
     z-index: 60;
   }
 
+  .z-\[200\] {
+    z-index: 200;
+  }
+
   .z-\[9999\] {
     z-index: 9999;
   }
@@ -2431,6 +2435,10 @@
     .bg-white\/\[0\.04\] {
       background-color: color-mix(in oklab, var(--color-white) 4%, transparent);
     }
+  }
+
+  .bg-yellow-400 {
+    background-color: var(--color-yellow-400);
   }
 
   .bg-gradient-to-b {
@@ -5614,6 +5622,9 @@ body {
 }
 .z-\[60\] {
   z-index: 60;
+}
+.z-\[200\] {
+  z-index: 200;
 }
 .z-\[9999\] {
   z-index: 9999;

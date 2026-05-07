@@ -62659,6 +62659,7 @@ function App() {
 	const [currentScreen, setCurrentScreen] = (0, import_react.useState)("mainMenu");
 	const [navHistory, setNavHistory] = (0, import_react.useState)(["mainMenu"]);
 	const [currentGroup, setCurrentGroup] = (0, import_react.useState)(null);
+	const [isOnline, setIsOnline] = (0, import_react.useState)(navigator.onLine);
 	const [deferredPrompt, setDeferredPrompt] = (0, import_react.useState)(null);
 	const [isAppInstalled, setIsAppInstalled] = (0, import_react.useState)(false);
 	const [showInstallGuide, setShowInstallGuide] = (0, import_react.useState)(false);
@@ -62667,6 +62668,16 @@ function App() {
 	const { myId, callStatus, localStream, remoteStream, remoteUserData, startCall, stopCall, switchCamera, toggleVideo, isVideoEnabled, getRemotePeerId, incomingCall, incomingCallerInfo, incomingCallType, acceptIncomingCall, rejectIncomingCall } = usePeer();
 	usePresence();
 	const [isAdmin, setIsAdmin] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		const handleOnline = () => setIsOnline(true);
+		const handleOffline = () => setIsOnline(false);
+		window.addEventListener("online", handleOnline);
+		window.addEventListener("offline", handleOffline);
+		return () => {
+			window.removeEventListener("online", handleOnline);
+			window.removeEventListener("offline", handleOffline);
+		};
+	}, []);
 	(0, import_react.useEffect)(() => {
 		if (!user?.uid) {
 			setIsAdmin(false);
@@ -63273,6 +63284,10 @@ function App() {
 			open: warningModalOpen,
 			message: warningMessage,
 			onClose: () => setWarningModalOpen(false)
+		}),
+		!isOnline && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "fixed top-0 left-0 right-0 z-[200] bg-yellow-400 text-black text-center py-2 text-sm font-bold shadow-md animate-pulse",
+			children: "⚠️ لا يوجد اتصال بالإنترنت - بعض الميزات غير متاحة"
 		}),
 		!isAppInstalled && showInstallGuide && modalQueue.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InstallGuide, {
 			onDismiss: () => setShowInstallGuide(false),
