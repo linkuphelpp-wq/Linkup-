@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Check, Settings, Users, Eye, EyeOff, Sparkles, ArrowLeftRight } from 'lucide-react';
+import { Copy, Check, Settings, Users, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { auth } from '../../firebase/config';
 
@@ -31,7 +31,6 @@ export default function MainMenuScreen({ onNavigate, username }) {
       onClick: () => onNavigate?.('contacts'),
       gradient: 'from-cyan-500 to-blue-600',
       shadowColor: 'shadow-cyan-200',
-      lightBg: 'bg-cyan-50',
     },
     {
       label: 'الإعدادات',
@@ -40,7 +39,6 @@ export default function MainMenuScreen({ onNavigate, username }) {
       onClick: () => onNavigate?.('settings'),
       gradient: 'from-violet-500 to-purple-600',
       shadowColor: 'shadow-violet-200',
-      lightBg: 'bg-violet-50',
     },
   ];
 
@@ -77,31 +75,31 @@ export default function MainMenuScreen({ onNavigate, username }) {
 
       <div className="relative z-10 flex-1 flex flex-col px-5 py-6 space-y-8 max-w-lg mx-auto w-full">
         
-        {/* بطاقة الملف الشخصي - تصميم Neumorphism */}
+        {/* بطاقة الملف الشخصي - تصميم Neumorphism - تم زيادة المسافة العلوية */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, type: 'spring', stiffness: 150, damping: 15 }}
           whileHover={{ y: -5 }}
-          className="relative bg-white/70 backdrop-blur-md rounded-3xl p-6 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5),0_20px_40px_-12px_rgba(0,0,0,0.1)] border border-white/50"
+          className="relative bg-white/70 backdrop-blur-md rounded-3xl p-6 pt-14 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5),0_20px_40px_-12px_rgba(0,0,0,0.1)] border border-white/50 mt-4"
         >
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2">
+          <div className="absolute -top-12 left-1/2 -translate-x-1/2">
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 15 }}
             >
-              <Avatar className="w-20 h-20 border-4 border-white shadow-xl ring-4 ring-purple-500/10">
+              <Avatar className="w-24 h-24 border-4 border-white shadow-xl ring-4 ring-purple-500/10">
                 <AvatarImage src={user?.photoURL} className="object-cover" />
-                <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-500 text-white text-2xl font-bold">
+                <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-500 text-white text-3xl font-bold">
                   {displayName.charAt(0)}
                 </AvatarFallback>
               </Avatar>
             </motion.div>
           </div>
-          <div className="mt-10 text-center">
-            <h2 className="text-xl font-bold text-gray-800">{displayName}</h2>
-            <p className="text-xs text-gray-500 mt-1">نشط الآن</p>
+          {/* تمت إزالة مؤشر النشاط (النجمة) */}
+          <div className="mt-2 text-center">
+            <h2 className="text-2xl font-bold text-gray-800">{displayName}</h2>
           </div>
         </motion.div>
 
