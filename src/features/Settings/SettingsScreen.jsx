@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield, Palette, Mic, Speaker, Lock, RefreshCw,
-  MessageCircle, Share2, Sparkles, ChevronRight, Check, Crown,
+  MessageCircle, Share2, Sparkles, Check, Crown,
   AlertTriangle, X, TabletSmartphone, User, ChevronLeft
 } from 'lucide-react';
 import { db, auth } from '../../firebase/config';
