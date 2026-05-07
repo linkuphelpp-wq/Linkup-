@@ -59070,7 +59070,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 					opacity: 1,
 					y: 0
 				},
-				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-16 pb-4 text-center shadow-sm",
+				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-24 pb-4 text-center shadow-sm",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center justify-between",
 					children: [
@@ -59083,8 +59083,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 							className: "text-2xl font-black text-gray-800 tracking-tight flex-1",
 							children: "الإعدادات"
 						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8" }),
-						" "
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8" })
 					]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-sm text-gray-500 mt-1",
