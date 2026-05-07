@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Lock, Eye, EyeOff, Fingerprint, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Lock, Eye, EyeOff, Fingerprint, CheckCircle, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppLock } from '../../context/AppLockContext';
 
 export default function AppLockScreen({ onBack }) {
-  const { lockEnabled, enableLock, disableLock } = useAppLock();
+  const { lockEnabled, enableLock, disableLock, biometricEnabled, enableBiometric, disableBiometric } = useAppLock();
   const [enabled, setEnabled] = useState(lockEnabled);
   const [pin, setPin] = useState('');
   const [showPin, setShowPin] = useState(false);
@@ -38,6 +38,13 @@ export default function AppLockScreen({ onBack }) {
     enableLock(pin, 0);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleEnableBiometric = async () => {
+    const success = await enableBiometric();
+    if (success) {
+      alert('تم تفعيل البصمة بنجاح');
+    }
   };
 
   return (
@@ -129,10 +136,30 @@ export default function AppLockScreen({ onBack }) {
                     {showPin ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500 bg-gray-50 p-4 rounded-xl">
-                  <Fingerprint className="w-5 h-5 text-purple-600 shrink-0" />
-                  <span>يمكنك تفعيل البصمة لاحقاً من إعدادات النظام</span>
+
+                {/* زر البصمة */}
+                <div className="flex items-center justify-between bg-gray-50 p-4 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <Fingerprint className="w-6 h-6 text-purple-600" />
+                    <span className="text-sm font-medium">فتح بالبصمة</span>
+                  </div>
+                  {biometricEnabled ? (
+                    <button
+                      onClick={disableBiometric}
+                      className="px-4 py-1.5 rounded-full bg-red-100 text-red-600 text-xs font-bold hover:bg-red-200 transition-colors"
+                    >
+                      إلغاء
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleEnableBiometric}
+                      className="px-4 py-1.5 rounded-full bg-purple-100 text-purple-600 text-xs font-bold hover:bg-purple-200 transition-colors"
+                    >
+                      تفعيل
+                    </button>
+                  )}
                 </div>
+
                 <Button
                   onClick={handleSave}
                   disabled={pin.length < 4}

@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Delete, Shield } from 'lucide-react';
+import { Delete, Fingerprint } from 'lucide-react';
 import { useAppLock } from '../../context/AppLockContext';
 
 export default function PinLockScreen() {
   const [enteredPin, setEnteredPin] = useState('');
   const [error, setError] = useState(false);
   const [lockedMessage, setLockedMessage] = useState('');
-  const { verifyPin } = useAppLock();
+  const { verifyPin, verifyBiometric, biometricEnabled } = useAppLock();
   
-  // ✅ الحل: جلب طول الـ PIN الفعلي من localStorage
   const pinLength = (localStorage.getItem('app_lock_pin') || '123456').length;
   const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 
@@ -20,19 +19,15 @@ export default function PinLockScreen() {
     const newPin = enteredPin + num;
     setEnteredPin(newPin);
     
-    // ✅ يتم التحقق عند بلوغ الطول الصحيح فقط
     if (newPin.length === pinLength) {
       const result = verifyPin(newPin);
-      
       if (result.success) {
         setError(false);
-        // سيختفي القفل تلقائياً من خلال Context
       } else {
         setError(true);
         setEnteredPin('');
-        
         if (result.locked) {
-          setLockedMessage(`محظور لمدة دقيقة`);
+          setLockedMessage('محظور لمدة دقيقة');
           setTimeout(() => setLockedMessage(''), 60000);
         } else {
           setTimeout(() => setError(false), 500);
@@ -47,6 +42,14 @@ export default function PinLockScreen() {
     setError(false);
   };
 
+  const handleBiometric = async () => {
+    const result = await verifyBiometric();
+    if (!result.success) {
+      setError(true);
+      setTimeout(() => setError(false), 500);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-purple-50 via-white to-blue-50 flex flex-col items-center justify-center text-right" dir="rtl">
       <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100/60 rounded-full blur-3xl" />
@@ -57,13 +60,28 @@ export default function PinLockScreen() {
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 flex flex-col items-center gap-8 w-full max-w-xs px-6"
       >
+        {/* أيقونة البصمة (إذا كانت مفعلة) أو أيقونة القفل */}
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+          className="cursor-pointer"
+          onClick={biometricEnabled ? handleBiometric : undefined}
         >
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center shadow-xl shadow-purple-500/20">
-            <Shield className="w-10 h-10 text-white" />
+          <div className={`w-20 h-20 rounded-2xl flex items-center justify-center shadow-xl ${
+            biometricEnabled 
+              ? 'bg-gradient-to-br from-emerald-400 to-teal-500 shadow-emerald-500/20' 
+              : 'bg-gradient-to-br from-purple-600 to-blue-500 shadow-purple-500/20'
+          }`}>
+            {biometricEnabled ? (
+              <Fingerprint className="w-10 h-10 text-white" />
+            ) : (
+              <div className="text-white">
+                <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M12 1v6M12 17v6M5.64 5.64l4.24 4.24M14.12 14.12l4.24 4.24M1 12h6M17 12h6M5.64 18.36l4.24-4.24M14.12 9.88l4.24-4.24"/>
+                </svg>
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -75,11 +93,10 @@ export default function PinLockScreen() {
         >
           <h1 className="text-2xl font-black text-gray-900">أدخل رمز PIN</h1>
           <p className="text-sm text-gray-500 mt-1">
-            {lockedMessage || `أدخل الرمز المكون من ${pinLength} أرقام`}
+            {lockedMessage || (biometricEnabled ? 'أو استخدم بصمتك للدخول' : `أدخل الرمز المكون من ${pinLength} أرقام`)}
           </p>
         </motion.div>
 
-        {/* ✅ نقاط PIN ديناميكية بعدد الطول المطلوب */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
