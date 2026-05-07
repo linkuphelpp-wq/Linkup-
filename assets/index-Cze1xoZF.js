@@ -66397,250 +66397,169 @@ function MainMenuScreen({ onNavigate, username }) {
 		icon: Users,
 		onClick: () => onNavigate?.("contacts"),
 		gradient: "from-blue-500 to-cyan-500",
-		shadowColor: "shadow-blue-200",
-		lightBg: "bg-blue-50",
-		iconColor: "text-blue-600"
+		shadowColor: "shadow-blue-200"
 	}, {
 		label: "الإعدادات",
 		desc: "تخصيص التطبيق",
 		icon: Settings,
 		onClick: () => onNavigate?.("settings"),
 		gradient: "from-purple-500 to-indigo-500",
-		shadowColor: "shadow-purple-200",
-		lightBg: "bg-purple-50",
-		iconColor: "text-purple-600"
+		shadowColor: "shadow-purple-200"
 	}];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right overflow-hidden",
+		className: "min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right",
 		dir: "rtl",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "absolute inset-0 pointer-events-none overflow-hidden",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-					animate: {
-						scale: [
-							1,
-							1.2,
-							1
-						],
-						rotate: [
-							0,
-							10,
-							-10,
-							0
-						]
-					},
-					transition: {
-						repeat: Infinity,
-						duration: 20,
-						ease: "linear"
-					},
-					className: "absolute -top-32 -right-32 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-					animate: {
-						scale: [
-							1.2,
-							1,
-							1.2
-						],
-						rotate: [
-							0,
-							-15,
-							15,
-							0
-						]
-					},
-					transition: {
-						repeat: Infinity,
-						duration: 25,
-						ease: "linear"
-					},
-					className: "absolute -bottom-32 -left-32 w-96 h-96 bg-blue-300/20 rounded-full blur-3xl"
-				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-				initial: {
-					opacity: 0,
-					y: -30
-				},
-				animate: {
-					opacity: 1,
-					y: 0
-				},
-				className: "sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-gray-200/60 px-5 pt-12 pb-4 text-center shadow-sm",
-				style: { paddingTop: "calc(1rem + env(safe-area-inset-top))" },
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-center gap-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-6 h-6 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-						className: "text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
-						children: "LinkUp"
-					})]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-sm text-gray-500 mt-1",
-					children: "مرحباً بك في عالمك الخاص"
-				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative z-10 flex-1 flex flex-col px-4 py-8 space-y-8 max-w-lg mx-auto w-full",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-						initial: {
-							opacity: 0,
-							y: 30
-						},
-						animate: {
-							opacity: 1,
-							y: 0
-						},
-						transition: {
-							delay: .15,
-							type: "spring",
-							stiffness: 200,
-							damping: 20
-						},
-						className: "relative bg-white rounded-3xl shadow-sm border border-gray-100/80 overflow-hidden",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 left-0 w-full h-20 bg-gradient-to-r from-purple-500/5 to-blue-500/5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative flex flex-col items-center pt-16 pb-8 px-6",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "absolute -top-16 left-1/2 -translate-x-1/2",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-									initial: {
-										scale: 0,
-										rotate: -180
-									},
-									animate: {
-										scale: 1,
-										rotate: 0
-									},
-									transition: {
-										delay: .3,
-										type: "spring",
-										stiffness: 200,
-										damping: 15
-									},
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
-										className: "w-28 h-28 border-4 border-white shadow-xl ring-4 ring-purple-500/10 mx-auto",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
-											src: user?.photoURL,
-											className: "object-cover"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-											className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white text-4xl font-bold",
-											children: displayName.charAt(0)
-										})]
-									})
-								})
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-								initial: {
-									opacity: 0,
-									y: 10
-								},
-								animate: {
-									opacity: 1,
-									y: 0
-								},
-								transition: { delay: .4 },
-								className: "text-center mt-6",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-									className: "text-2xl font-black text-gray-900",
-									children: displayName
-								})
-							})]
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-						initial: {
-							opacity: 0,
-							y: 20
-						},
-						animate: {
-							opacity: 1,
-							y: 0
-						},
-						transition: {
-							delay: .25,
-							type: "spring",
-							stiffness: 200,
-							damping: 20
-						},
-						className: "bg-white rounded-2xl p-5 shadow-sm border border-gray-100/80 hover:shadow-md transition-all",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center justify-between mb-3",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-									className: "text-sm font-bold text-gray-800",
-									children: "اسم المستخدم الخاص بك"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-									onClick: () => setIdVisible(!idVisible),
-									className: "text-xs text-gray-500 hover:text-purple-600 font-medium flex items-center gap-1 transition-colors",
-									children: [idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" }), idVisible ? "إخفاء" : "إظهار"]
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 border border-gray-200 flex items-center justify-between group transition-all hover:shadow-md",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("code", {
-									className: "text-lg font-mono text-purple-700 font-bold truncate flex-1 text-right select-all dir-ltr",
-									children: ["@", idVisible ? userHandle : "••••••••"]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-									whileHover: { scale: 1.05 },
-									whileTap: { scale: .9 },
-									onClick: handleCopy,
-									disabled: !username || username === "غير محدد",
-									className: "mr-3 p-3 rounded-xl bg-purple-500 text-white hover:bg-purple-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md",
-									children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-5 h-5" })
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "text-[11px] text-gray-500 mt-3 text-center font-medium",
-								children: [
-									"شارك اسم المستخدم (@",
-									username,
-									") مع أصدقائك ليعثروا عليك بسهولة في جهات الاتصال."
-								]
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-						initial: {
-							opacity: 0,
-							y: 20
-						},
-						animate: {
-							opacity: 1,
-							y: 0
-						},
-						transition: {
-							delay: .4,
-							type: "spring",
-							stiffness: 200,
-							damping: 20
-						},
-						className: "grid grid-cols-2 gap-4",
-						children: quickActions.map((action, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
-							whileHover: {
-								y: -5,
-								boxShadow: "0 16px 32px -8px rgba(0,0,0,0.15)"
-							},
-							whileTap: { scale: .95 },
-							onClick: action.onClick,
-							className: "relative overflow-hidden rounded-2xl p-5 bg-white border border-gray-100/80 shadow-sm hover:shadow-lg transition-all text-right group",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-purple-500/0 via-transparent to-blue-500/0 group-hover:from-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "relative flex flex-col gap-3",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: `w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-md group-hover:shadow-lg transition-all group-hover:scale-110`,
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(action.icon, { className: "w-6 h-6 text-white" })
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "font-bold text-gray-800 text-sm",
-									children: action.label
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-gray-500 mt-0.5",
-									children: action.desc
-								})] })]
-							})]
-						}, action.label))
-					})
-				]
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+			initial: {
+				opacity: 0,
+				y: -20
+			},
+			animate: {
+				opacity: 1,
+				y: 0
+			},
+			className: "sticky top-0 z-10 backdrop-blur-xl bg-white/60 border-b border-gray-200/30 px-5 py-3 text-center shadow-sm",
+			style: { paddingTop: "max(0.75rem, env(safe-area-inset-top))" },
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+				className: "text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
+				children: "LinkUp"
 			})
-		]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex-1 flex flex-col items-center pt-12 px-5",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					initial: {
+						scale: 0,
+						rotate: -10
+					},
+					animate: {
+						scale: 1,
+						rotate: 0
+					},
+					transition: {
+						type: "spring",
+						stiffness: 200,
+						damping: 15,
+						delay: .1
+					},
+					className: "mb-6",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
+						className: "w-28 h-28 border-4 border-white shadow-2xl ring-4 ring-purple-500/10",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
+							src: user?.photoURL,
+							className: "object-cover"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
+							className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white text-4xl font-bold",
+							children: displayName.charAt(0)
+						})]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.h2, {
+					initial: {
+						opacity: 0,
+						y: 10
+					},
+					animate: {
+						opacity: 1,
+						y: 0
+					},
+					transition: { delay: .2 },
+					className: "text-2xl font-black text-gray-800 mb-10",
+					children: displayName
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+					initial: {
+						opacity: 0,
+						y: 20
+					},
+					animate: {
+						opacity: 1,
+						y: 0
+					},
+					transition: {
+						delay: .3,
+						type: "spring",
+						stiffness: 200,
+						damping: 20
+					},
+					className: "w-full max-w-md bg-white rounded-2xl p-5 shadow-sm border border-gray-100/80 mb-6",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center justify-between mb-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								className: "text-sm font-bold text-gray-800",
+								children: "اسم المستخدم الخاص بك"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								onClick: () => setIdVisible(!idVisible),
+								className: "text-xs text-gray-500 hover:text-purple-600 font-medium flex items-center gap-1 transition-colors",
+								children: [idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" }), idVisible ? "إخفاء" : "إظهار"]
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 border border-gray-200 flex items-center justify-between group transition-all hover:shadow-md",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("code", {
+								className: "text-lg font-mono text-purple-700 font-bold truncate flex-1 text-right select-all dir-ltr",
+								children: ["@", idVisible ? userHandle : "••••••••"]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+								whileHover: { scale: 1.05 },
+								whileTap: { scale: .9 },
+								onClick: handleCopy,
+								disabled: !username || username === "غير محدد",
+								className: "mr-3 p-3 rounded-xl bg-purple-500 text-white hover:bg-purple-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md",
+								children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-5 h-5" })
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "text-[11px] text-gray-500 mt-3 text-center font-medium",
+							children: [
+								"شارك اسم المستخدم (@",
+								username,
+								") مع أصدقائك ليعثروا عليك بسهولة في جهات الاتصال."
+							]
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					initial: {
+						opacity: 0,
+						y: 20
+					},
+					animate: {
+						opacity: 1,
+						y: 0
+					},
+					transition: {
+						delay: .45,
+						type: "spring",
+						stiffness: 200,
+						damping: 20
+					},
+					className: "w-full max-w-md grid grid-cols-2 gap-4",
+					children: quickActions.map((action) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+						whileHover: {
+							y: -5,
+							boxShadow: "0 16px 32px -8px rgba(0,0,0,0.15)"
+						},
+						whileTap: { scale: .95 },
+						onClick: action.onClick,
+						className: "relative overflow-hidden rounded-2xl p-5 bg-white border border-gray-100/80 shadow-sm hover:shadow-lg transition-all text-right group",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-purple-500/0 via-transparent to-blue-500/0 group-hover:from-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative flex flex-col gap-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: `w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-md group-hover:shadow-lg transition-all group-hover:scale-110`,
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(action.icon, { className: "w-6 h-6 text-white" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-800 text-sm",
+								children: action.label
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-500 mt-0.5",
+								children: action.desc
+							})] })]
+						})]
+					}, action.label))
+				})
+			]
+		})]
 	});
 }
 //#endregion
