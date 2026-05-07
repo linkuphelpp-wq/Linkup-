@@ -66396,18 +66396,22 @@ function MainMenuScreen({ onNavigate, username }) {
 		desc: "إدارة القائمة",
 		icon: Users,
 		onClick: () => onNavigate?.("contacts"),
-		gradient: "from-cyan-500 to-blue-600",
-		shadowColor: "shadow-cyan-200"
+		gradient: "from-blue-500 to-cyan-500",
+		shadowColor: "shadow-blue-200",
+		lightBg: "bg-blue-50",
+		iconColor: "text-blue-600"
 	}, {
 		label: "الإعدادات",
 		desc: "تخصيص التطبيق",
 		icon: Settings,
 		onClick: () => onNavigate?.("settings"),
-		gradient: "from-violet-500 to-purple-600",
-		shadowColor: "shadow-violet-200"
+		gradient: "from-purple-500 to-indigo-500",
+		shadowColor: "shadow-purple-200",
+		lightBg: "bg-purple-50",
+		iconColor: "text-purple-600"
 	}];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-white to-rose-50 pb-32 text-right overflow-hidden",
+		className: "min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right overflow-hidden",
 		dir: "rtl",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -66463,10 +66467,11 @@ function MainMenuScreen({ onNavigate, username }) {
 					opacity: 1,
 					y: 0
 				},
-				className: "sticky top-0 z-20 backdrop-blur-xl bg-white/60 border-b border-white/40 px-5 pt-12 pb-4 text-center shadow-sm",
+				className: "sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-gray-200/60 px-5 pt-12 pb-4 text-center shadow-sm",
+				style: { paddingTop: "calc(1rem + env(safe-area-inset-top))" },
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center justify-center gap-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-6 h-6 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-6 h-6 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 						className: "text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
 						children: "LinkUp"
 					})]
@@ -66476,59 +66481,70 @@ function MainMenuScreen({ onNavigate, username }) {
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative z-10 flex-1 flex flex-col px-5 py-6 space-y-8 max-w-lg mx-auto w-full",
+				className: "relative z-10 flex-1 flex flex-col px-4 py-8 space-y-8 max-w-lg mx-auto w-full",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 						initial: {
 							opacity: 0,
-							y: 20
+							y: 30
 						},
 						animate: {
 							opacity: 1,
 							y: 0
 						},
 						transition: {
-							delay: .1,
+							delay: .15,
 							type: "spring",
-							stiffness: 150,
-							damping: 15
+							stiffness: 200,
+							damping: 20
 						},
-						whileHover: { y: -5 },
-						className: "relative bg-white/70 backdrop-blur-md rounded-3xl p-6 pt-14 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5),0_20px_40px_-12px_rgba(0,0,0,0.1)] border border-white/50 mt-4",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "absolute -top-12 left-1/2 -translate-x-1/2",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						className: "relative bg-white rounded-3xl shadow-sm border border-gray-100/80 overflow-hidden",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 left-0 w-full h-20 bg-gradient-to-r from-purple-500/5 to-blue-500/5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative flex flex-col items-center pt-16 pb-8 px-6",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "absolute -top-16 left-1/2 -translate-x-1/2",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+									initial: {
+										scale: 0,
+										rotate: -180
+									},
+									animate: {
+										scale: 1,
+										rotate: 0
+									},
+									transition: {
+										delay: .3,
+										type: "spring",
+										stiffness: 200,
+										damping: 15
+									},
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
+										className: "w-28 h-28 border-4 border-white shadow-xl ring-4 ring-purple-500/10 mx-auto",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
+											src: user?.photoURL,
+											className: "object-cover"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
+											className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white text-4xl font-bold",
+											children: displayName.charAt(0)
+										})]
+									})
+								})
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 								initial: {
-									scale: 0,
-									rotate: -180
+									opacity: 0,
+									y: 10
 								},
 								animate: {
-									scale: 1,
-									rotate: 0
+									opacity: 1,
+									y: 0
 								},
-								transition: {
-									delay: .3,
-									type: "spring",
-									stiffness: 200,
-									damping: 15
-								},
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
-									className: "w-24 h-24 border-4 border-white shadow-xl ring-4 ring-purple-500/10",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
-										src: user?.photoURL,
-										className: "object-cover"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-										className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white text-3xl font-bold",
-										children: displayName.charAt(0)
-									})]
+								transition: { delay: .4 },
+								className: "text-center mt-6",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+									className: "text-2xl font-black text-gray-900",
+									children: displayName
 								})
-							})
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "mt-2 text-center",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-								className: "text-2xl font-bold text-gray-800",
-								children: displayName
-							})
+							})]
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
@@ -66541,81 +66557,85 @@ function MainMenuScreen({ onNavigate, username }) {
 							y: 0
 						},
 						transition: {
-							delay: .2,
+							delay: .25,
 							type: "spring",
-							stiffness: 150,
-							damping: 15
+							stiffness: 200,
+							damping: 20
 						},
-						className: "bg-white/70 backdrop-blur-md rounded-2xl p-4 border border-white/50 shadow-lg",
+						className: "bg-white rounded-2xl p-5 shadow-sm border border-gray-100/80 hover:shadow-md transition-all",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center justify-between mb-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-sm font-bold text-gray-600",
-									children: "اسم المستخدم"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								className: "flex items-center justify-between mb-3",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+									className: "text-sm font-bold text-gray-800",
+									children: "اسم المستخدم الخاص بك"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 									onClick: () => setIdVisible(!idVisible),
-									className: "text-gray-400 hover:text-purple-500 transition-colors",
-									children: idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
+									className: "text-xs text-gray-500 hover:text-purple-600 font-medium flex items-center gap-1 transition-colors",
+									children: [idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" }), idVisible ? "إخفاء" : "إظهار"]
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-3 border border-gray-100",
+								className: "bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 border border-gray-200 flex items-center justify-between group transition-all hover:shadow-md",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("code", {
-									className: "flex-1 text-lg font-mono text-purple-700 font-bold tracking-wider dir-ltr text-left",
+									className: "text-lg font-mono text-purple-700 font-bold truncate flex-1 text-right select-all dir-ltr",
 									children: ["@", idVisible ? userHandle : "••••••••"]
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+									whileHover: { scale: 1.05 },
 									whileTap: { scale: .9 },
 									onClick: handleCopy,
 									disabled: !username || username === "غير محدد",
-									className: "mr-2 p-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 shadow-md disabled:opacity-50",
+									className: "mr-3 p-3 rounded-xl bg-purple-500 text-white hover:bg-purple-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md",
 									children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-5 h-5" })
 								})]
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-[10px] text-gray-400 mt-2 text-center",
-								children: "شارك المعرف للتواصل السريع"
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-[11px] text-gray-500 mt-3 text-center font-medium",
+								children: [
+									"شارك اسم المستخدم (@",
+									username,
+									") مع أصدقائك ليعثروا عليك بسهولة في جهات الاتصال."
+								]
 							})
 						]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "grid grid-cols-2 gap-4 mt-4",
-						children: quickActions.map((action, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
-							initial: {
-								opacity: 0,
-								x: idx === 0 ? -20 : 20
-							},
-							animate: {
-								opacity: 1,
-								x: 0
-							},
-							transition: {
-								delay: .4 + idx * .1,
-								type: "spring",
-								stiffness: 180,
-								damping: 18
-							},
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						initial: {
+							opacity: 0,
+							y: 20
+						},
+						animate: {
+							opacity: 1,
+							y: 0
+						},
+						transition: {
+							delay: .4,
+							type: "spring",
+							stiffness: 200,
+							damping: 20
+						},
+						className: "grid grid-cols-2 gap-4",
+						children: quickActions.map((action, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
 							whileHover: {
-								scale: 1.03,
-								y: -3
+								y: -5,
+								boxShadow: "0 16px 32px -8px rgba(0,0,0,0.15)"
 							},
-							whileTap: { scale: .97 },
+							whileTap: { scale: .95 },
 							onClick: action.onClick,
-							className: `relative flex flex-col items-center gap-3 p-5 rounded-2xl bg-gradient-to-br ${action.gradient} text-white shadow-lg ${action.shadowColor} transition-all`,
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(action.icon, { className: "w-8 h-8" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "text-center",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "font-bold text-sm",
-										children: action.label
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-[10px] opacity-80",
-										children: action.desc
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-white opacity-0 hover:opacity-10 transition-opacity rounded-2xl" })
-							]
+							className: "relative overflow-hidden rounded-2xl p-5 bg-white border border-gray-100/80 shadow-sm hover:shadow-lg transition-all text-right group",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-purple-500/0 via-transparent to-blue-500/0 group-hover:from-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "relative flex flex-col gap-3",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: `w-12 h-12 rounded-xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-md group-hover:shadow-lg transition-all group-hover:scale-110`,
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(action.icon, { className: "w-6 h-6 text-white" })
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "font-bold text-gray-800 text-sm",
+									children: action.label
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-xs text-gray-500 mt-0.5",
+									children: action.desc
+								})] })]
+							})]
 						}, action.label))
 					})
 				]
