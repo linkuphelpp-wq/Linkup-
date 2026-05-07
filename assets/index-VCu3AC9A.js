@@ -59059,7 +59059,8 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32",
+		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right",
+		dir: "rtl",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				initial: {
@@ -59263,7 +59264,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				style: { paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" },
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => window.history.back(),
+						onClick: onBack,
 						className: "p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-6 h-6 text-gray-700" })
 					}),
@@ -72952,6 +72953,29 @@ function App() {
 		onAccept: handleAcceptIncoming,
 		onReject: handleRejectIncoming
 	});
+	const pagesWithOwnHeader = [
+		"atheer",
+		"about",
+		"privacy",
+		"support",
+		"createGroup",
+		"data",
+		"lock",
+		"changeEmail",
+		"resetPasswordProfile",
+		"forgotpassword",
+		"resetpassword",
+		"contacts",
+		"chat",
+		"groupChat",
+		"groupInfo",
+		"settings",
+		"mainMenu",
+		"notifications",
+		"usermanagement",
+		"groups",
+		"admin"
+	];
 	const headerTitle = {
 		mainMenu: "القائمة الرئيسية",
 		profile: "الملف الشخصي",
@@ -72976,24 +73000,6 @@ function App() {
 		groupChat: "محادثة المجموعة",
 		groupInfo: "معلومات المجموعة"
 	}[currentScreen] || "LinkUp";
-	const pagesWithOwnHeader = [
-		"atheer",
-		"about",
-		"privacy",
-		"support",
-		"createGroup",
-		"data",
-		"lock",
-		"changeEmail",
-		"resetPasswordProfile",
-		"forgotpassword",
-		"resetpassword",
-		"contacts",
-		"chat",
-		"groupChat",
-		"groupInfo",
-		"settings"
-	];
 	const renderContent = () => {
 		if (currentScreen === "mainMenu") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MainMenuScreen, {
 			onNavigate: navigateTo,
@@ -73044,7 +73050,8 @@ function App() {
 			onSelectFontFamily: setFontFamily,
 			isAdmin,
 			onOpenAdmin: () => navigateTo("admin"),
-			onOpenPartner: () => navigateTo("partner")
+			onOpenPartner: () => navigateTo("partner"),
+			onBack: handleBack
 		});
 		if (currentScreen === "contacts") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContactsScreen, {
 			onBack: handleBack,
@@ -73105,7 +73112,8 @@ function App() {
 		"privacy",
 		"terms",
 		"forgotpassword",
-		"resetpassword"
+		"resetpassword",
+		"settings"
 	].includes(currentScreen);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DisplayNameModal, {
@@ -73140,7 +73148,7 @@ function App() {
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "min-h-screen flex flex-col bg-slate-50/50 text-gray-900",
 			children: [
-				!pagesWithOwnHeader.includes(currentScreen) && currentScreen !== "mainMenu" && currentScreen !== "chat" && currentScreen !== "notifications" && currentScreen !== "usermanagement" && currentScreen !== "groups" && currentScreen !== "groupChat" && currentScreen !== "groupInfo" && currentScreen !== "settings" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
+				!pagesWithOwnHeader.includes(currentScreen) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
 					className: "fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50 px-5 py-3 flex items-center shadow-sm",
 					style: { paddingTop: "max(0.75rem, env(safe-area-inset-top))" },
 					children: [
