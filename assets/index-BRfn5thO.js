@@ -58987,7 +58987,7 @@ var Section = ({ title, children, delay = 0, icon: Icon }) => /* @__PURE__ */ (0
 		children
 	})]
 });
-function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile, onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker, fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner }) {
+function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile, onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker, fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner, onBack }) {
 	const [showFontModal, setShowFontModal] = (0, import_react.useState)(false);
 	const [showSizeModal, setShowSizeModal] = (0, import_react.useState)(false);
 	const [showResetModal, setShowResetModal] = (0, import_react.useState)(false);
@@ -59059,7 +59059,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-24",
+		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				initial: {
@@ -59070,25 +59070,10 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 					opacity: 1,
 					y: 0
 				},
-				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-14 pb-4 text-center shadow-sm",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: () => window.history.back(),
-							className: "p-2 rounded-full hover:bg-gray-100",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-6 h-6 text-gray-700" })
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-							className: "text-2xl font-black text-gray-800 tracking-tight flex-1",
-							children: "الإعدادات"
-						}),
-						isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: onOpenAdmin,
-							className: "p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-6 h-6" })
-						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
-					]
+				className: "sticky top-0 z-20 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-14 pb-4 text-center shadow-sm",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+					className: "text-2xl font-black text-gray-800 tracking-tight",
+					children: "الإعدادات"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-sm text-gray-500 mt-1",
 					children: "تحكم كامل في تطبيقك كما تحب"
@@ -59240,7 +59225,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 							stiffness: 200,
 							damping: 20
 						},
-						className: "grid grid-cols-3 gap-3",
+						className: "grid grid-cols-3 gap-3 mt-4",
 						children: [
 							{
 								label: "من هو أثير؟",
@@ -59271,6 +59256,26 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 							})]
 						}, item.label))
 					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-gray-200/60 px-5 py-2 flex items-center justify-between shadow-lg",
+				style: { paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" },
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => window.history.back(),
+						className: "p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-6 h-6 text-gray-700" })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-sm font-medium text-gray-500",
+						children: "القائمة"
+					}),
+					isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: onOpenAdmin,
+						className: "p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 active:scale-90 transition-all",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-6 h-6" })
+					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
