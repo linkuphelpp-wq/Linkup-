@@ -10109,10 +10109,6 @@ var ChevronDown = createLucideIcon("chevron-down", [["path", {
 	d: "m6 9 6 6 6-6",
 	key: "qrunsl"
 }]]);
-var ChevronLeft = createLucideIcon("chevron-left", [["path", {
-	d: "m15 18-6-6 6-6",
-	key: "1wnfg3"
-}]]);
 var ChevronRight = createLucideIcon("chevron-right", [["path", {
 	d: "m9 18 6-6-6-6",
 	key: "mthhwq"
@@ -48694,552 +48690,6 @@ function HomeScreen({ myId, myUsername, user }) {
 	});
 }
 //#endregion
-//#region node_modules/@radix-ui/react-context/dist/index.mjs
-function createContextScope$1(scopeName, createContextScopeDeps = []) {
-	let defaultContexts = [];
-	function createContext3(rootComponentName, defaultContext) {
-		const BaseContext = import_react.createContext(defaultContext);
-		BaseContext.displayName = rootComponentName + "Context";
-		const index = defaultContexts.length;
-		defaultContexts = [...defaultContexts, defaultContext];
-		const Provider = (props) => {
-			const { scope, children, ...context } = props;
-			const Context = scope?.[scopeName]?.[index] || BaseContext;
-			const value = import_react.useMemo(() => context, Object.values(context));
-			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Context.Provider, {
-				value,
-				children
-			});
-		};
-		Provider.displayName = rootComponentName + "Provider";
-		function useContext2(consumerName, scope) {
-			const Context = scope?.[scopeName]?.[index] || BaseContext;
-			const context = import_react.useContext(Context);
-			if (context) return context;
-			if (defaultContext !== void 0) return defaultContext;
-			throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
-		}
-		return [Provider, useContext2];
-	}
-	const createScope = () => {
-		const scopeContexts = defaultContexts.map((defaultContext) => {
-			return import_react.createContext(defaultContext);
-		});
-		return function useScope(scope) {
-			const contexts = scope?.[scopeName] || scopeContexts;
-			return import_react.useMemo(() => ({ [`__scope${scopeName}`]: {
-				...scope,
-				[scopeName]: contexts
-			} }), [scope, contexts]);
-		};
-	};
-	createScope.scopeName = scopeName;
-	return [createContext3, composeContextScopes$1(createScope, ...createContextScopeDeps)];
-}
-function composeContextScopes$1(...scopes) {
-	const baseScope = scopes[0];
-	if (scopes.length === 1) return baseScope;
-	const createScope = () => {
-		const scopeHooks = scopes.map((createScope2) => ({
-			useScope: createScope2(),
-			scopeName: createScope2.scopeName
-		}));
-		return function useComposedScopes(overrideScopes) {
-			const nextScopes = scopeHooks.reduce((nextScopes2, { useScope, scopeName }) => {
-				const currentScope = useScope(overrideScopes)[`__scope${scopeName}`];
-				return {
-					...nextScopes2,
-					...currentScope
-				};
-			}, {});
-			return import_react.useMemo(() => ({ [`__scope${baseScope.scopeName}`]: nextScopes }), [nextScopes]);
-		};
-	};
-	createScope.scopeName = baseScope.scopeName;
-	return createScope;
-}
-//#endregion
-//#region node_modules/@radix-ui/react-use-callback-ref/dist/index.mjs
-function useCallbackRef$1(callback) {
-	const callbackRef = import_react.useRef(callback);
-	import_react.useEffect(() => {
-		callbackRef.current = callback;
-	});
-	return import_react.useMemo(() => (...args) => callbackRef.current?.(...args), []);
-}
-//#endregion
-//#region node_modules/@radix-ui/react-use-layout-effect/dist/index.mjs
-var useLayoutEffect2 = globalThis?.document ? import_react.useLayoutEffect : () => {};
-//#endregion
-//#region node_modules/@radix-ui/react-primitive/dist/index.mjs
-var import_react_dom = /* @__PURE__ */ __toESM(require_react_dom(), 1);
-var Primitive$4 = [
-	"a",
-	"button",
-	"div",
-	"form",
-	"h2",
-	"h3",
-	"img",
-	"input",
-	"label",
-	"li",
-	"nav",
-	"ol",
-	"p",
-	"select",
-	"span",
-	"svg",
-	"ul"
-].reduce((primitive, node) => {
-	const Slot = /* @__PURE__ */ createSlot$4(`Primitive.${node}`);
-	const Node = import_react.forwardRef((props, forwardedRef) => {
-		const { asChild, ...primitiveProps } = props;
-		const Comp = asChild ? Slot : node;
-		if (typeof window !== "undefined") window[Symbol.for("radix-ui")] = true;
-		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Comp, {
-			...primitiveProps,
-			ref: forwardedRef
-		});
-	});
-	Node.displayName = `Primitive.${node}`;
-	return {
-		...primitive,
-		[node]: Node
-	};
-}, {});
-//#endregion
-//#region node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.production.js
-/**
-* @license React
-* use-sync-external-store-shim.production.js
-*
-* Copyright (c) Meta Platforms, Inc. and affiliates.
-*
-* This source code is licensed under the MIT license found in the
-* LICENSE file in the root directory of this source tree.
-*/
-var require_use_sync_external_store_shim_production = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var React = require_react();
-	function is(x, y) {
-		return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
-	}
-	var objectIs = "function" === typeof Object.is ? Object.is : is, useState = React.useState, useEffect = React.useEffect, useLayoutEffect = React.useLayoutEffect, useDebugValue = React.useDebugValue;
-	function useSyncExternalStore$2(subscribe, getSnapshot) {
-		var value = getSnapshot(), _useState = useState({ inst: {
-			value,
-			getSnapshot
-		} }), inst = _useState[0].inst, forceUpdate = _useState[1];
-		useLayoutEffect(function() {
-			inst.value = value;
-			inst.getSnapshot = getSnapshot;
-			checkIfSnapshotChanged(inst) && forceUpdate({ inst });
-		}, [
-			subscribe,
-			value,
-			getSnapshot
-		]);
-		useEffect(function() {
-			checkIfSnapshotChanged(inst) && forceUpdate({ inst });
-			return subscribe(function() {
-				checkIfSnapshotChanged(inst) && forceUpdate({ inst });
-			});
-		}, [subscribe]);
-		useDebugValue(value);
-		return value;
-	}
-	function checkIfSnapshotChanged(inst) {
-		var latestGetSnapshot = inst.getSnapshot;
-		inst = inst.value;
-		try {
-			var nextValue = latestGetSnapshot();
-			return !objectIs(inst, nextValue);
-		} catch (error) {
-			return !0;
-		}
-	}
-	function useSyncExternalStore$1(subscribe, getSnapshot) {
-		return getSnapshot();
-	}
-	var shim = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? useSyncExternalStore$1 : useSyncExternalStore$2;
-	exports.useSyncExternalStore = void 0 !== React.useSyncExternalStore ? React.useSyncExternalStore : shim;
-}));
-//#endregion
-//#region node_modules/@radix-ui/react-use-is-hydrated/dist/index.mjs
-var import_shim = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_use_sync_external_store_shim_production();
-})))();
-function useIsHydrated() {
-	return (0, import_shim.useSyncExternalStore)(subscribe, () => true, () => false);
-}
-function subscribe() {
-	return () => {};
-}
-//#endregion
-//#region node_modules/@radix-ui/react-avatar/dist/index.mjs
-var AVATAR_NAME = "Avatar";
-var [createAvatarContext, createAvatarScope] = createContextScope$1(AVATAR_NAME);
-var [AvatarProvider, useAvatarContext] = createAvatarContext(AVATAR_NAME);
-var Avatar$1 = import_react.forwardRef((props, forwardedRef) => {
-	const { __scopeAvatar, ...avatarProps } = props;
-	const [imageLoadingStatus, setImageLoadingStatus] = import_react.useState("idle");
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarProvider, {
-		scope: __scopeAvatar,
-		imageLoadingStatus,
-		onImageLoadingStatusChange: setImageLoadingStatus,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$4.span, {
-			...avatarProps,
-			ref: forwardedRef
-		})
-	});
-});
-Avatar$1.displayName = AVATAR_NAME;
-var IMAGE_NAME = "AvatarImage";
-var AvatarImage$1 = import_react.forwardRef((props, forwardedRef) => {
-	const { __scopeAvatar, src, onLoadingStatusChange = () => {}, ...imageProps } = props;
-	const context = useAvatarContext(IMAGE_NAME, __scopeAvatar);
-	const imageLoadingStatus = useImageLoadingStatus(src, imageProps);
-	const handleLoadingStatusChange = useCallbackRef$1((status) => {
-		onLoadingStatusChange(status);
-		context.onImageLoadingStatusChange(status);
-	});
-	useLayoutEffect2(() => {
-		if (imageLoadingStatus !== "idle") handleLoadingStatusChange(imageLoadingStatus);
-	}, [imageLoadingStatus, handleLoadingStatusChange]);
-	return imageLoadingStatus === "loaded" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$4.img, {
-		...imageProps,
-		ref: forwardedRef,
-		src
-	}) : null;
-});
-AvatarImage$1.displayName = IMAGE_NAME;
-var FALLBACK_NAME = "AvatarFallback";
-var AvatarFallback$1 = import_react.forwardRef((props, forwardedRef) => {
-	const { __scopeAvatar, delayMs, ...fallbackProps } = props;
-	const context = useAvatarContext(FALLBACK_NAME, __scopeAvatar);
-	const [canRender, setCanRender] = import_react.useState(delayMs === void 0);
-	import_react.useEffect(() => {
-		if (delayMs !== void 0) {
-			const timerId = window.setTimeout(() => setCanRender(true), delayMs);
-			return () => window.clearTimeout(timerId);
-		}
-	}, [delayMs]);
-	return canRender && context.imageLoadingStatus !== "loaded" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$4.span, {
-		...fallbackProps,
-		ref: forwardedRef
-	}) : null;
-});
-AvatarFallback$1.displayName = FALLBACK_NAME;
-function resolveLoadingStatus(image, src) {
-	if (!image) return "idle";
-	if (!src) return "error";
-	if (image.src !== src) image.src = src;
-	return image.complete && image.naturalWidth > 0 ? "loaded" : "loading";
-}
-function useImageLoadingStatus(src, { referrerPolicy, crossOrigin }) {
-	const isHydrated = useIsHydrated();
-	const imageRef = import_react.useRef(null);
-	const image = (() => {
-		if (!isHydrated) return null;
-		if (!imageRef.current) imageRef.current = new window.Image();
-		return imageRef.current;
-	})();
-	const [loadingStatus, setLoadingStatus] = import_react.useState(() => resolveLoadingStatus(image, src));
-	useLayoutEffect2(() => {
-		setLoadingStatus(resolveLoadingStatus(image, src));
-	}, [image, src]);
-	useLayoutEffect2(() => {
-		const updateStatus = (status) => () => {
-			setLoadingStatus(status);
-		};
-		if (!image) return;
-		const handleLoad = updateStatus("loaded");
-		const handleError = updateStatus("error");
-		image.addEventListener("load", handleLoad);
-		image.addEventListener("error", handleError);
-		if (referrerPolicy) image.referrerPolicy = referrerPolicy;
-		if (typeof crossOrigin === "string") image.crossOrigin = crossOrigin;
-		return () => {
-			image.removeEventListener("load", handleLoad);
-			image.removeEventListener("error", handleError);
-		};
-	}, [
-		image,
-		crossOrigin,
-		referrerPolicy
-	]);
-	return loadingStatus;
-}
-var Root$2 = Avatar$1;
-var Image$1 = AvatarImage$1;
-var Fallback = AvatarFallback$1;
-//#endregion
-//#region src/components/ui/avatar.jsx
-var Avatar = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$2, {
-	ref,
-	className: cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className),
-	...props
-}));
-Avatar.displayName = Root$2.displayName;
-var AvatarImage = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Image$1, {
-	ref,
-	className: cn("aspect-square h-full w-full", className),
-	...props
-}));
-AvatarImage.displayName = Image$1.displayName;
-var AvatarFallback = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Fallback, {
-	ref,
-	className: cn("flex h-full w-full items-center justify-center rounded-full bg-muted", className),
-	...props
-}));
-AvatarFallback.displayName = Fallback.displayName;
-//#endregion
-//#region src/features/profile/ProfileScreen.jsx
-var ProfileRow = ({ icon: Icon, label, value, onClick, danger }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-	onClick,
-	className: `w-full flex items-center gap-4 p-4 rounded-2xl transition-all text-right group ${danger ? "bg-red-50/50 hover:bg-red-100/80 border border-red-100" : "bg-white hover:bg-gray-50/80 border border-gray-100 shadow-sm"}`,
-	children: [
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: `p-2.5 rounded-xl shrink-0 transition-colors ${danger ? "bg-red-100 text-red-600 group-hover:bg-red-200" : "bg-purple-50 text-purple-600 group-hover:bg-purple-100"}`,
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5" })
-		}),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex-1 min-w-0",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: `text-sm font-bold ${danger ? "text-red-700" : "text-gray-900"}`,
-				children: label
-			}), value && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs text-gray-500 mt-0.5 truncate",
-				children: value
-			})]
-		}),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: `w-4 h-4 shrink-0 transition-transform group-hover:-translate-x-1 ${danger ? "text-red-400" : "text-gray-300"}` })
-	]
-});
-var NameChangeModal = ({ open, onClose, currentName, onSave }) => {
-	const [newName, setNewName] = (0, import_react.useState)(currentName || "");
-	if (!open) return null;
-	const handleSave = () => {
-		if (newName.trim()) {
-			onSave(newName.trim());
-			onClose();
-		}
-	};
-	const handleKeyDown = (e) => {
-		if (e.key === "Enter") handleSave();
-		if (e.key === "Escape") onClose();
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200",
-		onClick: onClose,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-200 border border-gray-100",
-			onClick: (e) => e.stopPropagation(),
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center justify-between mb-6",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-					className: "text-xl font-bold text-gray-900",
-					children: "تغيير الاسم"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: onClose,
-					className: "w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors",
-					children: ["            ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-4 h-4 text-gray-600" })]
-				})]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "space-y-4",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-					className: "text-sm font-bold text-gray-700 mb-2 block",
-					children: "الاسم الجديد"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-					value: newName,
-					onChange: (e) => setNewName(e.target.value),
-					onKeyDown: handleKeyDown,
-					placeholder: "أدخل اسمك الجديد",
-					className: "h-12 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200",
-					autoFocus: true
-				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex gap-3 pt-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						variant: "outline",
-						onClick: onClose,
-						className: "flex-1 h-11 rounded-xl border-gray-200 text-gray-700 hover:bg-gray-50",
-						children: "إلغاء"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						onClick: handleSave,
-						disabled: !newName.trim(),
-						className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white font-bold shadow-md shadow-purple-500/20 transition-all active:scale-[0.98] disabled:opacity-50",
-						children: "حفظ"
-					})]
-				})]
-			})]
-		})
-	});
-};
-function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onResetPassword, onSwitchAccount }) {
-	const [showDelete, setShowDelete] = (0, import_react.useState)(false);
-	const [deleting, setDeleting] = (0, import_react.useState)(false);
-	const [error, setError] = (0, import_react.useState)("");
-	const [showNameModal, setShowNameModal] = (0, import_react.useState)(false);
-	const handleDelete = async () => {
-		setDeleting(true);
-		setError("");
-		try {
-			const u = auth.currentUser;
-			if (!u) throw new Error("لا يوجد مستخدم");
-			await deleteDoc(doc(db, "users", u.uid));
-			const savedU = localStorage.getItem("my_username");
-			if (savedU) await deleteDoc(doc(db, "usernames", savedU)).catch(() => {});
-			await deleteUser(u);
-			localStorage.clear();
-			sessionStorage.clear();
-			await signOut(auth);
-		} catch (e) {
-			setError(e.code === "auth/requires-recent-login" ? "يجب إعادة تسجيل الدخول أولاً" : "تعذر الحذف");
-		} finally {
-			setDeleting(false);
-		}
-	};
-	const displayName = user?.displayName || user?.email?.split("@")[0] || "مستخدم";
-	const email = user?.email || "";
-	const username = localStorage.getItem("my_username") || "";
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-slate-50/50 pb-32",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "bg-white px-5 pt-14 pb-8 rounded-b-3xl shadow-sm text-center relative overflow-hidden",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-purple-600 to-blue-500 opacity-10" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "relative inline-block mb-4",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
-							className: "w-28 h-28 border-4 border-white shadow-xl ring-4 ring-purple-500/10 mx-auto",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
-								src: user?.photoURL,
-								className: "object-cover"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-								className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white text-4xl font-bold",
-								children: displayName.charAt(0)
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: () => setShowNameModal(true),
-							className: "absolute bottom-1 right-1 w-9 h-9 bg-white text-purple-600 rounded-full flex items-center justify-center shadow-lg border border-gray-100 hover:bg-purple-50 active:scale-90 transition-all",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-4 h-4" })
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "text-2xl font-black text-gray-900",
-						children: displayName
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-						className: "text-sm text-gray-500 mt-1 font-medium",
-						children: ["@", username || "غير محدد"]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "mt-4 inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-3.5 h-3.5" }), " حساب نشط"]
-					})
-				]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-				className: "flex-1 overflow-y-auto px-5 pt-6 space-y-6 pb-8",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "space-y-3",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-xs font-bold text-gray-400 uppercase tracking-wider px-1 mb-2",
-								children: "المعلومات الأساسية"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
-								icon: User$1,
-								label: "الاسم المعروض",
-								value: displayName,
-								onClick: () => setShowNameModal(true)
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
-								icon: Mail,
-								label: "البريد الإلكتروني",
-								value: email,
-								onClick: onChangeEmail
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
-								icon: Lock,
-								label: "كلمة المرور",
-								value: "••••••••",
-								onClick: onResetPassword
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "space-y-3",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-xs font-bold text-gray-400 uppercase tracking-wider px-1 mb-2",
-								children: "إدارة الحساب"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
-								icon: Smartphone,
-								label: "الدخول بحساب آخر",
-								onClick: onSwitchAccount
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
-								icon: LogOut,
-								label: "تسجيل الخروج",
-								onClick: onLogout
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("section", {
-						className: "pt-4 border-t border-gray-200",
-						children: !showDelete ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-							onClick: () => setShowDelete(true),
-							className: "w-full flex items-center justify-center gap-2 py-3.5 text-red-500 font-bold text-sm hover:bg-red-50 rounded-2xl transition-colors border border-transparent hover:border-red-100",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }), " حذف الحساب نهائياً"]
-						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "bg-red-50 border border-red-100 rounded-2xl p-5 space-y-4 text-center shadow-sm",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-6 h-6 text-red-600" })
-								}),
-								"              ",
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-red-800 font-bold text-sm",
-									children: "هل أنت متأكد؟ هذا الإجراء لا يمكن التراجع عنه."
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex gap-3",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-										variant: "outline",
-										onClick: () => setShowDelete(false),
-										className: "flex-1 h-11 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50",
-										children: "إلغاء"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-										onClick: handleDelete,
-										disabled: deleting,
-										className: "flex-1 h-11 rounded-xl bg-red-600 hover:bg-red-700 text-white shadow-md shadow-red-500/20",
-										children: deleting ? "جارٍ..." : "تأكيد الحذف"
-									})]
-								}),
-								error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-red-500 text-xs font-medium",
-									children: error
-								})
-							]
-						})
-					})
-				]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NameChangeModal, {
-				open: showNameModal,
-				onClose: () => setShowNameModal(false),
-				currentName: displayName,
-				onSave: (name) => onUpdateProfile?.({ displayName: name })
-			})
-		]
-	});
-}
-//#endregion
 //#region node_modules/framer-motion/dist/es/context/LayoutGroupContext.mjs
 var LayoutGroupContext = (0, import_react.createContext)({});
 //#endregion
@@ -58861,6 +58311,772 @@ var motion = /* @__PURE__ */ createMotionProxy({
 	...drag,
 	...layout
 }, createDomVisualElement);
+//#endregion
+//#region node_modules/@radix-ui/react-context/dist/index.mjs
+function createContextScope$1(scopeName, createContextScopeDeps = []) {
+	let defaultContexts = [];
+	function createContext3(rootComponentName, defaultContext) {
+		const BaseContext = import_react.createContext(defaultContext);
+		BaseContext.displayName = rootComponentName + "Context";
+		const index = defaultContexts.length;
+		defaultContexts = [...defaultContexts, defaultContext];
+		const Provider = (props) => {
+			const { scope, children, ...context } = props;
+			const Context = scope?.[scopeName]?.[index] || BaseContext;
+			const value = import_react.useMemo(() => context, Object.values(context));
+			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Context.Provider, {
+				value,
+				children
+			});
+		};
+		Provider.displayName = rootComponentName + "Provider";
+		function useContext2(consumerName, scope) {
+			const Context = scope?.[scopeName]?.[index] || BaseContext;
+			const context = import_react.useContext(Context);
+			if (context) return context;
+			if (defaultContext !== void 0) return defaultContext;
+			throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
+		}
+		return [Provider, useContext2];
+	}
+	const createScope = () => {
+		const scopeContexts = defaultContexts.map((defaultContext) => {
+			return import_react.createContext(defaultContext);
+		});
+		return function useScope(scope) {
+			const contexts = scope?.[scopeName] || scopeContexts;
+			return import_react.useMemo(() => ({ [`__scope${scopeName}`]: {
+				...scope,
+				[scopeName]: contexts
+			} }), [scope, contexts]);
+		};
+	};
+	createScope.scopeName = scopeName;
+	return [createContext3, composeContextScopes$1(createScope, ...createContextScopeDeps)];
+}
+function composeContextScopes$1(...scopes) {
+	const baseScope = scopes[0];
+	if (scopes.length === 1) return baseScope;
+	const createScope = () => {
+		const scopeHooks = scopes.map((createScope2) => ({
+			useScope: createScope2(),
+			scopeName: createScope2.scopeName
+		}));
+		return function useComposedScopes(overrideScopes) {
+			const nextScopes = scopeHooks.reduce((nextScopes2, { useScope, scopeName }) => {
+				const currentScope = useScope(overrideScopes)[`__scope${scopeName}`];
+				return {
+					...nextScopes2,
+					...currentScope
+				};
+			}, {});
+			return import_react.useMemo(() => ({ [`__scope${baseScope.scopeName}`]: nextScopes }), [nextScopes]);
+		};
+	};
+	createScope.scopeName = baseScope.scopeName;
+	return createScope;
+}
+//#endregion
+//#region node_modules/@radix-ui/react-use-callback-ref/dist/index.mjs
+function useCallbackRef$1(callback) {
+	const callbackRef = import_react.useRef(callback);
+	import_react.useEffect(() => {
+		callbackRef.current = callback;
+	});
+	return import_react.useMemo(() => (...args) => callbackRef.current?.(...args), []);
+}
+//#endregion
+//#region node_modules/@radix-ui/react-use-layout-effect/dist/index.mjs
+var useLayoutEffect2 = globalThis?.document ? import_react.useLayoutEffect : () => {};
+//#endregion
+//#region node_modules/@radix-ui/react-primitive/dist/index.mjs
+var import_react_dom = /* @__PURE__ */ __toESM(require_react_dom(), 1);
+var Primitive$4 = [
+	"a",
+	"button",
+	"div",
+	"form",
+	"h2",
+	"h3",
+	"img",
+	"input",
+	"label",
+	"li",
+	"nav",
+	"ol",
+	"p",
+	"select",
+	"span",
+	"svg",
+	"ul"
+].reduce((primitive, node) => {
+	const Slot = /* @__PURE__ */ createSlot$4(`Primitive.${node}`);
+	const Node = import_react.forwardRef((props, forwardedRef) => {
+		const { asChild, ...primitiveProps } = props;
+		const Comp = asChild ? Slot : node;
+		if (typeof window !== "undefined") window[Symbol.for("radix-ui")] = true;
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Comp, {
+			...primitiveProps,
+			ref: forwardedRef
+		});
+	});
+	Node.displayName = `Primitive.${node}`;
+	return {
+		...primitive,
+		[node]: Node
+	};
+}, {});
+//#endregion
+//#region node_modules/use-sync-external-store/cjs/use-sync-external-store-shim.production.js
+/**
+* @license React
+* use-sync-external-store-shim.production.js
+*
+* Copyright (c) Meta Platforms, Inc. and affiliates.
+*
+* This source code is licensed under the MIT license found in the
+* LICENSE file in the root directory of this source tree.
+*/
+var require_use_sync_external_store_shim_production = /* @__PURE__ */ __commonJSMin(((exports) => {
+	var React = require_react();
+	function is(x, y) {
+		return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
+	}
+	var objectIs = "function" === typeof Object.is ? Object.is : is, useState = React.useState, useEffect = React.useEffect, useLayoutEffect = React.useLayoutEffect, useDebugValue = React.useDebugValue;
+	function useSyncExternalStore$2(subscribe, getSnapshot) {
+		var value = getSnapshot(), _useState = useState({ inst: {
+			value,
+			getSnapshot
+		} }), inst = _useState[0].inst, forceUpdate = _useState[1];
+		useLayoutEffect(function() {
+			inst.value = value;
+			inst.getSnapshot = getSnapshot;
+			checkIfSnapshotChanged(inst) && forceUpdate({ inst });
+		}, [
+			subscribe,
+			value,
+			getSnapshot
+		]);
+		useEffect(function() {
+			checkIfSnapshotChanged(inst) && forceUpdate({ inst });
+			return subscribe(function() {
+				checkIfSnapshotChanged(inst) && forceUpdate({ inst });
+			});
+		}, [subscribe]);
+		useDebugValue(value);
+		return value;
+	}
+	function checkIfSnapshotChanged(inst) {
+		var latestGetSnapshot = inst.getSnapshot;
+		inst = inst.value;
+		try {
+			var nextValue = latestGetSnapshot();
+			return !objectIs(inst, nextValue);
+		} catch (error) {
+			return !0;
+		}
+	}
+	function useSyncExternalStore$1(subscribe, getSnapshot) {
+		return getSnapshot();
+	}
+	var shim = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? useSyncExternalStore$1 : useSyncExternalStore$2;
+	exports.useSyncExternalStore = void 0 !== React.useSyncExternalStore ? React.useSyncExternalStore : shim;
+}));
+//#endregion
+//#region node_modules/@radix-ui/react-use-is-hydrated/dist/index.mjs
+var import_shim = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_use_sync_external_store_shim_production();
+})))();
+function useIsHydrated() {
+	return (0, import_shim.useSyncExternalStore)(subscribe, () => true, () => false);
+}
+function subscribe() {
+	return () => {};
+}
+//#endregion
+//#region node_modules/@radix-ui/react-avatar/dist/index.mjs
+var AVATAR_NAME = "Avatar";
+var [createAvatarContext, createAvatarScope] = createContextScope$1(AVATAR_NAME);
+var [AvatarProvider, useAvatarContext] = createAvatarContext(AVATAR_NAME);
+var Avatar$1 = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeAvatar, ...avatarProps } = props;
+	const [imageLoadingStatus, setImageLoadingStatus] = import_react.useState("idle");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarProvider, {
+		scope: __scopeAvatar,
+		imageLoadingStatus,
+		onImageLoadingStatusChange: setImageLoadingStatus,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$4.span, {
+			...avatarProps,
+			ref: forwardedRef
+		})
+	});
+});
+Avatar$1.displayName = AVATAR_NAME;
+var IMAGE_NAME = "AvatarImage";
+var AvatarImage$1 = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeAvatar, src, onLoadingStatusChange = () => {}, ...imageProps } = props;
+	const context = useAvatarContext(IMAGE_NAME, __scopeAvatar);
+	const imageLoadingStatus = useImageLoadingStatus(src, imageProps);
+	const handleLoadingStatusChange = useCallbackRef$1((status) => {
+		onLoadingStatusChange(status);
+		context.onImageLoadingStatusChange(status);
+	});
+	useLayoutEffect2(() => {
+		if (imageLoadingStatus !== "idle") handleLoadingStatusChange(imageLoadingStatus);
+	}, [imageLoadingStatus, handleLoadingStatusChange]);
+	return imageLoadingStatus === "loaded" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$4.img, {
+		...imageProps,
+		ref: forwardedRef,
+		src
+	}) : null;
+});
+AvatarImage$1.displayName = IMAGE_NAME;
+var FALLBACK_NAME = "AvatarFallback";
+var AvatarFallback$1 = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeAvatar, delayMs, ...fallbackProps } = props;
+	const context = useAvatarContext(FALLBACK_NAME, __scopeAvatar);
+	const [canRender, setCanRender] = import_react.useState(delayMs === void 0);
+	import_react.useEffect(() => {
+		if (delayMs !== void 0) {
+			const timerId = window.setTimeout(() => setCanRender(true), delayMs);
+			return () => window.clearTimeout(timerId);
+		}
+	}, [delayMs]);
+	return canRender && context.imageLoadingStatus !== "loaded" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$4.span, {
+		...fallbackProps,
+		ref: forwardedRef
+	}) : null;
+});
+AvatarFallback$1.displayName = FALLBACK_NAME;
+function resolveLoadingStatus(image, src) {
+	if (!image) return "idle";
+	if (!src) return "error";
+	if (image.src !== src) image.src = src;
+	return image.complete && image.naturalWidth > 0 ? "loaded" : "loading";
+}
+function useImageLoadingStatus(src, { referrerPolicy, crossOrigin }) {
+	const isHydrated = useIsHydrated();
+	const imageRef = import_react.useRef(null);
+	const image = (() => {
+		if (!isHydrated) return null;
+		if (!imageRef.current) imageRef.current = new window.Image();
+		return imageRef.current;
+	})();
+	const [loadingStatus, setLoadingStatus] = import_react.useState(() => resolveLoadingStatus(image, src));
+	useLayoutEffect2(() => {
+		setLoadingStatus(resolveLoadingStatus(image, src));
+	}, [image, src]);
+	useLayoutEffect2(() => {
+		const updateStatus = (status) => () => {
+			setLoadingStatus(status);
+		};
+		if (!image) return;
+		const handleLoad = updateStatus("loaded");
+		const handleError = updateStatus("error");
+		image.addEventListener("load", handleLoad);
+		image.addEventListener("error", handleError);
+		if (referrerPolicy) image.referrerPolicy = referrerPolicy;
+		if (typeof crossOrigin === "string") image.crossOrigin = crossOrigin;
+		return () => {
+			image.removeEventListener("load", handleLoad);
+			image.removeEventListener("error", handleError);
+		};
+	}, [
+		image,
+		crossOrigin,
+		referrerPolicy
+	]);
+	return loadingStatus;
+}
+var Root$2 = Avatar$1;
+var Image$1 = AvatarImage$1;
+var Fallback = AvatarFallback$1;
+//#endregion
+//#region src/components/ui/avatar.jsx
+var Avatar = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root$2, {
+	ref,
+	className: cn("relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full", className),
+	...props
+}));
+Avatar.displayName = Root$2.displayName;
+var AvatarImage = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Image$1, {
+	ref,
+	className: cn("aspect-square h-full w-full", className),
+	...props
+}));
+AvatarImage.displayName = Image$1.displayName;
+var AvatarFallback = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Fallback, {
+	ref,
+	className: cn("flex h-full w-full items-center justify-center rounded-full bg-muted", className),
+	...props
+}));
+AvatarFallback.displayName = Fallback.displayName;
+//#endregion
+//#region src/features/profile/ProfileScreen.jsx
+var ProfileRow = ({ icon: Icon, label, value, onClick, danger, color = "purple" }) => {
+	const colorsMap = {
+		purple: "from-purple-500 to-indigo-500 bg-purple-50 text-purple-600",
+		blue: "from-blue-500 to-cyan-500 bg-blue-50 text-blue-600",
+		green: "from-emerald-500 to-teal-500 bg-emerald-50 text-emerald-600",
+		orange: "from-orange-500 to-red-500 bg-orange-50 text-orange-600",
+		red: "from-red-500 to-rose-500 bg-red-50 text-red-600"
+	};
+	const colorSet = danger ? colorsMap.red : colorsMap[color] || colorsMap.purple;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+		whileHover: {
+			y: -3,
+			boxShadow: "0 12px 24px -8px rgba(0,0,0,0.12)"
+		},
+		whileTap: { scale: .97 },
+		onClick,
+		className: "w-full flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-100/80 shadow-sm hover:shadow-md transition-all text-right group overflow-hidden relative",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-purple-500/0 via-transparent to-blue-500/0 group-hover:from-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: `relative p-2.5 rounded-xl bg-gradient-to-br ${colorSet} text-white shadow-md group-hover:shadow-lg transition-all group-hover:scale-110`,
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5" })
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex-1 min-w-0 relative",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: `text-sm font-bold ${danger ? "text-red-700" : "text-gray-900"}`,
+					children: label
+				}), value && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-xs text-gray-500 mt-0.5 truncate",
+					children: value
+				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-5 h-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all shrink-0" })
+		]
+	});
+};
+var NameChangeModal = ({ open, onClose, currentName, onSave }) => {
+	const [newName, setNewName] = (0, import_react.useState)(currentName || "");
+	const handleSave = () => {
+		if (newName.trim()) {
+			onSave(newName.trim());
+			onClose();
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+		initial: { opacity: 0 },
+		animate: { opacity: 1 },
+		exit: { opacity: 0 },
+		className: "fixed inset-0 z-50 flex items-center justify-center p-5 bg-black/40 backdrop-blur-md",
+		onClick: onClose,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+			initial: {
+				scale: .9,
+				opacity: 0,
+				y: 30
+			},
+			animate: {
+				scale: 1,
+				opacity: 1,
+				y: 0
+			},
+			exit: {
+				scale: .85,
+				opacity: 0,
+				y: 30
+			},
+			transition: {
+				type: "spring",
+				stiffness: 500,
+				damping: 30
+			},
+			className: "bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-gray-100",
+			onClick: (e) => e.stopPropagation(),
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center justify-between mb-6",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-xl font-bold text-gray-900",
+						children: "تغيير الاسم"
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					onClick: onClose,
+					className: "w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-5 h-5" })
+				})]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "space-y-5",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+					className: "text-sm font-bold text-gray-700 mb-2 block",
+					children: "الاسم الجديد"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+					value: newName,
+					onChange: (e) => setNewName(e.target.value),
+					placeholder: "أدخل اسمك الجديد",
+					className: "h-12 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200 text-lg",
+					autoFocus: true
+				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex gap-3 pt-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						whileTap: { scale: .95 },
+						onClick: onClose,
+						className: "flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all",
+						children: "إلغاء"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						whileTap: newName.trim() ? { scale: .95 } : {},
+						onClick: handleSave,
+						disabled: !newName.trim(),
+						className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white font-bold shadow-md shadow-purple-500/20 transition-all disabled:opacity-50",
+						children: "حفظ"
+					})]
+				})]
+			})]
+		})
+	}) });
+};
+function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onResetPassword, onSwitchAccount }) {
+	const [showDelete, setShowDelete] = (0, import_react.useState)(false);
+	const [deleting, setDeleting] = (0, import_react.useState)(false);
+	const [error, setError] = (0, import_react.useState)("");
+	const [showNameModal, setShowNameModal] = (0, import_react.useState)(false);
+	const handleDelete = async () => {
+		setDeleting(true);
+		setError("");
+		try {
+			const u = auth.currentUser;
+			if (!u) throw new Error("لا يوجد مستخدم");
+			await deleteDoc(doc(db, "users", u.uid));
+			const savedU = localStorage.getItem("my_username");
+			if (savedU) await deleteDoc(doc(db, "usernames", savedU)).catch(() => {});
+			await deleteUser(u);
+			localStorage.clear();
+			sessionStorage.clear();
+			await signOut(auth);
+		} catch (e) {
+			setError(e.code === "auth/requires-recent-login" ? "يجب إعادة تسجيل الدخول أولاً" : "تعذر الحذف");
+		} finally {
+			setDeleting(false);
+		}
+	};
+	const displayName = user?.displayName || user?.email?.split("@")[0] || "مستخدم";
+	const email = user?.email || "";
+	const username = localStorage.getItem("my_username") || "";
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right",
+		dir: "rtl",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+				initial: {
+					opacity: 0,
+					y: -30
+				},
+				animate: {
+					opacity: 1,
+					y: 0
+				},
+				className: "sticky top-0 z-20 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-12 pb-4 text-center shadow-sm",
+				style: { paddingTop: "calc(1rem + env(safe-area-inset-top))" },
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center justify-center gap-2 mb-1",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-6 h-6 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+						className: "text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
+						children: "الملف الشخصي"
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-sm text-gray-500",
+					children: "معلومات حسابك وإعداداته"
+				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "px-4 py-6 space-y-8 max-w-lg mx-auto w-full",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						initial: {
+							opacity: 0,
+							y: 20
+						},
+						animate: {
+							opacity: 1,
+							y: 0
+						},
+						transition: {
+							delay: .1,
+							type: "spring",
+							stiffness: 200,
+							damping: 20
+						},
+						className: "relative overflow-hidden rounded-3xl bg-white border border-gray-100/80 shadow-lg",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-purple-500/5 to-blue-500/5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative flex flex-col items-center pt-14 pb-8 px-6",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "absolute -top-16 left-1/2 -translate-x-1/2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+									initial: {
+										scale: 0,
+										rotate: -180
+									},
+									animate: {
+										scale: 1,
+										rotate: 0
+									},
+									transition: {
+										delay: .25,
+										type: "spring",
+										stiffness: 200,
+										damping: 15
+									},
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
+										className: "w-28 h-28 border-4 border-white shadow-xl ring-4 ring-purple-500/10",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
+											src: user?.photoURL,
+											className: "object-cover"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
+											className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white text-4xl font-bold",
+											children: displayName.charAt(0)
+										})]
+									})
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+									whileHover: { scale: 1.1 },
+									whileTap: { scale: .9 },
+									onClick: () => setShowNameModal(true),
+									className: "absolute -bottom-1 -right-1 w-10 h-10 bg-white text-purple-600 rounded-full flex items-center justify-center shadow-lg border-2 border-purple-100 hover:bg-purple-50 active:scale-90 transition-all",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-4 h-4" })
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+								initial: {
+									opacity: 0,
+									y: 10
+								},
+								animate: {
+									opacity: 1,
+									y: 0
+								},
+								transition: { delay: .35 },
+								className: "text-center mt-4",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+										className: "text-2xl font-black text-gray-900",
+										children: displayName
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+										className: "text-sm text-gray-500 mt-1 font-medium",
+										children: ["@", username || "غير محدد"]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+										initial: { scale: 0 },
+										animate: { scale: 1 },
+										transition: {
+											delay: .45,
+											type: "spring",
+											stiffness: 200,
+											damping: 15
+										},
+										className: "mt-3 inline-flex items-center gap-1.5 px-4 py-1.5 bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-100 shadow-sm",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
+												animate: { scale: [
+													1,
+													1.2,
+													1
+												] },
+												transition: {
+													repeat: Infinity,
+													duration: 2
+												},
+												className: "w-2 h-2 rounded-full bg-emerald-500"
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-3.5 h-3.5" }),
+											"حساب نشط"
+										]
+									})
+								]
+							})]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						initial: {
+							opacity: 0,
+							y: 20
+						},
+						animate: {
+							opacity: 1,
+							y: 0
+						},
+						transition: {
+							delay: .2,
+							type: "spring",
+							stiffness: 200,
+							damping: 20
+						},
+						className: "space-y-3",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2 px-1 mb-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User$1, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+									className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
+									children: "المعلومات الأساسية"
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
+								icon: User$1,
+								label: "الاسم المعروض",
+								value: displayName,
+								onClick: () => setShowNameModal(true),
+								color: "purple"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
+								icon: Mail,
+								label: "البريد الإلكتروني",
+								value: email,
+								onClick: onChangeEmail,
+								color: "blue"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
+								icon: Lock,
+								label: "كلمة المرور",
+								value: "••••••••",
+								onClick: onResetPassword,
+								color: "green"
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						initial: {
+							opacity: 0,
+							y: 20
+						},
+						animate: {
+							opacity: 1,
+							y: 0
+						},
+						transition: {
+							delay: .25,
+							type: "spring",
+							stiffness: 200,
+							damping: 20
+						},
+						className: "space-y-3",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-2 px-1 mb-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+									className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
+									children: "إدارة الحساب"
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
+								icon: Smartphone,
+								label: "الدخول بحساب آخر",
+								onClick: onSwitchAccount,
+								color: "orange"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
+								icon: LogOut,
+								label: "تسجيل الخروج",
+								onClick: onLogout,
+								color: "red"
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						initial: {
+							opacity: 0,
+							y: 20
+						},
+						animate: {
+							opacity: 1,
+							y: 0
+						},
+						transition: {
+							delay: .3,
+							type: "spring",
+							stiffness: 200,
+							damping: 20
+						},
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, {
+							mode: "wait",
+							children: !showDelete ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+								initial: { opacity: 1 },
+								exit: {
+									opacity: 0,
+									scale: .95
+								},
+								whileHover: { scale: 1.02 },
+								whileTap: { scale: .97 },
+								onClick: () => setShowDelete(true),
+								className: "w-full flex items-center justify-center gap-3 py-4 text-red-500 font-bold text-sm bg-white border border-red-100 rounded-2xl hover:bg-red-50 transition-all shadow-sm hover:shadow-md",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-5 h-5" }), " حذف الحساب نهائياً"]
+							}, "show-delete") : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+								initial: {
+									opacity: 0,
+									scale: .95
+								},
+								animate: {
+									opacity: 1,
+									scale: 1
+								},
+								exit: {
+									opacity: 0,
+									scale: .95
+								},
+								className: "bg-white border-2 border-red-200 rounded-2xl p-6 space-y-5 text-center shadow-lg",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+										initial: { scale: 0 },
+										animate: { scale: 1 },
+										transition: {
+											type: "spring",
+											stiffness: 200,
+											damping: 15
+										},
+										className: "w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-8 h-8 text-red-600" })
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-red-800 font-bold text-lg mb-1",
+										children: "هل أنت متأكد؟"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-sm text-gray-500",
+										children: "هذا الإجراء لا يمكن التراجع عنه."
+									})] }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex gap-3",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+											whileTap: { scale: .95 },
+											onClick: () => setShowDelete(false),
+											className: "flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all",
+											children: "إلغاء"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+											whileTap: { scale: .9 },
+											onClick: handleDelete,
+											disabled: deleting,
+											className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold shadow-md shadow-red-200 disabled:opacity-50 transition-all",
+											children: deleting ? "جارٍ..." : "تأكيد الحذف"
+										})]
+									}),
+									error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.p, {
+										initial: {
+											opacity: 0,
+											y: -10
+										},
+										animate: {
+											opacity: 1,
+											y: 0
+										},
+										className: "text-red-500 text-xs font-medium",
+										children: error
+									})
+								]
+							}, "confirm-delete")
+						})
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NameChangeModal, {
+				open: showNameModal,
+				onClose: () => setShowNameModal(false),
+				currentName: displayName,
+				onSave: (name) => onUpdateProfile?.({ displayName: name })
+			})
+		]
+	});
+}
 //#endregion
 //#region src/features/Settings/SettingsScreen.jsx
 var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle, color = "purple" }) => {
