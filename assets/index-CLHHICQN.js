@@ -73132,7 +73132,7 @@ function App() {
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "min-h-screen flex flex-col bg-slate-50/50 text-gray-900",
 			children: [
-				!pagesWithOwnHeader.includes(currentScreen) && currentScreen !== "mainMenu" && currentScreen !== "chat" && currentScreen !== "notifications" && currentScreen !== "usermanagement" && currentScreen !== "groups" && currentScreen !== "groupChat" && currentScreen !== "groupInfo" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
+				!pagesWithOwnHeader.includes(currentScreen) && currentScreen !== "mainMenu" && currentScreen !== "chat" && currentScreen !== "notifications" && currentScreen !== "usermanagement" && currentScreen !== "groups" && currentScreen !== "groupChat" && currentScreen !== "groupInfo" && currentScreen !== "settings" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
 					className: "fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50 px-5 py-3 flex items-center shadow-sm",
 					style: { paddingTop: "max(0.75rem, env(safe-area-inset-top))" },
 					children: [
