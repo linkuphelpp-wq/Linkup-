@@ -161,19 +161,18 @@ export default function SettingsScreen({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-24">
-      {/* الهيدر الزجاجي المستقل */}
+      {/* 🔧 الهيدر الزجاجي مع padding-top كبير جداً لضمان الظهور */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-30 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-16 pb-4 text-center shadow-sm"
+        className="sticky top-0 z-30 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-24 pb-4 text-center shadow-sm"
       >
         <div className="flex items-center justify-between">
-          {/* زر الرجوع (اختياري، لكن يمكن إضافته للتناسق) */}
           <button onClick={() => window.history.back()} className="p-2 rounded-full hover:bg-gray-100">
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
           <h1 className="text-2xl font-black text-gray-800 tracking-tight flex-1">الإعدادات</h1>
-          <div className="w-8" /> {/* للحفاظ على التمركز */}
+          <div className="w-8" />
         </div>
         <p className="text-sm text-gray-500 mt-1">تحكم كامل في تطبيقك كما تحب</p>
       </motion.div>
