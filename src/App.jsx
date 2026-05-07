@@ -433,7 +433,7 @@ function App() {
       )}
 
       <div className="min-h-screen flex flex-col bg-slate-50/50 text-gray-900">
-        {!pagesWithOwnHeader.includes(currentScreen) && currentScreen !== 'mainMenu' && currentScreen !== 'chat' && currentScreen !== 'notifications' && currentScreen !== 'usermanagement' && currentScreen !== 'groups' && currentScreen !== 'groupChat' && currentScreen !== 'groupInfo' && (
+        {!pagesWithOwnHeader.includes(currentScreen) && currentScreen !== 'mainMenu' && currentScreen !== 'chat' && currentScreen !== 'notifications' && currentScreen !== 'usermanagement' && currentScreen !== 'groups' && currentScreen !== 'groupChat' && currentScreen !== 'groupInfo' && currentScreen !== 'settings' && (
           <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50 px-5 py-3 flex items-center shadow-sm" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
             <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100"><ArrowLeftIcon /></button>
             <h1 className="text-xl font-bold flex-1 text-right">{headerTitle}</h1>
