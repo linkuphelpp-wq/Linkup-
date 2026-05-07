@@ -69257,7 +69257,8 @@ function PinLockScreen() {
 	const [enteredPin, setEnteredPin] = (0, import_react.useState)("");
 	const [error, setError] = (0, import_react.useState)(false);
 	const [lockedMessage, setLockedMessage] = (0, import_react.useState)("");
-	const { verifyPin, failedAttempts } = useAppLock();
+	const { verifyPin } = useAppLock();
+	const pinLength = (localStorage.getItem("app_lock_pin") || "123456").length;
 	const numbers = [
 		1,
 		2,
@@ -69272,18 +69273,17 @@ function PinLockScreen() {
 	];
 	const handleNumber = (num) => {
 		if (lockedMessage) return;
-		if (enteredPin.length >= 6) return;
+		if (enteredPin.length >= pinLength) return;
 		const newPin = enteredPin + num;
 		setEnteredPin(newPin);
-		if (newPin.length === 6) {
+		if (newPin.length === pinLength) {
 			const result = verifyPin(newPin);
 			if (result.success) setError(false);
 			else {
 				setError(true);
 				setEnteredPin("");
 				if (result.locked) {
-					Math.ceil(result.remainingTime / 60);
-					setLockedMessage(`محظور لدقيقة كاملة`);
+					setLockedMessage(`محظور لمدة دقيقة`);
 					setTimeout(() => setLockedMessage(""), 6e4);
 				} else setTimeout(() => setError(false), 500);
 			}
@@ -69294,11 +69294,6 @@ function PinLockScreen() {
 		setEnteredPin((prev) => prev.slice(0, -1));
 		setError(false);
 	};
-	(0, import_react.useEffect)(() => {
-		setEnteredPin("");
-		setError(false);
-		setLockedMessage("");
-	}, [failedAttempts]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "fixed inset-0 z-[9999] bg-gradient-to-br from-purple-50 via-white to-blue-50 flex flex-col items-center justify-center text-right",
 		dir: "rtl",
@@ -69351,7 +69346,7 @@ function PinLockScreen() {
 							children: "أدخل رمز PIN"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-sm text-gray-500 mt-1",
-							children: lockedMessage || "أدخل الرمز المكون من 6 أرقام"
+							children: lockedMessage || `أدخل الرمز المكون من ${pinLength} أرقام`
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
@@ -69359,7 +69354,7 @@ function PinLockScreen() {
 						animate: { opacity: 1 },
 						transition: { delay: .3 },
 						className: "flex gap-4 items-center",
-						children: [...Array(6)].map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						children: [...Array(pinLength)].map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 							animate: {
 								scale: error ? [
 									1,
