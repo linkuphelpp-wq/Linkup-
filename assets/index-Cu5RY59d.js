@@ -66092,10 +66092,16 @@ var LinkUpLogo = () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		})]
 	})]
 });
-var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick }) => {
+var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0 }) => {
 	const [lastMsg, setLastMsg] = (0, import_react.useState)(null);
-	const [membersData, setMembersData] = (0, import_react.useState)([]);
 	const memberCount = group.members?.length || 0;
+	const gradients = [
+		"from-purple-500 to-indigo-500",
+		"from-blue-500 to-cyan-500",
+		"from-emerald-500 to-teal-500",
+		"from-orange-500 to-red-500"
+	];
+	const gradient = gradients[index % gradients.length];
 	(0, import_react.useEffect)(() => {
 		if (!group.id) return;
 		const unsub = onSnapshot(query(collection(db, "groups", group.id, "messages"), orderBy("timestamp", "desc")), (snap) => {
@@ -66103,56 +66109,71 @@ var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick }) => {
 		});
 		return () => unsub();
 	}, [group.id]);
-	(0, import_react.useEffect)(() => {
-		if (!group.members) return;
-		Promise.all(group.members.slice(0, 3).map(async (uid) => {
-			const snap = await getDoc(doc(db, "users", uid));
-			if (snap.exists()) return {
-				uid,
-				name: snap.data().displayName || uid.charAt(0).toUpperCase()
-			};
-			return {
-				uid,
-				name: uid.charAt(0).toUpperCase()
-			};
-		})).then((arr) => setMembersData(arr));
-	}, [group.members]);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4 hover:shadow-md transition-all active:scale-[0.98] cursor-pointer",
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+		initial: {
+			opacity: 0,
+			y: 20
+		},
+		animate: {
+			opacity: 1,
+			y: 0
+		},
+		transition: {
+			delay: index * .06,
+			type: "spring",
+			stiffness: 200,
+			damping: 20
+		},
+		whileHover: {
+			y: -4,
+			boxShadow: "0 16px 32px -8px rgba(0,0,0,0.15)"
+		},
+		whileTap: { scale: .98 },
 		onClick: () => onClick?.(),
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: `w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-md`,
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-6 h-6 text-white" })
-				}), isFavorite && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: "absolute -top-1 -right-1 w-5 h-5 text-yellow-500 fill-yellow-500" })]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex-1 min-w-0 text-right",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-						className: "font-bold text-gray-900 truncate",
-						children: group.name || "مجموعة"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-						className: "text-xs text-gray-400",
-						children: [memberCount, " أعضاء"]
+		className: "relative overflow-hidden rounded-2xl bg-white border border-gray-100/80 shadow-sm hover:shadow-lg transition-all cursor-pointer p-4",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-purple-500/0 via-transparent to-blue-500/0 group-hover:from-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "relative flex items-center gap-4",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "relative shrink-0",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: `w-14 h-14 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center shadow-md`,
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-6 h-6 text-white" })
+					}), isFavorite && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						initial: { scale: 0 },
+						animate: { scale: 1 },
+						className: "absolute -top-1 -right-1",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: "w-5 h-5 text-yellow-500 fill-yellow-500 drop-shadow-md" })
 					})]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-xs text-gray-500 mt-1 truncate",
-					children: lastMsg?.text || "ابدأ المحادثة"
-				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-				onClick: (e) => {
-					e.stopPropagation();
-					onToggleFavorite(group.id);
-				},
-				className: "p-2 rounded-full hover:bg-gray-100",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-4 h-4 ${isFavorite ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}` })
-			})
-		]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex-1 min-w-0 text-right",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "font-bold text-gray-800 truncate",
+							children: group.name || "مجموعة"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full",
+							children: [memberCount, " أعضاء"]
+						})]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-gray-500 mt-1 truncate",
+						children: lastMsg?.text || "ابدأ المحادثة"
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+					whileHover: { scale: 1.2 },
+					whileTap: { scale: .8 },
+					onClick: (e) => {
+						e.stopPropagation();
+						onToggleFavorite(group.id);
+					},
+					className: "p-2 rounded-full hover:bg-gray-100 transition-colors shrink-0",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-4 h-4 ${isFavorite ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}` })
+				})
+			]
+		})]
 	});
 };
 function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
@@ -66182,14 +66203,26 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 	}, []);
 	const filtered = groups.filter((g) => g.name?.toLowerCase().includes(searchTerm.toLowerCase()));
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-slate-50/50 pb-24",
+		className: "min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-24 text-right",
+		dir: "rtl",
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-12 pb-4",
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.header, {
+				initial: {
+					opacity: 0,
+					y: -30
+				},
+				animate: {
+					opacity: 1,
+					y: 0
+				},
+				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-12 pb-4 shadow-sm",
+				style: { paddingTop: "calc(1rem + env(safe-area-inset-top))" },
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center justify-between mb-5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LinkUpLogo, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LinkUpLogo, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+							whileHover: { scale: 1.1 },
+							whileTap: { scale: .9 },
 							onClick: onOpenCreateGroup,
 							className: "w-10 h-10 rounded-full bg-purple-50 text-purple-600 hover:bg-purple-100 flex items-center justify-center",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-5 h-5" })
@@ -66197,28 +66230,54 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "mb-4",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-							className: "text-3xl font-black text-gray-900 tracking-tight",
-							children: "المجموعات"
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-2 mb-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+								className: "text-2xl font-black text-gray-900 tracking-tight",
+								children: "المجموعات"
+							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-500 mt-1",
+							className: "text-sm text-gray-500",
 							children: "تعاون وتواصل مع فرقك بسهولة"
 						})]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						initial: {
+							opacity: 0,
+							y: 10
+						},
+						animate: {
+							opacity: 1,
+							y: 0
+						},
+						transition: { delay: .1 },
 						className: "relative",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
 							placeholder: "ابحث عن مجموعة...",
 							value: searchTerm,
 							onChange: (e) => setSearchTerm(e.target.value),
-							className: "w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm"
+							className: "w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-2 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm"
 						})]
 					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
 				className: "flex-1 overflow-y-auto px-5 pt-4 space-y-3",
-				children: filtered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				children: filtered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+					initial: {
+						opacity: 0,
+						scale: .9
+					},
+					animate: {
+						opacity: 1,
+						scale: 1
+					},
+					transition: {
+						delay: .2,
+						type: "spring",
+						stiffness: 200,
+						damping: 20
+					},
 					className: "flex flex-col items-center justify-center py-16 text-center",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -66234,18 +66293,42 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 							children: "ابدأ بإنشاء مجموعتك الأولى"
 						})
 					]
-				}) : filtered.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GroupCard, {
+				}) : filtered.map((g, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GroupCard, {
 					group: g,
 					isFavorite: favorites.includes(g.id),
 					onToggleFavorite: toggleFavorite,
-					onClick: () => onOpenGroup?.(g)
+					onClick: () => onOpenGroup?.(g),
+					index
 				}, g.id))
 			}),
-			groups.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: groups.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				initial: {
+					opacity: 0,
+					y: 40
+				},
+				animate: {
+					opacity: 1,
+					y: 0
+				},
+				exit: {
+					opacity: 0,
+					y: 40
+				},
+				transition: {
+					delay: .3,
+					type: "spring",
+					stiffness: 200,
+					damping: 20
+				},
 				className: "fixed bottom-32 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 px-2",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+					whileHover: {
+						scale: 1.02,
+						y: -2
+					},
+					whileTap: { scale: .97 },
 					onClick: onOpenCreateGroup,
-					className: "w-full bg-white border-2 border-purple-100 rounded-2xl p-4 flex items-center justify-between shadow-lg hover:shadow-xl hover:border-purple-300 transition-all active:scale-[0.98] group",
+					className: "w-full bg-white border-2 border-purple-100 rounded-2xl p-4 flex items-center justify-between shadow-lg hover:shadow-xl transition-all group",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex items-center gap-3",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -66269,7 +66352,7 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-4 h-4" })]
 					})]
 				})
-			})
+			}) })
 		]
 	});
 }
