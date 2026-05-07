@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Check, Settings, Users, Eye, EyeOff, Sparkles, Zap } from 'lucide-react';
+import { Copy, Check, Settings, Users, Eye, EyeOff } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { auth } from '../../firebase/config';
 
@@ -31,8 +31,6 @@ export default function MainMenuScreen({ onNavigate, username }) {
       onClick: () => onNavigate?.('contacts'),
       gradient: 'from-blue-500 to-cyan-500',
       shadowColor: 'shadow-blue-200',
-      lightBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
     },
     {
       label: 'الإعدادات',
@@ -41,90 +39,57 @@ export default function MainMenuScreen({ onNavigate, username }) {
       onClick: () => onNavigate?.('settings'),
       gradient: 'from-purple-500 to-indigo-500',
       shadowColor: 'shadow-purple-200',
-      lightBg: 'bg-purple-50',
-      iconColor: 'text-purple-600',
     },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right overflow-hidden" dir="rtl">
-      {/* زخارف خلفية ديناميكية */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
-          transition={{ repeat: Infinity, duration: 20, ease: 'linear' }}
-          className="absolute -top-32 -right-32 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ scale: [1.2, 1, 1.2], rotate: [0, -15, 15, 0] }}
-          transition={{ repeat: Infinity, duration: 25, ease: 'linear' }}
-          className="absolute -bottom-32 -left-32 w-96 h-96 bg-blue-300/20 rounded-full blur-3xl"
-        />
-      </div>
-
-      {/* هيدر زجاجي عصري */}
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right" dir="rtl">
+      {/* شريط علوي زجاجي رفيع جداً */}
       <motion.div
-        initial={{ opacity: 0, y: -30 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-gray-200/60 px-5 pt-12 pb-4 text-center shadow-sm"
-        style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}
+        className="sticky top-0 z-10 backdrop-blur-xl bg-white/60 border-b border-gray-200/30 px-5 py-3 text-center shadow-sm"
+        style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
       >
-        <div className="flex items-center justify-center gap-2">
-          <Zap className="w-6 h-6 text-purple-500" />
-          <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500">
-            LinkUp
-          </h1>
-        </div>
-        <p className="text-sm text-gray-500 mt-1">مرحباً بك في عالمك الخاص</p>
+        <h1 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500">
+          LinkUp
+        </h1>
       </motion.div>
 
-      <div className="relative z-10 flex-1 flex flex-col px-4 py-8 space-y-8 max-w-lg mx-auto w-full">
+      {/* مساحة علوية نظيفة جداً لضمان عدم ملامسة الأيقونة للشريط */}
+      <div className="flex-1 flex flex-col items-center pt-12 px-5">
         
-        {/* بطاقة الملف الشخصي - بنفس تصميم الإعدادات */}
+        {/* الأيقونة بحركة سلسة */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, type: 'spring', stiffness: 200, damping: 20 }}
-          className="relative bg-white rounded-3xl shadow-sm border border-gray-100/80 overflow-hidden"
+          initial={{ scale: 0, rotate: -10 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
+          className="mb-6"
         >
-          {/* شريط علوي مزخرف */}
-          <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-r from-purple-500/5 to-blue-500/5" />
-          
-          <div className="relative flex flex-col items-center pt-16 pb-8 px-6">
-            {/* الأيقونة - الآن بعيدة تماماً عن الشريط العلوي */}
-            <div className="absolute -top-16 left-1/2 -translate-x-1/2">
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 15 }}
-              >
-                <Avatar className="w-28 h-28 border-4 border-white shadow-xl ring-4 ring-purple-500/10 mx-auto">
-                  <AvatarImage src={user?.photoURL} className="object-cover" />
-                  <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-500 text-white text-4xl font-bold">
-                    {displayName.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-              </motion.div>
-            </div>
-
-            {/* الاسم مع تأثير ظهور متأخر */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-center mt-6"
-            >
-              <h2 className="text-2xl font-black text-gray-900">{displayName}</h2>
-            </motion.div>
-          </div>
+          <Avatar className="w-28 h-28 border-4 border-white shadow-2xl ring-4 ring-purple-500/10">
+            <AvatarImage src={user?.photoURL} className="object-cover" />
+            <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-500 text-white text-4xl font-bold">
+              {displayName.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
         </motion.div>
 
-        {/* بطاقة المعرف - تصميم متناسق */}
+        {/* الاسم فقط، بدون أيقونات جانبية */}
+        <motion.h2
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-2xl font-black text-gray-800 mb-10"
+        >
+          {displayName}
+        </motion.h2>
+
+        {/* بطاقة المعرف بتصميم الإعدادات النظيف */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, type: 'spring', stiffness: 200, damping: 20 }}
-          className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100/80 hover:shadow-md transition-all"
+          transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 20 }}
+          className="w-full max-w-md bg-white rounded-2xl p-5 shadow-sm border border-gray-100/80 mb-6"
         >
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-bold text-gray-800">اسم المستخدم الخاص بك</h3>
@@ -156,14 +121,14 @@ export default function MainMenuScreen({ onNavigate, username }) {
           </p>
         </motion.div>
 
-        {/* أزرار الاختصارات السريعة - بتصميم الإعدادات */}
+        {/* أزرار الاختصارات السريعة */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, type: 'spring', stiffness: 200, damping: 20 }}
-          className="grid grid-cols-2 gap-4"
+          transition={{ delay: 0.45, type: 'spring', stiffness: 200, damping: 20 }}
+          className="w-full max-w-md grid grid-cols-2 gap-4"
         >
-          {quickActions.map((action, index) => (
+          {quickActions.map((action) => (
             <motion.button
               key={action.label}
               whileHover={{ y: -5, boxShadow: '0 16px 32px -8px rgba(0,0,0,0.15)' }}
@@ -171,7 +136,6 @@ export default function MainMenuScreen({ onNavigate, username }) {
               onClick={action.onClick}
               className="relative overflow-hidden rounded-2xl p-5 bg-white border border-gray-100/80 shadow-sm hover:shadow-lg transition-all text-right group"
             >
-              {/* طبقة التأثير الخلفي عند التحويم */}
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-transparent to-blue-500/0 group-hover:from-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" />
               
               <div className="relative flex flex-col gap-3">
