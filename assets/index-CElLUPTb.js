@@ -66088,25 +66088,11 @@ var motion = /* @__PURE__ */ createMotionProxy({
 }, createDomVisualElement);
 //#endregion
 //#region src/components/common/WelcomeModal.jsx
-var features = [
-	{
-		icon: EyeOff,
-		text: "بدون إعلانات ولا تعقيدات"
-	},
-	{
-		icon: Shield,
-		text: "خصوصيتك أولاً، بياناتك محمية وآمنة"
-	},
-	{
-		icon: Zap,
-		text: "سريع وبسيط، تواصل في لحظات"
-	}
-];
 var AppIcon = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-	className: "relative w-24 h-24 rounded-[2rem] bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl shadow-blue-500/30",
+	className: "relative w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl shadow-blue-500/30 mb-2",
 	children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-		width: "44",
-		height: "44",
+		width: "36",
+		height: "36",
 		viewBox: "0 0 32 32",
 		fill: "none",
 		children: [
@@ -66152,6 +66138,14 @@ function WelcomeModal({ open, onClose, onLearnMore }) {
 			onClose?.();
 		}, 300);
 	};
+	const handleLearnMore = () => {
+		setIsExiting(true);
+		setTimeout(() => {
+			setIsVisible(false);
+			setIsExiting(false);
+			onLearnMore?.();
+		}, 300);
+	};
 	if (!isVisible) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4",
@@ -66163,12 +66157,12 @@ function WelcomeModal({ open, onClose, onLearnMore }) {
 			} : {
 				opacity: 0,
 				scale: .8,
-				y: 30
+				y: 40
 			},
 			animate: isExiting ? {
 				opacity: 0,
 				scale: .8,
-				y: 30
+				y: 40
 			} : {
 				opacity: 1,
 				scale: 1,
@@ -66184,7 +66178,7 @@ function WelcomeModal({ open, onClose, onLearnMore }) {
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -top-20 -right-20 w-40 h-40 bg-blue-100/60 rounded-full blur-2xl" }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -bottom-20 -left-20 w-40 h-40 bg-cyan-100/60 rounded-full blur-2xl" }),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "relative z-10",
+					className: "relative z-10 text-center",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 							initial: {
@@ -66201,11 +66195,8 @@ function WelcomeModal({ open, onClose, onLearnMore }) {
 								damping: 15,
 								delay: .1
 							},
-							className: "flex flex-col items-center mb-8",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "mb-4",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppIcon, {})
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
+							className: "flex flex-col items-center mb-6",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppIcon, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
 								className: "text-4xl font-black text-gray-900 tracking-tight",
 								children: ["Link", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500",
@@ -66223,28 +66214,29 @@ function WelcomeModal({ open, onClose, onLearnMore }) {
 								y: 0
 							},
 							transition: { delay: .3 },
-							className: "text-center mb-8",
+							className: "mb-8",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 								className: "text-2xl font-extrabold text-gray-900 mb-2",
 								children: "مرحباً بك في LinkUp!"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-gray-600 text-sm",
-								children: "تواصل مع من حولك بسهولة، بدون إعلانات ولا تعقيدات."
+								children: "تواصل مع من حولك بسهولة."
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 							initial: { opacity: 0 },
 							animate: { opacity: 1 },
 							transition: { delay: .5 },
-							className: "space-y-4 mb-8",
-							children: features.map((feat, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-4 p-4 bg-gray-50 rounded-2xl",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center shadow-sm",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(feat.icon, { className: "w-5 h-5 text-blue-600" })
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "space-y-3 mb-8",
+							children: [
+								"بدون إعلانات ولا تعقيدات",
+								"خصوصيتك أولاً، بياناتك محمية وآمنة",
+								"سريع وبسيط، تواصل في لحظات"
+							].map((text, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-3 text-right",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-2 h-2 rounded-full bg-blue-500 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "text-gray-700 font-medium text-sm",
-									children: feat.text
+									children: text
 								})]
 							}, idx))
 						}),
@@ -66264,7 +66256,7 @@ function WelcomeModal({ open, onClose, onLearnMore }) {
 								className: "w-full h-14 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl transition-all active:scale-95",
 								children: "متابعة"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: onLearnMore,
+								onClick: handleLearnMore,
 								className: "text-sm text-gray-500 hover:text-blue-600 transition-colors font-medium py-2",
 								children: "تعرف المزيد عن أثير"
 							})]
