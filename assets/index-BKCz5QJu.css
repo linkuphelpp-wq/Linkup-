@@ -554,10 +554,6 @@
     top: calc(var(--spacing) * -12);
   }
 
-  .-top-16 {
-    top: calc(var(--spacing) * -16);
-  }
-
   .-top-20 {
     top: calc(var(--spacing) * -20);
   }
@@ -1671,11 +1667,6 @@
 
   .rounded-xl {
     border-radius: var(--radius-xl);
-  }
-
-  .rounded-t-3xl {
-    border-top-left-radius: var(--radius-3xl);
-    border-top-right-radius: var(--radius-3xl);
   }
 
   .rounded-t-xl {
@@ -3235,6 +3226,10 @@
     padding-top: calc(var(--spacing) * 8);
   }
 
+  .pt-10 {
+    padding-top: calc(var(--spacing) * 10);
+  }
+
   .pt-12 {
     padding-top: calc(var(--spacing) * 12);
   }
@@ -3273,10 +3268,6 @@
 
   .pb-5 {
     padding-bottom: calc(var(--spacing) * 5);
-  }
-
-  .pb-6 {
-    padding-bottom: calc(var(--spacing) * 6);
   }
 
   .pb-8 {
