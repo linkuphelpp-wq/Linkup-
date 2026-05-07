@@ -44757,15 +44757,15 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 }
 //#endregion
 //#region node_modules/@radix-ui/react-compose-refs/dist/index.mjs
-function setRef(ref, value) {
+function setRef$1(ref, value) {
 	if (typeof ref === "function") return ref(value);
 	else if (ref !== null && ref !== void 0) ref.current = value;
 }
-function composeRefs(...refs) {
+function composeRefs$1(...refs) {
 	return (node) => {
 		let hasCleanup = false;
 		const cleanups = refs.map((ref) => {
-			const cleanup = setRef(ref, node);
+			const cleanup = setRef$1(ref, node);
 			if (!hasCleanup && typeof cleanup == "function") hasCleanup = true;
 			return cleanup;
 		});
@@ -44773,13 +44773,13 @@ function composeRefs(...refs) {
 			for (let i = 0; i < cleanups.length; i++) {
 				const cleanup = cleanups[i];
 				if (typeof cleanup == "function") cleanup();
-				else setRef(refs[i], null);
+				else setRef$1(refs[i], null);
 			}
 		};
 	};
 }
-function useComposedRefs(...refs) {
-	return import_react.useCallback(composeRefs(...refs), refs);
+function useComposedRefs$1(...refs) {
+	return import_react.useCallback(composeRefs$1(...refs), refs);
 }
 //#endregion
 //#region node_modules/@radix-ui/react-slot/dist/index.mjs
@@ -44831,7 +44831,7 @@ function createSlotClone$4(ownerName) {
 		if (import_react.isValidElement(children)) {
 			const childrenRef = getElementRef$5(children);
 			const props2 = mergeProps$4(slotProps, children.props);
-			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
+			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
 			return import_react.cloneElement(children, props2);
 		}
 		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
@@ -49240,7587 +49240,6 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 	});
 }
 //#endregion
-//#region src/features/Settings/SettingsScreen.jsx
-var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-	onClick: toggle ? void 0 : onClick,
-	className: "flex items-center gap-4 p-4 rounded-xl bg-white border border-gray-100 shadow-sm hover:bg-gray-50 transition-colors cursor-pointer",
-	children: [
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "p-2.5 rounded-lg bg-purple-50 text-purple-600 shrink-0",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5" })
-		}),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex-1 min-w-0 text-right",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-sm font-bold text-gray-900",
-				children: label
-			}), desc && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs text-gray-500 mt-0.5 truncate",
-				children: desc
-			})]
-		}),
-		toggle ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-			onClick: (e) => {
-				e.stopPropagation();
-				onToggle?.();
-			},
-			className: `w-11 h-6 rounded-full transition-colors relative shrink-0 ${isToggled ? "bg-purple-600" : "bg-gray-300"}`,
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${isToggled ? "translate-x-5" : ""}` })
-		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-4 h-4 text-gray-400 shrink-0" })
-	]
-});
-var SimpleModal = ({ open, onClose, title, children }) => {
-	if (!open) return null;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50",
-		onClick: onClose,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl",
-			onClick: (e) => e.stopPropagation(),
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center justify-between mb-4",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-					className: "text-lg font-bold text-gray-900",
-					children: title
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					onClick: onClose,
-					className: "w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-4 h-4" })
-				})]
-			}), children]
-		})
-	});
-};
-function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile, onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker, fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner }) {
-	const [showFontModal, setShowFontModal] = (0, import_react.useState)(false);
-	const [showSizeModal, setShowSizeModal] = (0, import_react.useState)(false);
-	const [showResetModal, setShowResetModal] = (0, import_react.useState)(false);
-	const [resetText, setResetText] = (0, import_react.useState)("");
-	const [resetLoading, setResetLoading] = (0, import_react.useState)(false);
-	const [compactMode, setCompactMode] = (0, import_react.useState)(() => localStorage.getItem("compactMode") === "true");
-	(0, import_react.useEffect)(() => {
-		localStorage.setItem("compactMode", compactMode);
-		if (compactMode) document.documentElement.classList.add("compact-ui");
-		else document.documentElement.classList.remove("compact-ui");
-	}, [compactMode]);
-	const sizes = [
-		{
-			v: "small",
-			l: "صغير"
-		},
-		{
-			v: "medium",
-			l: "متوسط"
-		},
-		{
-			v: "large",
-			l: "كبير"
-		},
-		{
-			v: "xlarge",
-			l: "كبير جداً"
-		}
-	];
-	const fonts = [
-		{
-			v: "tajawal",
-			l: "Tajawal",
-			desc: "الافتراضي"
-		},
-		{
-			v: "cairo",
-			l: "Cairo",
-			desc: "واضح"
-		},
-		{
-			v: "rubik",
-			l: "Rubik",
-			desc: "ناعم"
-		},
-		{
-			v: "ibm-plex",
-			l: "IBM Plex",
-			desc: "مميز",
-			featured: true
-		}
-	];
-	const handleResetApp = async () => {
-		if (resetText.trim() !== "حذف") return;
-		setResetLoading(true);
-		try {
-			if (!auth?.currentUser?.uid || !db) throw new Error("فشل المصادقة");
-			const batch = writeBatch(db);
-			(await getDocs(query(collection(db, "chats"), where("participants", "array-contains", auth.currentUser.uid)))).forEach((d) => batch.delete(doc(db, "chats", d.id)));
-			await batch.commit();
-			localStorage.clear();
-			sessionStorage.clear();
-			window.location.reload();
-		} catch (e) {
-			console.error(e);
-			alert("تعذر إعادة الضبط. تأكد من اتصالك أو سجّل الدخول مجدداً.");
-		} finally {
-			setResetLoading(false);
-		}
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-gray-50 pb-24",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "bg-white px-5 pt-16 pb-4 shadow-sm sticky top-0 z-10 text-center",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-					className: "text-lg font-black text-gray-900 tracking-tight",
-					children: "خصّص تجربتك في LinkUp"
-				})
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "px-5 py-6 space-y-6",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "space-y-3",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-							className: "text-xs font-bold text-gray-400 uppercase tracking-wider px-1",
-							children: "الحساب"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-							icon: Shield,
-							label: "الملف الشخصي",
-							desc: "تعديل المعلومات",
-							onClick: onOpenProfile
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "space-y-3",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-xs font-bold text-gray-400 uppercase tracking-wider px-1",
-								children: "المظهر"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Palette,
-								label: "حجم الخط",
-								desc: sizes.find((s) => s.v === fontSize)?.l,
-								onClick: () => setShowSizeModal(true)
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Palette,
-								label: "نوع الخط",
-								desc: fonts.find((f) => f.v === fontFamily)?.l,
-								onClick: () => setShowFontModal(true)
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: TabletSmartphone,
-								label: "تصغير الأبعاد",
-								desc: "يناسب الشاشات الصغيرة",
-								toggle: true,
-								isToggled: compactMode,
-								onToggle: () => setCompactMode(!compactMode)
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "space-y-3",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-xs font-bold text-gray-400 uppercase tracking-wider px-1",
-								children: "المكالمات"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Mic,
-								label: "كتم الميكروفون تلقائياً",
-								toggle: true,
-								isToggled: muteMicOnJoin,
-								onToggle: onToggleMuteMic
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Speaker,
-								label: "مكبر الصوت افتراضياً",
-								toggle: true,
-								isToggled: speakerDefault,
-								onToggle: onToggleSpeaker
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "space-y-3",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-xs font-bold text-gray-400 uppercase tracking-wider px-1",
-								children: "الخصوصية"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Lock,
-								label: "قفل التطبيق",
-								onClick: onOpenAppLock
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Shield,
-								label: "إدارة البيانات",
-								onClick: onOpenDataManagement
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: RefreshCw,
-								label: "إعادة ضبط التطبيق",
-								onClick: () => setShowResetModal(true)
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
-						className: "space-y-3",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-xs font-bold text-gray-400 uppercase tracking-wider px-1",
-								children: "المزيد"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: MessageCircle,
-								label: "تواصل مع المطور",
-								onClick: onOpenSupport
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Share2,
-								label: "شارك التطبيق",
-								onClick: () => navigator.share?.({
-									title: "LinkUp",
-									url: window.location.origin
-								}).catch(() => {})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Sparkles,
-								label: "تكوين شراكة",
-								onClick: onOpenPartner
-							}),
-							isAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Shield,
-								label: "لوحة الإدارة",
-								onClick: onOpenAdmin
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "grid grid-cols-3 gap-3 pt-2",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-										onClick: onOpenAtheer,
-										className: "flex flex-col items-center justify-center p-3 bg-purple-50 rounded-xl",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-xs font-bold text-purple-700",
-											children: "من هو أثير؟"
-										})
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-										onClick: onOpenAbout,
-										className: "flex flex-col items-center justify-center p-3 bg-blue-50 rounded-xl",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-xs font-bold text-blue-700",
-											children: "من نحن"
-										})
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-										onClick: onOpenPrivacy,
-										className: "flex flex-col items-center justify-center p-3 bg-gray-100 rounded-xl",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-xs font-bold text-gray-700",
-											children: "الخصوصية"
-										})
-									})
-								]
-							})
-						]
-					})
-				]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
-				open: showSizeModal,
-				onClose: () => setShowSizeModal(false),
-				title: "حجم الخط",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "space-y-2",
-					children: sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						onClick: () => {
-							onSelectFontSize?.(s.v);
-							setShowSizeModal(false);
-						},
-						className: `w-full p-3 rounded-lg text-right text-sm font-bold flex items-center justify-between ${fontSize === s.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300" : "bg-gray-50 text-gray-700"}`,
-						children: [
-							s.l,
-							" ",
-							fontSize === s.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })
-						]
-					}, s.v))
-				})
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
-				open: showFontModal,
-				onClose: () => setShowFontModal(false),
-				title: "نوع الخط",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "space-y-2",
-					children: fonts.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						onClick: () => {
-							onSelectFontFamily?.(f.v);
-							setShowFontModal(false);
-						},
-						className: `w-full p-3 rounded-lg text-right text-sm font-bold flex items-center justify-between ${fontFamily === f.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300" : "bg-gray-50 text-gray-700"}`,
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "flex items-center gap-2",
-							children: [
-								f.l,
-								" ",
-								f.featured && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-3 h-3 text-yellow-500" })
-							]
-						}), fontFamily === f.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })]
-					}, f.v))
-				})
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
-				open: showResetModal,
-				onClose: () => setShowResetModal(false),
-				title: "تأكيد إعادة الضبط",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "space-y-4",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex flex-col items-center gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-12 h-12 rounded-full bg-red-100 flex items-center justify-center",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-6 h-6 text-red-600" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "text-sm text-gray-600 text-center",
-								children: [
-									"اكتب كلمة ",
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "font-bold text-red-600",
-										children: "\"حذف\""
-									}),
-									" للتأكيد"
-								]
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-							value: resetText,
-							onChange: (e) => setResetText(e.target.value),
-							placeholder: "اكتب هنا...",
-							className: "w-full h-11 px-4 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-200 text-center"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: () => setShowResetModal(false),
-								className: "flex-1 h-10 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 font-medium",
-								children: "إلغاء"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: handleResetApp,
-								disabled: resetText.trim() !== "حذف" || resetLoading,
-								className: "flex-1 h-10 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold disabled:opacity-50",
-								children: resetLoading ? "جارٍ..." : "تأكيد"
-							})]
-						})
-					]
-				})
-			})
-		]
-	});
-}
-//#endregion
-//#region node_modules/sonner/dist/index.mjs
-var jt = (n) => {
-	switch (n) {
-		case "success": return ee;
-		case "info": return ae;
-		case "warning": return oe;
-		case "error": return se;
-		default: return null;
-	}
-}, te = Array(12).fill(0), Yt = ({ visible: n, className: e }) => import_react.createElement("div", {
-	className: ["sonner-loading-wrapper", e].filter(Boolean).join(" "),
-	"data-visible": n
-}, import_react.createElement("div", { className: "sonner-spinner" }, te.map((t, a) => import_react.createElement("div", {
-	className: "sonner-loading-bar",
-	key: `spinner-bar-${a}`
-})))), ee = import_react.createElement("svg", {
-	xmlns: "http://www.w3.org/2000/svg",
-	viewBox: "0 0 20 20",
-	fill: "currentColor",
-	height: "20",
-	width: "20"
-}, import_react.createElement("path", {
-	fillRule: "evenodd",
-	d: "M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z",
-	clipRule: "evenodd"
-})), oe = import_react.createElement("svg", {
-	xmlns: "http://www.w3.org/2000/svg",
-	viewBox: "0 0 24 24",
-	fill: "currentColor",
-	height: "20",
-	width: "20"
-}, import_react.createElement("path", {
-	fillRule: "evenodd",
-	d: "M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z",
-	clipRule: "evenodd"
-})), ae = import_react.createElement("svg", {
-	xmlns: "http://www.w3.org/2000/svg",
-	viewBox: "0 0 20 20",
-	fill: "currentColor",
-	height: "20",
-	width: "20"
-}, import_react.createElement("path", {
-	fillRule: "evenodd",
-	d: "M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z",
-	clipRule: "evenodd"
-})), se = import_react.createElement("svg", {
-	xmlns: "http://www.w3.org/2000/svg",
-	viewBox: "0 0 20 20",
-	fill: "currentColor",
-	height: "20",
-	width: "20"
-}, import_react.createElement("path", {
-	fillRule: "evenodd",
-	d: "M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z",
-	clipRule: "evenodd"
-})), Ot = import_react.createElement("svg", {
-	xmlns: "http://www.w3.org/2000/svg",
-	width: "12",
-	height: "12",
-	viewBox: "0 0 24 24",
-	fill: "none",
-	stroke: "currentColor",
-	strokeWidth: "1.5",
-	strokeLinecap: "round",
-	strokeLinejoin: "round"
-}, import_react.createElement("line", {
-	x1: "18",
-	y1: "6",
-	x2: "6",
-	y2: "18"
-}), import_react.createElement("line", {
-	x1: "6",
-	y1: "6",
-	x2: "18",
-	y2: "18"
-}));
-var Ft = () => {
-	let [n, e] = import_react.useState(document.hidden);
-	return import_react.useEffect(() => {
-		let t = () => {
-			e(document.hidden);
-		};
-		return document.addEventListener("visibilitychange", t), () => window.removeEventListener("visibilitychange", t);
-	}, []), n;
-};
-var bt = 1, yt = class {
-	constructor() {
-		this.subscribe = (e) => (this.subscribers.push(e), () => {
-			let t = this.subscribers.indexOf(e);
-			this.subscribers.splice(t, 1);
-		});
-		this.publish = (e) => {
-			this.subscribers.forEach((t) => t(e));
-		};
-		this.addToast = (e) => {
-			this.publish(e), this.toasts = [...this.toasts, e];
-		};
-		this.create = (e) => {
-			var S;
-			let { message: t, ...a } = e, u = typeof (e == null ? void 0 : e.id) == "number" || ((S = e.id) == null ? void 0 : S.length) > 0 ? e.id : bt++, f = this.toasts.find((g) => g.id === u), w = e.dismissible === void 0 ? !0 : e.dismissible;
-			return this.dismissedToasts.has(u) && this.dismissedToasts.delete(u), f ? this.toasts = this.toasts.map((g) => g.id === u ? (this.publish({
-				...g,
-				...e,
-				id: u,
-				title: t
-			}), {
-				...g,
-				...e,
-				id: u,
-				dismissible: w,
-				title: t
-			}) : g) : this.addToast({
-				title: t,
-				...a,
-				dismissible: w,
-				id: u
-			}), u;
-		};
-		this.dismiss = (e) => (this.dismissedToasts.add(e), e || this.toasts.forEach((t) => {
-			this.subscribers.forEach((a) => a({
-				id: t.id,
-				dismiss: !0
-			}));
-		}), this.subscribers.forEach((t) => t({
-			id: e,
-			dismiss: !0
-		})), e);
-		this.message = (e, t) => this.create({
-			...t,
-			message: e
-		});
-		this.error = (e, t) => this.create({
-			...t,
-			message: e,
-			type: "error"
-		});
-		this.success = (e, t) => this.create({
-			...t,
-			type: "success",
-			message: e
-		});
-		this.info = (e, t) => this.create({
-			...t,
-			type: "info",
-			message: e
-		});
-		this.warning = (e, t) => this.create({
-			...t,
-			type: "warning",
-			message: e
-		});
-		this.loading = (e, t) => this.create({
-			...t,
-			type: "loading",
-			message: e
-		});
-		this.promise = (e, t) => {
-			if (!t) return;
-			let a;
-			t.loading !== void 0 && (a = this.create({
-				...t,
-				promise: e,
-				type: "loading",
-				message: t.loading,
-				description: typeof t.description != "function" ? t.description : void 0
-			}));
-			let u = e instanceof Promise ? e : e(), f = a !== void 0, w, S = u.then(async (i) => {
-				if (w = ["resolve", i], import_react.isValidElement(i)) f = !1, this.create({
-					id: a,
-					type: "default",
-					message: i
-				});
-				else if (ie(i) && !i.ok) {
-					f = !1;
-					let T = typeof t.error == "function" ? await t.error(`HTTP error! status: ${i.status}`) : t.error, F = typeof t.description == "function" ? await t.description(`HTTP error! status: ${i.status}`) : t.description;
-					this.create({
-						id: a,
-						type: "error",
-						message: T,
-						description: F
-					});
-				} else if (t.success !== void 0) {
-					f = !1;
-					let T = typeof t.success == "function" ? await t.success(i) : t.success, F = typeof t.description == "function" ? await t.description(i) : t.description;
-					this.create({
-						id: a,
-						type: "success",
-						message: T,
-						description: F
-					});
-				}
-			}).catch(async (i) => {
-				if (w = ["reject", i], t.error !== void 0) {
-					f = !1;
-					let D = typeof t.error == "function" ? await t.error(i) : t.error, T = typeof t.description == "function" ? await t.description(i) : t.description;
-					this.create({
-						id: a,
-						type: "error",
-						message: D,
-						description: T
-					});
-				}
-			}).finally(() => {
-				var i;
-				f && (this.dismiss(a), a = void 0), (i = t.finally) == null || i.call(t);
-			}), g = () => new Promise((i, D) => S.then(() => w[0] === "reject" ? D(w[1]) : i(w[1])).catch(D));
-			return typeof a != "string" && typeof a != "number" ? { unwrap: g } : Object.assign(a, { unwrap: g });
-		};
-		this.custom = (e, t) => {
-			let a = (t == null ? void 0 : t.id) || bt++;
-			return this.create({
-				jsx: e(a),
-				id: a,
-				...t
-			}), a;
-		};
-		this.getActiveToasts = () => this.toasts.filter((e) => !this.dismissedToasts.has(e.id));
-		this.subscribers = [], this.toasts = [], this.dismissedToasts = /* @__PURE__ */ new Set();
-	}
-}, v = new yt(), ne = (n, e) => {
-	let t = (e == null ? void 0 : e.id) || bt++;
-	return v.addToast({
-		title: n,
-		...e,
-		id: t
-	}), t;
-}, ie = (n) => n && typeof n == "object" && "ok" in n && typeof n.ok == "boolean" && "status" in n && typeof n.status == "number", le = ne, ce = () => v.toasts, de = () => v.getActiveToasts(), ue = Object.assign(le, {
-	success: v.success,
-	info: v.info,
-	warning: v.warning,
-	error: v.error,
-	custom: v.custom,
-	message: v.message,
-	promise: v.promise,
-	dismiss: v.dismiss,
-	loading: v.loading
-}, {
-	getHistory: ce,
-	getToasts: de
-});
-function wt(n, { insertAt: e } = {}) {
-	if (!n || typeof document == "undefined") return;
-	let t = document.head || document.getElementsByTagName("head")[0], a = document.createElement("style");
-	a.type = "text/css", e === "top" && t.firstChild ? t.insertBefore(a, t.firstChild) : t.appendChild(a), a.styleSheet ? a.styleSheet.cssText = n : a.appendChild(document.createTextNode(n));
-}
-wt(`:where(html[dir="ltr"]),:where([data-sonner-toaster][dir="ltr"]){--toast-icon-margin-start: -3px;--toast-icon-margin-end: 4px;--toast-svg-margin-start: -1px;--toast-svg-margin-end: 0px;--toast-button-margin-start: auto;--toast-button-margin-end: 0;--toast-close-button-start: 0;--toast-close-button-end: unset;--toast-close-button-transform: translate(-35%, -35%)}:where(html[dir="rtl"]),:where([data-sonner-toaster][dir="rtl"]){--toast-icon-margin-start: 4px;--toast-icon-margin-end: -3px;--toast-svg-margin-start: 0px;--toast-svg-margin-end: -1px;--toast-button-margin-start: 0;--toast-button-margin-end: auto;--toast-close-button-start: unset;--toast-close-button-end: 0;--toast-close-button-transform: translate(35%, -35%)}:where([data-sonner-toaster]){position:fixed;width:var(--width);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;--gray1: hsl(0, 0%, 99%);--gray2: hsl(0, 0%, 97.3%);--gray3: hsl(0, 0%, 95.1%);--gray4: hsl(0, 0%, 93%);--gray5: hsl(0, 0%, 90.9%);--gray6: hsl(0, 0%, 88.7%);--gray7: hsl(0, 0%, 85.8%);--gray8: hsl(0, 0%, 78%);--gray9: hsl(0, 0%, 56.1%);--gray10: hsl(0, 0%, 52.3%);--gray11: hsl(0, 0%, 43.5%);--gray12: hsl(0, 0%, 9%);--border-radius: 8px;box-sizing:border-box;padding:0;margin:0;list-style:none;outline:none;z-index:999999999;transition:transform .4s ease}:where([data-sonner-toaster][data-lifted="true"]){transform:translateY(-10px)}@media (hover: none) and (pointer: coarse){:where([data-sonner-toaster][data-lifted="true"]){transform:none}}:where([data-sonner-toaster][data-x-position="right"]){right:var(--offset-right)}:where([data-sonner-toaster][data-x-position="left"]){left:var(--offset-left)}:where([data-sonner-toaster][data-x-position="center"]){left:50%;transform:translate(-50%)}:where([data-sonner-toaster][data-y-position="top"]){top:var(--offset-top)}:where([data-sonner-toaster][data-y-position="bottom"]){bottom:var(--offset-bottom)}:where([data-sonner-toast]){--y: translateY(100%);--lift-amount: calc(var(--lift) * var(--gap));z-index:var(--z-index);position:absolute;opacity:0;transform:var(--y);filter:blur(0);touch-action:none;transition:transform .4s,opacity .4s,height .4s,box-shadow .2s;box-sizing:border-box;outline:none;overflow-wrap:anywhere}:where([data-sonner-toast][data-styled="true"]){padding:16px;background:var(--normal-bg);border:1px solid var(--normal-border);color:var(--normal-text);border-radius:var(--border-radius);box-shadow:0 4px 12px #0000001a;width:var(--width);font-size:13px;display:flex;align-items:center;gap:6px}:where([data-sonner-toast]:focus-visible){box-shadow:0 4px 12px #0000001a,0 0 0 2px #0003}:where([data-sonner-toast][data-y-position="top"]){top:0;--y: translateY(-100%);--lift: 1;--lift-amount: calc(1 * var(--gap))}:where([data-sonner-toast][data-y-position="bottom"]){bottom:0;--y: translateY(100%);--lift: -1;--lift-amount: calc(var(--lift) * var(--gap))}:where([data-sonner-toast]) :where([data-description]){font-weight:400;line-height:1.4;color:inherit}:where([data-sonner-toast]) :where([data-title]){font-weight:500;line-height:1.5;color:inherit}:where([data-sonner-toast]) :where([data-icon]){display:flex;height:16px;width:16px;position:relative;justify-content:flex-start;align-items:center;flex-shrink:0;margin-left:var(--toast-icon-margin-start);margin-right:var(--toast-icon-margin-end)}:where([data-sonner-toast][data-promise="true"]) :where([data-icon])>svg{opacity:0;transform:scale(.8);transform-origin:center;animation:sonner-fade-in .3s ease forwards}:where([data-sonner-toast]) :where([data-icon])>*{flex-shrink:0}:where([data-sonner-toast]) :where([data-icon]) svg{margin-left:var(--toast-svg-margin-start);margin-right:var(--toast-svg-margin-end)}:where([data-sonner-toast]) :where([data-content]){display:flex;flex-direction:column;gap:2px}[data-sonner-toast][data-styled=true] [data-button]{border-radius:4px;padding-left:8px;padding-right:8px;height:24px;font-size:12px;color:var(--normal-bg);background:var(--normal-text);margin-left:var(--toast-button-margin-start);margin-right:var(--toast-button-margin-end);border:none;cursor:pointer;outline:none;display:flex;align-items:center;flex-shrink:0;transition:opacity .4s,box-shadow .2s}:where([data-sonner-toast]) :where([data-button]):focus-visible{box-shadow:0 0 0 2px #0006}:where([data-sonner-toast]) :where([data-button]):first-of-type{margin-left:var(--toast-button-margin-start);margin-right:var(--toast-button-margin-end)}:where([data-sonner-toast]) :where([data-cancel]){color:var(--normal-text);background:rgba(0,0,0,.08)}:where([data-sonner-toast][data-theme="dark"]) :where([data-cancel]){background:rgba(255,255,255,.3)}:where([data-sonner-toast]) :where([data-close-button]){position:absolute;left:var(--toast-close-button-start);right:var(--toast-close-button-end);top:0;height:20px;width:20px;display:flex;justify-content:center;align-items:center;padding:0;color:var(--gray12);border:1px solid var(--gray4);transform:var(--toast-close-button-transform);border-radius:50%;cursor:pointer;z-index:1;transition:opacity .1s,background .2s,border-color .2s}[data-sonner-toast] [data-close-button]{background:var(--gray1)}:where([data-sonner-toast]) :where([data-close-button]):focus-visible{box-shadow:0 4px 12px #0000001a,0 0 0 2px #0003}:where([data-sonner-toast]) :where([data-disabled="true"]){cursor:not-allowed}:where([data-sonner-toast]):hover :where([data-close-button]):hover{background:var(--gray2);border-color:var(--gray5)}:where([data-sonner-toast][data-swiping="true"]):before{content:"";position:absolute;left:-50%;right:-50%;height:100%;z-index:-1}:where([data-sonner-toast][data-y-position="top"][data-swiping="true"]):before{bottom:50%;transform:scaleY(3) translateY(50%)}:where([data-sonner-toast][data-y-position="bottom"][data-swiping="true"]):before{top:50%;transform:scaleY(3) translateY(-50%)}:where([data-sonner-toast][data-swiping="false"][data-removed="true"]):before{content:"";position:absolute;inset:0;transform:scaleY(2)}:where([data-sonner-toast]):after{content:"";position:absolute;left:0;height:calc(var(--gap) + 1px);bottom:100%;width:100%}:where([data-sonner-toast][data-mounted="true"]){--y: translateY(0);opacity:1}:where([data-sonner-toast][data-expanded="false"][data-front="false"]){--scale: var(--toasts-before) * .05 + 1;--y: translateY(calc(var(--lift-amount) * var(--toasts-before))) scale(calc(-1 * var(--scale)));height:var(--front-toast-height)}:where([data-sonner-toast])>*{transition:opacity .4s}:where([data-sonner-toast][data-expanded="false"][data-front="false"][data-styled="true"])>*{opacity:0}:where([data-sonner-toast][data-visible="false"]){opacity:0;pointer-events:none}:where([data-sonner-toast][data-mounted="true"][data-expanded="true"]){--y: translateY(calc(var(--lift) * var(--offset)));height:var(--initial-height)}:where([data-sonner-toast][data-removed="true"][data-front="true"][data-swipe-out="false"]){--y: translateY(calc(var(--lift) * -100%));opacity:0}:where([data-sonner-toast][data-removed="true"][data-front="false"][data-swipe-out="false"][data-expanded="true"]){--y: translateY(calc(var(--lift) * var(--offset) + var(--lift) * -100%));opacity:0}:where([data-sonner-toast][data-removed="true"][data-front="false"][data-swipe-out="false"][data-expanded="false"]){--y: translateY(40%);opacity:0;transition:transform .5s,opacity .2s}:where([data-sonner-toast][data-removed="true"][data-front="false"]):before{height:calc(var(--initial-height) + 20%)}[data-sonner-toast][data-swiping=true]{transform:var(--y) translateY(var(--swipe-amount-y, 0px)) translate(var(--swipe-amount-x, 0px));transition:none}[data-sonner-toast][data-swiped=true]{user-select:none}[data-sonner-toast][data-swipe-out=true][data-y-position=bottom],[data-sonner-toast][data-swipe-out=true][data-y-position=top]{animation-duration:.2s;animation-timing-function:ease-out;animation-fill-mode:forwards}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=left]{animation-name:swipe-out-left}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=right]{animation-name:swipe-out-right}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=up]{animation-name:swipe-out-up}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=down]{animation-name:swipe-out-down}@keyframes swipe-out-left{0%{transform:var(--y) translate(var(--swipe-amount-x));opacity:1}to{transform:var(--y) translate(calc(var(--swipe-amount-x) - 100%));opacity:0}}@keyframes swipe-out-right{0%{transform:var(--y) translate(var(--swipe-amount-x));opacity:1}to{transform:var(--y) translate(calc(var(--swipe-amount-x) + 100%));opacity:0}}@keyframes swipe-out-up{0%{transform:var(--y) translateY(var(--swipe-amount-y));opacity:1}to{transform:var(--y) translateY(calc(var(--swipe-amount-y) - 100%));opacity:0}}@keyframes swipe-out-down{0%{transform:var(--y) translateY(var(--swipe-amount-y));opacity:1}to{transform:var(--y) translateY(calc(var(--swipe-amount-y) + 100%));opacity:0}}@media (max-width: 600px){[data-sonner-toaster]{position:fixed;right:var(--mobile-offset-right);left:var(--mobile-offset-left);width:100%}[data-sonner-toaster][dir=rtl]{left:calc(var(--mobile-offset-left) * -1)}[data-sonner-toaster] [data-sonner-toast]{left:0;right:0;width:calc(100% - var(--mobile-offset-left) * 2)}[data-sonner-toaster][data-x-position=left]{left:var(--mobile-offset-left)}[data-sonner-toaster][data-y-position=bottom]{bottom:var(--mobile-offset-bottom)}[data-sonner-toaster][data-y-position=top]{top:var(--mobile-offset-top)}[data-sonner-toaster][data-x-position=center]{left:var(--mobile-offset-left);right:var(--mobile-offset-right);transform:none}}[data-sonner-toaster][data-theme=light]{--normal-bg: #fff;--normal-border: var(--gray4);--normal-text: var(--gray12);--success-bg: hsl(143, 85%, 96%);--success-border: hsl(145, 92%, 91%);--success-text: hsl(140, 100%, 27%);--info-bg: hsl(208, 100%, 97%);--info-border: hsl(221, 91%, 91%);--info-text: hsl(210, 92%, 45%);--warning-bg: hsl(49, 100%, 97%);--warning-border: hsl(49, 91%, 91%);--warning-text: hsl(31, 92%, 45%);--error-bg: hsl(359, 100%, 97%);--error-border: hsl(359, 100%, 94%);--error-text: hsl(360, 100%, 45%)}[data-sonner-toaster][data-theme=light] [data-sonner-toast][data-invert=true]{--normal-bg: #000;--normal-border: hsl(0, 0%, 20%);--normal-text: var(--gray1)}[data-sonner-toaster][data-theme=dark] [data-sonner-toast][data-invert=true]{--normal-bg: #fff;--normal-border: var(--gray3);--normal-text: var(--gray12)}[data-sonner-toaster][data-theme=dark]{--normal-bg: #000;--normal-bg-hover: hsl(0, 0%, 12%);--normal-border: hsl(0, 0%, 20%);--normal-border-hover: hsl(0, 0%, 25%);--normal-text: var(--gray1);--success-bg: hsl(150, 100%, 6%);--success-border: hsl(147, 100%, 12%);--success-text: hsl(150, 86%, 65%);--info-bg: hsl(215, 100%, 6%);--info-border: hsl(223, 100%, 12%);--info-text: hsl(216, 87%, 65%);--warning-bg: hsl(64, 100%, 6%);--warning-border: hsl(60, 100%, 12%);--warning-text: hsl(46, 87%, 65%);--error-bg: hsl(358, 76%, 10%);--error-border: hsl(357, 89%, 16%);--error-text: hsl(358, 100%, 81%)}[data-sonner-toaster][data-theme=dark] [data-sonner-toast] [data-close-button]{background:var(--normal-bg);border-color:var(--normal-border);color:var(--normal-text)}[data-sonner-toaster][data-theme=dark] [data-sonner-toast] [data-close-button]:hover{background:var(--normal-bg-hover);border-color:var(--normal-border-hover)}[data-rich-colors=true][data-sonner-toast][data-type=success],[data-rich-colors=true][data-sonner-toast][data-type=success] [data-close-button]{background:var(--success-bg);border-color:var(--success-border);color:var(--success-text)}[data-rich-colors=true][data-sonner-toast][data-type=info],[data-rich-colors=true][data-sonner-toast][data-type=info] [data-close-button]{background:var(--info-bg);border-color:var(--info-border);color:var(--info-text)}[data-rich-colors=true][data-sonner-toast][data-type=warning],[data-rich-colors=true][data-sonner-toast][data-type=warning] [data-close-button]{background:var(--warning-bg);border-color:var(--warning-border);color:var(--warning-text)}[data-rich-colors=true][data-sonner-toast][data-type=error],[data-rich-colors=true][data-sonner-toast][data-type=error] [data-close-button]{background:var(--error-bg);border-color:var(--error-border);color:var(--error-text)}.sonner-loading-wrapper{--size: 16px;height:var(--size);width:var(--size);position:absolute;inset:0;z-index:10}.sonner-loading-wrapper[data-visible=false]{transform-origin:center;animation:sonner-fade-out .2s ease forwards}.sonner-spinner{position:relative;top:50%;left:50%;height:var(--size);width:var(--size)}.sonner-loading-bar{animation:sonner-spin 1.2s linear infinite;background:var(--gray11);border-radius:6px;height:8%;left:-10%;position:absolute;top:-3.9%;width:24%}.sonner-loading-bar:nth-child(1){animation-delay:-1.2s;transform:rotate(.0001deg) translate(146%)}.sonner-loading-bar:nth-child(2){animation-delay:-1.1s;transform:rotate(30deg) translate(146%)}.sonner-loading-bar:nth-child(3){animation-delay:-1s;transform:rotate(60deg) translate(146%)}.sonner-loading-bar:nth-child(4){animation-delay:-.9s;transform:rotate(90deg) translate(146%)}.sonner-loading-bar:nth-child(5){animation-delay:-.8s;transform:rotate(120deg) translate(146%)}.sonner-loading-bar:nth-child(6){animation-delay:-.7s;transform:rotate(150deg) translate(146%)}.sonner-loading-bar:nth-child(7){animation-delay:-.6s;transform:rotate(180deg) translate(146%)}.sonner-loading-bar:nth-child(8){animation-delay:-.5s;transform:rotate(210deg) translate(146%)}.sonner-loading-bar:nth-child(9){animation-delay:-.4s;transform:rotate(240deg) translate(146%)}.sonner-loading-bar:nth-child(10){animation-delay:-.3s;transform:rotate(270deg) translate(146%)}.sonner-loading-bar:nth-child(11){animation-delay:-.2s;transform:rotate(300deg) translate(146%)}.sonner-loading-bar:nth-child(12){animation-delay:-.1s;transform:rotate(330deg) translate(146%)}@keyframes sonner-fade-in{0%{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes sonner-fade-out{0%{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.8)}}@keyframes sonner-spin{0%{opacity:1}to{opacity:.15}}@media (prefers-reduced-motion){[data-sonner-toast],[data-sonner-toast]>*,.sonner-loading-bar{transition:none!important;animation:none!important}}.sonner-loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transform-origin:center;transition:opacity .2s,transform .2s}.sonner-loader[data-visible=false]{opacity:0;transform:scale(.8) translate(-50%,-50%)}
-`);
-function tt(n) {
-	return n.label !== void 0;
-}
-var pe = 3, me = "32px", ge = "16px", Wt = 4e3, he = 356, be = 14, ye = 20, we = 200;
-function M(...n) {
-	return n.filter(Boolean).join(" ");
-}
-function xe(n) {
-	let [e, t] = n.split("-"), a = [];
-	return e && a.push(e), t && a.push(t), a;
-}
-var ve = (n) => {
-	var Dt, Pt, Nt, Bt, Ct, kt, It, Mt, Ht, At, Lt;
-	let { invert: e, toast: t, unstyled: a, interacting: u, setHeights: f, visibleToasts: w, heights: S, index: g, toasts: i, expanded: D, removeToast: T, defaultRichColors: F, closeButton: et, style: ut, cancelButtonStyle: ft, actionButtonStyle: l, className: ot = "", descriptionClassName: at = "", duration: X, position: st, gap: pt, loadingIcon: rt, expandByDefault: B, classNames: s, icons: P, closeButtonAriaLabel: nt = "Close toast", pauseWhenPageIsHidden: it } = n, [Y, C] = import_react.useState(null), [lt, J] = import_react.useState(null), [W, H] = import_react.useState(!1), [A, mt] = import_react.useState(!1), [L, z] = import_react.useState(!1), [ct, d] = import_react.useState(!1), [h, y] = import_react.useState(!1), [R, j] = import_react.useState(0), [p, _] = import_react.useState(0), O = import_react.useRef(t.duration || X || Wt), G = import_react.useRef(null), k = import_react.useRef(null), Vt = g === 0, Ut = g + 1 <= w, N = t.type, V = t.dismissible !== !1, Kt = t.className || "", Xt = t.descriptionClassName || "", dt = import_react.useMemo(() => S.findIndex((r) => r.toastId === t.id) || 0, [S, t.id]), Jt = import_react.useMemo(() => {
-		var r;
-		return (r = t.closeButton) != null ? r : et;
-	}, [t.closeButton, et]), Tt = import_react.useMemo(() => t.duration || X || Wt, [t.duration, X]), gt = import_react.useRef(0), U = import_react.useRef(0), St = import_react.useRef(0), K = import_react.useRef(null), [Gt, Qt] = st.split("-"), Rt = import_react.useMemo(() => S.reduce((r, m, c) => c >= dt ? r : r + m.height, 0), [S, dt]), Et = Ft(), qt = t.invert || e, ht = N === "loading";
-	U.current = import_react.useMemo(() => dt * pt + Rt, [dt, Rt]), import_react.useEffect(() => {
-		O.current = Tt;
-	}, [Tt]), import_react.useEffect(() => {
-		H(!0);
-	}, []), import_react.useEffect(() => {
-		let r = k.current;
-		if (r) {
-			let m = r.getBoundingClientRect().height;
-			return _(m), f((c) => [{
-				toastId: t.id,
-				height: m,
-				position: t.position
-			}, ...c]), () => f((c) => c.filter((b) => b.toastId !== t.id));
-		}
-	}, [f, t.id]), import_react.useLayoutEffect(() => {
-		if (!W) return;
-		let r = k.current, m = r.style.height;
-		r.style.height = "auto";
-		let c = r.getBoundingClientRect().height;
-		r.style.height = m, _(c), f((b) => b.find((x) => x.toastId === t.id) ? b.map((x) => x.toastId === t.id ? {
-			...x,
-			height: c
-		} : x) : [{
-			toastId: t.id,
-			height: c,
-			position: t.position
-		}, ...b]);
-	}, [
-		W,
-		t.title,
-		t.description,
-		f,
-		t.id
-	]);
-	let $ = import_react.useCallback(() => {
-		mt(!0), j(U.current), f((r) => r.filter((m) => m.toastId !== t.id)), setTimeout(() => {
-			T(t);
-		}, we);
-	}, [
-		t,
-		T,
-		f,
-		U
-	]);
-	import_react.useEffect(() => {
-		if (t.promise && N === "loading" || t.duration === Infinity || t.type === "loading") return;
-		let r;
-		return D || u || it && Et ? (() => {
-			if (St.current < gt.current) {
-				let b = (/* @__PURE__ */ new Date()).getTime() - gt.current;
-				O.current = O.current - b;
-			}
-			St.current = (/* @__PURE__ */ new Date()).getTime();
-		})() : O.current !== Infinity && (gt.current = (/* @__PURE__ */ new Date()).getTime(), r = setTimeout(() => {
-			var b;
-			(b = t.onAutoClose) == null || b.call(t, t), $();
-		}, O.current)), () => clearTimeout(r);
-	}, [
-		D,
-		u,
-		t,
-		N,
-		it,
-		Et,
-		$
-	]), import_react.useEffect(() => {
-		t.delete && $();
-	}, [$, t.delete]);
-	function Zt() {
-		var r, m, c;
-		return P != null && P.loading ? import_react.createElement("div", {
-			className: M(s == null ? void 0 : s.loader, (r = t == null ? void 0 : t.classNames) == null ? void 0 : r.loader, "sonner-loader"),
-			"data-visible": N === "loading"
-		}, P.loading) : rt ? import_react.createElement("div", {
-			className: M(s == null ? void 0 : s.loader, (m = t == null ? void 0 : t.classNames) == null ? void 0 : m.loader, "sonner-loader"),
-			"data-visible": N === "loading"
-		}, rt) : import_react.createElement(Yt, {
-			className: M(s == null ? void 0 : s.loader, (c = t == null ? void 0 : t.classNames) == null ? void 0 : c.loader),
-			visible: N === "loading"
-		});
-	}
-	return import_react.createElement("li", {
-		tabIndex: 0,
-		ref: k,
-		className: M(ot, Kt, s == null ? void 0 : s.toast, (Dt = t == null ? void 0 : t.classNames) == null ? void 0 : Dt.toast, s == null ? void 0 : s.default, s == null ? void 0 : s[N], (Pt = t == null ? void 0 : t.classNames) == null ? void 0 : Pt[N]),
-		"data-sonner-toast": "",
-		"data-rich-colors": (Nt = t.richColors) != null ? Nt : F,
-		"data-styled": !(t.jsx || t.unstyled || a),
-		"data-mounted": W,
-		"data-promise": !!t.promise,
-		"data-swiped": h,
-		"data-removed": A,
-		"data-visible": Ut,
-		"data-y-position": Gt,
-		"data-x-position": Qt,
-		"data-index": g,
-		"data-front": Vt,
-		"data-swiping": L,
-		"data-dismissible": V,
-		"data-type": N,
-		"data-invert": qt,
-		"data-swipe-out": ct,
-		"data-swipe-direction": lt,
-		"data-expanded": !!(D || B && W),
-		style: {
-			"--index": g,
-			"--toasts-before": g,
-			"--z-index": i.length - g,
-			"--offset": `${A ? R : U.current}px`,
-			"--initial-height": B ? "auto" : `${p}px`,
-			...ut,
-			...t.style
-		},
-		onDragEnd: () => {
-			z(!1), C(null), K.current = null;
-		},
-		onPointerDown: (r) => {
-			ht || !V || (G.current = /* @__PURE__ */ new Date(), j(U.current), r.target.setPointerCapture(r.pointerId), r.target.tagName !== "BUTTON" && (z(!0), K.current = {
-				x: r.clientX,
-				y: r.clientY
-			}));
-		},
-		onPointerUp: () => {
-			var x, Q, q, Z;
-			if (ct || !V) return;
-			K.current = null;
-			let r = Number(((x = k.current) == null ? void 0 : x.style.getPropertyValue("--swipe-amount-x").replace("px", "")) || 0), m = Number(((Q = k.current) == null ? void 0 : Q.style.getPropertyValue("--swipe-amount-y").replace("px", "")) || 0), c = (/* @__PURE__ */ new Date()).getTime() - ((q = G.current) == null ? void 0 : q.getTime()), b = Y === "x" ? r : m, I = Math.abs(b) / c;
-			if (Math.abs(b) >= ye || I > .11) {
-				j(U.current), (Z = t.onDismiss) == null || Z.call(t, t), J(Y === "x" ? r > 0 ? "right" : "left" : m > 0 ? "down" : "up"), $(), d(!0), y(!1);
-				return;
-			}
-			z(!1), C(null);
-		},
-		onPointerMove: (r) => {
-			var Q, q, Z, zt;
-			if (!K.current || !V || ((Q = window.getSelection()) == null ? void 0 : Q.toString().length) > 0) return;
-			let c = r.clientY - K.current.y, b = r.clientX - K.current.x, I = (q = n.swipeDirections) != null ? q : xe(st);
-			!Y && (Math.abs(b) > 1 || Math.abs(c) > 1) && C(Math.abs(b) > Math.abs(c) ? "x" : "y");
-			let x = {
-				x: 0,
-				y: 0
-			};
-			Y === "y" ? (I.includes("top") || I.includes("bottom")) && (I.includes("top") && c < 0 || I.includes("bottom") && c > 0) && (x.y = c) : Y === "x" && (I.includes("left") || I.includes("right")) && (I.includes("left") && b < 0 || I.includes("right") && b > 0) && (x.x = b), (Math.abs(x.x) > 0 || Math.abs(x.y) > 0) && y(!0), (Z = k.current) == null || Z.style.setProperty("--swipe-amount-x", `${x.x}px`), (zt = k.current) == null || zt.style.setProperty("--swipe-amount-y", `${x.y}px`);
-		}
-	}, Jt && !t.jsx ? import_react.createElement("button", {
-		"aria-label": nt,
-		"data-disabled": ht,
-		"data-close-button": !0,
-		onClick: ht || !V ? () => {} : () => {
-			var r;
-			$(), (r = t.onDismiss) == null || r.call(t, t);
-		},
-		className: M(s == null ? void 0 : s.closeButton, (Bt = t == null ? void 0 : t.classNames) == null ? void 0 : Bt.closeButton)
-	}, (Ct = P == null ? void 0 : P.close) != null ? Ct : Ot) : null, t.jsx || (0, import_react.isValidElement)(t.title) ? t.jsx ? t.jsx : typeof t.title == "function" ? t.title() : t.title : import_react.createElement(import_react.Fragment, null, N || t.icon || t.promise ? import_react.createElement("div", {
-		"data-icon": "",
-		className: M(s == null ? void 0 : s.icon, (kt = t == null ? void 0 : t.classNames) == null ? void 0 : kt.icon)
-	}, t.promise || t.type === "loading" && !t.icon ? t.icon || Zt() : null, t.type !== "loading" ? t.icon || (P == null ? void 0 : P[N]) || jt(N) : null) : null, import_react.createElement("div", {
-		"data-content": "",
-		className: M(s == null ? void 0 : s.content, (It = t == null ? void 0 : t.classNames) == null ? void 0 : It.content)
-	}, import_react.createElement("div", {
-		"data-title": "",
-		className: M(s == null ? void 0 : s.title, (Mt = t == null ? void 0 : t.classNames) == null ? void 0 : Mt.title)
-	}, typeof t.title == "function" ? t.title() : t.title), t.description ? import_react.createElement("div", {
-		"data-description": "",
-		className: M(at, Xt, s == null ? void 0 : s.description, (Ht = t == null ? void 0 : t.classNames) == null ? void 0 : Ht.description)
-	}, typeof t.description == "function" ? t.description() : t.description) : null), (0, import_react.isValidElement)(t.cancel) ? t.cancel : t.cancel && tt(t.cancel) ? import_react.createElement("button", {
-		"data-button": !0,
-		"data-cancel": !0,
-		style: t.cancelButtonStyle || ft,
-		onClick: (r) => {
-			var m, c;
-			tt(t.cancel) && V && ((c = (m = t.cancel).onClick) == null || c.call(m, r), $());
-		},
-		className: M(s == null ? void 0 : s.cancelButton, (At = t == null ? void 0 : t.classNames) == null ? void 0 : At.cancelButton)
-	}, t.cancel.label) : null, (0, import_react.isValidElement)(t.action) ? t.action : t.action && tt(t.action) ? import_react.createElement("button", {
-		"data-button": !0,
-		"data-action": !0,
-		style: t.actionButtonStyle || l,
-		onClick: (r) => {
-			var m, c;
-			tt(t.action) && ((c = (m = t.action).onClick) == null || c.call(m, r), !r.defaultPrevented && $());
-		},
-		className: M(s == null ? void 0 : s.actionButton, (Lt = t == null ? void 0 : t.classNames) == null ? void 0 : Lt.actionButton)
-	}, t.action.label) : null));
-};
-function _t() {
-	if (typeof window == "undefined" || typeof document == "undefined") return "ltr";
-	let n = document.documentElement.getAttribute("dir");
-	return n === "auto" || !n ? window.getComputedStyle(document.documentElement).direction : n;
-}
-function Te(n, e) {
-	let t = {};
-	return [n, e].forEach((a, u) => {
-		let f = u === 1, w = f ? "--mobile-offset" : "--offset", S = f ? ge : me;
-		function g(i) {
-			[
-				"top",
-				"right",
-				"bottom",
-				"left"
-			].forEach((D) => {
-				t[`${w}-${D}`] = typeof i == "number" ? `${i}px` : i;
-			});
-		}
-		typeof a == "number" || typeof a == "string" ? g(a) : typeof a == "object" ? [
-			"top",
-			"right",
-			"bottom",
-			"left"
-		].forEach((i) => {
-			a[i] === void 0 ? t[`${w}-${i}`] = S : t[`${w}-${i}`] = typeof a[i] == "number" ? `${a[i]}px` : a[i];
-		}) : g(S);
-	}), t;
-}
-var $e = (0, import_react.forwardRef)(function(e, t) {
-	let { invert: a, position: u = "bottom-right", hotkey: f = ["altKey", "KeyT"], expand: w, closeButton: S, className: g, offset: i, mobileOffset: D, theme: T = "light", richColors: F, duration: et, style: ut, visibleToasts: ft = pe, toastOptions: l, dir: ot = _t(), gap: at = be, loadingIcon: X, icons: st, containerAriaLabel: pt = "Notifications", pauseWhenPageIsHidden: rt } = e, [B, s] = import_react.useState([]), P = import_react.useMemo(() => Array.from(new Set([u].concat(B.filter((d) => d.position).map((d) => d.position)))), [B, u]), [nt, it] = import_react.useState([]), [Y, C] = import_react.useState(!1), [lt, J] = import_react.useState(!1), [W, H] = import_react.useState(T !== "system" ? T : typeof window != "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"), A = import_react.useRef(null), mt = f.join("+").replace(/Key/g, "").replace(/Digit/g, ""), L = import_react.useRef(null), z = import_react.useRef(!1), ct = import_react.useCallback((d) => {
-		s((h) => {
-			var y;
-			return (y = h.find((R) => R.id === d.id)) != null && y.delete || v.dismiss(d.id), h.filter(({ id: R }) => R !== d.id);
-		});
-	}, []);
-	return import_react.useEffect(() => v.subscribe((d) => {
-		if (d.dismiss) {
-			s((h) => h.map((y) => y.id === d.id ? {
-				...y,
-				delete: !0
-			} : y));
-			return;
-		}
-		setTimeout(() => {
-			import_react_dom.flushSync(() => {
-				s((h) => {
-					let y = h.findIndex((R) => R.id === d.id);
-					return y !== -1 ? [
-						...h.slice(0, y),
-						{
-							...h[y],
-							...d
-						},
-						...h.slice(y + 1)
-					] : [d, ...h];
-				});
-			});
-		});
-	}), []), import_react.useEffect(() => {
-		if (T !== "system") {
-			H(T);
-			return;
-		}
-		if (T === "system" && (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? H("dark") : H("light")), typeof window == "undefined") return;
-		let d = window.matchMedia("(prefers-color-scheme: dark)");
-		try {
-			d.addEventListener("change", ({ matches: h }) => {
-				H(h ? "dark" : "light");
-			});
-		} catch (h) {
-			d.addListener(({ matches: y }) => {
-				try {
-					H(y ? "dark" : "light");
-				} catch (R) {
-					console.error(R);
-				}
-			});
-		}
-	}, [T]), import_react.useEffect(() => {
-		B.length <= 1 && C(!1);
-	}, [B]), import_react.useEffect(() => {
-		let d = (h) => {
-			var R, j;
-			f.every((p) => h[p] || h.code === p) && (C(!0), (R = A.current) == null || R.focus()), h.code === "Escape" && (document.activeElement === A.current || (j = A.current) != null && j.contains(document.activeElement)) && C(!1);
-		};
-		return document.addEventListener("keydown", d), () => document.removeEventListener("keydown", d);
-	}, [f]), import_react.useEffect(() => {
-		if (A.current) return () => {
-			L.current && (L.current.focus({ preventScroll: !0 }), L.current = null, z.current = !1);
-		};
-	}, [A.current]), import_react.createElement("section", {
-		ref: t,
-		"aria-label": `${pt} ${mt}`,
-		tabIndex: -1,
-		"aria-live": "polite",
-		"aria-relevant": "additions text",
-		"aria-atomic": "false",
-		suppressHydrationWarning: !0
-	}, P.map((d, h) => {
-		var j;
-		let [y, R] = d.split("-");
-		return B.length ? import_react.createElement("ol", {
-			key: d,
-			dir: ot === "auto" ? _t() : ot,
-			tabIndex: -1,
-			ref: A,
-			className: g,
-			"data-sonner-toaster": !0,
-			"data-theme": W,
-			"data-y-position": y,
-			"data-lifted": Y && B.length > 1 && !w,
-			"data-x-position": R,
-			style: {
-				"--front-toast-height": `${((j = nt[0]) == null ? void 0 : j.height) || 0}px`,
-				"--width": `${he}px`,
-				"--gap": `${at}px`,
-				...ut,
-				...Te(i, D)
-			},
-			onBlur: (p) => {
-				z.current && !p.currentTarget.contains(p.relatedTarget) && (z.current = !1, L.current && (L.current.focus({ preventScroll: !0 }), L.current = null));
-			},
-			onFocus: (p) => {
-				p.target instanceof HTMLElement && p.target.dataset.dismissible === "false" || z.current || (z.current = !0, L.current = p.relatedTarget);
-			},
-			onMouseEnter: () => C(!0),
-			onMouseMove: () => C(!0),
-			onMouseLeave: () => {
-				lt || C(!1);
-			},
-			onDragEnd: () => C(!1),
-			onPointerDown: (p) => {
-				p.target instanceof HTMLElement && p.target.dataset.dismissible === "false" || J(!0);
-			},
-			onPointerUp: () => J(!1)
-		}, B.filter((p) => !p.position && h === 0 || p.position === d).map((p, _) => {
-			var O, G;
-			return import_react.createElement(ve, {
-				key: p.id,
-				icons: st,
-				index: _,
-				toast: p,
-				defaultRichColors: F,
-				duration: (O = l == null ? void 0 : l.duration) != null ? O : et,
-				className: l == null ? void 0 : l.className,
-				descriptionClassName: l == null ? void 0 : l.descriptionClassName,
-				invert: a,
-				visibleToasts: ft,
-				closeButton: (G = l == null ? void 0 : l.closeButton) != null ? G : S,
-				interacting: lt,
-				position: d,
-				style: l == null ? void 0 : l.style,
-				unstyled: l == null ? void 0 : l.unstyled,
-				classNames: l == null ? void 0 : l.classNames,
-				cancelButtonStyle: l == null ? void 0 : l.cancelButtonStyle,
-				actionButtonStyle: l == null ? void 0 : l.actionButtonStyle,
-				removeToast: ct,
-				toasts: B.filter((k) => k.position == p.position),
-				heights: nt.filter((k) => k.position == p.position),
-				setHeights: it,
-				expandByDefault: w,
-				gap: at,
-				loadingIcon: X,
-				expanded: Y,
-				pauseWhenPageIsHidden: rt,
-				swipeDirections: e.swipeDirections
-			});
-		})) : null;
-	}));
-});
-//#endregion
-//#region src/features/contacts/ContactsScreen.jsx
-var LinkUpLogo$1 = () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-	className: "flex items-center gap-2.5",
-	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "relative w-9 h-9",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl rotate-6 opacity-20" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl -rotate-6 opacity-20" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute inset-0 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-5 h-5 text-purple-600" })
-			})
-		]
-	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-		className: "text-2xl font-black tracking-tight text-gray-900",
-		children: ["Link", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-			className: "text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
-			children: "Up"
-		})]
-	})]
-});
-var getSafeName = (contact) => {
-	const emailPattern = /@/;
-	const candidates = [
-		contact?.localDisplayName,
-		contact?.displayName,
-		contact?.username,
-		contact?.name
-	];
-	for (let candidate of candidates) if (candidate && !emailPattern.test(candidate)) return candidate;
-	return "مستخدم";
-};
-var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0 }) => {
-	const [status, setStatus] = (0, import_react.useState)("offline");
-	const [expanded, setExpanded] = (0, import_react.useState)(false);
-	(0, import_react.useEffect)(() => {
-		if (!contact.uid) return;
-		const unsub = onSnapshot(doc(db, "users", contact.uid), (snap) => {
-			if (snap.exists()) setStatus(snap.data().status || "offline");
-			else setStatus("offline");
-		});
-		return () => unsub();
-	}, [contact.uid]);
-	const safeName = getSafeName(contact);
-	const statusDot = status === "online" ? "bg-emerald-500" : "bg-gray-300";
-	const statusText = status === "online" ? "متصل الآن" : "غير متصل";
-	const handleCallPress = (type) => {
-		if (status !== "online") {
-			ue.error("المستخدم غير متصل حاليًا", { description: "لا يمكن إجراء المكالمة الآن، حاول لاحقًا" });
-			return;
-		}
-		onCall?.(contact, type);
-		setExpanded(false);
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "bg-white rounded-2xl border border-gray-100/80 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "flex items-center justify-between p-3",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center gap-3.5 flex-1 min-w-0",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => onToggleFavorite?.(contact),
-						className: `shrink-0 p-1 rounded-full transition-all ${isFavorite ? "text-yellow-500 hover:bg-yellow-100" : "text-gray-300 hover:text-yellow-400 hover:bg-gray-100"}`,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-5 h-5 ${isFavorite ? "fill-yellow-500" : ""}` })
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "relative shrink-0",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
-							className: "h-14 w-14 border-2 border-white shadow-md ring-2 ring-purple-500/10",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
-								src: contact.photoURL,
-								className: "object-cover"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-								className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white font-bold text-lg",
-								children: safeName.charAt(0)?.toUpperCase() || "م"
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${statusDot} shadow-sm` })]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex-1 min-w-0 text-right",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-							className: "font-bold text-gray-900 truncate text-base",
-							children: ["@", safeName]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-gray-500",
-							children: statusText
-						})]
-					}),
-					unreadCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "min-w-[22px] h-5 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center shadow-md px-1.5",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-[10px] font-bold text-white",
-							children: unreadCount
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => onEdit?.(contact),
-						className: "p-2.5 rounded-full bg-gray-50 text-amber-600 hover:bg-amber-100 active:scale-90 transition-all",
-						title: "تعديل الاسم",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-4 h-4" })
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => setExpanded(!expanded),
-						className: "p-2.5 rounded-full bg-gray-50 text-gray-600 hover:bg-gray-100 active:scale-90 transition-all",
-						title: "خيارات",
-						children: expanded ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronUp, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: "w-4 h-4" })
-					})
-				]
-			})
-		}), expanded && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "px-4 pb-4 pt-1 flex items-center justify-around border-t border-gray-100 mt-1 animate-in slide-in-from-top-2 duration-150",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => handleCallPress("video"),
-					className: "flex flex-col items-center gap-1 text-purple-600 hover:bg-purple-50 p-2 rounded-xl transition-colors",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Video, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs font-medium",
-						children: "فيديو"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => handleCallPress("audio"),
-					className: "flex flex-col items-center gap-1 text-blue-600 hover:bg-blue-50 p-2 rounded-xl transition-colors",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs font-medium",
-						children: "صوت"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => {
-						onChat?.(contact);
-						setExpanded(false);
-					},
-					className: "flex flex-col items-center gap-1 text-gray-600 hover:bg-gray-100 p-2 rounded-xl transition-colors",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs font-medium",
-						children: "محادثة"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => {
-						setExpanded(false);
-						onToggleFavorite?.(contact);
-					},
-					className: "flex flex-col items-center gap-1 text-yellow-500 hover:bg-yellow-50 p-2 rounded-xl transition-colors",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-5 h-5 ${isFavorite ? "fill-yellow-500" : ""}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs font-medium",
-						children: "مفضلة"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: () => {
-						setExpanded(false);
-						onDelete?.(contact);
-					},
-					className: "flex flex-col items-center gap-1 text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs font-medium",
-						children: "حذف"
-					})]
-				})
-			]
-		})]
-	});
-};
-var DeleteConfirmModal = ({ open, contact, onConfirm, onClose }) => {
-	if (!open) return null;
-	const safeName = getSafeName(contact);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5",
-		onClick: onClose,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
-			onClick: (e) => e.stopPropagation(),
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "text-center mb-4",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-8 h-8 text-red-500" })
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "text-lg font-bold text-gray-900",
-						children: "تأكيد الحذف"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-						className: "text-sm text-gray-500 mt-2",
-						children: [
-							"هل أنت متأكد من حذف ",
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: ["@", safeName] }),
-							"؟"
-						]
-					})
-				]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex gap-3",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-					variant: "outline",
-					onClick: onClose,
-					className: "flex-1 h-11 rounded-xl",
-					children: "إلغاء"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-					onClick: onConfirm,
-					className: "flex-1 h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white",
-					children: "حذف"
-				})]
-			})]
-		})
-	});
-};
-var EditNameModal = ({ open, contact, onSave, onClose }) => {
-	const [newName, setNewName] = (0, import_react.useState)("");
-	(0, import_react.useEffect)(() => {
-		setNewName(contact?.localDisplayName || "");
-	}, [contact]);
-	const handleSave = () => {
-		if (!newName.trim()) return;
-		onSave(contact, newName.trim());
-		onClose();
-	};
-	if (!open) return null;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5",
-		onClick: onClose,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
-			onClick: (e) => e.stopPropagation(),
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between mb-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "text-lg font-bold",
-						children: "تعديل الاسم"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: onClose,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-5 h-5" })
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-					placeholder: "الاسم الجديد",
-					value: newName,
-					onChange: (e) => setNewName(e.target.value),
-					className: "mb-4 h-12",
-					autoFocus: true
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-					onClick: handleSave,
-					disabled: !newName.trim(),
-					className: "w-full h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white",
-					children: "حفظ"
-				})
-			]
-		})
-	});
-};
-function ContactsScreen({ onCall, onChat }) {
-	const [contacts, setContacts] = (0, import_react.useState)([]);
-	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
-	const [activeFilter, setActiveFilter] = (0, import_react.useState)("all");
-	const [favorites, setFavorites] = (0, import_react.useState)(() => {
-		try {
-			return JSON.parse(localStorage.getItem("contact_favorites") || "[]");
-		} catch {
-			return [];
-		}
-	});
-	const [showAddModal, setShowAddModal] = (0, import_react.useState)(false);
-	const [addUsername, setAddUsername] = (0, import_react.useState)("");
-	const [addLoading, setAddLoading] = (0, import_react.useState)(false);
-	const [addError, setAddError] = (0, import_react.useState)("");
-	const [addSuccess, setAddSuccess] = (0, import_react.useState)("");
-	const [deleteTarget, setDeleteTarget] = (0, import_react.useState)(null);
-	const [editTarget, setEditTarget] = (0, import_react.useState)(null);
-	const [unreadCounts, setUnreadCounts] = (0, import_react.useState)({});
-	const currentUser = auth.currentUser;
-	(0, import_react.useEffect)(() => {
-		if (!currentUser?.uid) return;
-		const unsub = onSnapshot(query(collection(db, "contacts"), where("participants", "array-contains", currentUser.uid)), async (snap) => {
-			setContacts((await Promise.all(snap.docs.map(async (docSnap) => {
-				const data = docSnap.data();
-				const contactId = data.participants.find((p) => p !== currentUser.uid);
-				if (!contactId) return null;
-				let userData = {};
-				try {
-					const userSnap = await getDoc(doc(db, "users", contactId));
-					if (userSnap.exists()) userData = userSnap.data();
-				} catch {}
-				return {
-					id: docSnap.id,
-					uid: contactId,
-					email: userData.email || data.email || "",
-					username: data.username || userData.username || "",
-					photoURL: userData.photoURL || "",
-					localDisplayName: data.displayName || "",
-					displayName: userData.displayName || ""
-				};
-			}))).filter(Boolean));
-		});
-		return () => unsub();
-	}, [currentUser]);
-	(0, import_react.useEffect)(() => {
-		if (!currentUser?.uid) return;
-		const unsub = onSnapshot(query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid)), (snapshot) => {
-			const counts = {};
-			snapshot.docs.forEach((docSnap) => {
-				const data = docSnap.data();
-				const otherUserId = data.participants.find((p) => p !== currentUser.uid);
-				if (otherUserId && data.unreadCount) counts[otherUserId] = (counts[otherUserId] || 0) + data.unreadCount;
-			});
-			setUnreadCounts(counts);
-		});
-		return () => unsub();
-	}, [currentUser]);
-	(0, import_react.useEffect)(() => {
-		localStorage.setItem("contact_favorites", JSON.stringify(favorites));
-	}, [favorites]);
-	const toggleFavorite = (contact) => {
-		const id = contact.uid || contact.username;
-		setFavorites((prev) => prev.includes(id) ? prev.filter((fid) => fid !== id) : [...prev, id]);
-	};
-	const confirmDelete = async () => {
-		if (!deleteTarget) return;
-		try {
-			const docToDelete = (await getDocs(query(collection(db, "contacts"), where("participants", "array-contains", currentUser.uid)))).docs.find((d) => d.data().participants.includes(deleteTarget.uid));
-			if (docToDelete) await deleteDoc(doc(db, "contacts", docToDelete.id));
-		} catch (err) {
-			console.error("فشل الحذف:", err);
-		} finally {
-			setDeleteTarget(null);
-		}
-	};
-	const handleEditSave = async (contact, newName) => {
-		if (!newName) return;
-		setContacts((prev) => prev.map((c) => (c.uid || c.username) === (contact.uid || contact.username) ? {
-			...c,
-			localDisplayName: newName
-		} : c));
-		try {
-			const docToUpdate = (await getDocs(query(collection(db, "contacts"), where("participants", "array-contains", currentUser.uid)))).docs.find((d) => d.data().participants.includes(contact.uid));
-			if (docToUpdate) await updateDoc(doc(db, "contacts", docToUpdate.id), { displayName: newName });
-		} catch (err) {
-			console.error("فشل التعديل:", err);
-		}
-	};
-	const handleAddContact = async () => {
-		const trimmed = addUsername.trim();
-		if (!trimmed || !currentUser) return;
-		setAddLoading(true);
-		setAddError("");
-		setAddSuccess("");
-		try {
-			const usernameDoc = await getDoc(doc(db, "usernames", trimmed));
-			if (!usernameDoc.exists()) {
-				setAddError("المعرف غير موجود");
-				return;
-			}
-			const targetUid = usernameDoc.data().uid;
-			if (targetUid === currentUser.uid) {
-				setAddError("لا يمكنك إضافة نفسك");
-				return;
-			}
-			if ((await getDocs(query(collection(db, "contacts"), where("participants", "array-contains", currentUser.uid)))).docs.some((d) => d.data().participants.includes(targetUid))) {
-				setAddError("موجود بالفعل في جهات الاتصال");
-				return;
-			}
-			const targetSnap = await getDoc(doc(db, "users", targetUid));
-			const targetData = targetSnap.exists() ? targetSnap.data() : {};
-			await addDoc(collection(db, "contacts"), {
-				participants: [currentUser.uid, targetUid],
-				displayName: targetData.displayName || targetData.email || "",
-				email: targetData.email || "",
-				username: trimmed,
-				createdAt: serverTimestamp$2()
-			});
-			setAddSuccess("تمت الإضافة بنجاح");
-			setAddUsername("");
-			setTimeout(() => setShowAddModal(false), 800);
-		} catch (err) {
-			console.error(err);
-			setAddError("حدث خطأ أثناء الإضافة");
-		} finally {
-			setAddLoading(false);
-		}
-	};
-	const filteredContacts = (0, import_react.useMemo)(() => {
-		let list = contacts;
-		if (activeFilter === "favorites") list = list.filter((c) => favorites.includes(c.uid || c.username));
-		else if (activeFilter === "online") list = list.filter((c) => c.status === "online");
-		if (searchTerm.trim()) {
-			const term = searchTerm.toLowerCase();
-			list = list.filter((c) => (c.username || "").toLowerCase().includes(term) || (c.localDisplayName || "").toLowerCase().includes(term) || (c.displayName || "").toLowerCase().includes(term) || (c.email || "").toLowerCase().includes(term));
-		}
-		return [...list].sort((a, b) => {
-			const aFav = favorites.includes(a.uid || a.username) ? 1 : 0;
-			return (favorites.includes(b.uid || b.username) ? 1 : 0) - aFav;
-		});
-	}, [
-		contacts,
-		activeFilter,
-		searchTerm,
-		favorites
-	]);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-slate-50/50 pb-24",
-		children: [
-			showAddModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5",
-				onClick: () => setShowAddModal(false),
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
-					onClick: (e) => e.stopPropagation(),
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center justify-between mb-4",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-								className: "text-lg font-bold",
-								children: "إضافة جهة اتصال"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: () => setShowAddModal(false),
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-5 h-5" })
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							placeholder: "أدخل المعرف (username)",
-							value: addUsername,
-							onChange: (e) => {
-								setAddUsername(e.target.value);
-								setAddError("");
-								setAddSuccess("");
-							},
-							className: "mb-3 h-12",
-							disabled: addLoading
-						}),
-						addError && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-							className: "text-red-500 text-sm mb-2 flex items-center gap-1",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4" }),
-								" ",
-								addError
-							]
-						}),
-						addSuccess && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-							className: "text-green-600 text-sm mb-2 flex items-center gap-1",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" }),
-								" ",
-								addSuccess
-							]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							onClick: handleAddContact,
-							disabled: addLoading || !addUsername.trim(),
-							className: "w-full h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white",
-							children: addLoading ? "جارٍ..." : "إضافة"
-						})
-					]
-				})
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DeleteConfirmModal, {
-				open: !!deleteTarget,
-				contact: deleteTarget,
-				onConfirm: confirmDelete,
-				onClose: () => setDeleteTarget(null)
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EditNameModal, {
-				open: !!editTarget,
-				contact: editTarget,
-				onSave: handleEditSave,
-				onClose: () => setEditTarget(null)
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-12 pb-4",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center justify-between mb-5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LinkUpLogo$1, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								variant: "ghost",
-								size: "icon",
-								onClick: () => setShowAddModal(true),
-								className: "rounded-full bg-purple-50 text-purple-600 hover:bg-purple-100 h-10 w-10",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-5 h-5" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								variant: "ghost",
-								size: "icon",
-								className: "rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 h-10 w-10",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Funnel, { className: "w-4 h-4" })
-							})]
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "mb-4",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-							className: "text-3xl font-black text-gray-900 tracking-tight",
-							children: "جهات الاتصال"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-500 mt-1",
-							children: "تواصل بسهولة مع الأشخاص المهمين لديك"
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar",
-						children: [
-							"all",
-							"favorites",
-							"online"
-						].map((filter) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-							onClick: () => setActiveFilter(filter),
-							className: `flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap shrink-0 transition-all duration-300 ${activeFilter === filter ? "bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-md shadow-purple-500/20" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`,
-							children: [
-								filter === "all" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-3.5 h-3.5" }), " الكل"] }),
-								filter === "favorites" && "المفضلة",
-								filter === "online" && "متصل الآن"
-							]
-						}, filter))
-					})
-				]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-				className: "flex-1 overflow-y-auto px-5 pt-5",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "relative mb-6",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							placeholder: "ابحث عن اسم أو رقم...",
-							value: searchTerm,
-							onChange: (e) => setSearchTerm(e.target.value),
-							className: "w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-2 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm transition-all"
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center justify-between mb-4 px-1",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-							className: "text-sm font-bold text-gray-800",
-							children: "جهات الاتصال"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full",
-							children: filteredContacts.length
-						})]
-					}),
-					filteredContacts.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex flex-col items-center justify-center py-16 text-center",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-4 shadow-inner",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-9 h-9 text-purple-600/70" })
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-gray-800 font-bold text-lg",
-								children: "لا توجد جهات اتصال"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-sm text-gray-500 mt-1.5 max-w-[200px]",
-								children: "ابدأ بإضافة أصدقائك لبدء التواصل"
-							})
-						]
-					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "space-y-3 pb-4",
-						children: filteredContacts.map((contact) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContactCard, {
-							contact,
-							onCall,
-							onChat,
-							onDelete: setDeleteTarget,
-							onToggleFavorite: toggleFavorite,
-							isFavorite: favorites.includes(contact.uid || contact.username),
-							onEdit: setEditTarget,
-							unreadCount: unreadCounts[contact.uid] || 0
-						}, contact.uid || contact.username))
-					})
-				]
-			})
-		]
-	});
-}
-//#endregion
-//#region src/features/atheer/AtheerScreen.jsx
-function AtheerScreen({ onBack }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-slate-50 relative overflow-hidden",
-		dir: "rtl",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-[500px] h-[500px] bg-purple-200/40 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-200/40 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
-				className: "sticky top-0 z-30 px-6 pt-14 pb-5 backdrop-blur-xl bg-white/70 border-b border-gray-200/50",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: onBack,
-						className: "w-11 h-11 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-							className: "w-5 h-5 text-gray-700",
-							viewBox: "0 0 24 24",
-							fill: "none",
-							stroke: "currentColor",
-							strokeWidth: "2.5",
-							strokeLinecap: "round",
-							strokeLinejoin: "round",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
-						})
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-						className: "text-xl font-black text-gray-900 tracking-tight",
-						children: "من هو أثير؟"
-					})]
-				})
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-				className: "relative z-10 px-5 py-8 pb-32 space-y-8 max-w-3xl mx-auto",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 rounded-3xl p-7 text-white shadow-2xl relative overflow-hidden",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative z-10",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center mb-4 text-2xl font-bold",
-									children: "أ"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-									className: "text-2xl font-black mb-2",
-									children: "أثير المطور"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-purple-200 text-sm leading-relaxed",
-									children: "مؤسس LinkUp | صانع التجارب الرقمية الهادئة"
-								})
-							]
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-lg border border-white/60 space-y-5 text-gray-700 leading-loose text-justify text-sm md:text-base",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "اسمي أثير، وهذا التطبيق بين يديك اسمه Linkup، وما يجمع بين الاسمين ليس مجرد فكرة عابرة أو مشروع تجاري، بل قصة كاملة بدأت من سؤال واحد ظل يلح عليّ كلما فتحت هاتفي: لماذا كل شيء في هذا العالم الرقمي إما يسرق وقتي أو يسرق بياناتي أو يطلب مني مالًا مقابل لحظة هدوء؟" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "أنا لا أمثل شركة، ولا خلفي مستثمرون، ولا يوجد مكتب فاخر يحمل لوحة باسمي، كل ما في الأمر أنني شخص قرر أن يصنع مساحته الخاصة بهدوء، مساحة لا يشوهها إعلان مقتحم ولا يثقلها اشتراك شهري ولا يعكر صفوها شعور دائم بأن هناك من يتنصت، مساحة أضع فيها توقيعي الشخصي بكل ثقة وأقول لك: هذا صنعته لك، خذه، ولا ترد لي شيئًا." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Linkup هو الابن الروحي لهذه الفلسفة، تطبيق ولد من رحم القناعة وليس من رحم السوق، لم أصنعه لأن هناك فجوة تجارية يجب ملؤها، بل صنعته لأنني ببساطة أردت أن أتصل بمن أحب دون أن أشعر أنني سلعة، أردت أن أسمع صوت أمي دون أن تقاطعنا نافذة منبثقة، أردت أن أضحك مع صديق قديم دون أن أعرف أن حديثنا حُلل لاستهدافنا بإعلان لاحق، وحين بحثت عن أداة تمنحني هذا النقاء لم أجدها، فقررت أن أصنعها بنفسي." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "bg-purple-50 border-r-4 border-purple-400 p-4 rounded-r-xl my-4",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-purple-900 font-medium italic",
-									children: "لهذا حين ترى اسم أثير على أي تطبيق، فأنت لا ترى علامة تجارية، بل ترى وعدًا شخصيًا من إنسان يعرف أن سمعته مرهونة بكل سطر برمجي يكتبه، وعد بأن هذا المكان الرقمي الصغير سيبقى نظيفًا، حرًا، وآمنًا، ليس لأن القانون يلزمني بذلك، بل لأن ضميري يفعل."
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "في Linkup لا يوجد سوى ما تحتاجه فعلًا: صوت نقي يصل كأن المتحدث جالس بجانبك، صورة واضحة تنقل ملامح الوجوه دون تشويش، مساحة صغيرة للكتابة السريعة أثناء المكالمة تمرر فيها فكرة أو رابطًا وكأنك تهمس في أذن الطرف الآخر، وكل هذا يحدث خلف جدار سميك من الخصوصية الكاملة التي لا يستطيع أحد اختراقها، حتى أنا شخصيًا أقف خارج هذا الجدار ولا أملك مفاتيحه." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "لا إعلانات تعطل تجربتك، لا اشتراكات تخفي خلفها الميزات الحقيقية، كل ما في التطبيق مفتوح لك من اللحظة الأولى وإلى الأبد، لأنني ببساطة لا أرى أن جودة الصوت أو وضوح الصورة ينبغي أن يكونا ترفًا يدفع المرء مقابله، هما حق أساسي مثل الهواء النقي الذي يجب ألا يباع." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "في زمن صار فيه المستخدم مجرد رقم في تقرير أرباح ربع سنوية، Linkup هو محاولتي المتواضعة لإعادة تعريف العلاقة بين الإنسان وتطبيقه، علاقة لا تقوم على الاستغلال بل على الثقة، لا تقوم على المراقبة بل على الاحترام، لا تقوم على الأخذ بل على العطاء." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "لست هنا لأبيعك شيئًا، ولا لأقنعك أن تطبيقي أفضل تطبيق في العالم، فأنا أعرف أنه ليس كذلك، لكن ما أعرفه يقينًا أن هذا التطبيق صُنع لك وليس ضدي، صُنع ليخدمك أنت لا ليخدمني أنا، صُنع وفي قلبه مبدأ واحد بسيط: أنت إنسان تستحق أن تتواصل بكرامة." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "font-bold text-gray-900 mt-4",
-								children: "مرحبًا بك في Linkup، أهلاً بك في مساحة تحمل اسمي وتوقيعي وضميري، هنا لا يوجد مستخدمون ولا عملاء، يوجد فقط بشر مثلي ومثلك يريدون أن يتحدثوا بحرية وأمان، وأنا أعدك أن هذه المساحة ستبقى كما هي دائمًا، هادئة، نظيفة، وصادقة، تمامًا كما وعدتك أول مرة."
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "mt-4 pt-4 border-t border-gray-200 text-gray-500 italic",
-								children: "هذا أنا، وهذا تطبيقي، وهذه دعوة مفتوحة لك لتكون جزءًا من عالم أثير الرقمي، حيث البساطة فلسفة، والخصوصية عهد، والتواصل بين الناس عودة إلى الجوهر الأول: صوت إنسان يصل إلى إنسان آخر، دون ضجيج ودون مقابل."
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "grid grid-cols-1 md:grid-cols-2 gap-4 pt-4",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-							href: "mailto:Linkup.helpp@gmail.com",
-							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-										className: "w-5 h-5",
-										viewBox: "0 0 24 24",
-										fill: "none",
-										stroke: "currentColor",
-										strokeWidth: "2",
-										strokeLinecap: "round",
-										strokeLinejoin: "round",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-											x: "2",
-											y: "4",
-											width: "20",
-											height: "16",
-											rx: "2"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" })]
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "font-bold text-gray-900",
-										children: "تواصل عبر البريد"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs text-gray-500 mt-0.5",
-										children: "رد سريع ومباشر"
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									strokeLinecap: "round",
-									strokeLinejoin: "round",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
-								})
-							]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-							href: "https://wa.me/966571107181",
-							target: "_blank",
-							rel: "noopener noreferrer",
-							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-										className: "w-6 h-6",
-										viewBox: "0 0 24 24",
-										fill: "currentColor",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" })
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "font-bold text-gray-900",
-										children: "تواصل عبر واتساب"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs text-gray-500 mt-0.5",
-										children: "محادثة فورية وآمنة"
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "w-5 h-5 text-gray-300 group-hover:text-green-500 transition-colors",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									strokeLinecap: "round",
-									strokeLinejoin: "round",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
-								})
-							]
-						})]
-					})
-				]
-			})
-		]
-	});
-}
-//#endregion
-//#region src/features/about/AboutScreen.jsx
-function AboutScreen({ onBack }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-slate-50 relative overflow-hidden",
-		dir: "rtl",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 left-0 w-[500px] h-[500px] bg-blue-200/40 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/4" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-200/40 rounded-full blur-[100px] translate-y-1/2 translate-x-1/4" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
-				className: "sticky top-0 z-30 px-6 pt-14 pb-5 backdrop-blur-xl bg-white/70 border-b border-gray-200/50",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: onBack,
-						className: "w-11 h-11 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-							className: "w-5 h-5 text-gray-700",
-							viewBox: "0 0 24 24",
-							fill: "none",
-							stroke: "currentColor",
-							strokeWidth: "2.5",
-							strokeLinecap: "round",
-							strokeLinejoin: "round",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
-						})
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-						className: "text-xl font-black text-gray-900 tracking-tight",
-						children: "من نحن"
-					})]
-				})
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-				className: "relative z-10 px-5 py-8 pb-32 space-y-8 max-w-3xl mx-auto",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800 rounded-3xl p-7 text-white shadow-2xl relative overflow-hidden",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative z-10",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "inline-block px-3 py-1 bg-white/20 backdrop-blur rounded-full text-[10px] font-bold tracking-wide mb-4 border border-white/10",
-									children: "الإصدار 1.0.0 | تحديث مستمر"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-									className: "text-3xl font-black tracking-tight mb-3",
-									children: "LinkUp"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-indigo-100 leading-relaxed text-sm",
-									children: "منصة تواصل عصرية صُممت لمن يقدر الخصوصية والسرعة والبساطة."
-								})
-							]
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-lg border border-white/60 space-y-5 text-gray-700 leading-loose text-justify text-sm md:text-base",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "نحن لسنا شركة، ولستَ تقرأ الآن كتيبًا تعريفيًا كتبه قسم التسويق، نحن مجرد فكرة خرجت من رأس شخص واحد هو أنا، أثير، ووجدت طريقها إلى هاتفك تحت اسم Linkup، اسم اخترته بعناية لأنه ببساطة ما نفعله: نوصلك بمن تحب، لا أكثر ولا أقل، دون تعقيد ودون مقابل ودون أن نجعل من أنفسنا حاجزًا بينك وبين صوت من تنتظره." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "حين تقرأ \"نحن\" في هذا النص فأنت لا تقرأ عن فريق عمل ضخم ولا عن هيكل تنظيمي ولا عن مجلس إدارة، أنا أثير وحدي، وخلفي قناعة واحدة ظلت ترافقني في كل مشروع أصنعه: التكنولوجيا يجب أن تخدم الإنسان لا أن تستعبده، أنا هنا لأنني أرفض فكرة أن كل نقرة على الهاتف يجب أن يتبعها إعلان، وأن كل دقيقة اتصال يجب أن تُدفع، وأن كل خصوصية يجب أن تُباع، هذا الرفض هو نقطة البداية." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "bg-blue-50 border-r-4 border-blue-400 p-4 rounded-r-xl my-4",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-blue-900 font-medium italic",
-									children: "Linkup خرج إلى النور ليكون مساحة اتصال نقية، لا تعقيد فيها ولا تشويش، تفتح التطبيق فتجده بسيطًا لدرجة أنك لا تحتاج إلى شرح، تضغط على اسم من تحب فيتصل، تتحدث بصوت واضح كأن الشخص في الغرفة المجاورة."
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "ترى وجهه بنقاء يجعلك تنسى أن بينكما شاشات ومسافات وكيلومترات من كابلات الإنترنت، تكتب له ملاحظة سريعة أثناء المكالمة وهو يقرؤها في لحظتها، وكل هذا يحدث في ممر آمن تمامًا، لا أحد يستمع، لا أحد يتطفل، لا أحد يحلل كلامكما ليبيعكما شيئًا لاحقًا، حتى أنا شخصيًا لا أستطيع الوصول إلى ما يدور بينكما لأن التطبيق صُمم أصلًا ليكون حصينًا حتى من صانعه." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "نحن لا نجمع بياناتك لنبيعها لأننا ببساطة لا نجمعها من الأساس، لا نعرف ماذا تقول، لا نعرف مع من تتكلم، لا نعرف كم مرة اتصلت بوالدتك هذا الأسبوع، كل ما نعرفه هو بريدك الإلكتروني الذي تعطينا إياه طواعية لا لنرسل لك إعلانات بل لنحفظ لك مفتاح حسابك إذا ضاع هاتفك أو تغير، وحتى هذا البريد لن يصلك منه شيء منا، لا نشرات ولا عروض ولا رسائل تذكير، إنه مجرد حبل نجاة صغير تمسك به أنت وحدك إذا احتجته يومًا، لا أكثر." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "في Linkup لا توجد خطط اشتراك تخفي الميزات الحقيقية خلف جدار دفع، كل ما في التطبيق متاح لك الآن، وغدًا، وإلى الأبد، الصوت عالي الجودة ليس ترفًا تشتريه، الفيديو النقي ليس ميزة بريميوم، الأمان الكامل ليس حكرًا على من يدفع أكثر، هذه كلها حقوق أساسية لأي إنسان يريد أن يتواصل بكرامة، وأنا أؤمن أن بيع هذه الحقوق هو نوع من الظلم الذي لا أريد أن أكون جزءًا منه." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "ما يفرقنا عن غيرنا ليس خاصية سحرية، بل ما لا يوجد لدينا، ليس لدينا إعلانات، ليس لدينا متتبعات، ليس لدينا طرف ثالث ينتظر بياناتك، ليس لدينا رغبة في احتكار وقتك أو انتباهك، كل ما لدينا هو أداة اتصال نظيفة تؤدي وظيفتها وتختفي، تمنحك ما تحتاج بالضبط دون أن تطلب منك شيئًا." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Linkup هو الجزء الجديد من عائلة أثير الرقمية، إلى جانب مشاريع أخرى قادمة، ألعاب ألغاز هادئة، أدوات تفاعلية بسيطة، كلها تحمل الاسم نفسه والوعد نفسه، لأن فلسفتي لا تتغير بتغير نوع التطبيق، أنا أصنع مساحات للناس وليس أدوات للربح، أمنحك ما أصنعه بيدي وأثق أنه سينفعك، ولا أنتظر منك مقابلاً." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "هذه الصفحة ليست طويلة لأن لدي الكثير لأخفيه، بل لأن لدي مبادئ أريدك أن تفهمها جيدًا قبل أن تضغط على أيقونة التطبيق لأول مرة، أريدك أن تعرف أن خلف هذه الأيقونة إنسانًا حقيقيًا يهمه رأيك وتجربتك، إنسانًا يقرأ رسائلك بنفسه على بريد الدعم، إنسانًا لا يعدك بالكمال لكنه يعدك بالصدق." }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "font-bold text-gray-900 mt-4 pt-4 border-t border-gray-200",
-								children: "مرحبًا بك في Linkup، مرحبًا بك في المساحة التي تحمل توقيع أثير، حيث البساطة أسلوب حياة، والتواصل بلا ثمن، والخصوصية ليست خيارًا بل أساس، وحيث ما زال بالإمكان أن تجد تطبيقًا يصنع لك لا لي."
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "grid grid-cols-1 md:grid-cols-2 gap-4 pt-4",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-							href: "mailto:Linkup.helpp@gmail.com",
-							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-										className: "w-5 h-5",
-										viewBox: "0 0 24 24",
-										fill: "none",
-										stroke: "currentColor",
-										strokeWidth: "2",
-										strokeLinecap: "round",
-										strokeLinejoin: "round",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-											x: "2",
-											y: "4",
-											width: "20",
-											height: "16",
-											rx: "2"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" })]
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "font-bold text-gray-900",
-										children: "تواصل عبر البريد"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs text-gray-500 mt-0.5",
-										children: "رد سريع ومباشر"
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									strokeLinecap: "round",
-									strokeLinejoin: "round",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
-								})
-							]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-							href: "https://wa.me/966571107181",
-							target: "_blank",
-							rel: "noopener noreferrer",
-							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-										className: "w-6 h-6",
-										viewBox: "0 0 24 24",
-										fill: "currentColor",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" })
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "font-bold text-gray-900",
-										children: "تواصل عبر واتساب"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs text-gray-500 mt-0.5",
-										children: "محادثة فورية وآمنة"
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "w-5 h-5 text-gray-300 group-hover:text-green-500 transition-colors",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									strokeLinecap: "round",
-									strokeLinejoin: "round",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
-								})
-							]
-						})]
-					})
-				]
-			})
-		]
-	});
-}
-//#endregion
-//#region src/features/Settings/PrivacyPolicyScreen.jsx
-function PrivacyPolicyScreen({ onBack }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-slate-50 relative overflow-hidden",
-		dir: "rtl",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-1/4 left-1/4 w-64 h-64 bg-purple-200/40 rounded-full blur-[80px]" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-200/40 rounded-full blur-[80px]" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
-				className: "sticky top-0 z-30 px-6 pt-14 pb-5 backdrop-blur-xl bg-white/70 border-b border-gray-200/50",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: onBack,
-						className: "w-11 h-11 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-							className: "w-5 h-5 text-gray-700",
-							viewBox: "0 0 24 24",
-							fill: "none",
-							stroke: "currentColor",
-							strokeWidth: "2.5",
-							strokeLinecap: "round",
-							strokeLinejoin: "round",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
-						})
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-						className: "text-xl font-black text-gray-900 tracking-tight",
-						children: "سياسة الخصوصية"
-					})]
-				})
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-				className: "relative z-10 px-5 py-8 pb-32 space-y-8 max-w-3xl mx-auto",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-3 mb-3",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "w-8 h-8 text-blue-200",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" })
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-									className: "font-black text-lg",
-									children: "كلمة من أثير"
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-blue-50 text-sm leading-loose",
-								children: "هذه ليست وثيقة قانونية معقدة، بل هي كلمتي لك. أنا لا أريد منك شيئًا، فقط أريدك أن تتواصل مع من تحب بأمان وراحة."
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "mt-4 text-[10px] font-bold text-blue-200 opacity-80",
-								children: "آخر تحديث: ٢٨ أبريل ٢٠٢٦"
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-lg border border-white/60 space-y-6 text-gray-700 leading-loose text-justify text-sm md:text-base",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-								className: "text-base font-black text-gray-900 mb-2 flex items-center gap-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-8 h-1 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full" }), "ما نعرفه عنك"]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "كل ما نعرفه عنك هو بريدك الإلكتروني فقط، وذلك لسبب وحيد هو أن تحمي نفسك من ضياع حسابك. إذا تغير هاتفك أو فقدته، فبريدك هو المفتاح الذي تستعيد به كل شيء. لا نرسل لك أي رسائل، لا نطلع على محتوى بريدك، ولا نستخدمه لأي غرض آخر. ببساطة، هو مجرد مفتاح طوارئ تحتفظ به أنت وحدك." })] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-								className: "text-base font-black text-gray-900 mb-2 flex items-center gap-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-8 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" }), "اتصالاتك خاصة تمامًا"]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "أما كل ما يتعلق باتصالاتك، صوتًا وصورةً ورسائل، فلا نعرف عنه شيئًا ولا نخزنه ولا نستطيع الوصول إليه. ما تقوله وترسله يبقى بينك وبين الطرف الآخر، دون أن يمر على خادم يمكننا فتحه، ودون أن يكون لنا أي قدرة على الاطلاع عليه، حتى لو أراد أحدنا ذلك لا يملك السبيل. يعني حين تتصل بوالدتك أو بصديقك، فالعالم الخارجي كله يقف خارج الغرفة، ونحن معه." })] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "bg-purple-50 border-r-4 border-purple-400 p-4 rounded-r-xl my-4",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-purple-900 font-medium italic",
-									children: "لا توجد لدينا إعلانات في التطبيق، ولا خطط اشتراك، ولا أطراف ثالثة نشاركها بياناتك لأننا أصلًا لا نملك بيانات نشاركها."
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-								className: "text-base font-black text-gray-900 mb-2 flex items-center gap-2",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-8 h-1 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full" }), "الشفافية والحذف"]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "لا نبيع شيئًا، لا نؤجر شيئًا، لا نحلل سلوكك ولا نبني ملفًا عنك، وكل ما يهمنا هو أن تبقى تجربتك نظيفة وخاصة. إذا قررت يومًا أن تغادر Linkup، فبإمكانك حذف حسابك من داخل التطبيق وسيُمسح بريدك الإلكتروني نهائيًا ولا يبقى له أثر." })] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "text-center pt-6 border-t border-gray-200",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-sm font-bold text-gray-900 mb-2",
-									children: "هذا هو وعدي لك"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-gray-600 leading-relaxed",
-									children: "لا بنود مخفية ولا مفاجآت. خصوصيتك ليست سلعة، بل هي حجر الأساس الذي بنيت عليه هذا التطبيق. شكرًا لثقتك فيّ وفي Linkup."
-								})]
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "grid grid-cols-1 md:grid-cols-2 gap-4 pt-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-							href: "mailto:Linkup.helpp@gmail.com",
-							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-										className: "w-5 h-5",
-										viewBox: "0 0 24 24",
-										fill: "none",
-										stroke: "currentColor",
-										strokeWidth: "2",
-										strokeLinecap: "round",
-										strokeLinejoin: "round",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-											x: "2",
-											y: "4",
-											width: "20",
-											height: "16",
-											rx: "2"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" })]
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "font-bold text-gray-900",
-										children: "تواصل عبر البريد"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs text-gray-500 mt-0.5",
-										children: "دعم فني مباشر"
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									strokeLinecap: "round",
-									strokeLinejoin: "round",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
-								})
-							]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-							href: "https://wa.me/966571107181",
-							target: "_blank",
-							rel: "noopener noreferrer",
-							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-										className: "w-6 h-6",
-										viewBox: "0 0 24 24",
-										fill: "currentColor",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" })
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "font-bold text-gray-900",
-										children: "تواصل عبر واتساب"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs text-gray-500 mt-0.5",
-										children: "محادثة فورية وآمنة"
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "w-5 h-5 text-gray-300 group-hover:text-green-500 transition-colors",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									strokeLinecap: "round",
-									strokeLinejoin: "round",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
-								})
-							]
-						})]
-					})
-				]
-			})
-		]
-	});
-}
-//#endregion
-//#region src/features/Settings/TermsOfServiceScreen.jsx
-function TermsOfServiceScreen({ onBack }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 pb-10",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "px-5 py-4 max-w-2xl mx-auto",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "mb-4",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-					variant: "ghost",
-					onClick: onBack,
-					className: "rounded-full",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "h-5 w-5 ml-2" }), " رجوع"]
-				})
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
-				className: "prose prose-gray max-w-none text-right leading-relaxed space-y-6",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-sm text-gray-500",
-						children: "آخر تحديث: أبريل 2026"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "text-2xl font-bold text-gray-900",
-						children: "كلمة من أثير"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "مرحباً بك في Tero Quick Call. قبل أن تبدأ، أريدك أن تقرأ هذه السطور القليلة. إنها \"قواعد البيت\" الذي بنيته لك. بسيطة، ومنطقية، ومبنية على الاحترام المتبادل." }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "باستخدامك للتطبيق، أنت توافق على هذه البنود. إذا لم تعجبك، لا مشكلة، لكن لا يحق لك الاستمرار." }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-						className: "text-xl font-bold text-gray-900",
-						children: "١. ما تلتزم به أنت"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "تطبيقنا مساحة للتواصل النقي. لذلك، أنت توعدني بأنك:" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
-						className: "list-disc list-inside space-y-1 text-gray-800",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "ستكون إنساناً طيباً:" }), " لا مضايقات، لا تهديدات، لا سب، لا محتوى غير أخلاقي، ولا أي فعل يؤذي الآخرين أو يخيفهم."] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "لن تستخدم التطبيق في الحرام:" }), " أي نشاط غير قانوني أو ينتهك حقوق الغير ممنوع تماماً."] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "لن تعبث بالتطبيق:" }), " لا تحاول اختراقه، أو نسخه، أو إعادة بيعه، أو استخدامه لإرسال رسائل مزعجة."] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "ستحافظ على حسابك:" }), " أنت مسؤول عن الحفاظ على سرية بيانات دخولك."] })
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "أي خرق واضح لهذه البنود يعطيني الحق في وقف حسابك فوراً دون سابق إنذار. هذه المساحة نظيفة، وسأحافظ عليها نظيفة." }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-						className: "text-xl font-bold text-gray-900",
-						children: "٢. ما نلتزم به نحن"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
-						className: "list-disc list-inside space-y-1 text-gray-800",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "الخدمة مجانية للأبد:" }), " لا اشتراكات، لا إعلانات، لا مفاجآت مالية."] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "خصوصيتك مصانة:" }), " لا نقرأ محادثاتك، لا نبيع بياناتك. سياسة الخصوصية تشرح هذا بالتفصيل."] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "نبذل جهدنا:" }), " نسعى لأن تكون المكالمات واضحة والخدمة مستقرة، لكن لا نضمن الكمال المطلق."] })
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-						className: "text-xl font-bold text-gray-900",
-						children: "٣. حدود المسؤولية (بكل صراحة)"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "أنا أقدم لك هذه الأداة كما هي، من شخص يحب أن يصنع أشياء مفيدة. لكن الحياة لا تخلو من مفاجآت:" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
-						className: "list-disc list-inside space-y-1 text-gray-800",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "أنا غير مسؤول عن أي ضرر مباشر أو غير مباشر يحدث بسبب استخدامك للتطبيق أو عدم قدرتك على استخدامه (مثلاً: انقطاع مكالمة مهمة بسبب ضعف شبكتك، أو أي خسارة تنتج عن ذلك)." }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "الاستخدام مسؤوليتك الشخصية:" }), " أنت تتحمل وحدك كل ما ترسله أو تشاركه."] })]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-						className: "text-xl font-bold text-gray-900",
-						children: "٤. إنهاء الخدمة"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "أنت حر في أي وقت. يمكنك حذف حسابك من داخل التطبيق. وأنا أيضاً أحتفظ بحقي في إنهاء حساب أي شخص يخالف هذه الشروط البسيطة، دون تعويض أو إشعار مسبق إذا كان الضرر واضحاً." }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-						className: "text-xl font-bold text-gray-900",
-						children: "٥. تغييرات على هذه الشروط"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "إذا طرأ أي تعديل، سأخبرك عبر إشعار في التطبيق. استمرارك في الاستخدام بعد التعديل يعني قبولك به." }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-						className: "text-xl font-bold text-gray-900",
-						children: "تواصل معي"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "هذه الشروط كتبتها بنفسي. إذا عندك سؤال، أنا موجود:" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex flex-wrap gap-4 mt-4",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-							href: "mailto:Linkup.helpp@gmail.com",
-							className: "group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 active:scale-95 overflow-hidden",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "h-5 w-5 relative z-10" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "relative z-10",
-									children: "البريد الإلكتروني"
-								})
-							]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-							href: "https://wa.me/966571107181",
-							target: "_blank",
-							rel: "noopener noreferrer",
-							className: "group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 active:scale-95 overflow-hidden",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "h-5 w-5 relative z-10",
-									viewBox: "0 0 24 24",
-									fill: "currentColor",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" })
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "relative z-10",
-									children: "واتساب"
-								})
-							]
-						})]
-					})
-				]
-			})]
-		})
-	});
-}
-//#endregion
-//#region src/features/Settings/DataManagementScreen.jsx
-function DataManagementScreen({ onBack }) {
-	const [loading, setLoading] = (0, import_react.useState)(null);
-	const [toast, setToast] = (0, import_react.useState)({
-		show: false,
-		msg: "",
-		type: "success"
-	});
-	const user = auth.currentUser;
-	const showToast = (msg, type = "success") => {
-		setToast({
-			show: true,
-			msg,
-			type
-		});
-		setTimeout(() => setToast({
-			show: false,
-			msg: "",
-			type: "success"
-		}), 3e3);
-	};
-	const handleExport = async () => {
-		if (!user) return;
-		setLoading("export");
-		try {
-			const data = (await getDocs(query(collection(db, "chats"), where("participants", "array-contains", user.uid)))).docs.map((d) => d.data());
-			const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = `linkup_backup_${Date.now()}.json`;
-			a.click();
-			URL.revokeObjectURL(url);
-			showToast("تم تصدير البيانات بنجاح");
-		} catch (e) {
-			showToast("فشل التصدير", "error");
-		} finally {
-			setLoading(null);
-		}
-	};
-	const handleClearCache = () => {
-		setLoading("cache");
-		setTimeout(() => {
-			localStorage.removeItem("vibecall_has_seen_welcome");
-			sessionStorage.clear();
-			showToast("تم مسح ذاكرة التخزين المؤقت");
-			setLoading(null);
-		}, 800);
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-slate-50/50 pb-24",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-16 pb-4",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-3 mb-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: onBack,
-							className: "w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-							className: "text-2xl font-black text-gray-900 tracking-tight",
-							children: "إدارة البيانات"
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-xs text-gray-500",
-						children: "تحكم كامل في بياناتك ونسخك الاحتياطي"
-					}),
-					"      "
-				]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-				className: "px-5 pt-6 space-y-4",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white rounded-2xl p-5 border border-gray-100 shadow-sm",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3 mb-4",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "p-2.5 rounded-xl bg-blue-100 text-blue-600",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Database$1, { className: "w-5 h-5" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "font-bold text-gray-900",
-								children: "النسخ الاحتياطي"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-gray-500",
-								children: "حفظ محادثاتك وبياناتك بأمان"
-							})] })]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							onClick: handleExport,
-							disabled: loading === "export",
-							className: "w-full h-12 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl font-bold transition-all active:scale-[0.98] disabled:opacity-50",
-							children: loading === "export" ? "جارٍ التصدير..." : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, { className: "w-4 h-4 ml-2" }), " تصدير البيانات (JSON)"] })
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white rounded-2xl p-5 border border-gray-100 shadow-sm",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3 mb-4",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "p-2.5 rounded-xl bg-purple-100 text-purple-600",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Cloud, { className: "w-5 h-5" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "font-bold text-gray-900",
-								children: "مسح الذاكرة المؤقتة"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-gray-500",
-								children: "تسريع التطبيق وحل مشاكل العرض"
-							})] })]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							onClick: handleClearCache,
-							disabled: loading === "cache",
-							variant: "outline",
-							className: "w-full h-12 rounded-xl border-gray-200 hover:bg-gray-50 transition-all active:scale-[0.98] disabled:opacity-50",
-							children: loading === "cache" ? "جارٍ المسح..." : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { className: "w-4 h-4 ml-2" }), " مسح الكاش"] })
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-red-50 rounded-2xl p-5 border border-red-100",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-3 mb-3",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "p-2.5 rounded-xl bg-red-100 text-red-600",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-5 h-5" })
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-									className: "font-bold text-red-800",
-									children: "منطقة الخطر"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-red-600",
-									children: "إجراءات لا يمكن التراجع عنها"
-								})] })]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-red-700 mb-4 leading-relaxed",
-								children: "حذف البيانات سيؤدي إلى إزالة جميع المحادثات، الإعدادات، والبيانات المحلية. لن يتم حذف حسابك من الخادم."
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-								variant: "destructive",
-								className: "w-full h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-all active:scale-[0.98]",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4 ml-2" }), " حذف البيانات المحلية"]
-							})
-						]
-					})
-				]
-			}),
-			toast.show && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: `fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-4 ${toast.type === "error" ? "bg-red-600" : "bg-gray-900"} text-white`,
-				children: [
-					toast.type === "error" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-5 h-5 text-emerald-400" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-sm font-medium",
-						children: toast.msg
-					}),
-					"        "
-				]
-			})
-		]
-	});
-}
-//#endregion
-//#region src/features/Settings/AppLockScreen.jsx
-function AppLockScreen({ onBack }) {
-	const [enabled, setEnabled] = (0, import_react.useState)(false);
-	const [pin, setPin] = (0, import_react.useState)("");
-	const [showPin, setShowPin] = (0, import_react.useState)(false);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-slate-50/50 pb-24 relative overflow-hidden",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
-			className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-16 pb-4",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center gap-3",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					onClick: onBack,
-					className: "w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors active:scale-95",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-					className: "text-2xl font-black text-gray-900 tracking-tight",
-					children: "قفل التطبيق"
-				})]
-			})
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-			className: "px-5 pt-8 space-y-6 relative z-10",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center justify-between",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "p-3 rounded-xl bg-purple-100 text-purple-600",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-6 h-6" })
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "font-bold text-gray-900 text-base",
-						children: "تفعيل القفل الأمني"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-xs text-gray-500 mt-1",
-						children: "طلب رمز PIN عند كل فتح"
-					})] })]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					onClick: () => setEnabled(!enabled),
-					className: `w-14 h-8 rounded-full transition-colors relative ${enabled ? "bg-purple-600" : "bg-gray-200"}`,
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${enabled ? "translate-x-6" : ""}` })
-				})]
-			}), enabled && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5 animate-in fade-in slide-in-from-top-4",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-						className: "text-sm font-bold text-gray-700 block",
-						children: "تعيين رمز PIN"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "relative",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							type: showPin ? "text" : "password",
-							value: pin,
-							onChange: (e) => setPin(e.target.value),
-							placeholder: "مثال: 1234",
-							maxLength: 6,
-							className: "h-14 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200 text-center tracking-[0.5em] text-xl font-mono"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: () => setShowPin(!showPin),
-							className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600",
-							children: showPin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-3 text-xs text-gray-500 bg-gray-50 p-4 rounded-xl",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-5 h-5 text-purple-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "يمكنك تفعيل البصمة لاحقاً من إعدادات النظام" })]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						className: "w-full h-14 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98]",
-						children: "حفظ القفل"
-					})
-				]
-			})]
-		})]
-	});
-}
-//#endregion
-//#region src/features/profile/ChangeEmailScreen.jsx
-function ChangeEmailScreen({ onSuccess, onBack }) {
-	const [currentPassword, setCurrentPassword] = (0, import_react.useState)("");
-	const [newEmail, setNewEmail] = (0, import_react.useState)("");
-	const [loading, setLoading] = (0, import_react.useState)(false);
-	const [error, setError] = (0, import_react.useState)("");
-	const [success, setSuccess] = (0, import_react.useState)("");
-	const user = auth.currentUser;
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		if (!currentPassword || !newEmail) {
-			setError("يرجى ملء جميع الحقول");
-			return;
-		}
-		setLoading(true);
-		setError("");
-		setSuccess("");
-		try {
-			await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, currentPassword));
-			await updateEmail(user, newEmail);
-			setSuccess("تم تحديث البريد بنجاح");
-			onSuccess?.(user);
-		} catch (err) {
-			setError(err.code === "auth/invalid-credential" ? "كلمة المرور غير صحيحة" : "فشل التحديث، حاول مرة أخرى");
-		} finally {
-			setLoading(false);
-		}
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "pt-28 px-5 pb-24 min-h-screen bg-slate-50/50 flex items-start justify-center",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "w-full max-w-md bg-white rounded-3xl p-6 shadow-lg shadow-gray-200/50 border border-gray-100 space-y-6 relative",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					onClick: onBack,
-					className: "absolute top-6 right-6 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors active:scale-95",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-5 h-5 text-gray-600" })
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "text-center mb-2",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-3",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "w-7 h-7 text-purple-600" })
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-							className: "text-2xl font-black text-gray-900",
-							children: "تغيير البريد"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-500 mt-1",
-							children: "قم بتحديث بريدك الإلكتروني لحسابك"
-						})
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-					className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
-					children: "البريد الحالي"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "h-12 px-4 rounded-xl bg-gray-50 border border-gray-200 flex items-center text-gray-600 text-sm font-medium",
-					children: user?.email || "غير محدد"
-				})] }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-					onSubmit: handleSubmit,
-					className: "space-y-4",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-							className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
-							children: "تأكيد كلمة المرور"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								type: "password",
-								value: currentPassword,
-								onChange: (e) => setCurrentPassword(e.target.value),
-								placeholder: "••••••••",
-								className: "pr-12 h-12 rounded-xl bg-white border-gray-200 focus-visible:ring-purple-200",
-								required: true
-							})]
-						})] }),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-							className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
-							children: "البريد الإلكتروني الجديد"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								type: "email",
-								value: newEmail,
-								onChange: (e) => setNewEmail(e.target.value),
-								placeholder: "new@example.com",
-								className: "pr-12 h-12 rounded-xl bg-white border-gray-200 focus-visible:ring-purple-200",
-								required: true
-							})]
-						})] }),
-						error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4 shrink-0" }), error]
-						}),
-						success && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "bg-emerald-50 border border-emerald-100 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-4 h-4 shrink-0" }), success]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							type: "submit",
-							disabled: loading,
-							className: "w-full h-12 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] disabled:opacity-50",
-							children: loading ? "جارٍ التحديث..." : "تحديث البريد"
-						})
-					]
-				})
-			]
-		})
-	});
-}
-//#endregion
-//#region src/features/profile/ResetPasswordScreen.jsx
-function ResetPasswordProfileScreen({ onBack, onOpenForgotPassword }) {
-	const [currentPassword, setCurrentPassword] = (0, import_react.useState)("");
-	const [newPassword, setNewPassword] = (0, import_react.useState)("");
-	const [confirmPassword, setConfirmPassword] = (0, import_react.useState)("");
-	const [loading, setLoading] = (0, import_react.useState)(false);
-	const [error, setError] = (0, import_react.useState)("");
-	const [success, setSuccess] = (0, import_react.useState)(false);
-	const [showCurrent, setShowCurrent] = (0, import_react.useState)(false);
-	const [showNew, setShowNew] = (0, import_react.useState)(false);
-	const [showConfirm, setShowConfirm] = (0, import_react.useState)(false);
-	const user = auth.currentUser;
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setError("");
-		if (!currentPassword || !newPassword || !confirmPassword) {
-			setError("يرجى ملء جميع الحقول");
-			return;
-		}
-		if (newPassword !== confirmPassword) {
-			setError("كلمتا المرور غير متطابقتين");
-			return;
-		}
-		if (newPassword.length < 6) {
-			setError("يجب أن تكون كلمة المرور 6 أحرف على الأقل");
-			return;
-		}
-		setLoading(true);
-		try {
-			await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, currentPassword));
-			await updatePassword(user, newPassword);
-			setSuccess(true);
-			setCurrentPassword("");
-			setNewPassword("");
-			setConfirmPassword("");
-		} catch (err) {
-			console.error(err);
-			if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") setError("كلمة المرور الحالية غير صحيحة. إذا نسيتها، استخدم رابط إعادة التعيين أدناه.");
-			else setError("حدث خطأ أثناء التغيير. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.");
-		} finally {
-			setLoading(false);
-		}
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "pt-28 px-5 pb-24 min-h-screen bg-slate-50/50 flex items-start justify-center",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "w-full max-w-md bg-white rounded-3xl p-6 shadow-lg shadow-gray-200/50 border border-gray-100 space-y-6",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-3 mb-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						variant: "ghost",
-						size: "icon",
-						onClick: onBack,
-						className: "rounded-full hover:bg-gray-100",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "h-5 w-5" })
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-sm font-medium text-gray-500",
-						children: "العودة للملف الشخصي"
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "text-center mb-2",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-3",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-7 h-7 text-purple-600" })
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-							className: "text-2xl font-black text-gray-900",
-							children: "تغيير كلمة المرور"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-500 mt-1",
-							children: "أدخل كلمة المرور الحالية للتحقق أولاً"
-						})
-					]
-				}),
-				!success ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-					onSubmit: handleSubmit,
-					className: "space-y-4",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
-								children: "كلمة المرور الحالية"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "relative",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-										type: showCurrent ? "text" : "password",
-										value: currentPassword,
-										onChange: (e) => setCurrentPassword(e.target.value),
-										placeholder: "••••••••",
-										className: "pr-12 h-12 rounded-xl bg-white border-gray-200 focus-visible:ring-purple-200",
-										required: true
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-										type: "button",
-										onClick: () => setShowCurrent(!showCurrent),
-										className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1",
-										children: showCurrent ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
-									})
-								]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								type: "button",
-								onClick: onOpenForgotPassword,
-								className: "text-xs text-purple-600 hover:text-purple-800 font-medium mt-1.5 flex items-center gap-1 transition-colors",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "w-3.5 h-3.5" }), " نسيت كلمة المرور؟ إرسال رابط إعادة التعيين"]
-							})
-						] }),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-							className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
-							children: "كلمة المرور الجديدة"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									type: showNew ? "text" : "password",
-									value: newPassword,
-									onChange: (e) => setNewPassword(e.target.value),
-									placeholder: "••••••••",
-									className: "pr-12 h-12 rounded-xl bg-white border-gray-200 focus-visible:ring-purple-200",
-									required: true
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-									type: "button",
-									onClick: () => setShowNew(!showNew),
-									className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1",
-									children: showNew ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
-								})
-							]
-						})] }),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-							className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
-							children: "تأكيد كلمة المرور الجديدة"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-									type: showConfirm ? "text" : "password",
-									value: confirmPassword,
-									onChange: (e) => setConfirmPassword(e.target.value),
-									placeholder: "••••••••",
-									className: "pr-12 h-12 rounded-xl bg-white border-gray-200 focus-visible:ring-purple-200",
-									required: true
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-									type: "button",
-									onClick: () => setShowConfirm(!showConfirm),
-									className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1",
-									children: showConfirm ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
-								})
-							]
-						})] }),
-						error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-1",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4 shrink-0" }), error]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							type: "submit",
-							disabled: loading,
-							className: "w-full h-12 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] disabled:opacity-50",
-							children: loading ? "جارٍ التحقق والتحديث..." : "تحديث كلمة المرور"
-						})
-					]
-				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "text-center py-8 animate-in fade-in zoom-in duration-300",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-10 h-10 text-emerald-600" })
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-							className: "text-xl font-bold text-gray-900 mb-2",
-							children: "تم التغيير بنجاح!"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-500 mb-6",
-							children: "يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة."
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-							onClick: onBack,
-							className: "w-full h-12 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-bold",
-							children: "العودة للملف الشخصي"
-						})
-					]
-				})
-			]
-		})
-	});
-}
-typeof window !== "undefined" && window.document && window.document.createElement;
-function composeEventHandlers(originalEventHandler, ourEventHandler, { checkForDefaultPrevented = true } = {}) {
-	return function handleEvent(event) {
-		originalEventHandler?.(event);
-		if (checkForDefaultPrevented === false || !event.defaultPrevented) return ourEventHandler?.(event);
-	};
-}
-//#endregion
-//#region node_modules/@radix-ui/react-dialog/node_modules/@radix-ui/react-context/dist/index.mjs
-function createContext2(rootComponentName, defaultContext) {
-	const Context = import_react.createContext(defaultContext);
-	const Provider = (props) => {
-		const { children, ...context } = props;
-		const value = import_react.useMemo(() => context, Object.values(context));
-		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Context.Provider, {
-			value,
-			children
-		});
-	};
-	Provider.displayName = rootComponentName + "Provider";
-	function useContext2(consumerName) {
-		const context = import_react.useContext(Context);
-		if (context) return context;
-		if (defaultContext !== void 0) return defaultContext;
-		throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
-	}
-	return [Provider, useContext2];
-}
-function createContextScope(scopeName, createContextScopeDeps = []) {
-	let defaultContexts = [];
-	function createContext3(rootComponentName, defaultContext) {
-		const BaseContext = import_react.createContext(defaultContext);
-		const index = defaultContexts.length;
-		defaultContexts = [...defaultContexts, defaultContext];
-		const Provider = (props) => {
-			const { scope, children, ...context } = props;
-			const Context = scope?.[scopeName]?.[index] || BaseContext;
-			const value = import_react.useMemo(() => context, Object.values(context));
-			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Context.Provider, {
-				value,
-				children
-			});
-		};
-		Provider.displayName = rootComponentName + "Provider";
-		function useContext2(consumerName, scope) {
-			const Context = scope?.[scopeName]?.[index] || BaseContext;
-			const context = import_react.useContext(Context);
-			if (context) return context;
-			if (defaultContext !== void 0) return defaultContext;
-			throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
-		}
-		return [Provider, useContext2];
-	}
-	const createScope = () => {
-		const scopeContexts = defaultContexts.map((defaultContext) => {
-			return import_react.createContext(defaultContext);
-		});
-		return function useScope(scope) {
-			const contexts = scope?.[scopeName] || scopeContexts;
-			return import_react.useMemo(() => ({ [`__scope${scopeName}`]: {
-				...scope,
-				[scopeName]: contexts
-			} }), [scope, contexts]);
-		};
-	};
-	createScope.scopeName = scopeName;
-	return [createContext3, composeContextScopes(createScope, ...createContextScopeDeps)];
-}
-function composeContextScopes(...scopes) {
-	const baseScope = scopes[0];
-	if (scopes.length === 1) return baseScope;
-	const createScope = () => {
-		const scopeHooks = scopes.map((createScope2) => ({
-			useScope: createScope2(),
-			scopeName: createScope2.scopeName
-		}));
-		return function useComposedScopes(overrideScopes) {
-			const nextScopes = scopeHooks.reduce((nextScopes2, { useScope, scopeName }) => {
-				const currentScope = useScope(overrideScopes)[`__scope${scopeName}`];
-				return {
-					...nextScopes2,
-					...currentScope
-				};
-			}, {});
-			return import_react.useMemo(() => ({ [`__scope${baseScope.scopeName}`]: nextScopes }), [nextScopes]);
-		};
-	};
-	createScope.scopeName = baseScope.scopeName;
-	return createScope;
-}
-//#endregion
-//#region node_modules/@radix-ui/react-id/dist/index.mjs
-var useReactId = import_react[" useId ".trim().toString()] || (() => void 0);
-var count$1 = 0;
-function useId$1(deterministicId) {
-	const [id, setId] = import_react.useState(useReactId());
-	useLayoutEffect2(() => {
-		if (!deterministicId) setId((reactId) => reactId ?? String(count$1++));
-	}, [deterministicId]);
-	return deterministicId || (id ? `radix-${id}` : "");
-}
-//#endregion
-//#region node_modules/@radix-ui/react-use-controllable-state/dist/index.mjs
-var useInsertionEffect$2 = import_react[" useInsertionEffect ".trim().toString()] || useLayoutEffect2;
-function useControllableState({ prop, defaultProp, onChange = () => {}, caller }) {
-	const [uncontrolledProp, setUncontrolledProp, onChangeRef] = useUncontrolledState({
-		defaultProp,
-		onChange
-	});
-	const isControlled = prop !== void 0;
-	const value = isControlled ? prop : uncontrolledProp;
-	{
-		const isControlledRef = import_react.useRef(prop !== void 0);
-		import_react.useEffect(() => {
-			const wasControlled = isControlledRef.current;
-			if (wasControlled !== isControlled) console.warn(`${caller} is changing from ${wasControlled ? "controlled" : "uncontrolled"} to ${isControlled ? "controlled" : "uncontrolled"}. Components should not switch from controlled to uncontrolled (or vice versa). Decide between using a controlled or uncontrolled value for the lifetime of the component.`);
-			isControlledRef.current = isControlled;
-		}, [isControlled, caller]);
-	}
-	return [value, import_react.useCallback((nextValue) => {
-		if (isControlled) {
-			const value2 = isFunction(nextValue) ? nextValue(prop) : nextValue;
-			if (value2 !== prop) onChangeRef.current?.(value2);
-		} else setUncontrolledProp(nextValue);
-	}, [
-		isControlled,
-		prop,
-		setUncontrolledProp,
-		onChangeRef
-	])];
-}
-function useUncontrolledState({ defaultProp, onChange }) {
-	const [value, setValue] = import_react.useState(defaultProp);
-	const prevValueRef = import_react.useRef(value);
-	const onChangeRef = import_react.useRef(onChange);
-	useInsertionEffect$2(() => {
-		onChangeRef.current = onChange;
-	}, [onChange]);
-	import_react.useEffect(() => {
-		if (prevValueRef.current !== value) {
-			onChangeRef.current?.(value);
-			prevValueRef.current = value;
-		}
-	}, [value, prevValueRef]);
-	return [
-		value,
-		setValue,
-		onChangeRef
-	];
-}
-function isFunction(value) {
-	return typeof value === "function";
-}
-//#endregion
-//#region node_modules/@radix-ui/react-dismissable-layer/node_modules/@radix-ui/react-slot/dist/index.mjs
-/* @__NO_SIDE_EFFECTS__ */
-function createSlot$3(ownerName) {
-	const SlotClone = /* @__PURE__ */ createSlotClone$3(ownerName);
-	const Slot2 = import_react.forwardRef((props, forwardedRef) => {
-		const { children, ...slotProps } = props;
-		const childrenArray = import_react.Children.toArray(children);
-		const slottable = childrenArray.find(isSlottable$3);
-		if (slottable) {
-			const newElement = slottable.props.children;
-			const newChildren = childrenArray.map((child) => {
-				if (child === slottable) {
-					if (import_react.Children.count(newElement) > 1) return import_react.Children.only(null);
-					return import_react.isValidElement(newElement) ? newElement.props.children : null;
-				} else return child;
-			});
-			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
-				...slotProps,
-				ref: forwardedRef,
-				children: import_react.isValidElement(newElement) ? import_react.cloneElement(newElement, void 0, newChildren) : null
-			});
-		}
-		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
-			...slotProps,
-			ref: forwardedRef,
-			children
-		});
-	});
-	Slot2.displayName = `${ownerName}.Slot`;
-	return Slot2;
-}
-/* @__NO_SIDE_EFFECTS__ */
-function createSlotClone$3(ownerName) {
-	const SlotClone = import_react.forwardRef((props, forwardedRef) => {
-		const { children, ...slotProps } = props;
-		if (import_react.isValidElement(children)) {
-			const childrenRef = getElementRef$4(children);
-			const props2 = mergeProps$3(slotProps, children.props);
-			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
-			return import_react.cloneElement(children, props2);
-		}
-		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
-	});
-	SlotClone.displayName = `${ownerName}.SlotClone`;
-	return SlotClone;
-}
-var SLOTTABLE_IDENTIFIER$3 = Symbol("radix.slottable");
-function isSlottable$3(child) {
-	return import_react.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER$3;
-}
-function mergeProps$3(slotProps, childProps) {
-	const overrideProps = { ...childProps };
-	for (const propName in childProps) {
-		const slotPropValue = slotProps[propName];
-		const childPropValue = childProps[propName];
-		if (/^on[A-Z]/.test(propName)) {
-			if (slotPropValue && childPropValue) overrideProps[propName] = (...args) => {
-				const result = childPropValue(...args);
-				slotPropValue(...args);
-				return result;
-			};
-			else if (slotPropValue) overrideProps[propName] = slotPropValue;
-		} else if (propName === "style") overrideProps[propName] = {
-			...slotPropValue,
-			...childPropValue
-		};
-		else if (propName === "className") overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
-	}
-	return {
-		...slotProps,
-		...overrideProps
-	};
-}
-function getElementRef$4(element) {
-	let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
-	let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-	if (mayWarn) return element.ref;
-	getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
-	mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-	if (mayWarn) return element.props.ref;
-	return element.props.ref || element.ref;
-}
-//#endregion
-//#region node_modules/@radix-ui/react-dismissable-layer/node_modules/@radix-ui/react-primitive/dist/index.mjs
-var Primitive$3 = [
-	"a",
-	"button",
-	"div",
-	"form",
-	"h2",
-	"h3",
-	"img",
-	"input",
-	"label",
-	"li",
-	"nav",
-	"ol",
-	"p",
-	"select",
-	"span",
-	"svg",
-	"ul"
-].reduce((primitive, node) => {
-	const Slot = /* @__PURE__ */ createSlot$3(`Primitive.${node}`);
-	const Node = import_react.forwardRef((props, forwardedRef) => {
-		const { asChild, ...primitiveProps } = props;
-		const Comp = asChild ? Slot : node;
-		if (typeof window !== "undefined") window[Symbol.for("radix-ui")] = true;
-		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Comp, {
-			...primitiveProps,
-			ref: forwardedRef
-		});
-	});
-	Node.displayName = `Primitive.${node}`;
-	return {
-		...primitive,
-		[node]: Node
-	};
-}, {});
-function dispatchDiscreteCustomEvent(target, event) {
-	if (target) import_react_dom.flushSync(() => target.dispatchEvent(event));
-}
-//#endregion
-//#region node_modules/@radix-ui/react-use-escape-keydown/dist/index.mjs
-function useEscapeKeydown(onEscapeKeyDownProp, ownerDocument = globalThis?.document) {
-	const onEscapeKeyDown = useCallbackRef$1(onEscapeKeyDownProp);
-	import_react.useEffect(() => {
-		const handleKeyDown = (event) => {
-			if (event.key === "Escape") onEscapeKeyDown(event);
-		};
-		ownerDocument.addEventListener("keydown", handleKeyDown, { capture: true });
-		return () => ownerDocument.removeEventListener("keydown", handleKeyDown, { capture: true });
-	}, [onEscapeKeyDown, ownerDocument]);
-}
-//#endregion
-//#region node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs
-var DISMISSABLE_LAYER_NAME = "DismissableLayer";
-var CONTEXT_UPDATE = "dismissableLayer.update";
-var POINTER_DOWN_OUTSIDE = "dismissableLayer.pointerDownOutside";
-var FOCUS_OUTSIDE = "dismissableLayer.focusOutside";
-var originalBodyPointerEvents;
-var DismissableLayerContext = import_react.createContext({
-	layers: /* @__PURE__ */ new Set(),
-	layersWithOutsidePointerEventsDisabled: /* @__PURE__ */ new Set(),
-	branches: /* @__PURE__ */ new Set()
-});
-var DismissableLayer = import_react.forwardRef((props, forwardedRef) => {
-	const { disableOutsidePointerEvents = false, onEscapeKeyDown, onPointerDownOutside, onFocusOutside, onInteractOutside, onDismiss, ...layerProps } = props;
-	const context = import_react.useContext(DismissableLayerContext);
-	const [node, setNode] = import_react.useState(null);
-	const ownerDocument = node?.ownerDocument ?? globalThis?.document;
-	const [, force] = import_react.useState({});
-	const composedRefs = useComposedRefs(forwardedRef, (node2) => setNode(node2));
-	const layers = Array.from(context.layers);
-	const [highestLayerWithOutsidePointerEventsDisabled] = [...context.layersWithOutsidePointerEventsDisabled].slice(-1);
-	const highestLayerWithOutsidePointerEventsDisabledIndex = layers.indexOf(highestLayerWithOutsidePointerEventsDisabled);
-	const index = node ? layers.indexOf(node) : -1;
-	const isBodyPointerEventsDisabled = context.layersWithOutsidePointerEventsDisabled.size > 0;
-	const isPointerEventsEnabled = index >= highestLayerWithOutsidePointerEventsDisabledIndex;
-	const pointerDownOutside = usePointerDownOutside((event) => {
-		const target = event.target;
-		const isPointerDownOnBranch = [...context.branches].some((branch) => branch.contains(target));
-		if (!isPointerEventsEnabled || isPointerDownOnBranch) return;
-		onPointerDownOutside?.(event);
-		onInteractOutside?.(event);
-		if (!event.defaultPrevented) onDismiss?.();
-	}, ownerDocument);
-	const focusOutside = useFocusOutside((event) => {
-		const target = event.target;
-		if ([...context.branches].some((branch) => branch.contains(target))) return;
-		onFocusOutside?.(event);
-		onInteractOutside?.(event);
-		if (!event.defaultPrevented) onDismiss?.();
-	}, ownerDocument);
-	useEscapeKeydown((event) => {
-		if (!(index === context.layers.size - 1)) return;
-		onEscapeKeyDown?.(event);
-		if (!event.defaultPrevented && onDismiss) {
-			event.preventDefault();
-			onDismiss();
-		}
-	}, ownerDocument);
-	import_react.useEffect(() => {
-		if (!node) return;
-		if (disableOutsidePointerEvents) {
-			if (context.layersWithOutsidePointerEventsDisabled.size === 0) {
-				originalBodyPointerEvents = ownerDocument.body.style.pointerEvents;
-				ownerDocument.body.style.pointerEvents = "none";
-			}
-			context.layersWithOutsidePointerEventsDisabled.add(node);
-		}
-		context.layers.add(node);
-		dispatchUpdate();
-		return () => {
-			if (disableOutsidePointerEvents && context.layersWithOutsidePointerEventsDisabled.size === 1) ownerDocument.body.style.pointerEvents = originalBodyPointerEvents;
-		};
-	}, [
-		node,
-		ownerDocument,
-		disableOutsidePointerEvents,
-		context
-	]);
-	import_react.useEffect(() => {
-		return () => {
-			if (!node) return;
-			context.layers.delete(node);
-			context.layersWithOutsidePointerEventsDisabled.delete(node);
-			dispatchUpdate();
-		};
-	}, [node, context]);
-	import_react.useEffect(() => {
-		const handleUpdate = () => force({});
-		document.addEventListener(CONTEXT_UPDATE, handleUpdate);
-		return () => document.removeEventListener(CONTEXT_UPDATE, handleUpdate);
-	}, []);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$3.div, {
-		...layerProps,
-		ref: composedRefs,
-		style: {
-			pointerEvents: isBodyPointerEventsDisabled ? isPointerEventsEnabled ? "auto" : "none" : void 0,
-			...props.style
-		},
-		onFocusCapture: composeEventHandlers(props.onFocusCapture, focusOutside.onFocusCapture),
-		onBlurCapture: composeEventHandlers(props.onBlurCapture, focusOutside.onBlurCapture),
-		onPointerDownCapture: composeEventHandlers(props.onPointerDownCapture, pointerDownOutside.onPointerDownCapture)
-	});
-});
-DismissableLayer.displayName = DISMISSABLE_LAYER_NAME;
-var BRANCH_NAME = "DismissableLayerBranch";
-var DismissableLayerBranch = import_react.forwardRef((props, forwardedRef) => {
-	const context = import_react.useContext(DismissableLayerContext);
-	const ref = import_react.useRef(null);
-	const composedRefs = useComposedRefs(forwardedRef, ref);
-	import_react.useEffect(() => {
-		const node = ref.current;
-		if (node) {
-			context.branches.add(node);
-			return () => {
-				context.branches.delete(node);
-			};
-		}
-	}, [context.branches]);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$3.div, {
-		...props,
-		ref: composedRefs
-	});
-});
-DismissableLayerBranch.displayName = BRANCH_NAME;
-function usePointerDownOutside(onPointerDownOutside, ownerDocument = globalThis?.document) {
-	const handlePointerDownOutside = useCallbackRef$1(onPointerDownOutside);
-	const isPointerInsideReactTreeRef = import_react.useRef(false);
-	const handleClickRef = import_react.useRef(() => {});
-	import_react.useEffect(() => {
-		const handlePointerDown = (event) => {
-			if (event.target && !isPointerInsideReactTreeRef.current) {
-				let handleAndDispatchPointerDownOutsideEvent2 = function() {
-					handleAndDispatchCustomEvent(POINTER_DOWN_OUTSIDE, handlePointerDownOutside, eventDetail, { discrete: true });
-				};
-				const eventDetail = { originalEvent: event };
-				if (event.pointerType === "touch") {
-					ownerDocument.removeEventListener("click", handleClickRef.current);
-					handleClickRef.current = handleAndDispatchPointerDownOutsideEvent2;
-					ownerDocument.addEventListener("click", handleClickRef.current, { once: true });
-				} else handleAndDispatchPointerDownOutsideEvent2();
-			} else ownerDocument.removeEventListener("click", handleClickRef.current);
-			isPointerInsideReactTreeRef.current = false;
-		};
-		const timerId = window.setTimeout(() => {
-			ownerDocument.addEventListener("pointerdown", handlePointerDown);
-		}, 0);
-		return () => {
-			window.clearTimeout(timerId);
-			ownerDocument.removeEventListener("pointerdown", handlePointerDown);
-			ownerDocument.removeEventListener("click", handleClickRef.current);
-		};
-	}, [ownerDocument, handlePointerDownOutside]);
-	return { onPointerDownCapture: () => isPointerInsideReactTreeRef.current = true };
-}
-function useFocusOutside(onFocusOutside, ownerDocument = globalThis?.document) {
-	const handleFocusOutside = useCallbackRef$1(onFocusOutside);
-	const isFocusInsideReactTreeRef = import_react.useRef(false);
-	import_react.useEffect(() => {
-		const handleFocus = (event) => {
-			if (event.target && !isFocusInsideReactTreeRef.current) handleAndDispatchCustomEvent(FOCUS_OUTSIDE, handleFocusOutside, { originalEvent: event }, { discrete: false });
-		};
-		ownerDocument.addEventListener("focusin", handleFocus);
-		return () => ownerDocument.removeEventListener("focusin", handleFocus);
-	}, [ownerDocument, handleFocusOutside]);
-	return {
-		onFocusCapture: () => isFocusInsideReactTreeRef.current = true,
-		onBlurCapture: () => isFocusInsideReactTreeRef.current = false
-	};
-}
-function dispatchUpdate() {
-	const event = new CustomEvent(CONTEXT_UPDATE);
-	document.dispatchEvent(event);
-}
-function handleAndDispatchCustomEvent(name, handler, detail, { discrete }) {
-	const target = detail.originalEvent.target;
-	const event = new CustomEvent(name, {
-		bubbles: false,
-		cancelable: true,
-		detail
-	});
-	if (handler) target.addEventListener(name, handler, { once: true });
-	if (discrete) dispatchDiscreteCustomEvent(target, event);
-	else target.dispatchEvent(event);
-}
-//#endregion
-//#region node_modules/@radix-ui/react-focus-scope/node_modules/@radix-ui/react-slot/dist/index.mjs
-/* @__NO_SIDE_EFFECTS__ */
-function createSlot$2(ownerName) {
-	const SlotClone = /* @__PURE__ */ createSlotClone$2(ownerName);
-	const Slot2 = import_react.forwardRef((props, forwardedRef) => {
-		const { children, ...slotProps } = props;
-		const childrenArray = import_react.Children.toArray(children);
-		const slottable = childrenArray.find(isSlottable$2);
-		if (slottable) {
-			const newElement = slottable.props.children;
-			const newChildren = childrenArray.map((child) => {
-				if (child === slottable) {
-					if (import_react.Children.count(newElement) > 1) return import_react.Children.only(null);
-					return import_react.isValidElement(newElement) ? newElement.props.children : null;
-				} else return child;
-			});
-			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
-				...slotProps,
-				ref: forwardedRef,
-				children: import_react.isValidElement(newElement) ? import_react.cloneElement(newElement, void 0, newChildren) : null
-			});
-		}
-		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
-			...slotProps,
-			ref: forwardedRef,
-			children
-		});
-	});
-	Slot2.displayName = `${ownerName}.Slot`;
-	return Slot2;
-}
-/* @__NO_SIDE_EFFECTS__ */
-function createSlotClone$2(ownerName) {
-	const SlotClone = import_react.forwardRef((props, forwardedRef) => {
-		const { children, ...slotProps } = props;
-		if (import_react.isValidElement(children)) {
-			const childrenRef = getElementRef$3(children);
-			const props2 = mergeProps$2(slotProps, children.props);
-			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
-			return import_react.cloneElement(children, props2);
-		}
-		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
-	});
-	SlotClone.displayName = `${ownerName}.SlotClone`;
-	return SlotClone;
-}
-var SLOTTABLE_IDENTIFIER$2 = Symbol("radix.slottable");
-function isSlottable$2(child) {
-	return import_react.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER$2;
-}
-function mergeProps$2(slotProps, childProps) {
-	const overrideProps = { ...childProps };
-	for (const propName in childProps) {
-		const slotPropValue = slotProps[propName];
-		const childPropValue = childProps[propName];
-		if (/^on[A-Z]/.test(propName)) {
-			if (slotPropValue && childPropValue) overrideProps[propName] = (...args) => {
-				const result = childPropValue(...args);
-				slotPropValue(...args);
-				return result;
-			};
-			else if (slotPropValue) overrideProps[propName] = slotPropValue;
-		} else if (propName === "style") overrideProps[propName] = {
-			...slotPropValue,
-			...childPropValue
-		};
-		else if (propName === "className") overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
-	}
-	return {
-		...slotProps,
-		...overrideProps
-	};
-}
-function getElementRef$3(element) {
-	let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
-	let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-	if (mayWarn) return element.ref;
-	getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
-	mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-	if (mayWarn) return element.props.ref;
-	return element.props.ref || element.ref;
-}
-//#endregion
-//#region node_modules/@radix-ui/react-focus-scope/node_modules/@radix-ui/react-primitive/dist/index.mjs
-var Primitive$2 = [
-	"a",
-	"button",
-	"div",
-	"form",
-	"h2",
-	"h3",
-	"img",
-	"input",
-	"label",
-	"li",
-	"nav",
-	"ol",
-	"p",
-	"select",
-	"span",
-	"svg",
-	"ul"
-].reduce((primitive, node) => {
-	const Slot = /* @__PURE__ */ createSlot$2(`Primitive.${node}`);
-	const Node = import_react.forwardRef((props, forwardedRef) => {
-		const { asChild, ...primitiveProps } = props;
-		const Comp = asChild ? Slot : node;
-		if (typeof window !== "undefined") window[Symbol.for("radix-ui")] = true;
-		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Comp, {
-			...primitiveProps,
-			ref: forwardedRef
-		});
-	});
-	Node.displayName = `Primitive.${node}`;
-	return {
-		...primitive,
-		[node]: Node
-	};
-}, {});
-//#endregion
-//#region node_modules/@radix-ui/react-focus-scope/dist/index.mjs
-var AUTOFOCUS_ON_MOUNT = "focusScope.autoFocusOnMount";
-var AUTOFOCUS_ON_UNMOUNT = "focusScope.autoFocusOnUnmount";
-var EVENT_OPTIONS = {
-	bubbles: false,
-	cancelable: true
-};
-var FOCUS_SCOPE_NAME = "FocusScope";
-var FocusScope = import_react.forwardRef((props, forwardedRef) => {
-	const { loop = false, trapped = false, onMountAutoFocus: onMountAutoFocusProp, onUnmountAutoFocus: onUnmountAutoFocusProp, ...scopeProps } = props;
-	const [container, setContainer] = import_react.useState(null);
-	const onMountAutoFocus = useCallbackRef$1(onMountAutoFocusProp);
-	const onUnmountAutoFocus = useCallbackRef$1(onUnmountAutoFocusProp);
-	const lastFocusedElementRef = import_react.useRef(null);
-	const composedRefs = useComposedRefs(forwardedRef, (node) => setContainer(node));
-	const focusScope = import_react.useRef({
-		paused: false,
-		pause() {
-			this.paused = true;
-		},
-		resume() {
-			this.paused = false;
-		}
-	}).current;
-	import_react.useEffect(() => {
-		if (trapped) {
-			let handleFocusIn2 = function(event) {
-				if (focusScope.paused || !container) return;
-				const target = event.target;
-				if (container.contains(target)) lastFocusedElementRef.current = target;
-				else focus(lastFocusedElementRef.current, { select: true });
-			}, handleFocusOut2 = function(event) {
-				if (focusScope.paused || !container) return;
-				const relatedTarget = event.relatedTarget;
-				if (relatedTarget === null) return;
-				if (!container.contains(relatedTarget)) focus(lastFocusedElementRef.current, { select: true });
-			}, handleMutations2 = function(mutations) {
-				if (document.activeElement !== document.body) return;
-				for (const mutation of mutations) if (mutation.removedNodes.length > 0) focus(container);
-			};
-			document.addEventListener("focusin", handleFocusIn2);
-			document.addEventListener("focusout", handleFocusOut2);
-			const mutationObserver = new MutationObserver(handleMutations2);
-			if (container) mutationObserver.observe(container, {
-				childList: true,
-				subtree: true
-			});
-			return () => {
-				document.removeEventListener("focusin", handleFocusIn2);
-				document.removeEventListener("focusout", handleFocusOut2);
-				mutationObserver.disconnect();
-			};
-		}
-	}, [
-		trapped,
-		container,
-		focusScope.paused
-	]);
-	import_react.useEffect(() => {
-		if (container) {
-			focusScopesStack.add(focusScope);
-			const previouslyFocusedElement = document.activeElement;
-			if (!container.contains(previouslyFocusedElement)) {
-				const mountEvent = new CustomEvent(AUTOFOCUS_ON_MOUNT, EVENT_OPTIONS);
-				container.addEventListener(AUTOFOCUS_ON_MOUNT, onMountAutoFocus);
-				container.dispatchEvent(mountEvent);
-				if (!mountEvent.defaultPrevented) {
-					focusFirst(removeLinks(getTabbableCandidates(container)), { select: true });
-					if (document.activeElement === previouslyFocusedElement) focus(container);
-				}
-			}
-			return () => {
-				container.removeEventListener(AUTOFOCUS_ON_MOUNT, onMountAutoFocus);
-				setTimeout(() => {
-					const unmountEvent = new CustomEvent(AUTOFOCUS_ON_UNMOUNT, EVENT_OPTIONS);
-					container.addEventListener(AUTOFOCUS_ON_UNMOUNT, onUnmountAutoFocus);
-					container.dispatchEvent(unmountEvent);
-					if (!unmountEvent.defaultPrevented) focus(previouslyFocusedElement ?? document.body, { select: true });
-					container.removeEventListener(AUTOFOCUS_ON_UNMOUNT, onUnmountAutoFocus);
-					focusScopesStack.remove(focusScope);
-				}, 0);
-			};
-		}
-	}, [
-		container,
-		onMountAutoFocus,
-		onUnmountAutoFocus,
-		focusScope
-	]);
-	const handleKeyDown = import_react.useCallback((event) => {
-		if (!loop && !trapped) return;
-		if (focusScope.paused) return;
-		const isTabKey = event.key === "Tab" && !event.altKey && !event.ctrlKey && !event.metaKey;
-		const focusedElement = document.activeElement;
-		if (isTabKey && focusedElement) {
-			const container2 = event.currentTarget;
-			const [first, last] = getTabbableEdges(container2);
-			if (!(first && last)) {
-				if (focusedElement === container2) event.preventDefault();
-			} else if (!event.shiftKey && focusedElement === last) {
-				event.preventDefault();
-				if (loop) focus(first, { select: true });
-			} else if (event.shiftKey && focusedElement === first) {
-				event.preventDefault();
-				if (loop) focus(last, { select: true });
-			}
-		}
-	}, [
-		loop,
-		trapped,
-		focusScope.paused
-	]);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$2.div, {
-		tabIndex: -1,
-		...scopeProps,
-		ref: composedRefs,
-		onKeyDown: handleKeyDown
-	});
-});
-FocusScope.displayName = FOCUS_SCOPE_NAME;
-function focusFirst(candidates, { select = false } = {}) {
-	const previouslyFocusedElement = document.activeElement;
-	for (const candidate of candidates) {
-		focus(candidate, { select });
-		if (document.activeElement !== previouslyFocusedElement) return;
-	}
-}
-function getTabbableEdges(container) {
-	const candidates = getTabbableCandidates(container);
-	return [findVisible(candidates, container), findVisible(candidates.reverse(), container)];
-}
-function getTabbableCandidates(container) {
-	const nodes = [];
-	const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT, { acceptNode: (node) => {
-		const isHiddenInput = node.tagName === "INPUT" && node.type === "hidden";
-		if (node.disabled || node.hidden || isHiddenInput) return NodeFilter.FILTER_SKIP;
-		return node.tabIndex >= 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
-	} });
-	while (walker.nextNode()) nodes.push(walker.currentNode);
-	return nodes;
-}
-function findVisible(elements, container) {
-	for (const element of elements) if (!isHidden(element, { upTo: container })) return element;
-}
-function isHidden(node, { upTo }) {
-	if (getComputedStyle(node).visibility === "hidden") return true;
-	while (node) {
-		if (upTo !== void 0 && node === upTo) return false;
-		if (getComputedStyle(node).display === "none") return true;
-		node = node.parentElement;
-	}
-	return false;
-}
-function isSelectableInput(element) {
-	return element instanceof HTMLInputElement && "select" in element;
-}
-function focus(element, { select = false } = {}) {
-	if (element && element.focus) {
-		const previouslyFocusedElement = document.activeElement;
-		element.focus({ preventScroll: true });
-		if (element !== previouslyFocusedElement && isSelectableInput(element) && select) element.select();
-	}
-}
-var focusScopesStack = createFocusScopesStack();
-function createFocusScopesStack() {
-	let stack = [];
-	return {
-		add(focusScope) {
-			const activeFocusScope = stack[0];
-			if (focusScope !== activeFocusScope) activeFocusScope?.pause();
-			stack = arrayRemove(stack, focusScope);
-			stack.unshift(focusScope);
-		},
-		remove(focusScope) {
-			stack = arrayRemove(stack, focusScope);
-			stack[0]?.resume();
-		}
-	};
-}
-function arrayRemove(array, item) {
-	const updatedArray = [...array];
-	const index = updatedArray.indexOf(item);
-	if (index !== -1) updatedArray.splice(index, 1);
-	return updatedArray;
-}
-function removeLinks(items) {
-	return items.filter((item) => item.tagName !== "A");
-}
-//#endregion
-//#region node_modules/@radix-ui/react-portal/node_modules/@radix-ui/react-slot/dist/index.mjs
-/* @__NO_SIDE_EFFECTS__ */
-function createSlot$1(ownerName) {
-	const SlotClone = /* @__PURE__ */ createSlotClone$1(ownerName);
-	const Slot2 = import_react.forwardRef((props, forwardedRef) => {
-		const { children, ...slotProps } = props;
-		const childrenArray = import_react.Children.toArray(children);
-		const slottable = childrenArray.find(isSlottable$1);
-		if (slottable) {
-			const newElement = slottable.props.children;
-			const newChildren = childrenArray.map((child) => {
-				if (child === slottable) {
-					if (import_react.Children.count(newElement) > 1) return import_react.Children.only(null);
-					return import_react.isValidElement(newElement) ? newElement.props.children : null;
-				} else return child;
-			});
-			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
-				...slotProps,
-				ref: forwardedRef,
-				children: import_react.isValidElement(newElement) ? import_react.cloneElement(newElement, void 0, newChildren) : null
-			});
-		}
-		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
-			...slotProps,
-			ref: forwardedRef,
-			children
-		});
-	});
-	Slot2.displayName = `${ownerName}.Slot`;
-	return Slot2;
-}
-/* @__NO_SIDE_EFFECTS__ */
-function createSlotClone$1(ownerName) {
-	const SlotClone = import_react.forwardRef((props, forwardedRef) => {
-		const { children, ...slotProps } = props;
-		if (import_react.isValidElement(children)) {
-			const childrenRef = getElementRef$2(children);
-			const props2 = mergeProps$1(slotProps, children.props);
-			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
-			return import_react.cloneElement(children, props2);
-		}
-		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
-	});
-	SlotClone.displayName = `${ownerName}.SlotClone`;
-	return SlotClone;
-}
-var SLOTTABLE_IDENTIFIER$1 = Symbol("radix.slottable");
-function isSlottable$1(child) {
-	return import_react.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER$1;
-}
-function mergeProps$1(slotProps, childProps) {
-	const overrideProps = { ...childProps };
-	for (const propName in childProps) {
-		const slotPropValue = slotProps[propName];
-		const childPropValue = childProps[propName];
-		if (/^on[A-Z]/.test(propName)) {
-			if (slotPropValue && childPropValue) overrideProps[propName] = (...args) => {
-				const result = childPropValue(...args);
-				slotPropValue(...args);
-				return result;
-			};
-			else if (slotPropValue) overrideProps[propName] = slotPropValue;
-		} else if (propName === "style") overrideProps[propName] = {
-			...slotPropValue,
-			...childPropValue
-		};
-		else if (propName === "className") overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
-	}
-	return {
-		...slotProps,
-		...overrideProps
-	};
-}
-function getElementRef$2(element) {
-	let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
-	let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-	if (mayWarn) return element.ref;
-	getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
-	mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-	if (mayWarn) return element.props.ref;
-	return element.props.ref || element.ref;
-}
-//#endregion
-//#region node_modules/@radix-ui/react-portal/node_modules/@radix-ui/react-primitive/dist/index.mjs
-var Primitive$1 = [
-	"a",
-	"button",
-	"div",
-	"form",
-	"h2",
-	"h3",
-	"img",
-	"input",
-	"label",
-	"li",
-	"nav",
-	"ol",
-	"p",
-	"select",
-	"span",
-	"svg",
-	"ul"
-].reduce((primitive, node) => {
-	const Slot = /* @__PURE__ */ createSlot$1(`Primitive.${node}`);
-	const Node = import_react.forwardRef((props, forwardedRef) => {
-		const { asChild, ...primitiveProps } = props;
-		const Comp = asChild ? Slot : node;
-		if (typeof window !== "undefined") window[Symbol.for("radix-ui")] = true;
-		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Comp, {
-			...primitiveProps,
-			ref: forwardedRef
-		});
-	});
-	Node.displayName = `Primitive.${node}`;
-	return {
-		...primitive,
-		[node]: Node
-	};
-}, {});
-//#endregion
-//#region node_modules/@radix-ui/react-portal/dist/index.mjs
-var PORTAL_NAME$1 = "Portal";
-var Portal$1 = import_react.forwardRef((props, forwardedRef) => {
-	const { container: containerProp, ...portalProps } = props;
-	const [mounted, setMounted] = import_react.useState(false);
-	useLayoutEffect2(() => setMounted(true), []);
-	const container = containerProp || mounted && globalThis?.document?.body;
-	return container ? import_react_dom.createPortal(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$1.div, {
-		...portalProps,
-		ref: forwardedRef
-	}), container) : null;
-});
-Portal$1.displayName = PORTAL_NAME$1;
-//#endregion
-//#region node_modules/@radix-ui/react-presence/dist/index.mjs
-function useStateMachine(initialState, machine) {
-	return import_react.useReducer((state, event) => {
-		return machine[state][event] ?? state;
-	}, initialState);
-}
-var Presence = (props) => {
-	const { present, children } = props;
-	const presence = usePresence$2(present);
-	const child = typeof children === "function" ? children({ present: presence.isPresent }) : import_react.Children.only(children);
-	const ref = useComposedRefs(presence.ref, getElementRef$1(child));
-	return typeof children === "function" || presence.isPresent ? import_react.cloneElement(child, { ref }) : null;
-};
-Presence.displayName = "Presence";
-function usePresence$2(present) {
-	const [node, setNode] = import_react.useState();
-	const stylesRef = import_react.useRef(null);
-	const prevPresentRef = import_react.useRef(present);
-	const prevAnimationNameRef = import_react.useRef("none");
-	const [state, send] = useStateMachine(present ? "mounted" : "unmounted", {
-		mounted: {
-			UNMOUNT: "unmounted",
-			ANIMATION_OUT: "unmountSuspended"
-		},
-		unmountSuspended: {
-			MOUNT: "mounted",
-			ANIMATION_END: "unmounted"
-		},
-		unmounted: { MOUNT: "mounted" }
-	});
-	import_react.useEffect(() => {
-		const currentAnimationName = getAnimationName(stylesRef.current);
-		prevAnimationNameRef.current = state === "mounted" ? currentAnimationName : "none";
-	}, [state]);
-	useLayoutEffect2(() => {
-		const styles = stylesRef.current;
-		const wasPresent = prevPresentRef.current;
-		if (wasPresent !== present) {
-			const prevAnimationName = prevAnimationNameRef.current;
-			const currentAnimationName = getAnimationName(styles);
-			if (present) send("MOUNT");
-			else if (currentAnimationName === "none" || styles?.display === "none") send("UNMOUNT");
-			else if (wasPresent && prevAnimationName !== currentAnimationName) send("ANIMATION_OUT");
-			else send("UNMOUNT");
-			prevPresentRef.current = present;
-		}
-	}, [present, send]);
-	useLayoutEffect2(() => {
-		if (node) {
-			let timeoutId;
-			const ownerWindow = node.ownerDocument.defaultView ?? window;
-			const handleAnimationEnd = (event) => {
-				const isCurrentAnimation = getAnimationName(stylesRef.current).includes(CSS.escape(event.animationName));
-				if (event.target === node && isCurrentAnimation) {
-					send("ANIMATION_END");
-					if (!prevPresentRef.current) {
-						const currentFillMode = node.style.animationFillMode;
-						node.style.animationFillMode = "forwards";
-						timeoutId = ownerWindow.setTimeout(() => {
-							if (node.style.animationFillMode === "forwards") node.style.animationFillMode = currentFillMode;
-						});
-					}
-				}
-			};
-			const handleAnimationStart = (event) => {
-				if (event.target === node) prevAnimationNameRef.current = getAnimationName(stylesRef.current);
-			};
-			node.addEventListener("animationstart", handleAnimationStart);
-			node.addEventListener("animationcancel", handleAnimationEnd);
-			node.addEventListener("animationend", handleAnimationEnd);
-			return () => {
-				ownerWindow.clearTimeout(timeoutId);
-				node.removeEventListener("animationstart", handleAnimationStart);
-				node.removeEventListener("animationcancel", handleAnimationEnd);
-				node.removeEventListener("animationend", handleAnimationEnd);
-			};
-		} else send("ANIMATION_END");
-	}, [node, send]);
-	return {
-		isPresent: ["mounted", "unmountSuspended"].includes(state),
-		ref: import_react.useCallback((node2) => {
-			stylesRef.current = node2 ? getComputedStyle(node2) : null;
-			setNode(node2);
-		}, [])
-	};
-}
-function getAnimationName(styles) {
-	return styles?.animationName || "none";
-}
-function getElementRef$1(element) {
-	let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
-	let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-	if (mayWarn) return element.ref;
-	getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
-	mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-	if (mayWarn) return element.props.ref;
-	return element.props.ref || element.ref;
-}
-//#endregion
-//#region node_modules/@radix-ui/react-dialog/node_modules/@radix-ui/react-slot/dist/index.mjs
-/* @__NO_SIDE_EFFECTS__ */
-function createSlot(ownerName) {
-	const SlotClone = /* @__PURE__ */ createSlotClone(ownerName);
-	const Slot2 = import_react.forwardRef((props, forwardedRef) => {
-		const { children, ...slotProps } = props;
-		const childrenArray = import_react.Children.toArray(children);
-		const slottable = childrenArray.find(isSlottable);
-		if (slottable) {
-			const newElement = slottable.props.children;
-			const newChildren = childrenArray.map((child) => {
-				if (child === slottable) {
-					if (import_react.Children.count(newElement) > 1) return import_react.Children.only(null);
-					return import_react.isValidElement(newElement) ? newElement.props.children : null;
-				} else return child;
-			});
-			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
-				...slotProps,
-				ref: forwardedRef,
-				children: import_react.isValidElement(newElement) ? import_react.cloneElement(newElement, void 0, newChildren) : null
-			});
-		}
-		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
-			...slotProps,
-			ref: forwardedRef,
-			children
-		});
-	});
-	Slot2.displayName = `${ownerName}.Slot`;
-	return Slot2;
-}
-/* @__NO_SIDE_EFFECTS__ */
-function createSlotClone(ownerName) {
-	const SlotClone = import_react.forwardRef((props, forwardedRef) => {
-		const { children, ...slotProps } = props;
-		if (import_react.isValidElement(children)) {
-			const childrenRef = getElementRef(children);
-			const props2 = mergeProps(slotProps, children.props);
-			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
-			return import_react.cloneElement(children, props2);
-		}
-		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
-	});
-	SlotClone.displayName = `${ownerName}.SlotClone`;
-	return SlotClone;
-}
-var SLOTTABLE_IDENTIFIER = Symbol("radix.slottable");
-function isSlottable(child) {
-	return import_react.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER;
-}
-function mergeProps(slotProps, childProps) {
-	const overrideProps = { ...childProps };
-	for (const propName in childProps) {
-		const slotPropValue = slotProps[propName];
-		const childPropValue = childProps[propName];
-		if (/^on[A-Z]/.test(propName)) {
-			if (slotPropValue && childPropValue) overrideProps[propName] = (...args) => {
-				const result = childPropValue(...args);
-				slotPropValue(...args);
-				return result;
-			};
-			else if (slotPropValue) overrideProps[propName] = slotPropValue;
-		} else if (propName === "style") overrideProps[propName] = {
-			...slotPropValue,
-			...childPropValue
-		};
-		else if (propName === "className") overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
-	}
-	return {
-		...slotProps,
-		...overrideProps
-	};
-}
-function getElementRef(element) {
-	let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
-	let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-	if (mayWarn) return element.ref;
-	getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
-	mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
-	if (mayWarn) return element.props.ref;
-	return element.props.ref || element.ref;
-}
-//#endregion
-//#region node_modules/@radix-ui/react-dialog/node_modules/@radix-ui/react-primitive/dist/index.mjs
-var Primitive = [
-	"a",
-	"button",
-	"div",
-	"form",
-	"h2",
-	"h3",
-	"img",
-	"input",
-	"label",
-	"li",
-	"nav",
-	"ol",
-	"p",
-	"select",
-	"span",
-	"svg",
-	"ul"
-].reduce((primitive, node) => {
-	const Slot = /* @__PURE__ */ createSlot(`Primitive.${node}`);
-	const Node = import_react.forwardRef((props, forwardedRef) => {
-		const { asChild, ...primitiveProps } = props;
-		const Comp = asChild ? Slot : node;
-		if (typeof window !== "undefined") window[Symbol.for("radix-ui")] = true;
-		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Comp, {
-			...primitiveProps,
-			ref: forwardedRef
-		});
-	});
-	Node.displayName = `Primitive.${node}`;
-	return {
-		...primitive,
-		[node]: Node
-	};
-}, {});
-//#endregion
-//#region node_modules/@radix-ui/react-focus-guards/dist/index.mjs
-var count = 0;
-function useFocusGuards() {
-	import_react.useEffect(() => {
-		const edgeGuards = document.querySelectorAll("[data-radix-focus-guard]");
-		document.body.insertAdjacentElement("afterbegin", edgeGuards[0] ?? createFocusGuard());
-		document.body.insertAdjacentElement("beforeend", edgeGuards[1] ?? createFocusGuard());
-		count++;
-		return () => {
-			if (count === 1) document.querySelectorAll("[data-radix-focus-guard]").forEach((node) => node.remove());
-			count--;
-		};
-	}, []);
-}
-function createFocusGuard() {
-	const element = document.createElement("span");
-	element.setAttribute("data-radix-focus-guard", "");
-	element.tabIndex = 0;
-	element.style.outline = "none";
-	element.style.opacity = "0";
-	element.style.position = "fixed";
-	element.style.pointerEvents = "none";
-	return element;
-}
-//#endregion
-//#region node_modules/tslib/tslib.es6.mjs
-var __assign = function() {
-	__assign = Object.assign || function __assign(t) {
-		for (var s, i = 1, n = arguments.length; i < n; i++) {
-			s = arguments[i];
-			for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-		}
-		return t;
-	};
-	return __assign.apply(this, arguments);
-};
-function __rest(s, e) {
-	var t = {};
-	for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
-	if (s != null && typeof Object.getOwnPropertySymbols === "function") {
-		for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
-	}
-	return t;
-}
-function __spreadArray(to, from, pack) {
-	if (pack || arguments.length === 2) {
-		for (var i = 0, l = from.length, ar; i < l; i++) if (ar || !(i in from)) {
-			if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-			ar[i] = from[i];
-		}
-	}
-	return to.concat(ar || Array.prototype.slice.call(from));
-}
-//#endregion
-//#region node_modules/react-remove-scroll-bar/dist/es2015/constants.js
-var zeroRightClassName = "right-scroll-bar-position";
-var fullWidthClassName = "width-before-scroll-bar";
-var noScrollbarsClassName = "with-scroll-bars-hidden";
-/**
-* Name of a CSS variable containing the amount of "hidden" scrollbar
-* ! might be undefined ! use will fallback!
-*/
-var removedBarSizeVariable = "--removed-body-scroll-bar-size";
-//#endregion
-//#region node_modules/use-callback-ref/dist/es2015/assignRef.js
-/**
-* Assigns a value for a given ref, no matter of the ref format
-* @param {RefObject} ref - a callback function or ref object
-* @param value - a new value
-*
-* @see https://github.com/theKashey/use-callback-ref#assignref
-* @example
-* const refObject = useRef();
-* const refFn = (ref) => {....}
-*
-* assignRef(refObject, "refValue");
-* assignRef(refFn, "refValue");
-*/
-function assignRef(ref, value) {
-	if (typeof ref === "function") ref(value);
-	else if (ref) ref.current = value;
-	return ref;
-}
-//#endregion
-//#region node_modules/use-callback-ref/dist/es2015/useRef.js
-/**
-* creates a MutableRef with ref change callback
-* @param initialValue - initial ref value
-* @param {Function} callback - a callback to run when value changes
-*
-* @example
-* const ref = useCallbackRef(0, (newValue, oldValue) => console.log(oldValue, '->', newValue);
-* ref.current = 1;
-* // prints 0 -> 1
-*
-* @see https://reactjs.org/docs/hooks-reference.html#useref
-* @see https://github.com/theKashey/use-callback-ref#usecallbackref---to-replace-reactuseref
-* @returns {MutableRefObject}
-*/
-function useCallbackRef(initialValue, callback) {
-	var ref = (0, import_react.useState)(function() {
-		return {
-			value: initialValue,
-			callback,
-			facade: {
-				get current() {
-					return ref.value;
-				},
-				set current(value) {
-					var last = ref.value;
-					if (last !== value) {
-						ref.value = value;
-						ref.callback(value, last);
-					}
-				}
-			}
-		};
-	})[0];
-	ref.callback = callback;
-	return ref.facade;
-}
-//#endregion
-//#region node_modules/use-callback-ref/dist/es2015/useMergeRef.js
-var useIsomorphicLayoutEffect$1 = typeof window !== "undefined" ? import_react.useLayoutEffect : import_react.useEffect;
-var currentValues = /* @__PURE__ */ new WeakMap();
-/**
-* Merges two or more refs together providing a single interface to set their value
-* @param {RefObject|Ref} refs
-* @returns {MutableRefObject} - a new ref, which translates all changes to {refs}
-*
-* @see {@link mergeRefs} a version without buit-in memoization
-* @see https://github.com/theKashey/use-callback-ref#usemergerefs
-* @example
-* const Component = React.forwardRef((props, ref) => {
-*   const ownRef = useRef();
-*   const domRef = useMergeRefs([ref, ownRef]); // 👈 merge together
-*   return <div ref={domRef}>...</div>
-* }
-*/
-function useMergeRefs(refs, defaultValue) {
-	var callbackRef = useCallbackRef(defaultValue || null, function(newValue) {
-		return refs.forEach(function(ref) {
-			return assignRef(ref, newValue);
-		});
-	});
-	useIsomorphicLayoutEffect$1(function() {
-		var oldValue = currentValues.get(callbackRef);
-		if (oldValue) {
-			var prevRefs_1 = new Set(oldValue);
-			var nextRefs_1 = new Set(refs);
-			var current_1 = callbackRef.current;
-			prevRefs_1.forEach(function(ref) {
-				if (!nextRefs_1.has(ref)) assignRef(ref, null);
-			});
-			nextRefs_1.forEach(function(ref) {
-				if (!prevRefs_1.has(ref)) assignRef(ref, current_1);
-			});
-		}
-		currentValues.set(callbackRef, refs);
-	}, [refs]);
-	return callbackRef;
-}
-//#endregion
-//#region node_modules/use-sidecar/dist/es2015/medium.js
-function ItoI(a) {
-	return a;
-}
-function innerCreateMedium(defaults, middleware) {
-	if (middleware === void 0) middleware = ItoI;
-	var buffer = [];
-	var assigned = false;
-	return {
-		read: function() {
-			if (assigned) throw new Error("Sidecar: could not `read` from an `assigned` medium. `read` could be used only with `useMedium`.");
-			if (buffer.length) return buffer[buffer.length - 1];
-			return defaults;
-		},
-		useMedium: function(data) {
-			var item = middleware(data, assigned);
-			buffer.push(item);
-			return function() {
-				buffer = buffer.filter(function(x) {
-					return x !== item;
-				});
-			};
-		},
-		assignSyncMedium: function(cb) {
-			assigned = true;
-			while (buffer.length) {
-				var cbs = buffer;
-				buffer = [];
-				cbs.forEach(cb);
-			}
-			buffer = {
-				push: function(x) {
-					return cb(x);
-				},
-				filter: function() {
-					return buffer;
-				}
-			};
-		},
-		assignMedium: function(cb) {
-			assigned = true;
-			var pendingQueue = [];
-			if (buffer.length) {
-				var cbs = buffer;
-				buffer = [];
-				cbs.forEach(cb);
-				pendingQueue = buffer;
-			}
-			var executeQueue = function() {
-				var cbs = pendingQueue;
-				pendingQueue = [];
-				cbs.forEach(cb);
-			};
-			var cycle = function() {
-				return Promise.resolve().then(executeQueue);
-			};
-			cycle();
-			buffer = {
-				push: function(x) {
-					pendingQueue.push(x);
-					cycle();
-				},
-				filter: function(filter) {
-					pendingQueue = pendingQueue.filter(filter);
-					return buffer;
-				}
-			};
-		}
-	};
-}
-function createSidecarMedium(options) {
-	if (options === void 0) options = {};
-	var medium = innerCreateMedium(null);
-	medium.options = __assign({
-		async: true,
-		ssr: false
-	}, options);
-	return medium;
-}
-//#endregion
-//#region node_modules/use-sidecar/dist/es2015/exports.js
-var SideCar = function(_a) {
-	var sideCar = _a.sideCar, rest = __rest(_a, ["sideCar"]);
-	if (!sideCar) throw new Error("Sidecar: please provide `sideCar` property to import the right car");
-	var Target = sideCar.read();
-	if (!Target) throw new Error("Sidecar medium not found");
-	return import_react.createElement(Target, __assign({}, rest));
-};
-SideCar.isSideCarExport = true;
-function exportSidecar(medium, exported) {
-	medium.useMedium(exported);
-	return SideCar;
-}
-//#endregion
-//#region node_modules/react-remove-scroll/dist/es2015/medium.js
-var effectCar = createSidecarMedium();
-//#endregion
-//#region node_modules/react-remove-scroll/dist/es2015/UI.js
-var nothing = function() {};
-/**
-* Removes scrollbar from the page and contain the scroll within the Lock
-*/
-var RemoveScroll = import_react.forwardRef(function(props, parentRef) {
-	var ref = import_react.useRef(null);
-	var _a = import_react.useState({
-		onScrollCapture: nothing,
-		onWheelCapture: nothing,
-		onTouchMoveCapture: nothing
-	}), callbacks = _a[0], setCallbacks = _a[1];
-	var forwardProps = props.forwardProps, children = props.children, className = props.className, removeScrollBar = props.removeScrollBar, enabled = props.enabled, shards = props.shards, sideCar = props.sideCar, noRelative = props.noRelative, noIsolation = props.noIsolation, inert = props.inert, allowPinchZoom = props.allowPinchZoom, _b = props.as, Container = _b === void 0 ? "div" : _b, gapMode = props.gapMode, rest = __rest(props, [
-		"forwardProps",
-		"children",
-		"className",
-		"removeScrollBar",
-		"enabled",
-		"shards",
-		"sideCar",
-		"noRelative",
-		"noIsolation",
-		"inert",
-		"allowPinchZoom",
-		"as",
-		"gapMode"
-	]);
-	var SideCar = sideCar;
-	var containerRef = useMergeRefs([ref, parentRef]);
-	var containerProps = __assign(__assign({}, rest), callbacks);
-	return import_react.createElement(import_react.Fragment, null, enabled && import_react.createElement(SideCar, {
-		sideCar: effectCar,
-		removeScrollBar,
-		shards,
-		noRelative,
-		noIsolation,
-		inert,
-		setCallbacks,
-		allowPinchZoom: !!allowPinchZoom,
-		lockRef: ref,
-		gapMode
-	}), forwardProps ? import_react.cloneElement(import_react.Children.only(children), __assign(__assign({}, containerProps), { ref: containerRef })) : import_react.createElement(Container, __assign({}, containerProps, {
-		className,
-		ref: containerRef
-	}), children));
-});
-RemoveScroll.defaultProps = {
-	enabled: true,
-	removeScrollBar: true,
-	inert: false
-};
-RemoveScroll.classNames = {
-	fullWidth: fullWidthClassName,
-	zeroRight: zeroRightClassName
-};
-//#endregion
-//#region node_modules/get-nonce/dist/es2015/index.js
-var currentNonce;
-var getNonce = function() {
-	if (currentNonce) return currentNonce;
-	if (typeof __webpack_nonce__ !== "undefined") return __webpack_nonce__;
-};
-//#endregion
-//#region node_modules/react-style-singleton/dist/es2015/singleton.js
-function makeStyleTag() {
-	if (!document) return null;
-	var tag = document.createElement("style");
-	tag.type = "text/css";
-	var nonce = getNonce();
-	if (nonce) tag.setAttribute("nonce", nonce);
-	return tag;
-}
-function injectStyles(tag, css) {
-	if (tag.styleSheet) tag.styleSheet.cssText = css;
-	else tag.appendChild(document.createTextNode(css));
-}
-function insertStyleTag(tag) {
-	(document.head || document.getElementsByTagName("head")[0]).appendChild(tag);
-}
-var stylesheetSingleton = function() {
-	var counter = 0;
-	var stylesheet = null;
-	return {
-		add: function(style) {
-			if (counter == 0) {
-				if (stylesheet = makeStyleTag()) {
-					injectStyles(stylesheet, style);
-					insertStyleTag(stylesheet);
-				}
-			}
-			counter++;
-		},
-		remove: function() {
-			counter--;
-			if (!counter && stylesheet) {
-				stylesheet.parentNode && stylesheet.parentNode.removeChild(stylesheet);
-				stylesheet = null;
-			}
-		}
-	};
-};
-//#endregion
-//#region node_modules/react-style-singleton/dist/es2015/hook.js
-/**
-* creates a hook to control style singleton
-* @see {@link styleSingleton} for a safer component version
-* @example
-* ```tsx
-* const useStyle = styleHookSingleton();
-* ///
-* useStyle('body { overflow: hidden}');
-*/
-var styleHookSingleton = function() {
-	var sheet = stylesheetSingleton();
-	return function(styles, isDynamic) {
-		import_react.useEffect(function() {
-			sheet.add(styles);
-			return function() {
-				sheet.remove();
-			};
-		}, [styles && isDynamic]);
-	};
-};
-//#endregion
-//#region node_modules/react-style-singleton/dist/es2015/component.js
-/**
-* create a Component to add styles on demand
-* - styles are added when first instance is mounted
-* - styles are removed when the last instance is unmounted
-* - changing styles in runtime does nothing unless dynamic is set. But with multiple components that can lead to the undefined behavior
-*/
-var styleSingleton = function() {
-	var useStyle = styleHookSingleton();
-	var Sheet = function(_a) {
-		var styles = _a.styles, dynamic = _a.dynamic;
-		useStyle(styles, dynamic);
-		return null;
-	};
-	return Sheet;
-};
-//#endregion
-//#region node_modules/react-remove-scroll-bar/dist/es2015/utils.js
-var zeroGap = {
-	left: 0,
-	top: 0,
-	right: 0,
-	gap: 0
-};
-var parse = function(x) {
-	return parseInt(x || "", 10) || 0;
-};
-var getOffset = function(gapMode) {
-	var cs = window.getComputedStyle(document.body);
-	var left = cs[gapMode === "padding" ? "paddingLeft" : "marginLeft"];
-	var top = cs[gapMode === "padding" ? "paddingTop" : "marginTop"];
-	var right = cs[gapMode === "padding" ? "paddingRight" : "marginRight"];
-	return [
-		parse(left),
-		parse(top),
-		parse(right)
-	];
-};
-var getGapWidth = function(gapMode) {
-	if (gapMode === void 0) gapMode = "margin";
-	if (typeof window === "undefined") return zeroGap;
-	var offsets = getOffset(gapMode);
-	var documentWidth = document.documentElement.clientWidth;
-	var windowWidth = window.innerWidth;
-	return {
-		left: offsets[0],
-		top: offsets[1],
-		right: offsets[2],
-		gap: Math.max(0, windowWidth - documentWidth + offsets[2] - offsets[0])
-	};
-};
-//#endregion
-//#region node_modules/react-remove-scroll-bar/dist/es2015/component.js
-var Style = styleSingleton();
-var lockAttribute = "data-scroll-locked";
-var getStyles = function(_a, allowRelative, gapMode, important) {
-	var left = _a.left, top = _a.top, right = _a.right, gap = _a.gap;
-	if (gapMode === void 0) gapMode = "margin";
-	return "\n  .".concat(noScrollbarsClassName, " {\n   overflow: hidden ").concat(important, ";\n   padding-right: ").concat(gap, "px ").concat(important, ";\n  }\n  body[").concat(lockAttribute, "] {\n    overflow: hidden ").concat(important, ";\n    overscroll-behavior: contain;\n    ").concat([
-		allowRelative && "position: relative ".concat(important, ";"),
-		gapMode === "margin" && "\n    padding-left: ".concat(left, "px;\n    padding-top: ").concat(top, "px;\n    padding-right: ").concat(right, "px;\n    margin-left:0;\n    margin-top:0;\n    margin-right: ").concat(gap, "px ").concat(important, ";\n    "),
-		gapMode === "padding" && "padding-right: ".concat(gap, "px ").concat(important, ";")
-	].filter(Boolean).join(""), "\n  }\n  \n  .").concat(zeroRightClassName, " {\n    right: ").concat(gap, "px ").concat(important, ";\n  }\n  \n  .").concat(fullWidthClassName, " {\n    margin-right: ").concat(gap, "px ").concat(important, ";\n  }\n  \n  .").concat(zeroRightClassName, " .").concat(zeroRightClassName, " {\n    right: 0 ").concat(important, ";\n  }\n  \n  .").concat(fullWidthClassName, " .").concat(fullWidthClassName, " {\n    margin-right: 0 ").concat(important, ";\n  }\n  \n  body[").concat(lockAttribute, "] {\n    ").concat(removedBarSizeVariable, ": ").concat(gap, "px;\n  }\n");
-};
-var getCurrentUseCounter = function() {
-	var counter = parseInt(document.body.getAttribute("data-scroll-locked") || "0", 10);
-	return isFinite(counter) ? counter : 0;
-};
-var useLockAttribute = function() {
-	import_react.useEffect(function() {
-		document.body.setAttribute(lockAttribute, (getCurrentUseCounter() + 1).toString());
-		return function() {
-			var newCounter = getCurrentUseCounter() - 1;
-			if (newCounter <= 0) document.body.removeAttribute(lockAttribute);
-			else document.body.setAttribute(lockAttribute, newCounter.toString());
-		};
-	}, []);
-};
-/**
-* Removes page scrollbar and blocks page scroll when mounted
-*/
-var RemoveScrollBar = function(_a) {
-	var noRelative = _a.noRelative, noImportant = _a.noImportant, _b = _a.gapMode, gapMode = _b === void 0 ? "margin" : _b;
-	useLockAttribute();
-	var gap = import_react.useMemo(function() {
-		return getGapWidth(gapMode);
-	}, [gapMode]);
-	return import_react.createElement(Style, { styles: getStyles(gap, !noRelative, gapMode, !noImportant ? "!important" : "") });
-};
-//#endregion
-//#region node_modules/react-remove-scroll/dist/es2015/aggresiveCapture.js
-var passiveSupported = false;
-if (typeof window !== "undefined") try {
-	var options = Object.defineProperty({}, "passive", { get: function() {
-		passiveSupported = true;
-		return true;
-	} });
-	window.addEventListener("test", options, options);
-	window.removeEventListener("test", options, options);
-} catch (err) {
-	passiveSupported = false;
-}
-var nonPassive = passiveSupported ? { passive: false } : false;
-//#endregion
-//#region node_modules/react-remove-scroll/dist/es2015/handleScroll.js
-var alwaysContainsScroll = function(node) {
-	return node.tagName === "TEXTAREA";
-};
-var elementCanBeScrolled = function(node, overflow) {
-	if (!(node instanceof Element)) return false;
-	var styles = window.getComputedStyle(node);
-	return styles[overflow] !== "hidden" && !(styles.overflowY === styles.overflowX && !alwaysContainsScroll(node) && styles[overflow] === "visible");
-};
-var elementCouldBeVScrolled = function(node) {
-	return elementCanBeScrolled(node, "overflowY");
-};
-var elementCouldBeHScrolled = function(node) {
-	return elementCanBeScrolled(node, "overflowX");
-};
-var locationCouldBeScrolled = function(axis, node) {
-	var ownerDocument = node.ownerDocument;
-	var current = node;
-	do {
-		if (typeof ShadowRoot !== "undefined" && current instanceof ShadowRoot) current = current.host;
-		if (elementCouldBeScrolled(axis, current)) {
-			var _a = getScrollVariables(axis, current);
-			if (_a[1] > _a[2]) return true;
-		}
-		current = current.parentNode;
-	} while (current && current !== ownerDocument.body);
-	return false;
-};
-var getVScrollVariables = function(_a) {
-	return [
-		_a.scrollTop,
-		_a.scrollHeight,
-		_a.clientHeight
-	];
-};
-var getHScrollVariables = function(_a) {
-	return [
-		_a.scrollLeft,
-		_a.scrollWidth,
-		_a.clientWidth
-	];
-};
-var elementCouldBeScrolled = function(axis, node) {
-	return axis === "v" ? elementCouldBeVScrolled(node) : elementCouldBeHScrolled(node);
-};
-var getScrollVariables = function(axis, node) {
-	return axis === "v" ? getVScrollVariables(node) : getHScrollVariables(node);
-};
-var getDirectionFactor = function(axis, direction) {
-	/**
-	* If the element's direction is rtl (right-to-left), then scrollLeft is 0 when the scrollbar is at its rightmost position,
-	* and then increasingly negative as you scroll towards the end of the content.
-	* @see https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollLeft
-	*/
-	return axis === "h" && direction === "rtl" ? -1 : 1;
-};
-var handleScroll = function(axis, endTarget, event, sourceDelta, noOverscroll) {
-	var directionFactor = getDirectionFactor(axis, window.getComputedStyle(endTarget).direction);
-	var delta = directionFactor * sourceDelta;
-	var target = event.target;
-	var targetInLock = endTarget.contains(target);
-	var shouldCancelScroll = false;
-	var isDeltaPositive = delta > 0;
-	var availableScroll = 0;
-	var availableScrollTop = 0;
-	do {
-		if (!target) break;
-		var _a = getScrollVariables(axis, target), position = _a[0];
-		var elementScroll = _a[1] - _a[2] - directionFactor * position;
-		if (position || elementScroll) {
-			if (elementCouldBeScrolled(axis, target)) {
-				availableScroll += elementScroll;
-				availableScrollTop += position;
-			}
-		}
-		var parent_1 = target.parentNode;
-		target = parent_1 && parent_1.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? parent_1.host : parent_1;
-	} while (!targetInLock && target !== document.body || targetInLock && (endTarget.contains(target) || endTarget === target));
-	if (isDeltaPositive && (noOverscroll && Math.abs(availableScroll) < 1 || !noOverscroll && delta > availableScroll)) shouldCancelScroll = true;
-	else if (!isDeltaPositive && (noOverscroll && Math.abs(availableScrollTop) < 1 || !noOverscroll && -delta > availableScrollTop)) shouldCancelScroll = true;
-	return shouldCancelScroll;
-};
-//#endregion
-//#region node_modules/react-remove-scroll/dist/es2015/SideEffect.js
-var getTouchXY = function(event) {
-	return "changedTouches" in event ? [event.changedTouches[0].clientX, event.changedTouches[0].clientY] : [0, 0];
-};
-var getDeltaXY = function(event) {
-	return [event.deltaX, event.deltaY];
-};
-var extractRef = function(ref) {
-	return ref && "current" in ref ? ref.current : ref;
-};
-var deltaCompare = function(x, y) {
-	return x[0] === y[0] && x[1] === y[1];
-};
-var generateStyle = function(id) {
-	return "\n  .block-interactivity-".concat(id, " {pointer-events: none;}\n  .allow-interactivity-").concat(id, " {pointer-events: all;}\n");
-};
-var idCounter = 0;
-var lockStack = [];
-function RemoveScrollSideCar(props) {
-	var shouldPreventQueue = import_react.useRef([]);
-	var touchStartRef = import_react.useRef([0, 0]);
-	var activeAxis = import_react.useRef();
-	var id = import_react.useState(idCounter++)[0];
-	var Style = import_react.useState(styleSingleton)[0];
-	var lastProps = import_react.useRef(props);
-	import_react.useEffect(function() {
-		lastProps.current = props;
-	}, [props]);
-	import_react.useEffect(function() {
-		if (props.inert) {
-			document.body.classList.add("block-interactivity-".concat(id));
-			var allow_1 = __spreadArray([props.lockRef.current], (props.shards || []).map(extractRef), true).filter(Boolean);
-			allow_1.forEach(function(el) {
-				return el.classList.add("allow-interactivity-".concat(id));
-			});
-			return function() {
-				document.body.classList.remove("block-interactivity-".concat(id));
-				allow_1.forEach(function(el) {
-					return el.classList.remove("allow-interactivity-".concat(id));
-				});
-			};
-		}
-	}, [
-		props.inert,
-		props.lockRef.current,
-		props.shards
-	]);
-	var shouldCancelEvent = import_react.useCallback(function(event, parent) {
-		if ("touches" in event && event.touches.length === 2 || event.type === "wheel" && event.ctrlKey) return !lastProps.current.allowPinchZoom;
-		var touch = getTouchXY(event);
-		var touchStart = touchStartRef.current;
-		var deltaX = "deltaX" in event ? event.deltaX : touchStart[0] - touch[0];
-		var deltaY = "deltaY" in event ? event.deltaY : touchStart[1] - touch[1];
-		var currentAxis;
-		var target = event.target;
-		var moveDirection = Math.abs(deltaX) > Math.abs(deltaY) ? "h" : "v";
-		if ("touches" in event && moveDirection === "h" && target.type === "range") return false;
-		var selection = window.getSelection();
-		var anchorNode = selection && selection.anchorNode;
-		if (anchorNode ? anchorNode === target || anchorNode.contains(target) : false) return false;
-		var canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
-		if (!canBeScrolledInMainDirection) return true;
-		if (canBeScrolledInMainDirection) currentAxis = moveDirection;
-		else {
-			currentAxis = moveDirection === "v" ? "h" : "v";
-			canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
-		}
-		if (!canBeScrolledInMainDirection) return false;
-		if (!activeAxis.current && "changedTouches" in event && (deltaX || deltaY)) activeAxis.current = currentAxis;
-		if (!currentAxis) return true;
-		var cancelingAxis = activeAxis.current || currentAxis;
-		return handleScroll(cancelingAxis, parent, event, cancelingAxis === "h" ? deltaX : deltaY, true);
-	}, []);
-	var shouldPrevent = import_react.useCallback(function(_event) {
-		var event = _event;
-		if (!lockStack.length || lockStack[lockStack.length - 1] !== Style) return;
-		var delta = "deltaY" in event ? getDeltaXY(event) : getTouchXY(event);
-		var sourceEvent = shouldPreventQueue.current.filter(function(e) {
-			return e.name === event.type && (e.target === event.target || event.target === e.shadowParent) && deltaCompare(e.delta, delta);
-		})[0];
-		if (sourceEvent && sourceEvent.should) {
-			if (event.cancelable) event.preventDefault();
-			return;
-		}
-		if (!sourceEvent) {
-			var shardNodes = (lastProps.current.shards || []).map(extractRef).filter(Boolean).filter(function(node) {
-				return node.contains(event.target);
-			});
-			if (shardNodes.length > 0 ? shouldCancelEvent(event, shardNodes[0]) : !lastProps.current.noIsolation) {
-				if (event.cancelable) event.preventDefault();
-			}
-		}
-	}, []);
-	var shouldCancel = import_react.useCallback(function(name, delta, target, should) {
-		var event = {
-			name,
-			delta,
-			target,
-			should,
-			shadowParent: getOutermostShadowParent(target)
-		};
-		shouldPreventQueue.current.push(event);
-		setTimeout(function() {
-			shouldPreventQueue.current = shouldPreventQueue.current.filter(function(e) {
-				return e !== event;
-			});
-		}, 1);
-	}, []);
-	var scrollTouchStart = import_react.useCallback(function(event) {
-		touchStartRef.current = getTouchXY(event);
-		activeAxis.current = void 0;
-	}, []);
-	var scrollWheel = import_react.useCallback(function(event) {
-		shouldCancel(event.type, getDeltaXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
-	}, []);
-	var scrollTouchMove = import_react.useCallback(function(event) {
-		shouldCancel(event.type, getTouchXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
-	}, []);
-	import_react.useEffect(function() {
-		lockStack.push(Style);
-		props.setCallbacks({
-			onScrollCapture: scrollWheel,
-			onWheelCapture: scrollWheel,
-			onTouchMoveCapture: scrollTouchMove
-		});
-		document.addEventListener("wheel", shouldPrevent, nonPassive);
-		document.addEventListener("touchmove", shouldPrevent, nonPassive);
-		document.addEventListener("touchstart", scrollTouchStart, nonPassive);
-		return function() {
-			lockStack = lockStack.filter(function(inst) {
-				return inst !== Style;
-			});
-			document.removeEventListener("wheel", shouldPrevent, nonPassive);
-			document.removeEventListener("touchmove", shouldPrevent, nonPassive);
-			document.removeEventListener("touchstart", scrollTouchStart, nonPassive);
-		};
-	}, []);
-	var removeScrollBar = props.removeScrollBar, inert = props.inert;
-	return import_react.createElement(import_react.Fragment, null, inert ? import_react.createElement(Style, { styles: generateStyle(id) }) : null, removeScrollBar ? import_react.createElement(RemoveScrollBar, {
-		noRelative: props.noRelative,
-		gapMode: props.gapMode
-	}) : null);
-}
-function getOutermostShadowParent(node) {
-	var shadowParent = null;
-	while (node !== null) {
-		if (node instanceof ShadowRoot) {
-			shadowParent = node.host;
-			node = node.host;
-		}
-		node = node.parentNode;
-	}
-	return shadowParent;
-}
-//#endregion
-//#region node_modules/react-remove-scroll/dist/es2015/sidecar.js
-var sidecar_default = exportSidecar(effectCar, RemoveScrollSideCar);
-//#endregion
-//#region node_modules/react-remove-scroll/dist/es2015/Combination.js
-var ReactRemoveScroll = import_react.forwardRef(function(props, ref) {
-	return import_react.createElement(RemoveScroll, __assign({}, props, {
-		ref,
-		sideCar: sidecar_default
-	}));
-});
-ReactRemoveScroll.classNames = RemoveScroll.classNames;
-//#endregion
-//#region node_modules/aria-hidden/dist/es2015/index.js
-var getDefaultParent = function(originalTarget) {
-	if (typeof document === "undefined") return null;
-	return (Array.isArray(originalTarget) ? originalTarget[0] : originalTarget).ownerDocument.body;
-};
-var counterMap = /* @__PURE__ */ new WeakMap();
-var uncontrolledNodes = /* @__PURE__ */ new WeakMap();
-var markerMap = {};
-var lockCount = 0;
-var unwrapHost = function(node) {
-	return node && (node.host || unwrapHost(node.parentNode));
-};
-var correctTargets = function(parent, targets) {
-	return targets.map(function(target) {
-		if (parent.contains(target)) return target;
-		var correctedTarget = unwrapHost(target);
-		if (correctedTarget && parent.contains(correctedTarget)) return correctedTarget;
-		console.error("aria-hidden", target, "in not contained inside", parent, ". Doing nothing");
-		return null;
-	}).filter(function(x) {
-		return Boolean(x);
-	});
-};
-/**
-* Marks everything except given node(or nodes) as aria-hidden
-* @param {Element | Element[]} originalTarget - elements to keep on the page
-* @param [parentNode] - top element, defaults to document.body
-* @param {String} [markerName] - a special attribute to mark every node
-* @param {String} [controlAttribute] - html Attribute to control
-* @return {Undo} undo command
-*/
-var applyAttributeToOthers = function(originalTarget, parentNode, markerName, controlAttribute) {
-	var targets = correctTargets(parentNode, Array.isArray(originalTarget) ? originalTarget : [originalTarget]);
-	if (!markerMap[markerName]) markerMap[markerName] = /* @__PURE__ */ new WeakMap();
-	var markerCounter = markerMap[markerName];
-	var hiddenNodes = [];
-	var elementsToKeep = /* @__PURE__ */ new Set();
-	var elementsToStop = new Set(targets);
-	var keep = function(el) {
-		if (!el || elementsToKeep.has(el)) return;
-		elementsToKeep.add(el);
-		keep(el.parentNode);
-	};
-	targets.forEach(keep);
-	var deep = function(parent) {
-		if (!parent || elementsToStop.has(parent)) return;
-		Array.prototype.forEach.call(parent.children, function(node) {
-			if (elementsToKeep.has(node)) deep(node);
-			else try {
-				var attr = node.getAttribute(controlAttribute);
-				var alreadyHidden = attr !== null && attr !== "false";
-				var counterValue = (counterMap.get(node) || 0) + 1;
-				var markerValue = (markerCounter.get(node) || 0) + 1;
-				counterMap.set(node, counterValue);
-				markerCounter.set(node, markerValue);
-				hiddenNodes.push(node);
-				if (counterValue === 1 && alreadyHidden) uncontrolledNodes.set(node, true);
-				if (markerValue === 1) node.setAttribute(markerName, "true");
-				if (!alreadyHidden) node.setAttribute(controlAttribute, "true");
-			} catch (e) {
-				console.error("aria-hidden: cannot operate on ", node, e);
-			}
-		});
-	};
-	deep(parentNode);
-	elementsToKeep.clear();
-	lockCount++;
-	return function() {
-		hiddenNodes.forEach(function(node) {
-			var counterValue = counterMap.get(node) - 1;
-			var markerValue = markerCounter.get(node) - 1;
-			counterMap.set(node, counterValue);
-			markerCounter.set(node, markerValue);
-			if (!counterValue) {
-				if (!uncontrolledNodes.has(node)) node.removeAttribute(controlAttribute);
-				uncontrolledNodes.delete(node);
-			}
-			if (!markerValue) node.removeAttribute(markerName);
-		});
-		lockCount--;
-		if (!lockCount) {
-			counterMap = /* @__PURE__ */ new WeakMap();
-			counterMap = /* @__PURE__ */ new WeakMap();
-			uncontrolledNodes = /* @__PURE__ */ new WeakMap();
-			markerMap = {};
-		}
-	};
-};
-/**
-* Marks everything except given node(or nodes) as aria-hidden
-* @param {Element | Element[]} originalTarget - elements to keep on the page
-* @param [parentNode] - top element, defaults to document.body
-* @param {String} [markerName] - a special attribute to mark every node
-* @return {Undo} undo command
-*/
-var hideOthers = function(originalTarget, parentNode, markerName) {
-	if (markerName === void 0) markerName = "data-aria-hidden";
-	var targets = Array.from(Array.isArray(originalTarget) ? originalTarget : [originalTarget]);
-	var activeParentNode = parentNode || getDefaultParent(originalTarget);
-	if (!activeParentNode) return function() {
-		return null;
-	};
-	targets.push.apply(targets, Array.from(activeParentNode.querySelectorAll("[aria-live], script")));
-	return applyAttributeToOthers(targets, activeParentNode, markerName, "aria-hidden");
-};
-//#endregion
-//#region node_modules/@radix-ui/react-dialog/dist/index.mjs
-var DIALOG_NAME = "Dialog";
-var [createDialogContext, createDialogScope] = createContextScope(DIALOG_NAME);
-var [DialogProvider, useDialogContext] = createDialogContext(DIALOG_NAME);
-var Dialog$1 = (props) => {
-	const { __scopeDialog, children, open: openProp, defaultOpen, onOpenChange, modal = true } = props;
-	const triggerRef = import_react.useRef(null);
-	const contentRef = import_react.useRef(null);
-	const [open, setOpen] = useControllableState({
-		prop: openProp,
-		defaultProp: defaultOpen ?? false,
-		onChange: onOpenChange,
-		caller: DIALOG_NAME
-	});
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogProvider, {
-		scope: __scopeDialog,
-		triggerRef,
-		contentRef,
-		contentId: useId$1(),
-		titleId: useId$1(),
-		descriptionId: useId$1(),
-		open,
-		onOpenChange: setOpen,
-		onOpenToggle: import_react.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
-		modal,
-		children
-	});
-};
-Dialog$1.displayName = DIALOG_NAME;
-var TRIGGER_NAME = "DialogTrigger";
-var DialogTrigger = import_react.forwardRef((props, forwardedRef) => {
-	const { __scopeDialog, ...triggerProps } = props;
-	const context = useDialogContext(TRIGGER_NAME, __scopeDialog);
-	const composedTriggerRef = useComposedRefs(forwardedRef, context.triggerRef);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.button, {
-		type: "button",
-		"aria-haspopup": "dialog",
-		"aria-expanded": context.open,
-		"aria-controls": context.contentId,
-		"data-state": getState(context.open),
-		...triggerProps,
-		ref: composedTriggerRef,
-		onClick: composeEventHandlers(props.onClick, context.onOpenToggle)
-	});
-});
-DialogTrigger.displayName = TRIGGER_NAME;
-var PORTAL_NAME = "DialogPortal";
-var [PortalProvider, usePortalContext] = createDialogContext(PORTAL_NAME, { forceMount: void 0 });
-var DialogPortal$1 = (props) => {
-	const { __scopeDialog, forceMount, children, container } = props;
-	const context = useDialogContext(PORTAL_NAME, __scopeDialog);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalProvider, {
-		scope: __scopeDialog,
-		forceMount,
-		children: import_react.Children.map(children, (child) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Presence, {
-			present: forceMount || context.open,
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Portal$1, {
-				asChild: true,
-				container,
-				children: child
-			})
-		}))
-	});
-};
-DialogPortal$1.displayName = PORTAL_NAME;
-var OVERLAY_NAME = "DialogOverlay";
-var DialogOverlay$1 = import_react.forwardRef((props, forwardedRef) => {
-	const portalContext = usePortalContext(OVERLAY_NAME, props.__scopeDialog);
-	const { forceMount = portalContext.forceMount, ...overlayProps } = props;
-	const context = useDialogContext(OVERLAY_NAME, props.__scopeDialog);
-	return context.modal ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Presence, {
-		present: forceMount || context.open,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogOverlayImpl, {
-			...overlayProps,
-			ref: forwardedRef
-		})
-	}) : null;
-});
-DialogOverlay$1.displayName = OVERLAY_NAME;
-var Slot = /* @__PURE__ */ createSlot("DialogOverlay.RemoveScroll");
-var DialogOverlayImpl = import_react.forwardRef((props, forwardedRef) => {
-	const { __scopeDialog, ...overlayProps } = props;
-	const context = useDialogContext(OVERLAY_NAME, __scopeDialog);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ReactRemoveScroll, {
-		as: Slot,
-		allowPinchZoom: true,
-		shards: [context.contentRef],
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.div, {
-			"data-state": getState(context.open),
-			...overlayProps,
-			ref: forwardedRef,
-			style: {
-				pointerEvents: "auto",
-				...overlayProps.style
-			}
-		})
-	});
-});
-var CONTENT_NAME = "DialogContent";
-var DialogContent$1 = import_react.forwardRef((props, forwardedRef) => {
-	const portalContext = usePortalContext(CONTENT_NAME, props.__scopeDialog);
-	const { forceMount = portalContext.forceMount, ...contentProps } = props;
-	const context = useDialogContext(CONTENT_NAME, props.__scopeDialog);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Presence, {
-		present: forceMount || context.open,
-		children: context.modal ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogContentModal, {
-			...contentProps,
-			ref: forwardedRef
-		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogContentNonModal, {
-			...contentProps,
-			ref: forwardedRef
-		})
-	});
-});
-DialogContent$1.displayName = CONTENT_NAME;
-var DialogContentModal = import_react.forwardRef((props, forwardedRef) => {
-	const context = useDialogContext(CONTENT_NAME, props.__scopeDialog);
-	const contentRef = import_react.useRef(null);
-	const composedRefs = useComposedRefs(forwardedRef, context.contentRef, contentRef);
-	import_react.useEffect(() => {
-		const content = contentRef.current;
-		if (content) return hideOthers(content);
-	}, []);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogContentImpl, {
-		...props,
-		ref: composedRefs,
-		trapFocus: context.open,
-		disableOutsidePointerEvents: true,
-		onCloseAutoFocus: composeEventHandlers(props.onCloseAutoFocus, (event) => {
-			event.preventDefault();
-			context.triggerRef.current?.focus();
-		}),
-		onPointerDownOutside: composeEventHandlers(props.onPointerDownOutside, (event) => {
-			const originalEvent = event.detail.originalEvent;
-			const ctrlLeftClick = originalEvent.button === 0 && originalEvent.ctrlKey === true;
-			if (originalEvent.button === 2 || ctrlLeftClick) event.preventDefault();
-		}),
-		onFocusOutside: composeEventHandlers(props.onFocusOutside, (event) => event.preventDefault())
-	});
-});
-var DialogContentNonModal = import_react.forwardRef((props, forwardedRef) => {
-	const context = useDialogContext(CONTENT_NAME, props.__scopeDialog);
-	const hasInteractedOutsideRef = import_react.useRef(false);
-	const hasPointerDownOutsideRef = import_react.useRef(false);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogContentImpl, {
-		...props,
-		ref: forwardedRef,
-		trapFocus: false,
-		disableOutsidePointerEvents: false,
-		onCloseAutoFocus: (event) => {
-			props.onCloseAutoFocus?.(event);
-			if (!event.defaultPrevented) {
-				if (!hasInteractedOutsideRef.current) context.triggerRef.current?.focus();
-				event.preventDefault();
-			}
-			hasInteractedOutsideRef.current = false;
-			hasPointerDownOutsideRef.current = false;
-		},
-		onInteractOutside: (event) => {
-			props.onInteractOutside?.(event);
-			if (!event.defaultPrevented) {
-				hasInteractedOutsideRef.current = true;
-				if (event.detail.originalEvent.type === "pointerdown") hasPointerDownOutsideRef.current = true;
-			}
-			const target = event.target;
-			if (context.triggerRef.current?.contains(target)) event.preventDefault();
-			if (event.detail.originalEvent.type === "focusin" && hasPointerDownOutsideRef.current) event.preventDefault();
-		}
-	});
-});
-var DialogContentImpl = import_react.forwardRef((props, forwardedRef) => {
-	const { __scopeDialog, trapFocus, onOpenAutoFocus, onCloseAutoFocus, ...contentProps } = props;
-	const context = useDialogContext(CONTENT_NAME, __scopeDialog);
-	const contentRef = import_react.useRef(null);
-	const composedRefs = useComposedRefs(forwardedRef, contentRef);
-	useFocusGuards();
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FocusScope, {
-		asChild: true,
-		loop: true,
-		trapped: trapFocus,
-		onMountAutoFocus: onOpenAutoFocus,
-		onUnmountAutoFocus: onCloseAutoFocus,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DismissableLayer, {
-			role: "dialog",
-			id: context.contentId,
-			"aria-describedby": context.descriptionId,
-			"aria-labelledby": context.titleId,
-			"data-state": getState(context.open),
-			...contentProps,
-			ref: composedRefs,
-			onDismiss: () => context.onOpenChange(false)
-		})
-	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TitleWarning, { titleId: context.titleId }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DescriptionWarning, {
-		contentRef,
-		descriptionId: context.descriptionId
-	})] })] });
-});
-var TITLE_NAME = "DialogTitle";
-var DialogTitle$1 = import_react.forwardRef((props, forwardedRef) => {
-	const { __scopeDialog, ...titleProps } = props;
-	const context = useDialogContext(TITLE_NAME, __scopeDialog);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.h2, {
-		id: context.titleId,
-		...titleProps,
-		ref: forwardedRef
-	});
-});
-DialogTitle$1.displayName = TITLE_NAME;
-var DESCRIPTION_NAME = "DialogDescription";
-var DialogDescription$1 = import_react.forwardRef((props, forwardedRef) => {
-	const { __scopeDialog, ...descriptionProps } = props;
-	const context = useDialogContext(DESCRIPTION_NAME, __scopeDialog);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.p, {
-		id: context.descriptionId,
-		...descriptionProps,
-		ref: forwardedRef
-	});
-});
-DialogDescription$1.displayName = DESCRIPTION_NAME;
-var CLOSE_NAME = "DialogClose";
-var DialogClose = import_react.forwardRef((props, forwardedRef) => {
-	const { __scopeDialog, ...closeProps } = props;
-	const context = useDialogContext(CLOSE_NAME, __scopeDialog);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.button, {
-		type: "button",
-		...closeProps,
-		ref: forwardedRef,
-		onClick: composeEventHandlers(props.onClick, () => context.onOpenChange(false))
-	});
-});
-DialogClose.displayName = CLOSE_NAME;
-function getState(open) {
-	return open ? "open" : "closed";
-}
-var TITLE_WARNING_NAME = "DialogTitleWarning";
-var [WarningProvider, useWarningContext] = createContext2(TITLE_WARNING_NAME, {
-	contentName: CONTENT_NAME,
-	titleName: TITLE_NAME,
-	docsSlug: "dialog"
-});
-var TitleWarning = ({ titleId }) => {
-	const titleWarningContext = useWarningContext(TITLE_WARNING_NAME);
-	const MESSAGE = `\`${titleWarningContext.contentName}\` requires a \`${titleWarningContext.titleName}\` for the component to be accessible for screen reader users.
-
-If you want to hide the \`${titleWarningContext.titleName}\`, you can wrap it with our VisuallyHidden component.
-
-For more information, see https://radix-ui.com/primitives/docs/components/${titleWarningContext.docsSlug}`;
-	import_react.useEffect(() => {
-		if (titleId) {
-			if (!document.getElementById(titleId)) console.error(MESSAGE);
-		}
-	}, [MESSAGE, titleId]);
-	return null;
-};
-var DESCRIPTION_WARNING_NAME = "DialogDescriptionWarning";
-var DescriptionWarning = ({ contentRef, descriptionId }) => {
-	const MESSAGE = `Warning: Missing \`Description\` or \`aria-describedby={undefined}\` for {${useWarningContext(DESCRIPTION_WARNING_NAME).contentName}}.`;
-	import_react.useEffect(() => {
-		const describedById = contentRef.current?.getAttribute("aria-describedby");
-		if (descriptionId && describedById) {
-			if (!document.getElementById(descriptionId)) console.warn(MESSAGE);
-		}
-	}, [
-		MESSAGE,
-		contentRef,
-		descriptionId
-	]);
-	return null;
-};
-var Root$1 = Dialog$1;
-var Portal = DialogPortal$1;
-var Overlay = DialogOverlay$1;
-var Content = DialogContent$1;
-var Title = DialogTitle$1;
-var Description = DialogDescription$1;
-var Close = DialogClose;
-//#endregion
-//#region src/components/ui/dialog.jsx
-var Dialog = Root$1;
-var DialogPortal = Portal;
-var DialogOverlay = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Overlay, {
-	ref,
-	className: cn("fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className),
-	...props
-}));
-DialogOverlay.displayName = Overlay.displayName;
-var DialogContent = import_react.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogPortal, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogOverlay, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Content, {
-	ref,
-	className: cn("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className),
-	...props,
-	children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Close, {
-		className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "h-4 w-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-			className: "sr-only",
-			children: "Close"
-		})]
-	})]
-})] }));
-DialogContent.displayName = Content.displayName;
-var DialogHeader = ({ className, ...props }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-	className: cn("flex flex-col space-y-1.5 text-center sm:text-left", className),
-	...props
-});
-DialogHeader.displayName = "DialogHeader";
-var DialogFooter = ({ className, ...props }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-	className: cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className),
-	...props
-});
-DialogFooter.displayName = "DialogFooter";
-var DialogTitle = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Title, {
-	ref,
-	className: cn("text-lg font-semibold leading-none tracking-tight", className),
-	...props
-}));
-DialogTitle.displayName = Title.displayName;
-var DialogDescription = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Description, {
-	ref,
-	className: cn("text-sm text-muted-foreground", className),
-	...props
-}));
-DialogDescription.displayName = Description.displayName;
-//#endregion
-//#region src/features/call/CallScreen.jsx
-function CallScreen({ open, onClose, contact, muteMicOnJoin, callType = "audio", callStatus, localStream, remoteStream, remoteUserData, startCall, stopCall, switchCamera, toggleVideo, isVideoEnabled, getRemotePeerId }) {
-	const [micEnabled, setMicEnabled] = (0, import_react.useState)(!muteMicOnJoin);
-	const [videoEnabled, setVideoEnabled] = (0, import_react.useState)(callType === "video");
-	const [callTimer, setCallTimer] = (0, import_react.useState)(0);
-	const localVideoRef = (0, import_react.useRef)(null);
-	const remoteVideoRef = (0, import_react.useRef)(null);
-	const timerRef = (0, import_react.useRef)(null);
-	const appliedMuteRef = (0, import_react.useRef)(false);
-	(0, import_react.useEffect)(() => {
-		if (open && contact?.uid) {
-			setVideoEnabled(callType === "video");
-			appliedMuteRef.current = false;
-			getRemotePeerId(contact.uid).then((pid) => {
-				if (!pid) {
-					ue.error("المستخدم غير متصل حاليًا", { description: "لا يمكن إجراء المكالمة الآن، حاول لاحقًا" });
-					onClose();
-					return;
-				}
-				startCall(pid, {
-					displayName: contact.displayName || "",
-					photoURL: contact.photoURL || "",
-					username: contact.username || ""
-				}, callType);
-			});
-		}
-	}, [
-		open,
-		contact?.uid,
-		callType,
-		startCall,
-		getRemotePeerId,
-		onClose
-	]);
-	(0, import_react.useEffect)(() => {
-		if (muteMicOnJoin && localStream && !appliedMuteRef.current) {
-			const audioTrack = localStream.getAudioTracks()[0];
-			if (audioTrack) {
-				audioTrack.enabled = false;
-				setMicEnabled(false);
-				appliedMuteRef.current = true;
-			}
-		}
-	}, [localStream, muteMicOnJoin]);
-	(0, import_react.useEffect)(() => {
-		if (localVideoRef.current && localStream) localVideoRef.current.srcObject = localStream;
-	}, [localStream]);
-	(0, import_react.useEffect)(() => {
-		if (remoteVideoRef.current && remoteStream) remoteVideoRef.current.srcObject = remoteStream;
-	}, [remoteStream]);
-	(0, import_react.useEffect)(() => {
-		if (callStatus?.includes("متصل")) timerRef.current = setInterval(() => setCallTimer((p) => p + 1), 1e3);
-		else {
-			clearInterval(timerRef.current);
-			if (callStatus?.includes("انتهت") || callStatus?.includes("فشل")) setCallTimer(0);
-		}
-		return () => clearInterval(timerRef.current);
-	}, [callStatus]);
-	const handleEndCall = () => {
-		stopCall();
-		clearInterval(timerRef.current);
-		setCallTimer(0);
-		onClose();
-	};
-	const toggleMic = () => {
-		if (localStream) {
-			const t = localStream.getAudioTracks()[0];
-			if (t) {
-				t.enabled = !t.enabled;
-				setMicEnabled(t.enabled);
-			}
-		}
-	};
-	const handleToggleVideo = () => {
-		setVideoEnabled(toggleVideo());
-	};
-	const handleSwitchCamera = () => switchCamera();
-	const formatTime = (s) => {
-		return `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
-	};
-	const displayName = remoteUserData?.displayName || contact?.displayName || contact?.username || "مستخدم";
-	const isVideoCall = callType === "video";
-	const isConnected = callStatus?.includes("متصل");
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
-		open,
-		onOpenChange: (isOpen) => !isOpen && handleEndCall(),
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogContent, {
-			className: "w-full h-full max-w-none max-h-none p-0 m-0 border-none bg-black flex items-center justify-center",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative w-full h-full max-w-md mx-auto bg-gray-900 overflow-hidden",
-				children: [
-					isVideoCall && remoteStream && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
-						ref: remoteVideoRef,
-						autoPlay: true,
-						playsInline: true,
-						className: "absolute inset-0 w-full h-full object-cover"
-					}),
-					(!isVideoCall || !remoteStream) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "absolute inset-0 flex flex-col items-center justify-center px-6",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-sm text-gray-400 mb-4 bg-white/10 px-4 py-1 rounded-full",
-								children: callStatus
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Avatar, {
-								className: "h-28 w-28 border-4 border-white/20 shadow-2xl mb-4",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-									className: "bg-gradient-to-br from-blue-600 to-cyan-500 text-white text-3xl font-bold",
-									children: displayName?.charAt(0) || /* @__PURE__ */ (0, import_jsx_runtime.jsx)(User$1, { className: "h-10 w-10" })
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xl font-bold text-white mb-1",
-								children: displayName
-							}),
-							contact?.username && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "text-sm text-gray-400",
-								children: ["@", contact.username]
-							}),
-							isConnected && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-2xl font-mono text-white mt-2",
-								children: formatTime(callTimer)
-							})
-						]
-					}),
-					isVideoCall && localStream && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "absolute top-4 right-4 w-28 h-40 rounded-xl overflow-hidden border-2 border-white/30 shadow-lg z-10 bg-black",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
-							ref: localVideoRef,
-							autoPlay: true,
-							muted: true,
-							playsInline: true,
-							className: "w-full h-full object-cover"
-						}), !videoEnabled && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "absolute inset-0 bg-gray-800/80 flex items-center justify-center",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoOff, { className: "h-6 w-6 text-white" })
-						})]
-					}),
-					isVideoCall && isConnected && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "absolute top-4 left-4 z-10 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-white text-sm font-mono",
-							children: formatTime(callTimer)
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: `absolute bottom-0 left-0 right-0 px-6 py-4 flex items-center justify-center gap-4 ${isVideoCall ? "bg-gradient-to-t from-black/80 to-transparent" : "bg-gray-900"}`,
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								variant: "outline",
-								size: "icon",
-								onClick: toggleMic,
-								className: `h-14 w-14 rounded-full border-2 ${micEnabled ? "bg-gray-800/80 border-gray-500" : "bg-red-600 border-red-500"}`,
-								children: micEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mic, { className: "h-5 w-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MicOff, { className: "h-5 w-5" })
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								variant: "destructive",
-								size: "icon",
-								onClick: handleEndCall,
-								className: "h-16 w-16 rounded-full bg-red-600 hover:bg-red-700 border-4 border-red-400/50 shadow-[0_0_25px_rgba(239,68,68,0.5)]",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PhoneOff, { className: "h-7 w-7" })
-							}),
-							isVideoCall && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								variant: "outline",
-								size: "icon",
-								onClick: handleToggleVideo,
-								className: `h-14 w-14 rounded-full border-2 ${videoEnabled ? "bg-gray-800/80 border-gray-500" : "bg-red-600 border-red-500"}`,
-								children: videoEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Video, { className: "h-5 w-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoOff, { className: "h-5 w-5" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								variant: "outline",
-								size: "icon",
-								onClick: handleSwitchCamera,
-								className: "h-14 w-14 rounded-full border-2 bg-gray-800/80 border-gray-500",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Camera, { className: "h-5 w-5" })
-							})] })
-						]
-					})
-				]
-			})
-		})
-	});
-}
-//#endregion
-//#region src/features/chat/ChatScreen.jsx
-var MessageActionsPopup$1 = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position }) => {
-	if (!position) return null;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50",
-		onClick: onClose,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "absolute bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 w-48 animate-in fade-in slide-in-from-bottom-2 duration-150",
-			style: {
-				top: Math.min(position.y, window.innerHeight - 200),
-				left: position.x > window.innerWidth / 2 ? position.x - 192 : position.x
-			},
-			onClick: (e) => e.stopPropagation(),
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-				onClick: () => {
-					onReply(message);
-					onClose();
-				},
-				className: "w-full text-right px-4 py-3 hover:bg-purple-50 flex items-center gap-3 text-sm",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-					className: "w-4 h-4 text-purple-600",
-					viewBox: "0 0 24 24",
-					fill: "none",
-					stroke: "currentColor",
-					strokeWidth: "2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: "9 17 4 12 9 7" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M20 18v-2a4 4 0 0 0-4-4H4" })]
-				}), "رد"]
-			}), isOwn && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-				onClick: () => {
-					onDeleteForEveryone(message);
-					onClose();
-				},
-				className: "w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }), " حذف للكل"]
-			})]
-		})
-	});
-};
-function ChatScreen({ contact, onBack, onCall }) {
-	const [message, setMessage] = (0, import_react.useState)("");
-	const [messages, setMessages] = (0, import_react.useState)([]);
-	const [loading, setLoading] = (0, import_react.useState)(true);
-	const [replyTo, setReplyTo] = (0, import_react.useState)(null);
-	const [actionPopup, setActionPopup] = (0, import_react.useState)(null);
-	const messagesEndRef = (0, import_react.useRef)(null);
-	const inputRef = (0, import_react.useRef)(null);
-	const currentUser = auth.currentUser;
-	const contactUid = contact?.uid || contact?.id;
-	const chatId = currentUser?.uid && contactUid ? [currentUser.uid, contactUid].sort().join("_") : null;
-	(0, import_react.useEffect)(() => {
-		if (!chatId) return;
-		const unsubscribe = onSnapshot(query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc")), (snapshot) => {
-			setMessages(snapshot.docs.map((d) => ({
-				id: d.id,
-				...d.data()
-			})));
-			setLoading(false);
-		}, (err) => {
-			console.error(err);
-			setLoading(false);
-		});
-		return () => unsubscribe();
-	}, [chatId]);
-	(0, import_react.useEffect)(() => {
-		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	}, [messages]);
-	const handleSend = async () => {
-		if (!message.trim() || !chatId || !currentUser) return;
-		const text = message.trim();
-		setMessage("");
-		inputRef.current?.focus();
-		try {
-			await addDoc(collection(db, "chats", chatId, "messages"), {
-				text,
-				senderId: currentUser.uid,
-				timestamp: serverTimestamp$2(),
-				replyTo: replyTo ? {
-					id: replyTo.id,
-					text: replyTo.text,
-					senderName: replyTo.senderName
-				} : null
-			});
-			setReplyTo(null);
-		} catch (err) {
-			ue.error("تعذر إرسال الرسالة");
-			setMessage(text);
-		}
-	};
-	const handleDeleteForEveryone = async (msg) => {
-		if (!chatId) return;
-		try {
-			await updateDoc(doc(db, "chats", chatId, "messages", msg.id), { deleted: true });
-			ue.success("تم حذف الرسالة");
-		} catch (err) {
-			ue.error("فشل حذف الرسالة");
-		}
-	};
-	const handleLongPress = (msg, e) => {
-		const touch = e.touches?.[0] || e;
-		setActionPopup({
-			message: msg,
-			position: {
-				x: touch.clientX,
-				y: touch.clientY
-			}
-		});
-	};
-	const groupedMessages = (0, import_react.useMemo)(() => {
-		const groups = [];
-		let currentDate = "";
-		let currentGroup = [];
-		messages.forEach((msg) => {
-			const dateStr = (msg.timestamp?.toDate?.() || new Date(msg.timestamp)).toLocaleDateString("ar-SA", {
-				weekday: "long",
-				year: "numeric",
-				month: "numeric",
-				day: "numeric"
-			});
-			if (dateStr !== currentDate) {
-				if (currentGroup.length > 0) groups.push({
-					date: currentDate,
-					messages: currentGroup
-				});
-				currentDate = dateStr;
-				currentGroup = [msg];
-			} else currentGroup.push(msg);
-		});
-		if (currentGroup.length > 0) groups.push({
-			date: currentDate,
-			messages: currentGroup
-		});
-		return groups;
-	}, [messages]);
-	const formatTime = (ts) => {
-		if (!ts) return "";
-		return (ts.toDate ? ts.toDate() : new Date(ts)).toLocaleTimeString("ar-SA", {
-			hour: "2-digit",
-			minute: "2-digit"
-		});
-	};
-	const getSafeName = () => {
-		const candidates = [
-			contact?.displayName,
-			contact?.username,
-			contact?.name
-		];
-		for (let candidate of candidates) if (candidate && !/@/.test(candidate)) return candidate;
-		return "مستخدم";
-	};
-	if (!chatId) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "flex items-center justify-center h-screen bg-slate-50 text-gray-500",
-		children: "جارٍ تهيئة المحادثة..."
-	});
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-gray-50",
-		dir: "rtl",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
-				className: "sticky top-0 z-30 px-4 pt-12 pb-3 bg-white border-b border-gray-200",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-3",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: onBack,
-							className: "w-10 h-10 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3 flex-1 min-w-0",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-sm",
-								children: getSafeName().charAt(0)?.toUpperCase() || "?"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex-1 min-w-0",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
-									className: "font-bold text-gray-900 truncate",
-									children: ["@", getSafeName()]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-gray-500",
-									children: contact.status === "online" ? "متصل الآن" : "غير متصل"
-								})]
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "flex items-center gap-1.5",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: () => onCall?.(contact, "audio"),
-								className: "w-10 h-10 rounded-2xl bg-gray-100 hover:bg-purple-100 flex items-center justify-center",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "w-5 h-5 text-gray-600",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" })
-								})
-							})
-						})
-					]
-				})
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-				className: "flex-1 overflow-y-auto px-4 py-4 space-y-6",
-				style: { paddingBottom: "120px" },
-				children: [loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "flex justify-center py-10",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" })
-				}) : groupedMessages.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "flex justify-center py-16 text-gray-400 text-sm",
-					children: "لا توجد رسائل بعد"
-				}) : groupedMessages.map((group, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "flex justify-center mb-4",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs bg-white border border-gray-200 text-gray-500 px-3 py-1 rounded-full shadow-sm",
-						children: group.date
-					})
-				}), group.messages.map((msg) => {
-					const isMe = msg.senderId === currentUser.uid;
-					return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: `mb-4 ${isMe ? "flex justify-end" : "flex justify-start"} group`,
-						onTouchStart: (e) => {
-							const timer = setTimeout(() => handleLongPress(msg, e), 500);
-							e.target._timer = timer;
-						},
-						onTouchEnd: (e) => clearTimeout(e.target._timer),
-						onTouchMove: (e) => clearTimeout(e.target._timer),
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: `max-w-[80%] ${isMe ? "items-end" : "items-start"}`,
-							children: [
-								msg.replyTo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: `mb-1 p-2 rounded-lg text-xs border border-gray-200 bg-gray-50 ${isMe ? "mr-2" : "ml-2"}`,
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "font-bold text-gray-700",
-										children: msg.replyTo.senderName
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-gray-500 truncate",
-										children: msg.replyTo.text
-									})]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									style: {
-										backgroundColor: msg.deleted ? "#F3F4F6" : isMe ? "#6D28D9" : "#FFFFFF",
-										color: msg.deleted ? "#9CA3AF" : isMe ? "#FFFFFF" : "#111827",
-										borderRadius: isMe ? "1rem 1rem 0 1rem" : "1rem 1rem 1rem 0",
-										padding: "0.75rem 1rem",
-										boxShadow: msg.deleted ? "none" : isMe ? "0 4px 12px rgba(109, 40, 217, 0.25)" : "0 2px 8px rgba(0,0,0,0.05)",
-										border: msg.deleted ? "1px dashed #E5E7EB" : !isMe ? "1px solid #E5E7EB" : "none"
-									},
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										style: {
-											margin: 0,
-											whiteSpace: "pre-wrap",
-											wordBreak: "break-word",
-											fontStyle: msg.deleted ? "italic" : "normal"
-										},
-										children: msg.deleted ? "تم حذف هذه الرسالة" : msg.text
-									})
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-[10px] text-gray-400 mt-1 block text-right",
-									children: formatTime(msg.timestamp)
-								})
-							]
-						})
-					}, msg.id);
-				})] }, idx)), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { ref: messagesEndRef })]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("footer", {
-				className: "fixed bottom-0 left-0 right-0 z-30 px-4 pb-5 pt-1 bg-white",
-				children: [replyTo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2 bg-gray-100 p-2 rounded-t-xl mx-2 border border-gray-200",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex-1 text-xs text-gray-600 truncate",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "font-bold",
-								children: [
-									"الرد على ",
-									replyTo.senderName,
-									":"
-								]
-							}),
-							" ",
-							replyTo.text
-						]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => setReplyTo(null),
-						className: "p-1 rounded-full hover:bg-gray-200",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
-					})]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-end gap-2 bg-white rounded-3xl border border-gray-200 shadow-lg p-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
-						ref: inputRef,
-						value: message,
-						onChange: (e) => setMessage(e.target.value),
-						placeholder: "اكتب رسالتك...",
-						rows: 1,
-						className: "flex-1 bg-transparent border-0 focus:ring-0 resize-none text-sm text-gray-800 placeholder:text-gray-400 py-2.5 px-1 max-h-32",
-						style: { minHeight: "40px" }
-					}), message.trim() ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: handleSend,
-						className: "w-10 h-10 rounded-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center text-white shadow-lg",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-5 h-5" })
-					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						className: "w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-5 h-5 text-gray-400" })
-					})]
-				})]
-			}),
-			actionPopup && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageActionsPopup$1, {
-				message: actionPopup.message,
-				isOwn: actionPopup.message.senderId === currentUser.uid,
-				onReply: setReplyTo,
-				onDeleteForEveryone: handleDeleteForEveryone,
-				onClose: () => setActionPopup(null),
-				position: actionPopup.position
-			})
-		]
-	});
-}
-//#endregion
-//#region src/features/admin/AdminScreen.jsx
-var StatCard = ({ icon: Icon, label, value, color, trend }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-	className: "group relative bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden",
-	children: [
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute top-0 left-0 w-1 h-full ${color} rounded-r-full opacity-60 group-hover:opacity-100 transition-opacity` }),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex items-start justify-between mb-3",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: `p-2.5 rounded-xl bg-gradient-to-br ${color} text-white shadow-md group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`,
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5" })
-			}), trend && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100",
-				children: trend
-			})]
-		}),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "text-2xl font-black text-gray-900 tracking-tight",
-			children: value
-		}),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "text-xs text-gray-500 font-medium mt-1",
-			children: label
-		})
-	]
-});
-var StatusBadge$1 = ({ status }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-	className: `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${status === "banned" ? "bg-red-50 text-red-600 border-red-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"}`,
-	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-1.5 h-1.5 rounded-full ${status === "banned" ? "bg-red-500" : "bg-emerald-500 animate-pulse"}` }), status === "banned" ? "محظور" : "نشط"]
-});
-function AdminScreen({ onBack }) {
-	const [users, setUsers] = (0, import_react.useState)([]);
-	const [loading, setLoading] = (0, import_react.useState)(true);
-	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
-	const [actionLoading, setActionLoading] = (0, import_react.useState)(null);
-	const [showBroadcast, setShowBroadcast] = (0, import_react.useState)(false);
-	const [broadcastText, setBroadcastText] = (0, import_react.useState)("");
-	const [showWarning, setShowWarning] = (0, import_react.useState)(null);
-	const [warningText, setWarningText] = (0, import_react.useState)("");
-	const [generatedKey, setGeneratedKey] = (0, import_react.useState)("");
-	const [toast, setToast] = (0, import_react.useState)({
-		show: false,
-		message: "",
-		type: "success"
-	});
-	const [copied, setCopied] = (0, import_react.useState)(false);
-	const adminId = auth.currentUser?.uid;
-	const stats = {
-		total: users?.length || 0,
-		active: (users || []).filter((u) => u.status !== "banned").length,
-		banned: (users || []).filter((u) => u.status === "banned").length,
-		newToday: (users || []).filter((u) => {
-			const created = u.createdAt?.toDate?.();
-			return created && Date.now() - created.getTime() < 1440 * 60 * 1e3;
-		}).length
-	};
-	const showToast = (message, type = "success") => {
-		setToast({
-			show: true,
-			message,
-			type
-		});
-		setTimeout(() => setToast({
-			show: false,
-			message: "",
-			type: "success"
-		}), 3e3);
-	};
-	const logAction = async (action, targetUserId, details = "") => {
-		if (!adminId) return;
-		try {
-			await addDoc(collection(db, "admin_logs"), {
-				action,
-				adminId,
-				targetUserId,
-				details,
-				timestamp: serverTimestamp$2()
-			});
-		} catch (e) {
-			console.error("log error", e);
-		}
-	};
-	(0, import_react.useEffect)(() => {
-		const fetchServer = async () => {
-			try {
-				setUsers((await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(100)), { source: "server" })).docs.map((d) => ({
-					id: d.id,
-					...d.data()
-				})));
-			} catch (e) {
-				console.error(e);
-			} finally {
-				setLoading(false);
-			}
-		};
-		fetchServer();
-		const unsubscribe = onSnapshot(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(100)), (snapshot) => {
-			setUsers(snapshot.docs.map((d) => ({
-				id: d.id,
-				...d.data()
-			})));
-		});
-		return () => unsubscribe();
-	}, []);
-	const refreshUsers = async () => {
-		try {
-			setUsers((await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(100)), { source: "server" })).docs.map((d) => ({
-				id: d.id,
-				...d.data()
-			})));
-		} catch (e) {
-			console.error(e);
-		}
-	};
-	const toggleBan = async (userId, currentStatus) => {
-		const newStatus = currentStatus === "banned" ? "online" : "banned";
-		setActionLoading(userId);
-		try {
-			await updateDoc(doc(db, "users", userId), { status: newStatus });
-			await logAction(newStatus === "banned" ? "ban_user" : "unban_user", userId);
-			showToast(newStatus === "banned" ? "تم حظر المستخدم" : "تم فك الحظر");
-			refreshUsers();
-		} catch (e) {
-			showToast("فشل في تحديث الحالة", "error");
-		} finally {
-			setActionLoading(null);
-		}
-	};
-	const deleteUser = async (userId, username) => {
-		if (!confirm(`حذف نهائي لـ ${username || userId}؟ لا يمكن التراجع.`)) return;
-		setActionLoading(userId);
-		try {
-			const batch = writeBatch(db);
-			batch.delete(doc(db, "users", userId));
-			if (username) batch.delete(doc(db, "usernames", username));
-			(await getDocs(query(collection(db, "chats"), where("participants", "array-contains", userId)))).forEach((chatDoc) => batch.delete(doc(db, "chats", chatDoc.id)));
-			await batch.commit();
-			await logAction("delete_user", userId, `username: ${username}`);
-			showToast("تم الحذف بنجاح");
-			refreshUsers();
-		} catch (e) {
-			showToast("خطأ في الحذف", "error");
-		} finally {
-			setActionLoading(null);
-		}
-	};
-	const sendWarning = async (userId) => {
-		if (!warningText.trim()) return;
-		setActionLoading(`warn-${userId}`);
-		try {
-			await updateDoc(doc(db, "users", userId), { warning: {
-				message: warningText.trim(),
-				timestamp: /* @__PURE__ */ new Date()
-			} });
-			await logAction("warn_user", userId, warningText.trim());
-			showToast("تم إرسال التحذير");
-			setShowWarning(null);
-			setWarningText("");
-			refreshUsers();
-		} catch (e) {
-			showToast("فشل الإرسال", "error");
-		} finally {
-			setActionLoading(null);
-		}
-	};
-	const sendBroadcast = async () => {
-		if (!broadcastText.trim()) return;
-		setActionLoading("broadcast");
-		try {
-			await addDoc(collection(db, "notifications"), {
-				message: broadcastText.trim(),
-				timestamp: serverTimestamp$2()
-			});
-			await logAction("broadcast", null, broadcastText.trim());
-			showToast("تم إرسال الإشعار العام");
-			setBroadcastText("");
-			setShowBroadcast(false);
-		} catch (e) {
-			showToast("فشل الإرسال", "error");
-		} finally {
-			setActionLoading(null);
-		}
-	};
-	const copyToClipboard = async (text) => {
-		try {
-			await navigator.clipboard.writeText(text);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2e3);
-		} catch (e) {
-			const textarea = document.createElement("textarea");
-			textarea.value = text;
-			document.body.appendChild(textarea);
-			textarea.select();
-			document.execCommand("copy");
-			document.body.removeChild(textarea);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2e3);
-		}
-	};
-	const generateInviteKey = async () => {
-		setActionLoading("key");
-		try {
-			const key = "ADM-" + Math.random().toString(36).substring(2, 9).toUpperCase();
-			await setDoc(doc(db, "adminInvites", key), {
-				used: false,
-				createdAt: serverTimestamp$2(),
-				createdBy: auth.currentUser?.uid
-			});
-			setGeneratedKey(key);
-			await copyToClipboard(key);
-			showToast(`✅ تم إنشاء ونسخ المفتاح: ${key}`);
-		} catch (e) {
-			console.error("generateKey error", e);
-			showToast("فشل إنشاء المفتاح", "error");
-		} finally {
-			setActionLoading(null);
-		}
-	};
-	const exportCSV = () => {
-		let csv = "email,username,status,createdAt\n";
-		(users || []).forEach((u) => {
-			csv += `${u.email},${u.username || ""},${u.status},${u.createdAt?.toDate?.()?.toISOString() || ""}\n`;
-		});
-		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-		const link = document.createElement("a");
-		link.href = URL.createObjectURL(blob);
-		link.download = `users_${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.csv`;
-		link.click();
-		showToast("تم التصدير");
-	};
-	const filteredUsers = (users || []).filter((u) => u.email?.toLowerCase().includes(searchTerm.toLowerCase()) || u.username?.toLowerCase().includes(searchTerm.toLowerCase()));
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-[#f8f9fc] pb-24 relative",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "fixed inset-0 opacity-[0.03] pointer-events-none",
-				style: {
-					backgroundImage: "radial-gradient(#6366f1 1px, transparent 1px)",
-					backgroundSize: "24px 24px"
-				}
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
-				className: "sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200/60 shadow-sm",
-				style: { paddingTop: "calc(0.75rem + env(safe-area-inset-top, 0px))" },
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "max-w-7xl mx-auto px-4 sm:px-6 py-3",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex flex-col sm:flex-row sm:items-center justify-between gap-3",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3 w-full sm:w-auto",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: onBack,
-								className: "w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors active:scale-95 shrink-0",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-								className: "text-xl font-black text-gray-900 tracking-tight",
-								children: "لوحة الإدارة"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-gray-500 font-medium mt-0.5",
-								children: "مراقبة وتحكم كامل"
-							})] })]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-2 flex-wrap justify-end sm:justify-start w-full sm:w-auto",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-									onClick: generateInviteKey,
-									disabled: actionLoading === "key",
-									size: "sm",
-									className: "rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-xs px-3 py-2 shadow-md shadow-emerald-500/20 transition-all active:scale-95 shrink-0",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Key, { className: "w-3.5 h-3.5 ml-1.5" }), " مفتاح"]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-									onClick: () => setShowBroadcast(true),
-									size: "sm",
-									variant: "outline",
-									className: "rounded-xl text-xs px-3 py-2 border-gray-200 hover:bg-gray-50 transition-all active:scale-95 shrink-0",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-3.5 h-3.5 ml-1.5" }), " إشعار"]
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-									onClick: exportCSV,
-									size: "sm",
-									variant: "outline",
-									className: "rounded-xl text-xs px-3 py-2 border-gray-200 hover:bg-gray-50 transition-all active:scale-95 shrink-0",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, { className: "w-3.5 h-3.5 ml-1.5" }), " تصدير"]
-								})
-							]
-						})]
-					})
-				})
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-				className: "max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-8 space-y-6",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-								icon: Users,
-								label: "إجمالي المستخدمين",
-								value: stats.total,
-								color: "from-blue-500 to-cyan-500"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-								icon: Zap,
-								label: "نشط الآن",
-								value: stats.active,
-								color: "from-emerald-500 to-teal-500",
-								trend: `${stats.total ? Math.round(stats.active / stats.total * 100) : 0}%`
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-								icon: Shield,
-								label: "محظورين",
-								value: stats.banned,
-								color: "from-red-500 to-rose-500"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
-								icon: UserPlus,
-								label: "انضموا اليوم",
-								value: stats.newToday,
-								color: "from-purple-500 to-indigo-500"
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4 items-center animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative flex-1 w-full group",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								placeholder: "بحث بالبريد أو المعرف...",
-								value: searchTerm,
-								onChange: (e) => setSearchTerm(e.target.value),
-								className: "pr-12 h-12 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200 focus:bg-white transition-all"
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "text-xs text-gray-500 font-medium bg-gray-100 px-3 py-1.5 rounded-full shrink-0",
-							children: [
-								"عرض ",
-								filteredUsers.length,
-								" / ",
-								stats.total
-							]
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200",
-						children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex flex-col items-center justify-center py-16 space-y-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-sm text-gray-500 font-medium",
-								children: "جاري تحميل البيانات..."
-							})]
-						}) : filteredUsers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "text-center py-16 text-gray-400",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-14 h-14 mx-auto mb-3 opacity-40" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "font-medium",
-								children: "لا يوجد نتائج مطابقة"
-							})]
-						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "divide-y divide-gray-50",
-							children: filteredUsers.map((u) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "p-4 hover:bg-purple-50/30 transition-colors duration-200 group/row",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex flex-col md:flex-row md:items-center justify-between gap-4",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "flex items-center gap-4 flex-1 min-w-0",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Avatar, {
-												className: "h-12 w-12 ring-2 ring-white shadow-sm shrink-0 group-hover/row:scale-105 transition-transform duration-300",
-												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-													className: "bg-gradient-to-br from-purple-500 to-blue-500 text-white font-bold text-sm",
-													children: u.email?.charAt(0)?.toUpperCase() || "?"
-												})
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-												className: "min-w-0 text-right flex-1",
-												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-													className: "font-bold text-gray-900 truncate text-sm group-hover/row:text-purple-700 transition-colors",
-													children: u.email
-												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-													className: "text-xs text-gray-500 mt-0.5 font-mono",
-													children: ["@", u.username || "غير محدد"]
-												})]
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge$1, { status: u.status })
-										]
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "flex items-center gap-2 justify-end opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 md:opacity-100",
-										children: showWarning === u.id ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "flex items-center gap-2 bg-white rounded-xl p-1.5 shadow-lg border border-gray-200 w-full md:w-auto animate-in zoom-in-95 duration-200",
-											children: [
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-													autoFocus: true,
-													value: warningText,
-													onChange: (e) => setWarningText(e.target.value),
-													placeholder: "نص التحذير...",
-													className: "h-8 text-xs rounded-lg bg-gray-50 border-gray-200"
-												}),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-													size: "sm",
-													onClick: () => sendWarning(u.id),
-													disabled: !warningText.trim(),
-													className: "h-8 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold",
-													children: "إرسال"
-												}),
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-													size: "sm",
-													variant: "ghost",
-													onClick: () => setShowWarning(null),
-													className: "h-8 w-8 p-0 text-gray-400",
-													children: "✕"
-												})
-											]
-										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-												onClick: () => {
-													setShowWarning(u.id);
-													setWarningText("");
-												},
-												className: "p-2 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-all active:scale-95",
-												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-4 h-4" })
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-												onClick: () => toggleBan(u.id, u.status),
-												className: `p-2 rounded-lg transition-all active:scale-95 ${u.status === "banned" ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" : "bg-red-50 text-red-600 hover:bg-red-100"}`,
-												children: u.status === "banned" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleX, { className: "w-4 h-4" })
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-												onClick: () => deleteUser(u.id, u.username),
-												className: "p-2 rounded-lg bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95",
-												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" })
-											})
-										] })
-									})]
-								})
-							}, u.id))
-						})
-					})
-				]
-			}),
-			showBroadcast && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "fixed inset-0 z-[60] flex items-center justify-center p-5 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200",
-				onClick: () => setShowBroadcast(false),
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200",
-					onClick: (e) => e.stopPropagation(),
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center justify-between mb-4",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-lg font-bold text-gray-900",
-								children: "إشعار عام"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: () => setShowBroadcast(false),
-								className: "w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-lg leading-none",
-									children: "×"
-								})
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
-							value: broadcastText,
-							onChange: (e) => setBroadcastText(e.target.value),
-							placeholder: "اكتب رسالة الإشعار...",
-							rows: 4,
-							className: "w-full rounded-xl bg-gray-50 border border-gray-200 p-3 text-sm focus:ring-2 focus:ring-purple-200 focus:border-transparent outline-none resize-none mb-4 transition-all"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								variant: "outline",
-								onClick: () => setShowBroadcast(false),
-								className: "flex-1 h-11 rounded-xl border-gray-200",
-								children: "إلغاء"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								onClick: sendBroadcast,
-								disabled: !broadcastText.trim() || actionLoading === "broadcast",
-								className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold shadow-md shadow-purple-500/20 transition-all",
-								children: actionLoading === "broadcast" ? "جارٍ..." : "إرسال للجميع"
-							})]
-						})
-					]
-				})
-			}),
-			generatedKey && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "fixed bottom-28 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-4 fade-in duration-300 max-w-[90%]",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Key, { className: "w-5 h-5 shrink-0" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex-1 min-w-0",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs opacity-80 mb-0.5",
-							children: "مفتاح الدعوة"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "font-mono font-bold text-sm truncate",
-							children: generatedKey
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => copyToClipboard(generatedKey),
-						className: "p-2 hover:bg-white/20 rounded-lg transition-colors shrink-0",
-						title: copied ? "تم النسخ" : "نسخ مجدداً",
-						children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" })
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => setGeneratedKey(""),
-						className: "p-2 hover:bg-red-400/30 rounded-lg transition-colors shrink-0",
-						children: "×"
-					})
-				]
-			}),
-			toast.show && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: `fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-4 fade-in duration-300 ${toast.type === "error" ? "bg-red-600" : "bg-gray-900"} text-white`,
-				children: [toast.type === "error" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-5 h-5 text-emerald-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-sm font-medium",
-					children: toast.message
-				})]
-			})
-		]
-	});
-}
-//#endregion
-//#region src/features/UserManagement/UserManagementScreen.jsx
-var StatusBadge = ({ status }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-	className: `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${status === "banned" ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`,
-	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-1.5 h-1.5 rounded-full ${status === "banned" ? "bg-red-500" : "bg-emerald-500"}` }), status === "banned" ? "محظور" : "نشط"]
-});
-var InfoRow = ({ icon: Icon, label, value }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-	className: "flex items-center gap-3 p-3 bg-gray-50 rounded-xl",
-	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-4 h-4 text-gray-500 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex-1 text-right",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "text-xs text-gray-500 font-medium",
-			children: label
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "text-sm font-bold text-gray-900 truncate",
-			children: value || "—"
-		})]
-	})]
-});
-function UserManagementScreen({ onBack }) {
-	const [users, setUsers] = (0, import_react.useState)([]);
-	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
-	const [selectedUser, setSelectedUser] = (0, import_react.useState)(null);
-	const [loading, setLoading] = (0, import_react.useState)(true);
-	const [refreshing, setRefreshing] = (0, import_react.useState)(false);
-	(0, import_react.useEffect)(() => {
-		const fetchData = async () => {
-			try {
-				setUsers((await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50)), { source: "server" })).docs.map((doc) => ({
-					id: doc.id,
-					...doc.data()
-				})));
-			} catch (e) {
-				console.error("خطأ جلب الخادم:", e);
-			} finally {
-				setLoading(false);
-			}
-		};
-		fetchData();
-		const unsubscribe = onSnapshot(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50)), (snapshot) => {
-			setUsers(snapshot.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data()
-			})));
-		});
-		return () => unsubscribe();
-	}, []);
-	const handleRefresh = async () => {
-		setRefreshing(true);
-		try {
-			setUsers((await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50)), { source: "server" })).docs.map((doc) => ({
-				id: doc.id,
-				...doc.data()
-			})));
-		} catch (e) {
-			console.error(e);
-		} finally {
-			setRefreshing(false);
-		}
-	};
-	const filteredUsers = users.filter((u) => u.email?.toLowerCase().includes(searchTerm.toLowerCase()) || u.username?.toLowerCase().includes(searchTerm.toLowerCase()) || u.displayName?.toLowerCase().includes(searchTerm.toLowerCase()));
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-slate-50/50 pb-24",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-			className: "sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-16 pb-5",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center justify-between mb-4",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-3",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						variant: "ghost",
-						size: "icon",
-						onClick: onBack,
-						className: "rounded-full hover:bg-gray-100",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "h-5 w-5" })
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "text-2xl font-black text-gray-900 tracking-tight",
-						children: "إدارة المستخدمين"
-					})]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-					variant: "outline",
-					size: "icon",
-					onClick: handleRefresh,
-					disabled: refreshing,
-					className: "rounded-full",
-					title: "تحديث القائمة من الخادم",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: `h-4 w-4 ${refreshing ? "animate-spin" : ""}` })
-				})]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-					placeholder: "البحث بالاسم، البريد، أو المعرف...",
-					value: searchTerm,
-					onChange: (e) => setSearchTerm(e.target.value),
-					className: "pr-12 h-12 rounded-xl bg-white border-gray-200 shadow-sm focus-visible:ring-purple-200"
-				})]
-			})]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
-			className: "flex-1 overflow-y-auto px-5 pt-6",
-			children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "flex justify-center py-12",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" })
-			}) : filteredUsers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "text-center py-16 opacity-50",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserCheck, { className: "w-16 h-16 mx-auto mb-4 text-gray-300" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-gray-600 font-bold text-lg",
-					children: "لا يوجد مستخدمين"
-				})]
-			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "space-y-3",
-				children: filteredUsers.map((u) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					onClick: () => setSelectedUser(selectedUser?.id === u.id ? null : u),
-					className: `bg-white rounded-2xl p-4 border shadow-sm cursor-pointer transition-all ${selectedUser?.id === u.id ? "border-purple-300 shadow-md" : "border-gray-100 hover:border-purple-200 hover:shadow-md"}`,
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-3 mb-3",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Avatar, {
-								className: "h-12 w-12 ring-2 ring-white shadow-sm",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-									className: "bg-gradient-to-br from-purple-500 to-blue-500 text-white font-bold",
-									children: (u.displayName || u.email || "?").charAt(0).toUpperCase()
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex-1 min-w-0 text-right",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "font-bold text-gray-900 truncate",
-									children: u.displayName || u.email
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									className: "text-xs text-gray-500",
-									children: ["@", u.username || "غير محدد"]
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: u.status })
-						]
-					}), selectedUser?.id === u.id && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "grid grid-cols-2 gap-2 pt-3 border-t border-gray-100 animate-in fade-in slide-in-from-top-2",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
-								icon: Mail,
-								label: "البريد الإلكتروني",
-								value: u.email
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
-								icon: Phone,
-								label: "رقم الهاتف",
-								value: u.phone || "غير مسجل"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
-								icon: Calendar,
-								label: "تاريخ الانضمام",
-								value: u.createdAt?.toDate?.().toLocaleDateString("ar-SA") || "—"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
-								icon: UserCheck,
-								label: "حالة الحساب",
-								value: u.status === "banned" ? "محظور" : "نشط"
-							})
-						]
-					})]
-				}, u.id))
-			})
-		})]
-	});
-}
-//#endregion
-//#region src/features/partner/PartnerScreen.jsx
-function PartnerScreen({ onBack }) {
-	const [adminKey, setAdminKey] = (0, import_react.useState)("");
-	const [status, setStatus] = (0, import_react.useState)(null);
-	const [message, setMessage] = (0, import_react.useState)("");
-	const [loading, setLoading] = (0, import_react.useState)(false);
-	const [debugInfo, setDebugInfo] = (0, import_react.useState)("");
-	const currentUser = auth.currentUser;
-	const handleActivate = async () => {
-		const trimmed = adminKey.replace(/\s+/g, "").toUpperCase().trim();
-		if (!trimmed) {
-			setStatus("error");
-			setMessage("يرجى إدخال معرف المدير.");
-			return;
-		}
-		if (!currentUser) {
-			setStatus("error");
-			setMessage("يجب تسجيل الدخول أولاً.");
-			return;
-		}
-		setLoading(true);
-		setStatus(null);
-		setMessage("");
-		setDebugInfo("");
-		try {
-			const inviteRef = doc(db, "adminInvites", trimmed);
-			const inviteSnap = await getDoc(inviteRef);
-			if (!inviteSnap.exists()) {
-				setStatus("error");
-				setMessage("معرف المدير غير صحيح أو منتهي الصلاحية.");
-				setLoading(false);
-				return;
-			}
-			if (inviteSnap.data().used === true) {
-				setStatus("error");
-				setMessage("هذا المفتاح تم استخدامه بالفعل ولا يمكن إعادة استخدامه.");
-				setLoading(false);
-				return;
-			}
-			await setDoc(inviteRef, {
-				used: true,
-				usedBy: currentUser.uid,
-				usedAt: serverTimestamp$2()
-			}, { merge: true });
-			await setDoc(doc(db, "users", currentUser.uid), {
-				isAdmin: true,
-				upgradedBy: inviteSnap.data().createdBy || "admin"
-			}, { merge: true });
-			await deleteDoc(inviteRef).catch(() => {});
-			setStatus("success");
-			setMessage("🎉 تم تفعيل صلاحيات المدير بنجاح! سيتم تحويلك للوحة الإدارة.");
-			setAdminKey("");
-			setTimeout(() => {
-				if (onBack) onBack();
-			}, 2e3);
-		} catch (error) {
-			console.error("❌ خطأ التفاصيل الكامل:", error);
-			let errorMsg = "حدث خطأ غير متوقع.";
-			if (error.code === "permission-denied") errorMsg = "⛔ صلاحيات محدودة. يرجى التواصل مع المطور لضبط قواعد الأمان.";
-			else if (error.message?.includes("serverTimestamp")) errorMsg = "❌ خطأ في تهيئة الوقت. تأكد من استيراد serverTimestamp.";
-			else errorMsg = `❌ ${error.message || error}`;
-			setStatus("error");
-			setMessage(errorMsg);
-			setDebugInfo(JSON.stringify(error, null, 1));
-		} finally {
-			setLoading(false);
-		}
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex flex-col items-center justify-center px-5 py-10",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "max-w-md w-full mx-auto",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "mb-4",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-						variant: "ghost",
-						onClick: onBack,
-						className: "rounded-full",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "h-5 w-5 ml-2" }), " رجوع"]
-					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "text-center mb-6",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 text-white shadow-lg mb-4",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "h-10 w-10" })
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-							className: "text-3xl font-bold text-gray-900 mb-2",
-							children: "تكوين شراكة"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-gray-600 leading-relaxed",
-							children: "انضم إلى فريق LinkUp وساهم في تطوير التطبيق"
-						})
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-sm border border-white/20 mb-6 space-y-5 text-right",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-							className: "text-lg font-bold text-gray-900 flex items-center gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: "h-5 w-5 text-purple-600" }), "لماذا نصمم هذا البرنامج؟"]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-700 leading-relaxed",
-							children: "لأن LinkUp ليس مجرد تطبيق، إنه مجتمع نابض بالحياة. نريد أن نفتح أبواب الإدارة للمبدعين والمتطوعين الذين يشاركونا الشغف. برنامج \"تكوين شراكة\" هو فرصتك لتصبح جزءًا من فريق التطوير والإشراف، وتمتلك صلاحيات حقيقية لمساعدة الآخرين والحفاظ على بيئة آمنة ونظيفة."
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-							className: "text-lg font-bold text-gray-900 flex items-center gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "h-5 w-5 text-purple-600" }), "ماذا ستحصل عليه كشريك؟"]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
-							className: "list-disc list-inside space-y-2 text-sm text-gray-700",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "لوحة تحكم إدارية:" }), " تمكنك من مراقبة المستخدمين، حظر المخالفين، وإرسال تحذيرات."] }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "إدارة الإشعارات العامة:" }), " إرسال تنبيهات لجميع المستخدمين لإطلاعهم على التحديثات."] }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "إنشاء مفاتيح دعوة:" }), " لترقية شركاء جدد تختارهم بنفسك."] }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "تقارير وإحصاءات:" }), " رؤية شاملة لنشاط التطبيق."] }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "دعم فني خاص:" }), " تواصل مباشر مع المطور الأساسي لحل المشكلات."] })
-							]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-500 italic",
-							children: "ملاحظة: صلاحيات الشريك لا تشمل الاطلاع على محادثات المستخدمين الخاصة، احترامًا لخصوصيتهم."
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-							className: "text-lg font-bold text-gray-900 flex items-center gap-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Key, { className: "h-5 w-5 text-purple-600" }), "كيف تنضم؟"]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-700 leading-relaxed",
-							children: "ببساطة، تواصل مع مدير التطبيق الحالي ليولد لك \"مفتاح دعوة\" خاصًا بك. أدخل هذا المفتاح في الحقل أدناه، واضغط \"تفعيل المدير\". ستصبح شريكًا فورًا دون الحاجة لأي إعدادات معقدة. كل مفتاح يُستخدم مرة واحدة لضمان الأمان والخصوصية."
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-2 text-purple-700 bg-purple-50 rounded-xl p-3 mt-2",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "h-5 w-5 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-sm",
-								children: "نظام المفاتيح آمن تمامًا، ولا يمكن لأحد التنبؤ بها أو إعادة استخدامها."
-							})]
-						})
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-sm border border-white/20 mb-6 space-y-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "relative",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							type: "text",
-							placeholder: "أدخل معرف المدير هنا",
-							value: adminKey,
-							onChange: (e) => {
-								setAdminKey(e.target.value);
-								setStatus(null);
-								setMessage("");
-								setDebugInfo("");
-							},
-							className: "h-12 rounded-xl bg-gray-100/80 border-gray-200 text-center text-lg font-mono tracking-widest uppercase",
-							disabled: loading,
-							autoComplete: "off"
-						}), status && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "mt-2 text-sm font-medium text-center",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: status === "success" ? "text-green-600" : "text-red-500",
-								children: message
-							}), debugInfo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", {
-								className: "mt-2 text-left bg-red-50 rounded p-2 text-xs text-red-800 max-h-24 overflow-auto",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", {
-									className: "cursor-pointer font-bold",
-									children: "تفاصيل الخطأ"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
-									className: "whitespace-pre-wrap",
-									children: debugInfo
-								})]
-							})]
-						})]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-						onClick: handleActivate,
-						disabled: loading || !adminKey.trim(),
-						className: "w-full h-12 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 text-white font-semibold shadow-md hover:shadow-lg transition-all disabled:opacity-50",
-						children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Key, { className: "h-5 w-5 mr-2" }), " تفعيل الصلاحية الآن"] })
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "space-y-3",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-sm text-gray-500 text-center",
-						children: "إذا لم تحصل على مفتاح بعد، تواصل معنا:"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-						href: "mailto:Linkup.helpp@gmail.com",
-						className: "group relative flex items-center justify-center gap-2 w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 active:scale-95 overflow-hidden",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "h-5 w-5 relative z-10" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "relative z-10",
-								children: "البريد الإلكتروني"
-							})
-						]
-					})]
-				})
-			]
-		})
-	});
-}
-//#endregion
-//#region src/features/notifications/NotificationsScreen.jsx
-var ADMIN_UID = "REPLACE_WITH_YOUR_ADMIN_UID";
-function NotificationsScreen({ onBack }) {
-	const [notifications, setNotifications] = (0, import_react.useState)([]);
-	const isAdmin = auth.currentUser?.uid === ADMIN_UID;
-	(0, import_react.useEffect)(() => {
-		const unsub = onSnapshot(query(collection(db, "notifications"), orderBy("timestamp", "desc")), (snap) => {
-			setNotifications(snap.docs.map((d) => ({
-				id: d.id,
-				...d.data()
-			})));
-		});
-		return () => unsub();
-	}, []);
-	const deleteNotification = async (id) => {
-		if (!isAdmin) return;
-		if (!confirm("حذف هذا الإشعار؟ سيُحذف من الجميع.")) return;
-		await deleteDoc(doc(db, "notifications", id));
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "px-5 py-4 max-w-2xl mx-auto",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "mb-4",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-						variant: "ghost",
-						onClick: onBack,
-						className: "rounded-full",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "h-5 w-5 ml-2" }), " رجوع"]
-					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
-					className: "text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "h-6 w-6" }), " الإشعارات"]
-				}),
-				notifications.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-center text-gray-500 py-10",
-					children: "لا توجد إشعارات حالياً"
-				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "space-y-3",
-					children: notifications.map((notif) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white/80 backdrop-blur rounded-2xl p-4 shadow-sm flex items-start gap-3",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "h-5 w-5 text-blue-500 mt-1 shrink-0" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-gray-800",
-									children: notif.message
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-gray-400 mt-1",
-									children: notif.timestamp?.toDate?.()?.toLocaleString("ar-SA")
-								})]
-							}),
-							isAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
-								variant: "ghost",
-								size: "icon",
-								onClick: () => deleteNotification(notif.id),
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "h-4 w-4 text-red-500" })
-							})
-						]
-					}, notif.id))
-				})
-			]
-		})
-	});
-}
-//#endregion
-//#region src/components/onboarding/OnboardingScreen.jsx
-var slides = [
-	{
-		id: 1,
-		icon: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-			width: "80",
-			height: "80",
-			viewBox: "0 0 24 24",
-			fill: "none",
-			stroke: "currentColor",
-			strokeWidth: "1.2",
-			strokeLinecap: "round",
-			strokeLinejoin: "round",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M22 11.08V12a10 10 0 1 1-5.93-9.14" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: "22 4 12 14.01 9 11.01" })]
-		}),
-		title: "تأكيد الحساب بسرعة",
-		description: "سجّل دخولك بحساب Google وتأكد من بريدك الإلكتروني لتصبح جاهزاً للتواصل."
-	},
-	{
-		id: 2,
-		icon: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-			width: "80",
-			height: "80",
-			viewBox: "0 0 24 24",
-			fill: "none",
-			stroke: "currentColor",
-			strokeWidth: "1.2",
-			strokeLinecap: "round",
-			strokeLinejoin: "round",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-					cx: "9",
-					cy: "7",
-					r: "4"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M23 21v-2a4 4 0 0 0-3-3.87" }),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M16 3.13a4 4 0 0 1 0 7.75" })
-			]
-		}),
-		title: "أضف أصدقاءك",
-		description: "ابحث عن أصدقائك باستخدام معرفهم الفريد وأضفهم إلى جهات اتصالك."
-	},
-	{
-		id: 3,
-		icon: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-			width: "80",
-			height: "80",
-			viewBox: "0 0 24 24",
-			fill: "none",
-			stroke: "currentColor",
-			strokeWidth: "1.2",
-			strokeLinecap: "round",
-			strokeLinejoin: "round",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("polygon", { points: "11 5 6 9 2 9 2 15 6 15 11 19 11 5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" })]
-		}),
-		title: "مكالمات صوتية وفيديو",
-		description: "اتصل بأصدقائك صوتياً أو فيديو مباشرة من جهات الاتصال."
-	},
-	{
-		id: 4,
-		icon: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-			width: "80",
-			height: "80",
-			viewBox: "0 0 24 24",
-			fill: "none",
-			stroke: "currentColor",
-			strokeWidth: "1.2",
-			strokeLinecap: "round",
-			strokeLinejoin: "round",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-					x: "3",
-					y: "3",
-					width: "18",
-					height: "18",
-					rx: "3"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", {
-					x1: "8",
-					y1: "8",
-					x2: "16",
-					y2: "8"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", {
-					x1: "8",
-					y1: "12",
-					x2: "16",
-					y2: "12"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", {
-					x1: "8",
-					y1: "16",
-					x2: "12",
-					y2: "16"
-				})
-			]
-		}),
-		title: "محادثات نصية فورية",
-		description: "تبادل الرسائل النصية مع أصدقائك أثناء المكالمات أو في أي وقت."
-	},
-	{
-		id: 5,
-		icon: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-			width: "80",
-			height: "80",
-			viewBox: "0 0 24 24",
-			fill: "none",
-			stroke: "currentColor",
-			strokeWidth: "1.2",
-			strokeLinecap: "round",
-			strokeLinejoin: "round",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M9 12l2 2 4-4" })]
-		}),
-		title: "خصوصية وأمان",
-		description: "محادثاتك ومكالماتك مشفرة ولا يمكن لأحد الاطلاع عليها."
-	}
-];
-function OnboardingScreen({ onFinish }) {
-	const [current, setCurrent] = (0, import_react.useState)(0);
-	const [isExiting, setIsExiting] = (0, import_react.useState)(false);
-	const next = () => {
-		if (current < slides.length - 1) setCurrent(current + 1);
-		else handleFinish();
-	};
-	const prev = () => {
-		if (current > 0) setCurrent(current - 1);
-	};
-	const handleFinish = () => {
-		setIsExiting(true);
-		setTimeout(() => onFinish(), 600);
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: `fixed inset-0 bg-[#0e0e1a] flex flex-col items-center justify-between py-12 px-6 transition-opacity duration-500 ${isExiting ? "opacity-0" : "opacity-100"}`,
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute top-6 right-6 text-xs font-medium text-gray-600 uppercase tracking-[0.15em]",
-				children: "LinkUp"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-				onClick: handleFinish,
-				className: "absolute top-6 left-6 text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors",
-				children: "تخطي"
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex-1 flex flex-col items-center justify-center text-center max-w-sm",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "mb-8 text-blue-500",
-						children: slides[current].icon
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "text-2xl font-bold text-white mb-3",
-						children: slides[current].title
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-gray-400 leading-relaxed text-sm",
-						children: slides[current].description
-					})
-				]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "w-full max-w-xs",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "flex justify-center gap-2 mb-6",
-					children: slides.map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `h-1.5 rounded-full transition-all duration-300 ${i === current ? "w-8 bg-blue-500" : "w-1.5 bg-gray-700"}` }, i))
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: prev,
-						disabled: current === 0,
-						className: `text-sm font-medium ${current === 0 ? "text-gray-700 cursor-not-allowed" : "text-gray-400 hover:text-white"}`,
-						children: "السابق"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: next,
-						className: "px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold text-sm shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all active:scale-95",
-						children: current === slides.length - 1 ? "ابدأ الآن" : "التالي"
-					})]
-				})]
-			})
-		]
-	});
-}
-//#endregion
-//#region src/features/Support/SupportScreen.jsx
-function SupportScreen({ onBack }) {
-	const [copied, setCopied] = (0, import_react.useState)(false);
-	const handleCopy = () => {
-		navigator.clipboard.writeText("Linkup.helpp@gmail.com");
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2e3);
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-slate-50/50",
-		dir: "rtl",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
-			className: "sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-14 pb-4",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center gap-3",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					onClick: onBack,
-					className: "w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors active:scale-95",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-						className: "w-5 h-5 text-gray-700",
-						viewBox: "0 0 24 24",
-						fill: "none",
-						stroke: "currentColor",
-						strokeWidth: "2",
-						strokeLinecap: "round",
-						strokeLinejoin: "round",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
-					})
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-					className: "text-xl font-black text-gray-900 tracking-tight",
-					children: "تواصل مع المطور"
-				})]
-			})
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-			className: "flex-1 overflow-y-auto px-5 py-6 pb-24 space-y-5",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "text-center mb-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "w-16 h-16 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-							className: "w-8 h-8 text-purple-600",
-							viewBox: "0 0 24 24",
-							fill: "none",
-							stroke: "currentColor",
-							strokeWidth: "2",
-							strokeLinecap: "round",
-							strokeLinejoin: "round",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })
-						})
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-sm text-gray-600",
-						children: "نحن هنا لمساعدتك. اختر القناة المناسبة وسنرد خلال 24 ساعة."
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-					href: "mailto:Linkup.helpp@gmail.com",
-					className: "group block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-4",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-									className: "w-6 h-6",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									strokeLinecap: "round",
-									strokeLinejoin: "round",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-										x: "2",
-										y: "4",
-										width: "20",
-										height: "16",
-										rx: "2"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "font-bold text-gray-900",
-									children: "البريد الإلكتروني"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-gray-500 mt-0.5 font-mono",
-									children: "Linkup.helpp@gmail.com"
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-								className: "w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors",
-								viewBox: "0 0 24 24",
-								fill: "none",
-								stroke: "currentColor",
-								strokeWidth: "2",
-								strokeLinecap: "round",
-								strokeLinejoin: "round",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
-							})
-						]
-					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-					href: "https://wa.me/966500000000",
-					target: "_blank",
-					rel: "noopener noreferrer",
-					className: "group block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:border-green-200 hover:shadow-md transition-all active:scale-[0.98]",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-4",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-green-100 transition-colors",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "w-6 h-6",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									strokeLinecap: "round",
-									strokeLinejoin: "round",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" })
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "font-bold text-gray-900",
-									children: "واتساب"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-gray-500 mt-0.5",
-									children: "تواصل مباشر وسريع"
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-								className: "w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors",
-								viewBox: "0 0 24 24",
-								fill: "none",
-								stroke: "currentColor",
-								strokeWidth: "2",
-								strokeLinecap: "round",
-								strokeLinejoin: "round",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
-							})
-						]
-					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					onClick: handleCopy,
-					className: "w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3.5 rounded-2xl transition-colors flex items-center justify-center gap-2 active:scale-[0.98]",
-					children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-						className: "w-4 h-4 text-green-600",
-						viewBox: "0 0 24 24",
-						fill: "none",
-						stroke: "currentColor",
-						strokeWidth: "2",
-						strokeLinecap: "round",
-						strokeLinejoin: "round",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: "20 6 9 17 4 12" })
-					}), " تم نسخ البريد بنجاح"] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-						className: "w-4 h-4",
-						viewBox: "0 0 24 24",
-						fill: "none",
-						stroke: "currentColor",
-						strokeWidth: "2",
-						strokeLinecap: "round",
-						strokeLinejoin: "round",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-							x: "9",
-							y: "9",
-							width: "13",
-							height: "13",
-							rx: "2",
-							ry: "2"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" })]
-					}), " نسخ عنوان البريد الإلكتروني"] })
-				})
-			]
-		})]
-	});
-}
-//#endregion
-//#region src/features/groups/GroupsScreen.jsx
-var LinkUpLogo = () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-	className: "flex items-center gap-2.5",
-	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "relative w-9 h-9",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl rotate-6 opacity-20" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl -rotate-6 opacity-20" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute inset-0 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-5 h-5 text-purple-600" })
-			})
-		]
-	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-		className: "text-2xl font-black tracking-tight text-gray-900",
-		children: ["Link", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-			className: "text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
-			children: "Up"
-		})]
-	})]
-});
-var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick }) => {
-	const [lastMsg, setLastMsg] = (0, import_react.useState)(null);
-	const [membersData, setMembersData] = (0, import_react.useState)([]);
-	const memberCount = group.members?.length || 0;
-	(0, import_react.useEffect)(() => {
-		if (!group.id) return;
-		const unsub = onSnapshot(query(collection(db, "groups", group.id, "messages"), orderBy("timestamp", "desc")), (snap) => {
-			if (!snap.empty) setLastMsg(snap.docs[0].data());
-		});
-		return () => unsub();
-	}, [group.id]);
-	(0, import_react.useEffect)(() => {
-		if (!group.members) return;
-		Promise.all(group.members.slice(0, 3).map(async (uid) => {
-			const snap = await getDoc(doc(db, "users", uid));
-			if (snap.exists()) return {
-				uid,
-				name: snap.data().displayName || uid.charAt(0).toUpperCase()
-			};
-			return {
-				uid,
-				name: uid.charAt(0).toUpperCase()
-			};
-		})).then((arr) => setMembersData(arr));
-	}, [group.members]);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4 hover:shadow-md transition-all active:scale-[0.98] cursor-pointer",
-		onClick: () => onClick?.(),
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: `w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-md`,
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-6 h-6 text-white" })
-				}), isFavorite && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: "absolute -top-1 -right-1 w-5 h-5 text-yellow-500 fill-yellow-500" })]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex-1 min-w-0 text-right",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-						className: "font-bold text-gray-900 truncate",
-						children: group.name || "مجموعة"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-						className: "text-xs text-gray-400",
-						children: [memberCount, " أعضاء"]
-					})]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-xs text-gray-500 mt-1 truncate",
-					children: lastMsg?.text || "ابدأ المحادثة"
-				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-				onClick: (e) => {
-					e.stopPropagation();
-					onToggleFavorite(group.id);
-				},
-				className: "p-2 rounded-full hover:bg-gray-100",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-4 h-4 ${isFavorite ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}` })
-			})
-		]
-	});
-};
-function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
-	const [groups, setGroups] = (0, import_react.useState)([]);
-	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
-	const [favorites, setFavorites] = (0, import_react.useState)(() => {
-		try {
-			return JSON.parse(localStorage.getItem("group_favorites") || "[]");
-		} catch {
-			return [];
-		}
-	});
-	(0, import_react.useEffect)(() => {
-		localStorage.setItem("group_favorites", JSON.stringify(favorites));
-	}, [favorites]);
-	const toggleFavorite = (groupId) => {
-		setFavorites((prev) => prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]);
-	};
-	(0, import_react.useEffect)(() => {
-		const unsubscribe = onSnapshot(query(collection(db, "groups"), orderBy("createdAt", "desc")), (snap) => {
-			setGroups(snap.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data()
-			})));
-		});
-		return () => unsubscribe();
-	}, []);
-	const filtered = groups.filter((g) => g.name?.toLowerCase().includes(searchTerm.toLowerCase()));
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-slate-50/50 pb-24",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-12 pb-4",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center justify-between mb-5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LinkUpLogo, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: onOpenCreateGroup,
-							className: "w-10 h-10 rounded-full bg-purple-50 text-purple-600 hover:bg-purple-100 flex items-center justify-center",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-5 h-5" })
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "mb-4",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-							className: "text-3xl font-black text-gray-900 tracking-tight",
-							children: "المجموعات"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-500 mt-1",
-							children: "تعاون وتواصل مع فرقك بسهولة"
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "relative",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							placeholder: "ابحث عن مجموعة...",
-							value: searchTerm,
-							onChange: (e) => setSearchTerm(e.target.value),
-							className: "w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm"
-						})]
-					})
-				]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
-				className: "flex-1 overflow-y-auto px-5 pt-4 space-y-3",
-				children: filtered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex flex-col items-center justify-center py-16 text-center",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-4 shadow-inner",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-9 h-9 text-purple-600/70" })
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-gray-800 font-bold text-lg",
-							children: "لا توجد مجموعات"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-500 mt-1.5",
-							children: "ابدأ بإنشاء مجموعتك الأولى"
-						})
-					]
-				}) : filtered.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GroupCard, {
-					group: g,
-					isFavorite: favorites.includes(g.id),
-					onToggleFavorite: toggleFavorite,
-					onClick: () => onOpenGroup?.(g)
-				}, g.id))
-			}),
-			groups.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "fixed bottom-32 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 px-2",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-					onClick: onOpenCreateGroup,
-					className: "w-full bg-white border-2 border-purple-100 rounded-2xl p-4 flex items-center justify-between shadow-lg hover:shadow-xl hover:border-purple-300 transition-all active:scale-[0.98] group",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-3",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-11 h-11 rounded-xl bg-gradient-to-br from-purple-100 to-blue-50 flex items-center justify-center group-hover:scale-105 transition-transform",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-5 h-5 text-purple-600" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "text-right",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "font-bold text-gray-900 text-sm",
-								children: "إنشاء مجموعة جديدة"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-[10px] text-gray-500",
-								children: "ادعُ أصدقاءك وابدأ النقاش"
-							})]
-						})]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl px-4 py-2 flex items-center gap-1.5 shadow-md shadow-purple-500/20",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-xs font-bold",
-							children: "إنشاء"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-4 h-4" })]
-					})]
-				})
-			})
-		]
-	});
-}
-//#endregion
-//#region src/features/groups/CreateGroupScreen.jsx
-function CreateGroupScreen({ onBack }) {
-	const [name, setName] = (0, import_react.useState)("");
-	const [description, setDescription] = (0, import_react.useState)("");
-	const [isPrivate, setIsPrivate] = (0, import_react.useState)(false);
-	const [loading, setLoading] = (0, import_react.useState)(false);
-	const [success, setSuccess] = (0, import_react.useState)(false);
-	const [error, setError] = (0, import_react.useState)("");
-	const [contacts, setContacts] = (0, import_react.useState)([]);
-	const [selectedContacts, setSelectedContacts] = (0, import_react.useState)([]);
-	const currentUser = auth.currentUser;
-	(0, import_react.useEffect)(() => {
-		if (!currentUser?.uid) return;
-		const unsub = onSnapshot(query(collection(db, "contacts"), where("participants", "array-contains", currentUser.uid)), (snap) => {
-			setContacts(snap.docs.map((doc) => ({
-				id: doc.id,
-				...doc.data(),
-				contactId: doc.data().participants.find((p) => p !== currentUser.uid)
-			})));
-		});
-		return () => unsub();
-	}, [currentUser]);
-	const handleToggleContact = (contactId) => {
-		setSelectedContacts((prev) => prev.includes(contactId) ? prev.filter((id) => id !== contactId) : [...prev, contactId]);
-	};
-	const handleSubmit = async (e) => {
-		e.preventDefault();
-		setError("");
-		if (!name.trim()) return setError("يرجى كتابة اسم المجموعة");
-		if (!currentUser) {
-			setError("يجب تسجيل الدخول أولاً.");
-			return;
-		}
-		setLoading(true);
-		try {
-			const memberIds = [currentUser.uid, ...selectedContacts];
-			const groupRef = await addDoc(collection(db, "groups"), {
-				name: name.trim(),
-				description: description.trim(),
-				isPrivate,
-				createdBy: currentUser.uid,
-				members: memberIds,
-				createdAt: serverTimestamp$2()
-			});
-			const batch = [];
-			for (const memberId of selectedContacts) {
-				if (memberId === currentUser.uid) continue;
-				batch.push(addDoc(collection(db, "notifications"), {
-					type: "added_to_group",
-					groupId: groupRef.id,
-					groupName: name.trim(),
-					recipientId: memberId,
-					senderId: currentUser.uid,
-					read: false,
-					createdAt: serverTimestamp$2()
-				}));
-			}
-			await Promise.all(batch);
-			setSuccess(true);
-			setTimeout(() => onBack?.(), 1500);
-		} catch (err) {
-			console.error(err);
-			setError("حدث خطأ أثناء الإنشاء. حاول مرة أخرى.");
-		} finally {
-			setLoading(false);
-		}
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-slate-50/50",
-		dir: "rtl",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
-			className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-14 pb-4",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center justify-between",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: onBack,
-						className: "w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors active:scale-95",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-							className: "w-5 h-5 text-gray-700",
-							viewBox: "0 0 24 24",
-							fill: "none",
-							stroke: "currentColor",
-							strokeWidth: "2",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-						className: "text-xl font-black text-gray-900 tracking-tight",
-						children: "إنشاء مجموعة"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
-				]
-			})
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
-			className: "flex-1 overflow-y-auto px-5 py-6 pb-24",
-			children: success ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex flex-col items-center justify-center py-12 text-center animate-in fade-in zoom-in duration-300",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mb-4",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-							className: "w-10 h-10 text-emerald-600",
-							viewBox: "0 0 24 24",
-							fill: "none",
-							stroke: "currentColor",
-							strokeWidth: "2",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: "20 6 9 17 4 12" })
-						})
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-						className: "text-xl font-bold text-gray-900 mb-2",
-						children: "تم إنشاء المجموعة بنجاح!"
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-sm text-gray-500",
-						children: "جاري العودة إلى القائمة..."
-					})
-				]
-			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-				onSubmit: handleSubmit,
-				className: "space-y-6",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-5",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-							className: "text-sm font-bold text-gray-700 mb-2 block",
-							children: ["اسم المجموعة ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-red-500",
-								children: "*"
-							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-							type: "text",
-							value: name,
-							onChange: (e) => setName(e.target.value),
-							placeholder: "مثال: فريق التطوير",
-							className: "w-full h-12 px-4 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-transparent transition-all",
-							maxLength: 50
-						})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-							className: "text-sm font-bold text-gray-700 mb-2 block",
-							children: "الوصف (اختياري)"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
-							value: description,
-							onChange: (e) => setDescription(e.target.value),
-							placeholder: "اكتب وصفاً مختصراً للمجموعة...",
-							rows: 3,
-							className: "w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-transparent transition-all resize-none",
-							maxLength: 200
-						})] })]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white rounded-3xl p-5 border border-gray-100 shadow-sm",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-							className: "text-sm font-bold text-gray-900 mb-4",
-							children: "إعدادات الخصوصية"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center justify-between p-4 bg-gray-50 rounded-xl",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "font-bold text-gray-900 text-sm",
-								children: "مجموعة خاصة"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-gray-500 mt-0.5",
-								children: "الدعوة مطلوبة للانضمام"
-							})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								type: "button",
-								onClick: () => setIsPrivate(!isPrivate),
-								className: `w-12 h-7 rounded-full transition-colors relative ${isPrivate ? "bg-purple-600" : "bg-gray-300"}`,
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${isPrivate ? "translate-x-5" : ""}` })
-							})]
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white rounded-3xl p-5 border border-gray-100 shadow-sm",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-							className: "text-sm font-bold text-gray-900 mb-4",
-							children: [
-								"إضافة أعضاء (",
-								selectedContacts.length,
-								")"
-							]
-						}), contacts.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-gray-400 text-center py-4",
-							children: "لا توجد جهات اتصال مضافة بعد"
-						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "space-y-2 max-h-60 overflow-y-auto",
-							children: contacts.map((contact) => {
-								const isSelected = selectedContacts.includes(contact.contactId);
-								return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									onClick: () => handleToggleContact(contact.contactId),
-									className: `flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${isSelected ? "bg-purple-50 border-purple-300 shadow-sm" : "bg-gray-50 border-gray-100 hover:border-purple-200"}`,
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "flex items-center gap-3",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: `w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs ${isSelected ? "bg-purple-600 border-purple-600 text-white" : "border-gray-300 text-transparent"}`,
-											children: isSelected && "✓"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-											className: "text-sm font-medium text-gray-900",
-											children: contact.displayName || contact.email || "مستخدم"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-											className: "text-[10px] text-gray-500",
-											children: ["@", contact.username || contact.contactId?.slice(0, 8)]
-										})] })]
-									})
-								}, contact.id);
-							})
-						})]
-					}),
-					error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-red-50 border border-red-100 text-red-600 text-sm p-4 rounded-xl flex items-center gap-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-							className: "w-5 h-5 shrink-0",
-							viewBox: "0 0 24 24",
-							fill: "none",
-							stroke: "currentColor",
-							strokeWidth: "2",
-							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-									cx: "12",
-									cy: "12",
-									r: "10"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", {
-									x1: "12",
-									y1: "8",
-									x2: "12",
-									y2: "12"
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", {
-									x1: "12",
-									y1: "16",
-									x2: "12.01",
-									y2: "16"
-								})
-							]
-						}), error]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						type: "submit",
-						disabled: loading || !name.trim(),
-						className: "w-full h-14 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-						children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-							className: "w-5 h-5 animate-spin",
-							viewBox: "0 0 24 24",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
-								cx: "12",
-								cy: "12",
-								r: "10",
-								stroke: "currentColor",
-								strokeWidth: "4",
-								className: "opacity-25"
-							})
-						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-							className: "w-5 h-5",
-							viewBox: "0 0 24 24",
-							fill: "none",
-							stroke: "currentColor",
-							strokeWidth: "2",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M12 5v14M5 12h14" })
-						}), "إنشاء المجموعة"] })
-					})
-				]
-			})
-		})]
-	});
-}
-//#endregion
-//#region src/features/home/MainMenuScreen.jsx
-function MainMenuScreen({ onNavigate, username }) {
-	const user = auth.currentUser;
-	const [copied, setCopied] = (0, import_react.useState)(false);
-	const [idVisible, setIdVisible] = (0, import_react.useState)(true);
-	const displayName = user?.displayName || user?.email?.split("@")[0] || "مستخدم";
-	const userHandle = username || "غير محدد";
-	const handleCopy = async () => {
-		if (!username || username === "غير محدد") return;
-		try {
-			await navigator.clipboard.writeText(username);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2e3);
-		} catch (err) {
-			console.error("فشل النسخ:", err);
-		}
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-slate-50/50 pb-24",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
-			className: "bg-white/80 backdrop-blur-xl sticky top-0 z-20 px-5 pt-16 pb-5 border-b border-gray-200/60",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-				className: "text-2xl font-black text-gray-900 tracking-tight",
-				children: "القائمة الرئيسية"
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs text-gray-500 mt-1",
-				children: "مرحباً بك في LinkUp"
-			})]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-			className: "flex-1 overflow-y-auto px-5 pt-6 space-y-6",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center relative overflow-hidden",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-purple-600 to-blue-500 opacity-5" }),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "relative inline-block mb-4",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
-								className: "w-28 h-28 border-4 border-white shadow-xl ring-4 ring-purple-500/10 mx-auto",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
-									src: user?.photoURL,
-									className: "object-cover"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-									className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white text-4xl font-bold",
-									children: displayName.charAt(0)
-								})]
-							})
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-							className: "text-2xl font-black text-gray-900",
-							children: displayName
-						})
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "bg-white rounded-2xl p-5 shadow-sm border border-gray-100",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center justify-between mb-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-sm font-bold text-gray-800",
-								children: "اسم المستخدم الخاص بك"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: () => setIdVisible(!idVisible),
-								className: "text-xs text-gray-500 hover:text-purple-600 font-medium flex items-center gap-1 transition-colors",
-								children: [idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" }), idVisible ? "إخفاء" : "إظهار"]
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "bg-slate-50 rounded-xl p-4 border border-gray-200 flex items-center justify-between group transition-colors hover:border-purple-200",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("code", {
-								className: "text-lg font-mono text-purple-700 font-bold truncate flex-1 text-right select-all",
-								dir: "ltr",
-								children: ["@", idVisible ? userHandle : "••••••••"]
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: handleCopy,
-								disabled: !username || username === "غير محدد",
-								className: "mr-3 p-3 rounded-xl bg-purple-100 text-purple-600 hover:bg-purple-200 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed",
-								children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-5 h-5" })
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-							className: "text-[10px] text-gray-500 mt-3 text-center font-medium",
-							children: [
-								"شارك اسم المستخدم (@",
-								username,
-								") مع أصدقائك ليعثروا عليك بسهولة في جهات الاتصال."
-							]
-						})
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "grid grid-cols-2 gap-3",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						onClick: () => onNavigate?.("contacts"),
-						className: "bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all active:scale-[0.98] text-right group",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center mb-3 group-hover:bg-purple-100 transition-colors",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-6 h-6 text-purple-600" })
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "font-bold text-gray-900 text-sm",
-								children: "جهات الاتصال"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-gray-500 mt-0.5",
-								children: "إدارة القائمة"
-							})
-						]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-						onClick: () => onNavigate?.("settings"),
-						className: "bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all active:scale-[0.98] text-right group",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-3 group-hover:bg-blue-100 transition-colors",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, { className: "w-6 h-6 text-blue-600" })
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "font-bold text-gray-900 text-sm",
-								children: "الإعدادات"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-gray-500 mt-0.5",
-								children: "تخصيص التطبيق"
-							})
-						]
-					})]
-				})
-			]
-		})]
-	});
-}
-//#endregion
-//#region node_modules/@radix-ui/react-label/dist/index.mjs
-var NAME = "Label";
-var Label$1 = import_react.forwardRef((props, forwardedRef) => {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$4.label, {
-		...props,
-		ref: forwardedRef,
-		onMouseDown: (event) => {
-			if (event.target.closest("button, input, select, textarea")) return;
-			props.onMouseDown?.(event);
-			if (!event.defaultPrevented && event.detail > 1) event.preventDefault();
-		}
-	});
-});
-Label$1.displayName = NAME;
-var Root = Label$1;
-//#endregion
-//#region src/components/ui/label.jsx
-var labelVariants = cva("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70");
-var Label = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root, {
-	ref,
-	className: cn(labelVariants(), className),
-	...props
-}));
-Label.displayName = Root.displayName;
-//#endregion
-//#region src/components/common/DisplayNameModal.jsx
-function DisplayNameModal({ open, suggestedName, onConfirm }) {
-	const [displayName, setDisplayName] = (0, import_react.useState)(suggestedName);
-	const handleSubmit = (e) => {
-		e.preventDefault();
-		if (displayName.trim().length > 0) onConfirm(displayName.trim());
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
-		open,
-		onOpenChange: () => {},
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
-			className: "sm:max-w-md w-[calc(100%-2rem)] mx-auto my-8 bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border-0 p-6",
-			onPointerDownOutside: (e) => e.preventDefault(),
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogHeader, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, {
-				className: "text-center text-2xl font-bold text-gray-800 dark:text-white",
-				children: "أكمل ملفك الشخصي"
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogDescription, {
-				className: "text-center text-gray-600 dark:text-gray-400",
-				children: "اختر اسم العرض الذي سيظهر للمستخدمين الآخرين"
-			})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-				onSubmit: handleSubmit,
-				className: "space-y-6 py-4",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "space-y-2",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
-							className: "text-gray-700 dark:text-gray-300 font-medium",
-							children: "اسم العرض"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User$1, { className: "absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								type: "text",
-								placeholder: "مثال: محمد أحمد",
-								value: displayName,
-								onChange: (e) => setDisplayName(e.target.value),
-								className: "pl-10 h-12 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-base",
-								autoFocus: true
-							})]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-gray-500 dark:text-gray-400",
-							children: "يمكنك تغييره لاحقاً من الملف الشخصي"
-						})
-					]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogFooter, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
-					type: "submit",
-					disabled: !displayName.trim(),
-					className: "w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-md",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "h-4 w-4 mr-2" }), "متابعة"]
-				}) })]
-			})]
-		})
-	});
-}
-//#endregion
 //#region node_modules/framer-motion/dist/es/context/LayoutGroupContext.mjs
 var LayoutGroupContext = (0, import_react.createContext)({});
 //#endregion
@@ -56839,7 +49258,7 @@ function useConstant(init) {
 }
 //#endregion
 //#region node_modules/framer-motion/dist/es/utils/use-isomorphic-effect.mjs
-var useIsomorphicLayoutEffect = typeof window !== "undefined" ? import_react.useLayoutEffect : import_react.useEffect;
+var useIsomorphicLayoutEffect$1 = typeof window !== "undefined" ? import_react.useLayoutEffect : import_react.useEffect;
 //#endregion
 //#region node_modules/framer-motion/dist/es/context/PresenceContext.mjs
 /**
@@ -64019,6 +56438,193 @@ var MotionConfigContext = (0, import_react.createContext)({
 	reducedMotion: "never"
 });
 //#endregion
+//#region node_modules/framer-motion/dist/es/utils/use-composed-ref.mjs
+/**
+* Taken from https://github.com/radix-ui/primitives/blob/main/packages/react/compose-refs/src/compose-refs.tsx
+*/
+/**
+* Set a given ref to a given value
+* This utility takes care of different types of refs: callback refs and RefObject(s)
+*/
+function setRef(ref, value) {
+	if (typeof ref === "function") return ref(value);
+	else if (ref !== null && ref !== void 0) ref.current = value;
+}
+/**
+* A utility to compose multiple refs together
+* Accepts callback refs and RefObject(s)
+*/
+function composeRefs(...refs) {
+	return (node) => {
+		let hasCleanup = false;
+		const cleanups = refs.map((ref) => {
+			const cleanup = setRef(ref, node);
+			if (!hasCleanup && typeof cleanup === "function") hasCleanup = true;
+			return cleanup;
+		});
+		if (hasCleanup) return () => {
+			for (let i = 0; i < cleanups.length; i++) {
+				const cleanup = cleanups[i];
+				if (typeof cleanup === "function") cleanup();
+				else setRef(refs[i], null);
+			}
+		};
+	};
+}
+/**
+* A custom hook that composes multiple refs
+* Accepts callback refs and RefObject(s)
+*/
+function useComposedRefs(...refs) {
+	return import_react.useCallback(composeRefs(...refs), refs);
+}
+//#endregion
+//#region node_modules/framer-motion/dist/es/components/AnimatePresence/PopChild.mjs
+/**
+* Measurement functionality has to be within a separate component
+* to leverage snapshot lifecycle.
+*/
+var PopChildMeasure = class extends import_react.Component {
+	getSnapshotBeforeUpdate(prevProps) {
+		const element = this.props.childRef.current;
+		if (isHTMLElement(element) && prevProps.isPresent && !this.props.isPresent && this.props.pop !== false) {
+			const parent = element.offsetParent;
+			const parentWidth = isHTMLElement(parent) ? parent.offsetWidth || 0 : 0;
+			const parentHeight = isHTMLElement(parent) ? parent.offsetHeight || 0 : 0;
+			const computedStyle = getComputedStyle(element);
+			const size = this.props.sizeRef.current;
+			size.height = parseFloat(computedStyle.height);
+			size.width = parseFloat(computedStyle.width);
+			size.top = element.offsetTop;
+			size.left = element.offsetLeft;
+			size.right = parentWidth - size.width - size.left;
+			size.bottom = parentHeight - size.height - size.top;
+		}
+		return null;
+	}
+	/**
+	* Required with getSnapshotBeforeUpdate to stop React complaining.
+	*/
+	componentDidUpdate() {}
+	render() {
+		return this.props.children;
+	}
+};
+function PopChild({ children, isPresent, anchorX, anchorY, root, pop }) {
+	const id = (0, import_react.useId)();
+	const ref = (0, import_react.useRef)(null);
+	const size = (0, import_react.useRef)({
+		width: 0,
+		height: 0,
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0
+	});
+	const { nonce } = (0, import_react.useContext)(MotionConfigContext);
+	const composedRef = useComposedRefs(ref, children.props?.ref ?? children?.ref);
+	/**
+	* We create and inject a style block so we can apply this explicit
+	* sizing in a non-destructive manner by just deleting the style block.
+	*
+	* We can't apply size via render as the measurement happens
+	* in getSnapshotBeforeUpdate (post-render), likewise if we apply the
+	* styles directly on the DOM node, we might be overwriting
+	* styles set via the style prop.
+	*/
+	(0, import_react.useInsertionEffect)(() => {
+		const { width, height, top, left, right, bottom } = size.current;
+		if (isPresent || pop === false || !ref.current || !width || !height) return;
+		const x = anchorX === "left" ? `left: ${left}` : `right: ${right}`;
+		const y = anchorY === "bottom" ? `bottom: ${bottom}` : `top: ${top}`;
+		ref.current.dataset.motionPopId = id;
+		const style = document.createElement("style");
+		if (nonce) style.nonce = nonce;
+		const parent = root ?? document.head;
+		parent.appendChild(style);
+		if (style.sheet) style.sheet.insertRule(`
+          [data-motion-pop-id="${id}"] {
+            position: absolute !important;
+            width: ${width}px !important;
+            height: ${height}px !important;
+            ${x}px !important;
+            ${y}px !important;
+          }
+        `);
+		return () => {
+			ref.current?.removeAttribute("data-motion-pop-id");
+			if (parent.contains(style)) parent.removeChild(style);
+		};
+	}, [isPresent]);
+	return (0, import_jsx_runtime.jsx)(PopChildMeasure, {
+		isPresent,
+		childRef: ref,
+		sizeRef: size,
+		pop,
+		children: pop === false ? children : import_react.cloneElement(children, { ref: composedRef })
+	});
+}
+//#endregion
+//#region node_modules/framer-motion/dist/es/components/AnimatePresence/PresenceChild.mjs
+var PresenceChild = ({ children, initial, isPresent, onExitComplete, custom, presenceAffectsLayout, mode, anchorX, anchorY, root }) => {
+	const presenceChildren = useConstant(newChildrenMap);
+	const id = (0, import_react.useId)();
+	let isReusedContext = true;
+	let context = (0, import_react.useMemo)(() => {
+		isReusedContext = false;
+		return {
+			id,
+			initial,
+			isPresent,
+			custom,
+			onExitComplete: (childId) => {
+				presenceChildren.set(childId, true);
+				for (const isComplete of presenceChildren.values()) if (!isComplete) return;
+				onExitComplete && onExitComplete();
+			},
+			register: (childId) => {
+				presenceChildren.set(childId, false);
+				return () => presenceChildren.delete(childId);
+			}
+		};
+	}, [
+		isPresent,
+		presenceChildren,
+		onExitComplete
+	]);
+	/**
+	* If the presence of a child affects the layout of the components around it,
+	* we want to make a new context value to ensure they get re-rendered
+	* so they can detect that layout change.
+	*/
+	if (presenceAffectsLayout && isReusedContext) context = { ...context };
+	(0, import_react.useMemo)(() => {
+		presenceChildren.forEach((_, key) => presenceChildren.set(key, false));
+	}, [isPresent]);
+	/**
+	* If there's no `motion` components to fire exit animations, we want to remove this
+	* component immediately.
+	*/
+	import_react.useEffect(() => {
+		!isPresent && !presenceChildren.size && onExitComplete && onExitComplete();
+	}, [isPresent]);
+	children = (0, import_jsx_runtime.jsx)(PopChild, {
+		pop: mode === "popLayout",
+		isPresent,
+		anchorX,
+		anchorY,
+		root,
+		children
+	});
+	return (0, import_jsx_runtime.jsx)(PresenceContext.Provider, {
+		value: context,
+		children
+	});
+};
+function newChildrenMap() {
+	return /* @__PURE__ */ new Map();
+}
+//#endregion
 //#region node_modules/framer-motion/dist/es/components/AnimatePresence/use-presence.mjs
 /**
 * When a component is the child of `AnimatePresence`, it can use `usePresence`
@@ -64043,7 +56649,7 @@ var MotionConfigContext = (0, import_react.createContext)({
 *
 * @public
 */
-function usePresence$1(subscribe = true) {
+function usePresence$2(subscribe = true) {
 	const context = (0, import_react.useContext)(PresenceContext);
 	if (context === null) return [true, null];
 	const { isPresent, onExitComplete, register } = context;
@@ -64058,6 +56664,175 @@ function usePresence$1(subscribe = true) {
 	]);
 	return !isPresent && onExitComplete ? [false, safeToRemove] : [true];
 }
+//#endregion
+//#region node_modules/framer-motion/dist/es/components/AnimatePresence/utils.mjs
+var getChildKey = (child) => child.key || "";
+function onlyElements(children) {
+	const filtered = [];
+	import_react.Children.forEach(children, (child) => {
+		if ((0, import_react.isValidElement)(child)) filtered.push(child);
+	});
+	return filtered;
+}
+//#endregion
+//#region node_modules/framer-motion/dist/es/components/AnimatePresence/index.mjs
+/**
+* `AnimatePresence` enables the animation of components that have been removed from the tree.
+*
+* When adding/removing more than a single child, every child **must** be given a unique `key` prop.
+*
+* Any `motion` components that have an `exit` property defined will animate out when removed from
+* the tree.
+*
+* ```jsx
+* import { motion, AnimatePresence } from 'framer-motion'
+*
+* export const Items = ({ items }) => (
+*   <AnimatePresence>
+*     {items.map(item => (
+*       <motion.div
+*         key={item.id}
+*         initial={{ opacity: 0 }}
+*         animate={{ opacity: 1 }}
+*         exit={{ opacity: 0 }}
+*       />
+*     ))}
+*   </AnimatePresence>
+* )
+* ```
+*
+* You can sequence exit animations throughout a tree using variants.
+*
+* If a child contains multiple `motion` components with `exit` props, it will only unmount the child
+* once all `motion` components have finished animating out. Likewise, any components using
+* `usePresence` all need to call `safeToRemove`.
+*
+* @public
+*/
+var AnimatePresence = ({ children, custom, initial = true, onExitComplete, presenceAffectsLayout = true, mode = "sync", propagate = false, anchorX = "left", anchorY = "top", root }) => {
+	const [isParentPresent, safeToRemove] = usePresence$2(propagate);
+	/**
+	* Filter any children that aren't ReactElements. We can only track components
+	* between renders with a props.key.
+	*/
+	const presentChildren = (0, import_react.useMemo)(() => onlyElements(children), [children]);
+	/**
+	* Track the keys of the currently rendered children. This is used to
+	* determine which children are exiting.
+	*/
+	const presentKeys = propagate && !isParentPresent ? [] : presentChildren.map(getChildKey);
+	/**
+	* If `initial={false}` we only want to pass this to components in the first render.
+	*/
+	const isInitialRender = (0, import_react.useRef)(true);
+	/**
+	* A ref containing the currently present children. When all exit animations
+	* are complete, we use this to re-render the component with the latest children
+	* *committed* rather than the latest children *rendered*.
+	*/
+	const pendingPresentChildren = (0, import_react.useRef)(presentChildren);
+	/**
+	* Track which exiting children have finished animating out.
+	*/
+	const exitComplete = useConstant(() => /* @__PURE__ */ new Map());
+	/**
+	* Track which components are currently processing exit to prevent duplicate processing.
+	*/
+	const exitingComponents = (0, import_react.useRef)(/* @__PURE__ */ new Set());
+	/**
+	* Save children to render as React state. To ensure this component is concurrent-safe,
+	* we check for exiting children via an effect.
+	*/
+	const [diffedChildren, setDiffedChildren] = (0, import_react.useState)(presentChildren);
+	const [renderedChildren, setRenderedChildren] = (0, import_react.useState)(presentChildren);
+	useIsomorphicLayoutEffect$1(() => {
+		isInitialRender.current = false;
+		pendingPresentChildren.current = presentChildren;
+		/**
+		* Update complete status of exiting children.
+		*/
+		for (let i = 0; i < renderedChildren.length; i++) {
+			const key = getChildKey(renderedChildren[i]);
+			if (!presentKeys.includes(key)) {
+				if (exitComplete.get(key) !== true) exitComplete.set(key, false);
+			} else {
+				exitComplete.delete(key);
+				exitingComponents.current.delete(key);
+			}
+		}
+	}, [
+		renderedChildren,
+		presentKeys.length,
+		presentKeys.join("-")
+	]);
+	const exitingChildren = [];
+	if (presentChildren !== diffedChildren) {
+		let nextChildren = [...presentChildren];
+		/**
+		* Loop through all the currently rendered components and decide which
+		* are exiting.
+		*/
+		for (let i = 0; i < renderedChildren.length; i++) {
+			const child = renderedChildren[i];
+			const key = getChildKey(child);
+			if (!presentKeys.includes(key)) {
+				nextChildren.splice(i, 0, child);
+				exitingChildren.push(child);
+			}
+		}
+		/**
+		* If we're in "wait" mode, and we have exiting children, we want to
+		* only render these until they've all exited.
+		*/
+		if (mode === "wait" && exitingChildren.length) nextChildren = exitingChildren;
+		setRenderedChildren(onlyElements(nextChildren));
+		setDiffedChildren(presentChildren);
+		/**
+		* Early return to ensure once we've set state with the latest diffed
+		* children, we can immediately re-render.
+		*/
+		return null;
+	}
+	/**
+	* If we've been provided a forceRender function by the LayoutGroupContext,
+	* we can use it to force a re-render amongst all surrounding components once
+	* all components have finished animating out.
+	*/
+	const { forceRender } = (0, import_react.useContext)(LayoutGroupContext);
+	return (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: renderedChildren.map((child) => {
+		const key = getChildKey(child);
+		const isPresent = propagate && !isParentPresent ? false : presentChildren === renderedChildren || presentKeys.includes(key);
+		const onExit = () => {
+			if (exitingComponents.current.has(key)) return;
+			if (exitComplete.has(key)) {
+				exitingComponents.current.add(key);
+				exitComplete.set(key, true);
+			} else return;
+			let isEveryExitComplete = true;
+			exitComplete.forEach((isExitComplete) => {
+				if (!isExitComplete) isEveryExitComplete = false;
+			});
+			if (isEveryExitComplete) {
+				forceRender?.();
+				setRenderedChildren(pendingPresentChildren.current);
+				propagate && safeToRemove?.();
+				onExitComplete && onExitComplete();
+			}
+		};
+		return (0, import_jsx_runtime.jsx)(PresenceChild, {
+			isPresent,
+			initial: !isInitialRender.current || initial ? void 0 : false,
+			custom,
+			presenceAffectsLayout,
+			mode,
+			root,
+			onExitComplete: isPresent ? void 0 : onExit,
+			anchorX,
+			anchorY,
+			children: child
+		}, key);
+	}) });
+};
 //#endregion
 //#region node_modules/framer-motion/dist/es/context/LazyContext.mjs
 var LazyContext = (0, import_react.createContext)({ strict: false });
@@ -64570,7 +57345,7 @@ function useVisualElement(Component, visualState, props, createVisualElement, Pr
 	*/
 	const optimisedAppearId = props[optimizedAppearDataAttribute];
 	const wantsHandoff = (0, import_react.useRef)(Boolean(optimisedAppearId) && typeof window !== "undefined" && !window.MotionHandoffIsComplete?.(optimisedAppearId) && window.MotionHasOptimisedAnimation?.(optimisedAppearId));
-	useIsomorphicLayoutEffect(() => {
+	useIsomorphicLayoutEffect$1(() => {
 		/**
 		* Track that this component has mounted. This is used to detect when
 		* LazyMotion features load after the component has already committed.
@@ -65853,7 +58628,7 @@ var MeasureLayoutWithContext = class extends import_react.Component {
 	}
 };
 function MeasureLayout(props) {
-	const [isPresent, safeToRemove] = usePresence$1();
+	const [isPresent, safeToRemove] = usePresence$2();
 	const layoutGroup = (0, import_react.useContext)(LayoutGroupContext);
 	return (0, import_jsx_runtime.jsx)(MeasureLayoutWithContext, {
 		...props,
@@ -66086,6 +58861,7667 @@ var motion = /* @__PURE__ */ createMotionProxy({
 	...drag,
 	...layout
 }, createDomVisualElement);
+//#endregion
+//#region src/features/Settings/SettingsScreen.jsx
+var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+	whileHover: {
+		scale: 1.01,
+		backgroundColor: "#f9fafb"
+	},
+	whileTap: { scale: .98 },
+	onClick: toggle ? void 0 : onClick,
+	className: "flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-100/80 shadow-sm cursor-pointer transition-all group",
+	children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "p-2.5 rounded-xl bg-purple-50 text-purple-600 shrink-0 group-hover:bg-purple-100 transition-colors",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5" })
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex-1 min-w-0 text-right",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-sm font-bold text-gray-900",
+				children: label
+			}), desc && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-xs text-gray-500 mt-0.5 truncate",
+				children: desc
+			})]
+		}),
+		toggle ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+			onClick: (e) => {
+				e.stopPropagation();
+				onToggle?.();
+			},
+			className: `relative w-12 h-7 rounded-full transition-colors shrink-0 ${isToggled ? "bg-purple-600" : "bg-gray-300"}`,
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
+				animate: { x: isToggled ? 20 : 2 },
+				transition: {
+					type: "spring",
+					stiffness: 500,
+					damping: 30
+				},
+				className: "absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+			})
+		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-4 h-4 text-gray-400 shrink-0 group-hover:text-purple-500 transition-colors" })
+	]
+});
+var SimpleModal = ({ open, onClose, title, children }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+	initial: { opacity: 0 },
+	animate: { opacity: 1 },
+	exit: { opacity: 0 },
+	className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm",
+	onClick: onClose,
+	children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+		initial: {
+			scale: .9,
+			opacity: 0,
+			y: 20
+		},
+		animate: {
+			scale: 1,
+			opacity: 1,
+			y: 0
+		},
+		exit: {
+			scale: .9,
+			opacity: 0,
+			y: 20
+		},
+		transition: {
+			type: "spring",
+			stiffness: 400,
+			damping: 25
+		},
+		className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
+		onClick: (e) => e.stopPropagation(),
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex items-center justify-between mb-4",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+				className: "text-lg font-bold text-gray-900",
+				children: title
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				onClick: onClose,
+				className: "w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-4 h-4" })
+			})]
+		}), children]
+	})
+}) });
+var Section = ({ title, children, delay = 0 }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.section, {
+	initial: {
+		opacity: 0,
+		y: 30
+	},
+	animate: {
+		opacity: 1,
+		y: 0
+	},
+	transition: {
+		duration: .4,
+		delay,
+		type: "spring",
+		stiffness: 200,
+		damping: 20
+	},
+	className: "space-y-3",
+	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+		className: "text-xs font-bold text-gray-400 uppercase tracking-wider px-1 mb-2",
+		children: title
+	}), children]
+});
+function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile, onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker, fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner }) {
+	const [showFontModal, setShowFontModal] = (0, import_react.useState)(false);
+	const [showSizeModal, setShowSizeModal] = (0, import_react.useState)(false);
+	const [showResetModal, setShowResetModal] = (0, import_react.useState)(false);
+	const [resetText, setResetText] = (0, import_react.useState)("");
+	const [resetLoading, setResetLoading] = (0, import_react.useState)(false);
+	const [compactMode, setCompactMode] = (0, import_react.useState)(() => localStorage.getItem("compactMode") === "true");
+	(0, import_react.useEffect)(() => {
+		localStorage.setItem("compactMode", compactMode);
+		if (compactMode) document.documentElement.classList.add("compact-ui");
+		else document.documentElement.classList.remove("compact-ui");
+	}, [compactMode]);
+	const sizes = [
+		{
+			v: "small",
+			l: "صغير"
+		},
+		{
+			v: "medium",
+			l: "متوسط"
+		},
+		{
+			v: "large",
+			l: "كبير"
+		},
+		{
+			v: "xlarge",
+			l: "كبير جداً"
+		}
+	];
+	const fonts = [
+		{
+			v: "tajawal",
+			l: "Tajawal",
+			desc: "الافتراضي"
+		},
+		{
+			v: "cairo",
+			l: "Cairo",
+			desc: "واضح"
+		},
+		{
+			v: "rubik",
+			l: "Rubik",
+			desc: "ناعم"
+		},
+		{
+			v: "ibm-plex",
+			l: "IBM Plex",
+			desc: "مميز",
+			featured: true
+		}
+	];
+	const handleResetApp = async () => {
+		if (resetText.trim() !== "حذف") return;
+		setResetLoading(true);
+		try {
+			if (!auth?.currentUser?.uid || !db) throw new Error("فشل المصادقة");
+			const batch = writeBatch(db);
+			(await getDocs(query(collection(db, "chats"), where("participants", "array-contains", auth.currentUser.uid)))).forEach((d) => batch.delete(doc(db, "chats", d.id)));
+			await batch.commit();
+			localStorage.clear();
+			sessionStorage.clear();
+			window.location.reload();
+		} catch (e) {
+			console.error(e);
+			alert("تعذر إعادة الضبط. تأكد من اتصالك أو سجّل الدخول مجدداً.");
+		} finally {
+			setResetLoading(false);
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen bg-gradient-to-b from-gray-50 to-white pb-24",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+				initial: {
+					opacity: 0,
+					y: -20
+				},
+				animate: {
+					opacity: 1,
+					y: 0
+				},
+				className: "sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-gray-200/60 px-5 pt-16 pb-4 text-center",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
+					className: "text-2xl font-black text-gray-900 tracking-tight",
+					children: ["خصّص ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
+						children: "تجربتك"
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-sm text-gray-500 mt-1",
+					children: "تحكم كامل في تطبيقك كما تحب"
+				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "px-5 py-6 space-y-8",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Section, {
+						title: "الحساب",
+						delay: .1,
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+							icon: User$1,
+							label: "الملف الشخصي",
+							desc: "تعديل اسمك وصورتك",
+							onClick: onOpenProfile
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
+						title: "المظهر",
+						delay: .2,
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: Palette,
+								label: "حجم الخط",
+								desc: sizes.find((s) => s.v === fontSize)?.l,
+								onClick: () => setShowSizeModal(true)
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: Palette,
+								label: "نوع الخط",
+								desc: fonts.find((f) => f.v === fontFamily)?.l,
+								onClick: () => setShowFontModal(true)
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: TabletSmartphone,
+								label: "تصغير الأبعاد",
+								desc: "مناسب للشاشات الصغيرة",
+								toggle: true,
+								isToggled: compactMode,
+								onToggle: () => setCompactMode(!compactMode)
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
+						title: "المكالمات",
+						delay: .3,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+							icon: Mic,
+							label: "كتم الميكروفون تلقائياً",
+							toggle: true,
+							isToggled: muteMicOnJoin,
+							onToggle: onToggleMuteMic
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+							icon: Speaker,
+							label: "مكبر الصوت افتراضياً",
+							toggle: true,
+							isToggled: speakerDefault,
+							onToggle: onToggleSpeaker
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
+						title: "الخصوصية والأمان",
+						delay: .4,
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: Lock,
+								label: "قفل التطبيق",
+								desc: "حماية إضافية برمز سري",
+								onClick: onOpenAppLock
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: Shield,
+								label: "إدارة البيانات",
+								desc: "التحكم في تخزين بياناتك",
+								onClick: onOpenDataManagement
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: RefreshCw,
+								label: "إعادة ضبط التطبيق",
+								desc: "مسح جميع المحادثات والبيانات",
+								onClick: () => setShowResetModal(true)
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
+						title: "المزيد",
+						delay: .5,
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: MessageCircle,
+								label: "تواصل مع المطور",
+								desc: "ملاحظات، اقتراحات، أو مشاكل",
+								onClick: onOpenSupport
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: Share2,
+								label: "شارك التطبيق",
+								desc: "دع أصدقاءك ينضمون",
+								onClick: () => navigator.share?.({
+									title: "LinkUp",
+									url: window.location.origin
+								}).catch(() => {})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: Sparkles,
+								label: "تكوين شراكة",
+								desc: "انضم كشريك رسمي",
+								onClick: onOpenPartner
+							}),
+							isAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: Shield,
+								label: "لوحة الإدارة",
+								desc: "إدارة المستخدمين والمحتوى",
+								onClick: onOpenAdmin
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						initial: {
+							opacity: 0,
+							y: 20
+						},
+						animate: {
+							opacity: 1,
+							y: 0
+						},
+						transition: {
+							delay: .6,
+							type: "spring",
+							stiffness: 200,
+							damping: 20
+						},
+						className: "grid grid-cols-3 gap-3 pt-2",
+						children: [
+							{
+								label: "من هو أثير؟",
+								onClick: onOpenAtheer,
+								color: "purple"
+							},
+							{
+								label: "من نحن",
+								onClick: onOpenAbout,
+								color: "blue"
+							},
+							{
+								label: "الخصوصية",
+								onClick: onOpenPrivacy,
+								color: "gray"
+							}
+						].map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+							whileHover: {
+								scale: 1.05,
+								y: -2
+							},
+							whileTap: { scale: .95 },
+							onClick: item.onClick,
+							className: `flex flex-col items-center justify-center p-3 rounded-xl shadow-sm border border-gray-100 bg-white hover:bg-gray-50 transition-all`,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: `text-xs font-bold text-${item.color}-700`,
+								children: item.label
+							})
+						}, item.label))
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
+				open: showSizeModal,
+				onClose: () => setShowSizeModal(false),
+				title: "حجم الخط",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "space-y-2",
+					children: sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+						whileTap: { scale: .97 },
+						onClick: () => {
+							onSelectFontSize?.(s.v);
+							setShowSizeModal(false);
+						},
+						className: `w-full p-3 rounded-lg text-right text-sm font-bold flex items-center justify-between ${fontSize === s.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300" : "bg-gray-50 text-gray-700 hover:bg-gray-100"}`,
+						children: [
+							s.l,
+							" ",
+							fontSize === s.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })
+						]
+					}, s.v))
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
+				open: showFontModal,
+				onClose: () => setShowFontModal(false),
+				title: "نوع الخط",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "space-y-2",
+					children: fonts.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+						whileTap: { scale: .97 },
+						onClick: () => {
+							onSelectFontFamily?.(f.v);
+							setShowFontModal(false);
+						},
+						className: `w-full p-3 rounded-lg text-right text-sm font-bold flex items-center justify-between ${fontFamily === f.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300" : "bg-gray-50 text-gray-700 hover:bg-gray-100"}`,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "flex items-center gap-2",
+							children: [
+								f.l,
+								" ",
+								f.featured && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-3 h-3 text-yellow-500" })
+							]
+						}), fontFamily === f.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })]
+					}, f.v))
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
+				open: showResetModal,
+				onClose: () => setShowResetModal(false),
+				title: "تأكيد إعادة الضبط",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "space-y-4",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex flex-col items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "w-14 h-14 rounded-full bg-red-100 flex items-center justify-center",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-7 h-7 text-red-600" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-sm text-gray-600 text-center",
+								children: [
+									"اكتب كلمة ",
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "font-bold text-red-600",
+										children: "\"حذف\""
+									}),
+									" للتأكيد"
+								]
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							value: resetText,
+							onChange: (e) => setResetText(e.target.value),
+							placeholder: "اكتب هنا...",
+							className: "w-full h-12 px-4 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-200 text-center text-lg",
+							autoFocus: true
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex gap-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: () => setShowResetModal(false),
+								className: "flex-1 h-11 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 font-medium transition-colors",
+								children: "إلغاء"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+								whileTap: resetText.trim() === "حذف" ? { scale: .95 } : {},
+								onClick: handleResetApp,
+								disabled: resetText.trim() !== "حذف" || resetLoading,
+								className: "flex-1 h-11 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-red-200 transition-all",
+								children: resetLoading ? "جارٍ..." : "تأكيد"
+							})]
+						})
+					]
+				})
+			})
+		]
+	});
+}
+//#endregion
+//#region node_modules/sonner/dist/index.mjs
+var jt = (n) => {
+	switch (n) {
+		case "success": return ee;
+		case "info": return ae;
+		case "warning": return oe;
+		case "error": return se;
+		default: return null;
+	}
+}, te = Array(12).fill(0), Yt = ({ visible: n, className: e }) => import_react.createElement("div", {
+	className: ["sonner-loading-wrapper", e].filter(Boolean).join(" "),
+	"data-visible": n
+}, import_react.createElement("div", { className: "sonner-spinner" }, te.map((t, a) => import_react.createElement("div", {
+	className: "sonner-loading-bar",
+	key: `spinner-bar-${a}`
+})))), ee = import_react.createElement("svg", {
+	xmlns: "http://www.w3.org/2000/svg",
+	viewBox: "0 0 20 20",
+	fill: "currentColor",
+	height: "20",
+	width: "20"
+}, import_react.createElement("path", {
+	fillRule: "evenodd",
+	d: "M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z",
+	clipRule: "evenodd"
+})), oe = import_react.createElement("svg", {
+	xmlns: "http://www.w3.org/2000/svg",
+	viewBox: "0 0 24 24",
+	fill: "currentColor",
+	height: "20",
+	width: "20"
+}, import_react.createElement("path", {
+	fillRule: "evenodd",
+	d: "M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z",
+	clipRule: "evenodd"
+})), ae = import_react.createElement("svg", {
+	xmlns: "http://www.w3.org/2000/svg",
+	viewBox: "0 0 20 20",
+	fill: "currentColor",
+	height: "20",
+	width: "20"
+}, import_react.createElement("path", {
+	fillRule: "evenodd",
+	d: "M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z",
+	clipRule: "evenodd"
+})), se = import_react.createElement("svg", {
+	xmlns: "http://www.w3.org/2000/svg",
+	viewBox: "0 0 20 20",
+	fill: "currentColor",
+	height: "20",
+	width: "20"
+}, import_react.createElement("path", {
+	fillRule: "evenodd",
+	d: "M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z",
+	clipRule: "evenodd"
+})), Ot = import_react.createElement("svg", {
+	xmlns: "http://www.w3.org/2000/svg",
+	width: "12",
+	height: "12",
+	viewBox: "0 0 24 24",
+	fill: "none",
+	stroke: "currentColor",
+	strokeWidth: "1.5",
+	strokeLinecap: "round",
+	strokeLinejoin: "round"
+}, import_react.createElement("line", {
+	x1: "18",
+	y1: "6",
+	x2: "6",
+	y2: "18"
+}), import_react.createElement("line", {
+	x1: "6",
+	y1: "6",
+	x2: "18",
+	y2: "18"
+}));
+var Ft = () => {
+	let [n, e] = import_react.useState(document.hidden);
+	return import_react.useEffect(() => {
+		let t = () => {
+			e(document.hidden);
+		};
+		return document.addEventListener("visibilitychange", t), () => window.removeEventListener("visibilitychange", t);
+	}, []), n;
+};
+var bt = 1, yt = class {
+	constructor() {
+		this.subscribe = (e) => (this.subscribers.push(e), () => {
+			let t = this.subscribers.indexOf(e);
+			this.subscribers.splice(t, 1);
+		});
+		this.publish = (e) => {
+			this.subscribers.forEach((t) => t(e));
+		};
+		this.addToast = (e) => {
+			this.publish(e), this.toasts = [...this.toasts, e];
+		};
+		this.create = (e) => {
+			var S;
+			let { message: t, ...a } = e, u = typeof (e == null ? void 0 : e.id) == "number" || ((S = e.id) == null ? void 0 : S.length) > 0 ? e.id : bt++, f = this.toasts.find((g) => g.id === u), w = e.dismissible === void 0 ? !0 : e.dismissible;
+			return this.dismissedToasts.has(u) && this.dismissedToasts.delete(u), f ? this.toasts = this.toasts.map((g) => g.id === u ? (this.publish({
+				...g,
+				...e,
+				id: u,
+				title: t
+			}), {
+				...g,
+				...e,
+				id: u,
+				dismissible: w,
+				title: t
+			}) : g) : this.addToast({
+				title: t,
+				...a,
+				dismissible: w,
+				id: u
+			}), u;
+		};
+		this.dismiss = (e) => (this.dismissedToasts.add(e), e || this.toasts.forEach((t) => {
+			this.subscribers.forEach((a) => a({
+				id: t.id,
+				dismiss: !0
+			}));
+		}), this.subscribers.forEach((t) => t({
+			id: e,
+			dismiss: !0
+		})), e);
+		this.message = (e, t) => this.create({
+			...t,
+			message: e
+		});
+		this.error = (e, t) => this.create({
+			...t,
+			message: e,
+			type: "error"
+		});
+		this.success = (e, t) => this.create({
+			...t,
+			type: "success",
+			message: e
+		});
+		this.info = (e, t) => this.create({
+			...t,
+			type: "info",
+			message: e
+		});
+		this.warning = (e, t) => this.create({
+			...t,
+			type: "warning",
+			message: e
+		});
+		this.loading = (e, t) => this.create({
+			...t,
+			type: "loading",
+			message: e
+		});
+		this.promise = (e, t) => {
+			if (!t) return;
+			let a;
+			t.loading !== void 0 && (a = this.create({
+				...t,
+				promise: e,
+				type: "loading",
+				message: t.loading,
+				description: typeof t.description != "function" ? t.description : void 0
+			}));
+			let u = e instanceof Promise ? e : e(), f = a !== void 0, w, S = u.then(async (i) => {
+				if (w = ["resolve", i], import_react.isValidElement(i)) f = !1, this.create({
+					id: a,
+					type: "default",
+					message: i
+				});
+				else if (ie(i) && !i.ok) {
+					f = !1;
+					let T = typeof t.error == "function" ? await t.error(`HTTP error! status: ${i.status}`) : t.error, F = typeof t.description == "function" ? await t.description(`HTTP error! status: ${i.status}`) : t.description;
+					this.create({
+						id: a,
+						type: "error",
+						message: T,
+						description: F
+					});
+				} else if (t.success !== void 0) {
+					f = !1;
+					let T = typeof t.success == "function" ? await t.success(i) : t.success, F = typeof t.description == "function" ? await t.description(i) : t.description;
+					this.create({
+						id: a,
+						type: "success",
+						message: T,
+						description: F
+					});
+				}
+			}).catch(async (i) => {
+				if (w = ["reject", i], t.error !== void 0) {
+					f = !1;
+					let D = typeof t.error == "function" ? await t.error(i) : t.error, T = typeof t.description == "function" ? await t.description(i) : t.description;
+					this.create({
+						id: a,
+						type: "error",
+						message: D,
+						description: T
+					});
+				}
+			}).finally(() => {
+				var i;
+				f && (this.dismiss(a), a = void 0), (i = t.finally) == null || i.call(t);
+			}), g = () => new Promise((i, D) => S.then(() => w[0] === "reject" ? D(w[1]) : i(w[1])).catch(D));
+			return typeof a != "string" && typeof a != "number" ? { unwrap: g } : Object.assign(a, { unwrap: g });
+		};
+		this.custom = (e, t) => {
+			let a = (t == null ? void 0 : t.id) || bt++;
+			return this.create({
+				jsx: e(a),
+				id: a,
+				...t
+			}), a;
+		};
+		this.getActiveToasts = () => this.toasts.filter((e) => !this.dismissedToasts.has(e.id));
+		this.subscribers = [], this.toasts = [], this.dismissedToasts = /* @__PURE__ */ new Set();
+	}
+}, v = new yt(), ne = (n, e) => {
+	let t = (e == null ? void 0 : e.id) || bt++;
+	return v.addToast({
+		title: n,
+		...e,
+		id: t
+	}), t;
+}, ie = (n) => n && typeof n == "object" && "ok" in n && typeof n.ok == "boolean" && "status" in n && typeof n.status == "number", le = ne, ce = () => v.toasts, de = () => v.getActiveToasts(), ue = Object.assign(le, {
+	success: v.success,
+	info: v.info,
+	warning: v.warning,
+	error: v.error,
+	custom: v.custom,
+	message: v.message,
+	promise: v.promise,
+	dismiss: v.dismiss,
+	loading: v.loading
+}, {
+	getHistory: ce,
+	getToasts: de
+});
+function wt(n, { insertAt: e } = {}) {
+	if (!n || typeof document == "undefined") return;
+	let t = document.head || document.getElementsByTagName("head")[0], a = document.createElement("style");
+	a.type = "text/css", e === "top" && t.firstChild ? t.insertBefore(a, t.firstChild) : t.appendChild(a), a.styleSheet ? a.styleSheet.cssText = n : a.appendChild(document.createTextNode(n));
+}
+wt(`:where(html[dir="ltr"]),:where([data-sonner-toaster][dir="ltr"]){--toast-icon-margin-start: -3px;--toast-icon-margin-end: 4px;--toast-svg-margin-start: -1px;--toast-svg-margin-end: 0px;--toast-button-margin-start: auto;--toast-button-margin-end: 0;--toast-close-button-start: 0;--toast-close-button-end: unset;--toast-close-button-transform: translate(-35%, -35%)}:where(html[dir="rtl"]),:where([data-sonner-toaster][dir="rtl"]){--toast-icon-margin-start: 4px;--toast-icon-margin-end: -3px;--toast-svg-margin-start: 0px;--toast-svg-margin-end: -1px;--toast-button-margin-start: 0;--toast-button-margin-end: auto;--toast-close-button-start: unset;--toast-close-button-end: 0;--toast-close-button-transform: translate(35%, -35%)}:where([data-sonner-toaster]){position:fixed;width:var(--width);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;--gray1: hsl(0, 0%, 99%);--gray2: hsl(0, 0%, 97.3%);--gray3: hsl(0, 0%, 95.1%);--gray4: hsl(0, 0%, 93%);--gray5: hsl(0, 0%, 90.9%);--gray6: hsl(0, 0%, 88.7%);--gray7: hsl(0, 0%, 85.8%);--gray8: hsl(0, 0%, 78%);--gray9: hsl(0, 0%, 56.1%);--gray10: hsl(0, 0%, 52.3%);--gray11: hsl(0, 0%, 43.5%);--gray12: hsl(0, 0%, 9%);--border-radius: 8px;box-sizing:border-box;padding:0;margin:0;list-style:none;outline:none;z-index:999999999;transition:transform .4s ease}:where([data-sonner-toaster][data-lifted="true"]){transform:translateY(-10px)}@media (hover: none) and (pointer: coarse){:where([data-sonner-toaster][data-lifted="true"]){transform:none}}:where([data-sonner-toaster][data-x-position="right"]){right:var(--offset-right)}:where([data-sonner-toaster][data-x-position="left"]){left:var(--offset-left)}:where([data-sonner-toaster][data-x-position="center"]){left:50%;transform:translate(-50%)}:where([data-sonner-toaster][data-y-position="top"]){top:var(--offset-top)}:where([data-sonner-toaster][data-y-position="bottom"]){bottom:var(--offset-bottom)}:where([data-sonner-toast]){--y: translateY(100%);--lift-amount: calc(var(--lift) * var(--gap));z-index:var(--z-index);position:absolute;opacity:0;transform:var(--y);filter:blur(0);touch-action:none;transition:transform .4s,opacity .4s,height .4s,box-shadow .2s;box-sizing:border-box;outline:none;overflow-wrap:anywhere}:where([data-sonner-toast][data-styled="true"]){padding:16px;background:var(--normal-bg);border:1px solid var(--normal-border);color:var(--normal-text);border-radius:var(--border-radius);box-shadow:0 4px 12px #0000001a;width:var(--width);font-size:13px;display:flex;align-items:center;gap:6px}:where([data-sonner-toast]:focus-visible){box-shadow:0 4px 12px #0000001a,0 0 0 2px #0003}:where([data-sonner-toast][data-y-position="top"]){top:0;--y: translateY(-100%);--lift: 1;--lift-amount: calc(1 * var(--gap))}:where([data-sonner-toast][data-y-position="bottom"]){bottom:0;--y: translateY(100%);--lift: -1;--lift-amount: calc(var(--lift) * var(--gap))}:where([data-sonner-toast]) :where([data-description]){font-weight:400;line-height:1.4;color:inherit}:where([data-sonner-toast]) :where([data-title]){font-weight:500;line-height:1.5;color:inherit}:where([data-sonner-toast]) :where([data-icon]){display:flex;height:16px;width:16px;position:relative;justify-content:flex-start;align-items:center;flex-shrink:0;margin-left:var(--toast-icon-margin-start);margin-right:var(--toast-icon-margin-end)}:where([data-sonner-toast][data-promise="true"]) :where([data-icon])>svg{opacity:0;transform:scale(.8);transform-origin:center;animation:sonner-fade-in .3s ease forwards}:where([data-sonner-toast]) :where([data-icon])>*{flex-shrink:0}:where([data-sonner-toast]) :where([data-icon]) svg{margin-left:var(--toast-svg-margin-start);margin-right:var(--toast-svg-margin-end)}:where([data-sonner-toast]) :where([data-content]){display:flex;flex-direction:column;gap:2px}[data-sonner-toast][data-styled=true] [data-button]{border-radius:4px;padding-left:8px;padding-right:8px;height:24px;font-size:12px;color:var(--normal-bg);background:var(--normal-text);margin-left:var(--toast-button-margin-start);margin-right:var(--toast-button-margin-end);border:none;cursor:pointer;outline:none;display:flex;align-items:center;flex-shrink:0;transition:opacity .4s,box-shadow .2s}:where([data-sonner-toast]) :where([data-button]):focus-visible{box-shadow:0 0 0 2px #0006}:where([data-sonner-toast]) :where([data-button]):first-of-type{margin-left:var(--toast-button-margin-start);margin-right:var(--toast-button-margin-end)}:where([data-sonner-toast]) :where([data-cancel]){color:var(--normal-text);background:rgba(0,0,0,.08)}:where([data-sonner-toast][data-theme="dark"]) :where([data-cancel]){background:rgba(255,255,255,.3)}:where([data-sonner-toast]) :where([data-close-button]){position:absolute;left:var(--toast-close-button-start);right:var(--toast-close-button-end);top:0;height:20px;width:20px;display:flex;justify-content:center;align-items:center;padding:0;color:var(--gray12);border:1px solid var(--gray4);transform:var(--toast-close-button-transform);border-radius:50%;cursor:pointer;z-index:1;transition:opacity .1s,background .2s,border-color .2s}[data-sonner-toast] [data-close-button]{background:var(--gray1)}:where([data-sonner-toast]) :where([data-close-button]):focus-visible{box-shadow:0 4px 12px #0000001a,0 0 0 2px #0003}:where([data-sonner-toast]) :where([data-disabled="true"]){cursor:not-allowed}:where([data-sonner-toast]):hover :where([data-close-button]):hover{background:var(--gray2);border-color:var(--gray5)}:where([data-sonner-toast][data-swiping="true"]):before{content:"";position:absolute;left:-50%;right:-50%;height:100%;z-index:-1}:where([data-sonner-toast][data-y-position="top"][data-swiping="true"]):before{bottom:50%;transform:scaleY(3) translateY(50%)}:where([data-sonner-toast][data-y-position="bottom"][data-swiping="true"]):before{top:50%;transform:scaleY(3) translateY(-50%)}:where([data-sonner-toast][data-swiping="false"][data-removed="true"]):before{content:"";position:absolute;inset:0;transform:scaleY(2)}:where([data-sonner-toast]):after{content:"";position:absolute;left:0;height:calc(var(--gap) + 1px);bottom:100%;width:100%}:where([data-sonner-toast][data-mounted="true"]){--y: translateY(0);opacity:1}:where([data-sonner-toast][data-expanded="false"][data-front="false"]){--scale: var(--toasts-before) * .05 + 1;--y: translateY(calc(var(--lift-amount) * var(--toasts-before))) scale(calc(-1 * var(--scale)));height:var(--front-toast-height)}:where([data-sonner-toast])>*{transition:opacity .4s}:where([data-sonner-toast][data-expanded="false"][data-front="false"][data-styled="true"])>*{opacity:0}:where([data-sonner-toast][data-visible="false"]){opacity:0;pointer-events:none}:where([data-sonner-toast][data-mounted="true"][data-expanded="true"]){--y: translateY(calc(var(--lift) * var(--offset)));height:var(--initial-height)}:where([data-sonner-toast][data-removed="true"][data-front="true"][data-swipe-out="false"]){--y: translateY(calc(var(--lift) * -100%));opacity:0}:where([data-sonner-toast][data-removed="true"][data-front="false"][data-swipe-out="false"][data-expanded="true"]){--y: translateY(calc(var(--lift) * var(--offset) + var(--lift) * -100%));opacity:0}:where([data-sonner-toast][data-removed="true"][data-front="false"][data-swipe-out="false"][data-expanded="false"]){--y: translateY(40%);opacity:0;transition:transform .5s,opacity .2s}:where([data-sonner-toast][data-removed="true"][data-front="false"]):before{height:calc(var(--initial-height) + 20%)}[data-sonner-toast][data-swiping=true]{transform:var(--y) translateY(var(--swipe-amount-y, 0px)) translate(var(--swipe-amount-x, 0px));transition:none}[data-sonner-toast][data-swiped=true]{user-select:none}[data-sonner-toast][data-swipe-out=true][data-y-position=bottom],[data-sonner-toast][data-swipe-out=true][data-y-position=top]{animation-duration:.2s;animation-timing-function:ease-out;animation-fill-mode:forwards}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=left]{animation-name:swipe-out-left}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=right]{animation-name:swipe-out-right}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=up]{animation-name:swipe-out-up}[data-sonner-toast][data-swipe-out=true][data-swipe-direction=down]{animation-name:swipe-out-down}@keyframes swipe-out-left{0%{transform:var(--y) translate(var(--swipe-amount-x));opacity:1}to{transform:var(--y) translate(calc(var(--swipe-amount-x) - 100%));opacity:0}}@keyframes swipe-out-right{0%{transform:var(--y) translate(var(--swipe-amount-x));opacity:1}to{transform:var(--y) translate(calc(var(--swipe-amount-x) + 100%));opacity:0}}@keyframes swipe-out-up{0%{transform:var(--y) translateY(var(--swipe-amount-y));opacity:1}to{transform:var(--y) translateY(calc(var(--swipe-amount-y) - 100%));opacity:0}}@keyframes swipe-out-down{0%{transform:var(--y) translateY(var(--swipe-amount-y));opacity:1}to{transform:var(--y) translateY(calc(var(--swipe-amount-y) + 100%));opacity:0}}@media (max-width: 600px){[data-sonner-toaster]{position:fixed;right:var(--mobile-offset-right);left:var(--mobile-offset-left);width:100%}[data-sonner-toaster][dir=rtl]{left:calc(var(--mobile-offset-left) * -1)}[data-sonner-toaster] [data-sonner-toast]{left:0;right:0;width:calc(100% - var(--mobile-offset-left) * 2)}[data-sonner-toaster][data-x-position=left]{left:var(--mobile-offset-left)}[data-sonner-toaster][data-y-position=bottom]{bottom:var(--mobile-offset-bottom)}[data-sonner-toaster][data-y-position=top]{top:var(--mobile-offset-top)}[data-sonner-toaster][data-x-position=center]{left:var(--mobile-offset-left);right:var(--mobile-offset-right);transform:none}}[data-sonner-toaster][data-theme=light]{--normal-bg: #fff;--normal-border: var(--gray4);--normal-text: var(--gray12);--success-bg: hsl(143, 85%, 96%);--success-border: hsl(145, 92%, 91%);--success-text: hsl(140, 100%, 27%);--info-bg: hsl(208, 100%, 97%);--info-border: hsl(221, 91%, 91%);--info-text: hsl(210, 92%, 45%);--warning-bg: hsl(49, 100%, 97%);--warning-border: hsl(49, 91%, 91%);--warning-text: hsl(31, 92%, 45%);--error-bg: hsl(359, 100%, 97%);--error-border: hsl(359, 100%, 94%);--error-text: hsl(360, 100%, 45%)}[data-sonner-toaster][data-theme=light] [data-sonner-toast][data-invert=true]{--normal-bg: #000;--normal-border: hsl(0, 0%, 20%);--normal-text: var(--gray1)}[data-sonner-toaster][data-theme=dark] [data-sonner-toast][data-invert=true]{--normal-bg: #fff;--normal-border: var(--gray3);--normal-text: var(--gray12)}[data-sonner-toaster][data-theme=dark]{--normal-bg: #000;--normal-bg-hover: hsl(0, 0%, 12%);--normal-border: hsl(0, 0%, 20%);--normal-border-hover: hsl(0, 0%, 25%);--normal-text: var(--gray1);--success-bg: hsl(150, 100%, 6%);--success-border: hsl(147, 100%, 12%);--success-text: hsl(150, 86%, 65%);--info-bg: hsl(215, 100%, 6%);--info-border: hsl(223, 100%, 12%);--info-text: hsl(216, 87%, 65%);--warning-bg: hsl(64, 100%, 6%);--warning-border: hsl(60, 100%, 12%);--warning-text: hsl(46, 87%, 65%);--error-bg: hsl(358, 76%, 10%);--error-border: hsl(357, 89%, 16%);--error-text: hsl(358, 100%, 81%)}[data-sonner-toaster][data-theme=dark] [data-sonner-toast] [data-close-button]{background:var(--normal-bg);border-color:var(--normal-border);color:var(--normal-text)}[data-sonner-toaster][data-theme=dark] [data-sonner-toast] [data-close-button]:hover{background:var(--normal-bg-hover);border-color:var(--normal-border-hover)}[data-rich-colors=true][data-sonner-toast][data-type=success],[data-rich-colors=true][data-sonner-toast][data-type=success] [data-close-button]{background:var(--success-bg);border-color:var(--success-border);color:var(--success-text)}[data-rich-colors=true][data-sonner-toast][data-type=info],[data-rich-colors=true][data-sonner-toast][data-type=info] [data-close-button]{background:var(--info-bg);border-color:var(--info-border);color:var(--info-text)}[data-rich-colors=true][data-sonner-toast][data-type=warning],[data-rich-colors=true][data-sonner-toast][data-type=warning] [data-close-button]{background:var(--warning-bg);border-color:var(--warning-border);color:var(--warning-text)}[data-rich-colors=true][data-sonner-toast][data-type=error],[data-rich-colors=true][data-sonner-toast][data-type=error] [data-close-button]{background:var(--error-bg);border-color:var(--error-border);color:var(--error-text)}.sonner-loading-wrapper{--size: 16px;height:var(--size);width:var(--size);position:absolute;inset:0;z-index:10}.sonner-loading-wrapper[data-visible=false]{transform-origin:center;animation:sonner-fade-out .2s ease forwards}.sonner-spinner{position:relative;top:50%;left:50%;height:var(--size);width:var(--size)}.sonner-loading-bar{animation:sonner-spin 1.2s linear infinite;background:var(--gray11);border-radius:6px;height:8%;left:-10%;position:absolute;top:-3.9%;width:24%}.sonner-loading-bar:nth-child(1){animation-delay:-1.2s;transform:rotate(.0001deg) translate(146%)}.sonner-loading-bar:nth-child(2){animation-delay:-1.1s;transform:rotate(30deg) translate(146%)}.sonner-loading-bar:nth-child(3){animation-delay:-1s;transform:rotate(60deg) translate(146%)}.sonner-loading-bar:nth-child(4){animation-delay:-.9s;transform:rotate(90deg) translate(146%)}.sonner-loading-bar:nth-child(5){animation-delay:-.8s;transform:rotate(120deg) translate(146%)}.sonner-loading-bar:nth-child(6){animation-delay:-.7s;transform:rotate(150deg) translate(146%)}.sonner-loading-bar:nth-child(7){animation-delay:-.6s;transform:rotate(180deg) translate(146%)}.sonner-loading-bar:nth-child(8){animation-delay:-.5s;transform:rotate(210deg) translate(146%)}.sonner-loading-bar:nth-child(9){animation-delay:-.4s;transform:rotate(240deg) translate(146%)}.sonner-loading-bar:nth-child(10){animation-delay:-.3s;transform:rotate(270deg) translate(146%)}.sonner-loading-bar:nth-child(11){animation-delay:-.2s;transform:rotate(300deg) translate(146%)}.sonner-loading-bar:nth-child(12){animation-delay:-.1s;transform:rotate(330deg) translate(146%)}@keyframes sonner-fade-in{0%{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes sonner-fade-out{0%{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.8)}}@keyframes sonner-spin{0%{opacity:1}to{opacity:.15}}@media (prefers-reduced-motion){[data-sonner-toast],[data-sonner-toast]>*,.sonner-loading-bar{transition:none!important;animation:none!important}}.sonner-loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transform-origin:center;transition:opacity .2s,transform .2s}.sonner-loader[data-visible=false]{opacity:0;transform:scale(.8) translate(-50%,-50%)}
+`);
+function tt(n) {
+	return n.label !== void 0;
+}
+var pe = 3, me = "32px", ge = "16px", Wt = 4e3, he = 356, be = 14, ye = 20, we = 200;
+function M(...n) {
+	return n.filter(Boolean).join(" ");
+}
+function xe(n) {
+	let [e, t] = n.split("-"), a = [];
+	return e && a.push(e), t && a.push(t), a;
+}
+var ve = (n) => {
+	var Dt, Pt, Nt, Bt, Ct, kt, It, Mt, Ht, At, Lt;
+	let { invert: e, toast: t, unstyled: a, interacting: u, setHeights: f, visibleToasts: w, heights: S, index: g, toasts: i, expanded: D, removeToast: T, defaultRichColors: F, closeButton: et, style: ut, cancelButtonStyle: ft, actionButtonStyle: l, className: ot = "", descriptionClassName: at = "", duration: X, position: st, gap: pt, loadingIcon: rt, expandByDefault: B, classNames: s, icons: P, closeButtonAriaLabel: nt = "Close toast", pauseWhenPageIsHidden: it } = n, [Y, C] = import_react.useState(null), [lt, J] = import_react.useState(null), [W, H] = import_react.useState(!1), [A, mt] = import_react.useState(!1), [L, z] = import_react.useState(!1), [ct, d] = import_react.useState(!1), [h, y] = import_react.useState(!1), [R, j] = import_react.useState(0), [p, _] = import_react.useState(0), O = import_react.useRef(t.duration || X || Wt), G = import_react.useRef(null), k = import_react.useRef(null), Vt = g === 0, Ut = g + 1 <= w, N = t.type, V = t.dismissible !== !1, Kt = t.className || "", Xt = t.descriptionClassName || "", dt = import_react.useMemo(() => S.findIndex((r) => r.toastId === t.id) || 0, [S, t.id]), Jt = import_react.useMemo(() => {
+		var r;
+		return (r = t.closeButton) != null ? r : et;
+	}, [t.closeButton, et]), Tt = import_react.useMemo(() => t.duration || X || Wt, [t.duration, X]), gt = import_react.useRef(0), U = import_react.useRef(0), St = import_react.useRef(0), K = import_react.useRef(null), [Gt, Qt] = st.split("-"), Rt = import_react.useMemo(() => S.reduce((r, m, c) => c >= dt ? r : r + m.height, 0), [S, dt]), Et = Ft(), qt = t.invert || e, ht = N === "loading";
+	U.current = import_react.useMemo(() => dt * pt + Rt, [dt, Rt]), import_react.useEffect(() => {
+		O.current = Tt;
+	}, [Tt]), import_react.useEffect(() => {
+		H(!0);
+	}, []), import_react.useEffect(() => {
+		let r = k.current;
+		if (r) {
+			let m = r.getBoundingClientRect().height;
+			return _(m), f((c) => [{
+				toastId: t.id,
+				height: m,
+				position: t.position
+			}, ...c]), () => f((c) => c.filter((b) => b.toastId !== t.id));
+		}
+	}, [f, t.id]), import_react.useLayoutEffect(() => {
+		if (!W) return;
+		let r = k.current, m = r.style.height;
+		r.style.height = "auto";
+		let c = r.getBoundingClientRect().height;
+		r.style.height = m, _(c), f((b) => b.find((x) => x.toastId === t.id) ? b.map((x) => x.toastId === t.id ? {
+			...x,
+			height: c
+		} : x) : [{
+			toastId: t.id,
+			height: c,
+			position: t.position
+		}, ...b]);
+	}, [
+		W,
+		t.title,
+		t.description,
+		f,
+		t.id
+	]);
+	let $ = import_react.useCallback(() => {
+		mt(!0), j(U.current), f((r) => r.filter((m) => m.toastId !== t.id)), setTimeout(() => {
+			T(t);
+		}, we);
+	}, [
+		t,
+		T,
+		f,
+		U
+	]);
+	import_react.useEffect(() => {
+		if (t.promise && N === "loading" || t.duration === Infinity || t.type === "loading") return;
+		let r;
+		return D || u || it && Et ? (() => {
+			if (St.current < gt.current) {
+				let b = (/* @__PURE__ */ new Date()).getTime() - gt.current;
+				O.current = O.current - b;
+			}
+			St.current = (/* @__PURE__ */ new Date()).getTime();
+		})() : O.current !== Infinity && (gt.current = (/* @__PURE__ */ new Date()).getTime(), r = setTimeout(() => {
+			var b;
+			(b = t.onAutoClose) == null || b.call(t, t), $();
+		}, O.current)), () => clearTimeout(r);
+	}, [
+		D,
+		u,
+		t,
+		N,
+		it,
+		Et,
+		$
+	]), import_react.useEffect(() => {
+		t.delete && $();
+	}, [$, t.delete]);
+	function Zt() {
+		var r, m, c;
+		return P != null && P.loading ? import_react.createElement("div", {
+			className: M(s == null ? void 0 : s.loader, (r = t == null ? void 0 : t.classNames) == null ? void 0 : r.loader, "sonner-loader"),
+			"data-visible": N === "loading"
+		}, P.loading) : rt ? import_react.createElement("div", {
+			className: M(s == null ? void 0 : s.loader, (m = t == null ? void 0 : t.classNames) == null ? void 0 : m.loader, "sonner-loader"),
+			"data-visible": N === "loading"
+		}, rt) : import_react.createElement(Yt, {
+			className: M(s == null ? void 0 : s.loader, (c = t == null ? void 0 : t.classNames) == null ? void 0 : c.loader),
+			visible: N === "loading"
+		});
+	}
+	return import_react.createElement("li", {
+		tabIndex: 0,
+		ref: k,
+		className: M(ot, Kt, s == null ? void 0 : s.toast, (Dt = t == null ? void 0 : t.classNames) == null ? void 0 : Dt.toast, s == null ? void 0 : s.default, s == null ? void 0 : s[N], (Pt = t == null ? void 0 : t.classNames) == null ? void 0 : Pt[N]),
+		"data-sonner-toast": "",
+		"data-rich-colors": (Nt = t.richColors) != null ? Nt : F,
+		"data-styled": !(t.jsx || t.unstyled || a),
+		"data-mounted": W,
+		"data-promise": !!t.promise,
+		"data-swiped": h,
+		"data-removed": A,
+		"data-visible": Ut,
+		"data-y-position": Gt,
+		"data-x-position": Qt,
+		"data-index": g,
+		"data-front": Vt,
+		"data-swiping": L,
+		"data-dismissible": V,
+		"data-type": N,
+		"data-invert": qt,
+		"data-swipe-out": ct,
+		"data-swipe-direction": lt,
+		"data-expanded": !!(D || B && W),
+		style: {
+			"--index": g,
+			"--toasts-before": g,
+			"--z-index": i.length - g,
+			"--offset": `${A ? R : U.current}px`,
+			"--initial-height": B ? "auto" : `${p}px`,
+			...ut,
+			...t.style
+		},
+		onDragEnd: () => {
+			z(!1), C(null), K.current = null;
+		},
+		onPointerDown: (r) => {
+			ht || !V || (G.current = /* @__PURE__ */ new Date(), j(U.current), r.target.setPointerCapture(r.pointerId), r.target.tagName !== "BUTTON" && (z(!0), K.current = {
+				x: r.clientX,
+				y: r.clientY
+			}));
+		},
+		onPointerUp: () => {
+			var x, Q, q, Z;
+			if (ct || !V) return;
+			K.current = null;
+			let r = Number(((x = k.current) == null ? void 0 : x.style.getPropertyValue("--swipe-amount-x").replace("px", "")) || 0), m = Number(((Q = k.current) == null ? void 0 : Q.style.getPropertyValue("--swipe-amount-y").replace("px", "")) || 0), c = (/* @__PURE__ */ new Date()).getTime() - ((q = G.current) == null ? void 0 : q.getTime()), b = Y === "x" ? r : m, I = Math.abs(b) / c;
+			if (Math.abs(b) >= ye || I > .11) {
+				j(U.current), (Z = t.onDismiss) == null || Z.call(t, t), J(Y === "x" ? r > 0 ? "right" : "left" : m > 0 ? "down" : "up"), $(), d(!0), y(!1);
+				return;
+			}
+			z(!1), C(null);
+		},
+		onPointerMove: (r) => {
+			var Q, q, Z, zt;
+			if (!K.current || !V || ((Q = window.getSelection()) == null ? void 0 : Q.toString().length) > 0) return;
+			let c = r.clientY - K.current.y, b = r.clientX - K.current.x, I = (q = n.swipeDirections) != null ? q : xe(st);
+			!Y && (Math.abs(b) > 1 || Math.abs(c) > 1) && C(Math.abs(b) > Math.abs(c) ? "x" : "y");
+			let x = {
+				x: 0,
+				y: 0
+			};
+			Y === "y" ? (I.includes("top") || I.includes("bottom")) && (I.includes("top") && c < 0 || I.includes("bottom") && c > 0) && (x.y = c) : Y === "x" && (I.includes("left") || I.includes("right")) && (I.includes("left") && b < 0 || I.includes("right") && b > 0) && (x.x = b), (Math.abs(x.x) > 0 || Math.abs(x.y) > 0) && y(!0), (Z = k.current) == null || Z.style.setProperty("--swipe-amount-x", `${x.x}px`), (zt = k.current) == null || zt.style.setProperty("--swipe-amount-y", `${x.y}px`);
+		}
+	}, Jt && !t.jsx ? import_react.createElement("button", {
+		"aria-label": nt,
+		"data-disabled": ht,
+		"data-close-button": !0,
+		onClick: ht || !V ? () => {} : () => {
+			var r;
+			$(), (r = t.onDismiss) == null || r.call(t, t);
+		},
+		className: M(s == null ? void 0 : s.closeButton, (Bt = t == null ? void 0 : t.classNames) == null ? void 0 : Bt.closeButton)
+	}, (Ct = P == null ? void 0 : P.close) != null ? Ct : Ot) : null, t.jsx || (0, import_react.isValidElement)(t.title) ? t.jsx ? t.jsx : typeof t.title == "function" ? t.title() : t.title : import_react.createElement(import_react.Fragment, null, N || t.icon || t.promise ? import_react.createElement("div", {
+		"data-icon": "",
+		className: M(s == null ? void 0 : s.icon, (kt = t == null ? void 0 : t.classNames) == null ? void 0 : kt.icon)
+	}, t.promise || t.type === "loading" && !t.icon ? t.icon || Zt() : null, t.type !== "loading" ? t.icon || (P == null ? void 0 : P[N]) || jt(N) : null) : null, import_react.createElement("div", {
+		"data-content": "",
+		className: M(s == null ? void 0 : s.content, (It = t == null ? void 0 : t.classNames) == null ? void 0 : It.content)
+	}, import_react.createElement("div", {
+		"data-title": "",
+		className: M(s == null ? void 0 : s.title, (Mt = t == null ? void 0 : t.classNames) == null ? void 0 : Mt.title)
+	}, typeof t.title == "function" ? t.title() : t.title), t.description ? import_react.createElement("div", {
+		"data-description": "",
+		className: M(at, Xt, s == null ? void 0 : s.description, (Ht = t == null ? void 0 : t.classNames) == null ? void 0 : Ht.description)
+	}, typeof t.description == "function" ? t.description() : t.description) : null), (0, import_react.isValidElement)(t.cancel) ? t.cancel : t.cancel && tt(t.cancel) ? import_react.createElement("button", {
+		"data-button": !0,
+		"data-cancel": !0,
+		style: t.cancelButtonStyle || ft,
+		onClick: (r) => {
+			var m, c;
+			tt(t.cancel) && V && ((c = (m = t.cancel).onClick) == null || c.call(m, r), $());
+		},
+		className: M(s == null ? void 0 : s.cancelButton, (At = t == null ? void 0 : t.classNames) == null ? void 0 : At.cancelButton)
+	}, t.cancel.label) : null, (0, import_react.isValidElement)(t.action) ? t.action : t.action && tt(t.action) ? import_react.createElement("button", {
+		"data-button": !0,
+		"data-action": !0,
+		style: t.actionButtonStyle || l,
+		onClick: (r) => {
+			var m, c;
+			tt(t.action) && ((c = (m = t.action).onClick) == null || c.call(m, r), !r.defaultPrevented && $());
+		},
+		className: M(s == null ? void 0 : s.actionButton, (Lt = t == null ? void 0 : t.classNames) == null ? void 0 : Lt.actionButton)
+	}, t.action.label) : null));
+};
+function _t() {
+	if (typeof window == "undefined" || typeof document == "undefined") return "ltr";
+	let n = document.documentElement.getAttribute("dir");
+	return n === "auto" || !n ? window.getComputedStyle(document.documentElement).direction : n;
+}
+function Te(n, e) {
+	let t = {};
+	return [n, e].forEach((a, u) => {
+		let f = u === 1, w = f ? "--mobile-offset" : "--offset", S = f ? ge : me;
+		function g(i) {
+			[
+				"top",
+				"right",
+				"bottom",
+				"left"
+			].forEach((D) => {
+				t[`${w}-${D}`] = typeof i == "number" ? `${i}px` : i;
+			});
+		}
+		typeof a == "number" || typeof a == "string" ? g(a) : typeof a == "object" ? [
+			"top",
+			"right",
+			"bottom",
+			"left"
+		].forEach((i) => {
+			a[i] === void 0 ? t[`${w}-${i}`] = S : t[`${w}-${i}`] = typeof a[i] == "number" ? `${a[i]}px` : a[i];
+		}) : g(S);
+	}), t;
+}
+var $e = (0, import_react.forwardRef)(function(e, t) {
+	let { invert: a, position: u = "bottom-right", hotkey: f = ["altKey", "KeyT"], expand: w, closeButton: S, className: g, offset: i, mobileOffset: D, theme: T = "light", richColors: F, duration: et, style: ut, visibleToasts: ft = pe, toastOptions: l, dir: ot = _t(), gap: at = be, loadingIcon: X, icons: st, containerAriaLabel: pt = "Notifications", pauseWhenPageIsHidden: rt } = e, [B, s] = import_react.useState([]), P = import_react.useMemo(() => Array.from(new Set([u].concat(B.filter((d) => d.position).map((d) => d.position)))), [B, u]), [nt, it] = import_react.useState([]), [Y, C] = import_react.useState(!1), [lt, J] = import_react.useState(!1), [W, H] = import_react.useState(T !== "system" ? T : typeof window != "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"), A = import_react.useRef(null), mt = f.join("+").replace(/Key/g, "").replace(/Digit/g, ""), L = import_react.useRef(null), z = import_react.useRef(!1), ct = import_react.useCallback((d) => {
+		s((h) => {
+			var y;
+			return (y = h.find((R) => R.id === d.id)) != null && y.delete || v.dismiss(d.id), h.filter(({ id: R }) => R !== d.id);
+		});
+	}, []);
+	return import_react.useEffect(() => v.subscribe((d) => {
+		if (d.dismiss) {
+			s((h) => h.map((y) => y.id === d.id ? {
+				...y,
+				delete: !0
+			} : y));
+			return;
+		}
+		setTimeout(() => {
+			import_react_dom.flushSync(() => {
+				s((h) => {
+					let y = h.findIndex((R) => R.id === d.id);
+					return y !== -1 ? [
+						...h.slice(0, y),
+						{
+							...h[y],
+							...d
+						},
+						...h.slice(y + 1)
+					] : [d, ...h];
+				});
+			});
+		});
+	}), []), import_react.useEffect(() => {
+		if (T !== "system") {
+			H(T);
+			return;
+		}
+		if (T === "system" && (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? H("dark") : H("light")), typeof window == "undefined") return;
+		let d = window.matchMedia("(prefers-color-scheme: dark)");
+		try {
+			d.addEventListener("change", ({ matches: h }) => {
+				H(h ? "dark" : "light");
+			});
+		} catch (h) {
+			d.addListener(({ matches: y }) => {
+				try {
+					H(y ? "dark" : "light");
+				} catch (R) {
+					console.error(R);
+				}
+			});
+		}
+	}, [T]), import_react.useEffect(() => {
+		B.length <= 1 && C(!1);
+	}, [B]), import_react.useEffect(() => {
+		let d = (h) => {
+			var R, j;
+			f.every((p) => h[p] || h.code === p) && (C(!0), (R = A.current) == null || R.focus()), h.code === "Escape" && (document.activeElement === A.current || (j = A.current) != null && j.contains(document.activeElement)) && C(!1);
+		};
+		return document.addEventListener("keydown", d), () => document.removeEventListener("keydown", d);
+	}, [f]), import_react.useEffect(() => {
+		if (A.current) return () => {
+			L.current && (L.current.focus({ preventScroll: !0 }), L.current = null, z.current = !1);
+		};
+	}, [A.current]), import_react.createElement("section", {
+		ref: t,
+		"aria-label": `${pt} ${mt}`,
+		tabIndex: -1,
+		"aria-live": "polite",
+		"aria-relevant": "additions text",
+		"aria-atomic": "false",
+		suppressHydrationWarning: !0
+	}, P.map((d, h) => {
+		var j;
+		let [y, R] = d.split("-");
+		return B.length ? import_react.createElement("ol", {
+			key: d,
+			dir: ot === "auto" ? _t() : ot,
+			tabIndex: -1,
+			ref: A,
+			className: g,
+			"data-sonner-toaster": !0,
+			"data-theme": W,
+			"data-y-position": y,
+			"data-lifted": Y && B.length > 1 && !w,
+			"data-x-position": R,
+			style: {
+				"--front-toast-height": `${((j = nt[0]) == null ? void 0 : j.height) || 0}px`,
+				"--width": `${he}px`,
+				"--gap": `${at}px`,
+				...ut,
+				...Te(i, D)
+			},
+			onBlur: (p) => {
+				z.current && !p.currentTarget.contains(p.relatedTarget) && (z.current = !1, L.current && (L.current.focus({ preventScroll: !0 }), L.current = null));
+			},
+			onFocus: (p) => {
+				p.target instanceof HTMLElement && p.target.dataset.dismissible === "false" || z.current || (z.current = !0, L.current = p.relatedTarget);
+			},
+			onMouseEnter: () => C(!0),
+			onMouseMove: () => C(!0),
+			onMouseLeave: () => {
+				lt || C(!1);
+			},
+			onDragEnd: () => C(!1),
+			onPointerDown: (p) => {
+				p.target instanceof HTMLElement && p.target.dataset.dismissible === "false" || J(!0);
+			},
+			onPointerUp: () => J(!1)
+		}, B.filter((p) => !p.position && h === 0 || p.position === d).map((p, _) => {
+			var O, G;
+			return import_react.createElement(ve, {
+				key: p.id,
+				icons: st,
+				index: _,
+				toast: p,
+				defaultRichColors: F,
+				duration: (O = l == null ? void 0 : l.duration) != null ? O : et,
+				className: l == null ? void 0 : l.className,
+				descriptionClassName: l == null ? void 0 : l.descriptionClassName,
+				invert: a,
+				visibleToasts: ft,
+				closeButton: (G = l == null ? void 0 : l.closeButton) != null ? G : S,
+				interacting: lt,
+				position: d,
+				style: l == null ? void 0 : l.style,
+				unstyled: l == null ? void 0 : l.unstyled,
+				classNames: l == null ? void 0 : l.classNames,
+				cancelButtonStyle: l == null ? void 0 : l.cancelButtonStyle,
+				actionButtonStyle: l == null ? void 0 : l.actionButtonStyle,
+				removeToast: ct,
+				toasts: B.filter((k) => k.position == p.position),
+				heights: nt.filter((k) => k.position == p.position),
+				setHeights: it,
+				expandByDefault: w,
+				gap: at,
+				loadingIcon: X,
+				expanded: Y,
+				pauseWhenPageIsHidden: rt,
+				swipeDirections: e.swipeDirections
+			});
+		})) : null;
+	}));
+});
+//#endregion
+//#region src/features/contacts/ContactsScreen.jsx
+var LinkUpLogo$1 = () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+	className: "flex items-center gap-2.5",
+	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "relative w-9 h-9",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl rotate-6 opacity-20" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl -rotate-6 opacity-20" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "absolute inset-0 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-5 h-5 text-purple-600" })
+			})
+		]
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+		className: "text-2xl font-black tracking-tight text-gray-900",
+		children: ["Link", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+			className: "text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
+			children: "Up"
+		})]
+	})]
+});
+var getSafeName = (contact) => {
+	const emailPattern = /@/;
+	const candidates = [
+		contact?.localDisplayName,
+		contact?.displayName,
+		contact?.username,
+		contact?.name
+	];
+	for (let candidate of candidates) if (candidate && !emailPattern.test(candidate)) return candidate;
+	return "مستخدم";
+};
+var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0 }) => {
+	const [status, setStatus] = (0, import_react.useState)("offline");
+	const [expanded, setExpanded] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		if (!contact.uid) return;
+		const unsub = onSnapshot(doc(db, "users", contact.uid), (snap) => {
+			if (snap.exists()) setStatus(snap.data().status || "offline");
+			else setStatus("offline");
+		});
+		return () => unsub();
+	}, [contact.uid]);
+	const safeName = getSafeName(contact);
+	const statusDot = status === "online" ? "bg-emerald-500" : "bg-gray-300";
+	const statusText = status === "online" ? "متصل الآن" : "غير متصل";
+	const handleCallPress = (type) => {
+		if (status !== "online") {
+			ue.error("المستخدم غير متصل حاليًا", { description: "لا يمكن إجراء المكالمة الآن، حاول لاحقًا" });
+			return;
+		}
+		onCall?.(contact, type);
+		setExpanded(false);
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "bg-white rounded-2xl border border-gray-100/80 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "flex items-center justify-between p-3",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-3.5 flex-1 min-w-0",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => onToggleFavorite?.(contact),
+						className: `shrink-0 p-1 rounded-full transition-all ${isFavorite ? "text-yellow-500 hover:bg-yellow-100" : "text-gray-300 hover:text-yellow-400 hover:bg-gray-100"}`,
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-5 h-5 ${isFavorite ? "fill-yellow-500" : ""}` })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "relative shrink-0",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
+							className: "h-14 w-14 border-2 border-white shadow-md ring-2 ring-purple-500/10",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
+								src: contact.photoURL,
+								className: "object-cover"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
+								className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white font-bold text-lg",
+								children: safeName.charAt(0)?.toUpperCase() || "م"
+							})]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${statusDot} shadow-sm` })]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex-1 min-w-0 text-right",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "font-bold text-gray-900 truncate text-base",
+							children: ["@", safeName]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-xs text-gray-500",
+							children: statusText
+						})]
+					}),
+					unreadCount > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "min-w-[22px] h-5 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center shadow-md px-1.5",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-[10px] font-bold text-white",
+							children: unreadCount
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => onEdit?.(contact),
+						className: "p-2.5 rounded-full bg-gray-50 text-amber-600 hover:bg-amber-100 active:scale-90 transition-all",
+						title: "تعديل الاسم",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-4 h-4" })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => setExpanded(!expanded),
+						className: "p-2.5 rounded-full bg-gray-50 text-gray-600 hover:bg-gray-100 active:scale-90 transition-all",
+						title: "خيارات",
+						children: expanded ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronUp, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: "w-4 h-4" })
+					})
+				]
+			})
+		}), expanded && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "px-4 pb-4 pt-1 flex items-center justify-around border-t border-gray-100 mt-1 animate-in slide-in-from-top-2 duration-150",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					onClick: () => handleCallPress("video"),
+					className: "flex flex-col items-center gap-1 text-purple-600 hover:bg-purple-50 p-2 rounded-xl transition-colors",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Video, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs font-medium",
+						children: "فيديو"
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					onClick: () => handleCallPress("audio"),
+					className: "flex flex-col items-center gap-1 text-blue-600 hover:bg-blue-50 p-2 rounded-xl transition-colors",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs font-medium",
+						children: "صوت"
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					onClick: () => {
+						onChat?.(contact);
+						setExpanded(false);
+					},
+					className: "flex flex-col items-center gap-1 text-gray-600 hover:bg-gray-100 p-2 rounded-xl transition-colors",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs font-medium",
+						children: "محادثة"
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					onClick: () => {
+						setExpanded(false);
+						onToggleFavorite?.(contact);
+					},
+					className: "flex flex-col items-center gap-1 text-yellow-500 hover:bg-yellow-50 p-2 rounded-xl transition-colors",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-5 h-5 ${isFavorite ? "fill-yellow-500" : ""}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs font-medium",
+						children: "مفضلة"
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					onClick: () => {
+						setExpanded(false);
+						onDelete?.(contact);
+					},
+					className: "flex flex-col items-center gap-1 text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs font-medium",
+						children: "حذف"
+					})]
+				})
+			]
+		})]
+	});
+};
+var DeleteConfirmModal = ({ open, contact, onConfirm, onClose }) => {
+	if (!open) return null;
+	const safeName = getSafeName(contact);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5",
+		onClick: onClose,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
+			onClick: (e) => e.stopPropagation(),
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "text-center mb-4",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-8 h-8 text-red-500" })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+						className: "text-lg font-bold text-gray-900",
+						children: "تأكيد الحذف"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+						className: "text-sm text-gray-500 mt-2",
+						children: [
+							"هل أنت متأكد من حذف ",
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("strong", { children: ["@", safeName] }),
+							"؟"
+						]
+					})
+				]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex gap-3",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					variant: "outline",
+					onClick: onClose,
+					className: "flex-1 h-11 rounded-xl",
+					children: "إلغاء"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					onClick: onConfirm,
+					className: "flex-1 h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white",
+					children: "حذف"
+				})]
+			})]
+		})
+	});
+};
+var EditNameModal = ({ open, contact, onSave, onClose }) => {
+	const [newName, setNewName] = (0, import_react.useState)("");
+	(0, import_react.useEffect)(() => {
+		setNewName(contact?.localDisplayName || "");
+	}, [contact]);
+	const handleSave = () => {
+		if (!newName.trim()) return;
+		onSave(contact, newName.trim());
+		onClose();
+	};
+	if (!open) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5",
+		onClick: onClose,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
+			onClick: (e) => e.stopPropagation(),
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center justify-between mb-4",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+						className: "text-lg font-bold",
+						children: "تعديل الاسم"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: onClose,
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-5 h-5" })
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+					placeholder: "الاسم الجديد",
+					value: newName,
+					onChange: (e) => setNewName(e.target.value),
+					className: "mb-4 h-12",
+					autoFocus: true
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					onClick: handleSave,
+					disabled: !newName.trim(),
+					className: "w-full h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white",
+					children: "حفظ"
+				})
+			]
+		})
+	});
+};
+function ContactsScreen({ onCall, onChat }) {
+	const [contacts, setContacts] = (0, import_react.useState)([]);
+	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
+	const [activeFilter, setActiveFilter] = (0, import_react.useState)("all");
+	const [favorites, setFavorites] = (0, import_react.useState)(() => {
+		try {
+			return JSON.parse(localStorage.getItem("contact_favorites") || "[]");
+		} catch {
+			return [];
+		}
+	});
+	const [showAddModal, setShowAddModal] = (0, import_react.useState)(false);
+	const [addUsername, setAddUsername] = (0, import_react.useState)("");
+	const [addLoading, setAddLoading] = (0, import_react.useState)(false);
+	const [addError, setAddError] = (0, import_react.useState)("");
+	const [addSuccess, setAddSuccess] = (0, import_react.useState)("");
+	const [deleteTarget, setDeleteTarget] = (0, import_react.useState)(null);
+	const [editTarget, setEditTarget] = (0, import_react.useState)(null);
+	const [unreadCounts, setUnreadCounts] = (0, import_react.useState)({});
+	const currentUser = auth.currentUser;
+	(0, import_react.useEffect)(() => {
+		if (!currentUser?.uid) return;
+		const unsub = onSnapshot(query(collection(db, "contacts"), where("participants", "array-contains", currentUser.uid)), async (snap) => {
+			setContacts((await Promise.all(snap.docs.map(async (docSnap) => {
+				const data = docSnap.data();
+				const contactId = data.participants.find((p) => p !== currentUser.uid);
+				if (!contactId) return null;
+				let userData = {};
+				try {
+					const userSnap = await getDoc(doc(db, "users", contactId));
+					if (userSnap.exists()) userData = userSnap.data();
+				} catch {}
+				return {
+					id: docSnap.id,
+					uid: contactId,
+					email: userData.email || data.email || "",
+					username: data.username || userData.username || "",
+					photoURL: userData.photoURL || "",
+					localDisplayName: data.displayName || "",
+					displayName: userData.displayName || ""
+				};
+			}))).filter(Boolean));
+		});
+		return () => unsub();
+	}, [currentUser]);
+	(0, import_react.useEffect)(() => {
+		if (!currentUser?.uid) return;
+		const unsub = onSnapshot(query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid)), (snapshot) => {
+			const counts = {};
+			snapshot.docs.forEach((docSnap) => {
+				const data = docSnap.data();
+				const otherUserId = data.participants.find((p) => p !== currentUser.uid);
+				if (otherUserId && data.unreadCount) counts[otherUserId] = (counts[otherUserId] || 0) + data.unreadCount;
+			});
+			setUnreadCounts(counts);
+		});
+		return () => unsub();
+	}, [currentUser]);
+	(0, import_react.useEffect)(() => {
+		localStorage.setItem("contact_favorites", JSON.stringify(favorites));
+	}, [favorites]);
+	const toggleFavorite = (contact) => {
+		const id = contact.uid || contact.username;
+		setFavorites((prev) => prev.includes(id) ? prev.filter((fid) => fid !== id) : [...prev, id]);
+	};
+	const confirmDelete = async () => {
+		if (!deleteTarget) return;
+		try {
+			const docToDelete = (await getDocs(query(collection(db, "contacts"), where("participants", "array-contains", currentUser.uid)))).docs.find((d) => d.data().participants.includes(deleteTarget.uid));
+			if (docToDelete) await deleteDoc(doc(db, "contacts", docToDelete.id));
+		} catch (err) {
+			console.error("فشل الحذف:", err);
+		} finally {
+			setDeleteTarget(null);
+		}
+	};
+	const handleEditSave = async (contact, newName) => {
+		if (!newName) return;
+		setContacts((prev) => prev.map((c) => (c.uid || c.username) === (contact.uid || contact.username) ? {
+			...c,
+			localDisplayName: newName
+		} : c));
+		try {
+			const docToUpdate = (await getDocs(query(collection(db, "contacts"), where("participants", "array-contains", currentUser.uid)))).docs.find((d) => d.data().participants.includes(contact.uid));
+			if (docToUpdate) await updateDoc(doc(db, "contacts", docToUpdate.id), { displayName: newName });
+		} catch (err) {
+			console.error("فشل التعديل:", err);
+		}
+	};
+	const handleAddContact = async () => {
+		const trimmed = addUsername.trim();
+		if (!trimmed || !currentUser) return;
+		setAddLoading(true);
+		setAddError("");
+		setAddSuccess("");
+		try {
+			const usernameDoc = await getDoc(doc(db, "usernames", trimmed));
+			if (!usernameDoc.exists()) {
+				setAddError("المعرف غير موجود");
+				return;
+			}
+			const targetUid = usernameDoc.data().uid;
+			if (targetUid === currentUser.uid) {
+				setAddError("لا يمكنك إضافة نفسك");
+				return;
+			}
+			if ((await getDocs(query(collection(db, "contacts"), where("participants", "array-contains", currentUser.uid)))).docs.some((d) => d.data().participants.includes(targetUid))) {
+				setAddError("موجود بالفعل في جهات الاتصال");
+				return;
+			}
+			const targetSnap = await getDoc(doc(db, "users", targetUid));
+			const targetData = targetSnap.exists() ? targetSnap.data() : {};
+			await addDoc(collection(db, "contacts"), {
+				participants: [currentUser.uid, targetUid],
+				displayName: targetData.displayName || targetData.email || "",
+				email: targetData.email || "",
+				username: trimmed,
+				createdAt: serverTimestamp$2()
+			});
+			setAddSuccess("تمت الإضافة بنجاح");
+			setAddUsername("");
+			setTimeout(() => setShowAddModal(false), 800);
+		} catch (err) {
+			console.error(err);
+			setAddError("حدث خطأ أثناء الإضافة");
+		} finally {
+			setAddLoading(false);
+		}
+	};
+	const filteredContacts = (0, import_react.useMemo)(() => {
+		let list = contacts;
+		if (activeFilter === "favorites") list = list.filter((c) => favorites.includes(c.uid || c.username));
+		else if (activeFilter === "online") list = list.filter((c) => c.status === "online");
+		if (searchTerm.trim()) {
+			const term = searchTerm.toLowerCase();
+			list = list.filter((c) => (c.username || "").toLowerCase().includes(term) || (c.localDisplayName || "").toLowerCase().includes(term) || (c.displayName || "").toLowerCase().includes(term) || (c.email || "").toLowerCase().includes(term));
+		}
+		return [...list].sort((a, b) => {
+			const aFav = favorites.includes(a.uid || a.username) ? 1 : 0;
+			return (favorites.includes(b.uid || b.username) ? 1 : 0) - aFav;
+		});
+	}, [
+		contacts,
+		activeFilter,
+		searchTerm,
+		favorites
+	]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen flex flex-col bg-slate-50/50 pb-24",
+		children: [
+			showAddModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-5",
+				onClick: () => setShowAddModal(false),
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
+					onClick: (e) => e.stopPropagation(),
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center justify-between mb-4",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+								className: "text-lg font-bold",
+								children: "إضافة جهة اتصال"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: () => setShowAddModal(false),
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-5 h-5" })
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							placeholder: "أدخل المعرف (username)",
+							value: addUsername,
+							onChange: (e) => {
+								setAddUsername(e.target.value);
+								setAddError("");
+								setAddSuccess("");
+							},
+							className: "mb-3 h-12",
+							disabled: addLoading
+						}),
+						addError && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "text-red-500 text-sm mb-2 flex items-center gap-1",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4" }),
+								" ",
+								addError
+							]
+						}),
+						addSuccess && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "text-green-600 text-sm mb-2 flex items-center gap-1",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" }),
+								" ",
+								addSuccess
+							]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							onClick: handleAddContact,
+							disabled: addLoading || !addUsername.trim(),
+							className: "w-full h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white",
+							children: addLoading ? "جارٍ..." : "إضافة"
+						})
+					]
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DeleteConfirmModal, {
+				open: !!deleteTarget,
+				contact: deleteTarget,
+				onConfirm: confirmDelete,
+				onClose: () => setDeleteTarget(null)
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EditNameModal, {
+				open: !!editTarget,
+				contact: editTarget,
+				onSave: handleEditSave,
+				onClose: () => setEditTarget(null)
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
+				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-12 pb-4",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between mb-5",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LinkUpLogo$1, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								variant: "ghost",
+								size: "icon",
+								onClick: () => setShowAddModal(true),
+								className: "rounded-full bg-purple-50 text-purple-600 hover:bg-purple-100 h-10 w-10",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-5 h-5" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								variant: "ghost",
+								size: "icon",
+								className: "rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 h-10 w-10",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Funnel, { className: "w-4 h-4" })
+							})]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mb-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+							className: "text-3xl font-black text-gray-900 tracking-tight",
+							children: "جهات الاتصال"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-500 mt-1",
+							children: "تواصل بسهولة مع الأشخاص المهمين لديك"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar",
+						children: [
+							"all",
+							"favorites",
+							"online"
+						].map((filter) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							onClick: () => setActiveFilter(filter),
+							className: `flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap shrink-0 transition-all duration-300 ${activeFilter === filter ? "bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-md shadow-purple-500/20" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`,
+							children: [
+								filter === "all" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-3.5 h-3.5" }), " الكل"] }),
+								filter === "favorites" && "المفضلة",
+								filter === "online" && "متصل الآن"
+							]
+						}, filter))
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+				className: "flex-1 overflow-y-auto px-5 pt-5",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "relative mb-6",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							placeholder: "ابحث عن اسم أو رقم...",
+							value: searchTerm,
+							onChange: (e) => setSearchTerm(e.target.value),
+							className: "w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-2 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm transition-all"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between mb-4 px-1",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "text-sm font-bold text-gray-800",
+							children: "جهات الاتصال"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full",
+							children: filteredContacts.length
+						})]
+					}),
+					filteredContacts.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex flex-col items-center justify-center py-16 text-center",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-4 shadow-inner",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-9 h-9 text-purple-600/70" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-gray-800 font-bold text-lg",
+								children: "لا توجد جهات اتصال"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-sm text-gray-500 mt-1.5 max-w-[200px]",
+								children: "ابدأ بإضافة أصدقائك لبدء التواصل"
+							})
+						]
+					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "space-y-3 pb-4",
+						children: filteredContacts.map((contact) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContactCard, {
+							contact,
+							onCall,
+							onChat,
+							onDelete: setDeleteTarget,
+							onToggleFavorite: toggleFavorite,
+							isFavorite: favorites.includes(contact.uid || contact.username),
+							onEdit: setEditTarget,
+							unreadCount: unreadCounts[contact.uid] || 0
+						}, contact.uid || contact.username))
+					})
+				]
+			})
+		]
+	});
+}
+//#endregion
+//#region src/features/atheer/AtheerScreen.jsx
+function AtheerScreen({ onBack }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen bg-slate-50 relative overflow-hidden",
+		dir: "rtl",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-[500px] h-[500px] bg-purple-200/40 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-200/40 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
+				className: "sticky top-0 z-30 px-6 pt-14 pb-5 backdrop-blur-xl bg-white/70 border-b border-gray-200/50",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-4",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: onBack,
+						className: "w-11 h-11 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+							className: "w-5 h-5 text-gray-700",
+							viewBox: "0 0 24 24",
+							fill: "none",
+							stroke: "currentColor",
+							strokeWidth: "2.5",
+							strokeLinecap: "round",
+							strokeLinejoin: "round",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
+						})
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+						className: "text-xl font-black text-gray-900 tracking-tight",
+						children: "من هو أثير؟"
+					})]
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+				className: "relative z-10 px-5 py-8 pb-32 space-y-8 max-w-3xl mx-auto",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 rounded-3xl p-7 text-white shadow-2xl relative overflow-hidden",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative z-10",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center mb-4 text-2xl font-bold",
+									children: "أ"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+									className: "text-2xl font-black mb-2",
+									children: "أثير المطور"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-purple-200 text-sm leading-relaxed",
+									children: "مؤسس LinkUp | صانع التجارب الرقمية الهادئة"
+								})
+							]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-white/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-lg border border-white/60 space-y-5 text-gray-700 leading-loose text-justify text-sm md:text-base",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "اسمي أثير، وهذا التطبيق بين يديك اسمه Linkup، وما يجمع بين الاسمين ليس مجرد فكرة عابرة أو مشروع تجاري، بل قصة كاملة بدأت من سؤال واحد ظل يلح عليّ كلما فتحت هاتفي: لماذا كل شيء في هذا العالم الرقمي إما يسرق وقتي أو يسرق بياناتي أو يطلب مني مالًا مقابل لحظة هدوء؟" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "أنا لا أمثل شركة، ولا خلفي مستثمرون، ولا يوجد مكتب فاخر يحمل لوحة باسمي، كل ما في الأمر أنني شخص قرر أن يصنع مساحته الخاصة بهدوء، مساحة لا يشوهها إعلان مقتحم ولا يثقلها اشتراك شهري ولا يعكر صفوها شعور دائم بأن هناك من يتنصت، مساحة أضع فيها توقيعي الشخصي بكل ثقة وأقول لك: هذا صنعته لك، خذه، ولا ترد لي شيئًا." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Linkup هو الابن الروحي لهذه الفلسفة، تطبيق ولد من رحم القناعة وليس من رحم السوق، لم أصنعه لأن هناك فجوة تجارية يجب ملؤها، بل صنعته لأنني ببساطة أردت أن أتصل بمن أحب دون أن أشعر أنني سلعة، أردت أن أسمع صوت أمي دون أن تقاطعنا نافذة منبثقة، أردت أن أضحك مع صديق قديم دون أن أعرف أن حديثنا حُلل لاستهدافنا بإعلان لاحق، وحين بحثت عن أداة تمنحني هذا النقاء لم أجدها، فقررت أن أصنعها بنفسي." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "bg-purple-50 border-r-4 border-purple-400 p-4 rounded-r-xl my-4",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-purple-900 font-medium italic",
+									children: "لهذا حين ترى اسم أثير على أي تطبيق، فأنت لا ترى علامة تجارية، بل ترى وعدًا شخصيًا من إنسان يعرف أن سمعته مرهونة بكل سطر برمجي يكتبه، وعد بأن هذا المكان الرقمي الصغير سيبقى نظيفًا، حرًا، وآمنًا، ليس لأن القانون يلزمني بذلك، بل لأن ضميري يفعل."
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "في Linkup لا يوجد سوى ما تحتاجه فعلًا: صوت نقي يصل كأن المتحدث جالس بجانبك، صورة واضحة تنقل ملامح الوجوه دون تشويش، مساحة صغيرة للكتابة السريعة أثناء المكالمة تمرر فيها فكرة أو رابطًا وكأنك تهمس في أذن الطرف الآخر، وكل هذا يحدث خلف جدار سميك من الخصوصية الكاملة التي لا يستطيع أحد اختراقها، حتى أنا شخصيًا أقف خارج هذا الجدار ولا أملك مفاتيحه." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "لا إعلانات تعطل تجربتك، لا اشتراكات تخفي خلفها الميزات الحقيقية، كل ما في التطبيق مفتوح لك من اللحظة الأولى وإلى الأبد، لأنني ببساطة لا أرى أن جودة الصوت أو وضوح الصورة ينبغي أن يكونا ترفًا يدفع المرء مقابله، هما حق أساسي مثل الهواء النقي الذي يجب ألا يباع." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "في زمن صار فيه المستخدم مجرد رقم في تقرير أرباح ربع سنوية، Linkup هو محاولتي المتواضعة لإعادة تعريف العلاقة بين الإنسان وتطبيقه، علاقة لا تقوم على الاستغلال بل على الثقة، لا تقوم على المراقبة بل على الاحترام، لا تقوم على الأخذ بل على العطاء." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "لست هنا لأبيعك شيئًا، ولا لأقنعك أن تطبيقي أفضل تطبيق في العالم، فأنا أعرف أنه ليس كذلك، لكن ما أعرفه يقينًا أن هذا التطبيق صُنع لك وليس ضدي، صُنع ليخدمك أنت لا ليخدمني أنا، صُنع وفي قلبه مبدأ واحد بسيط: أنت إنسان تستحق أن تتواصل بكرامة." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900 mt-4",
+								children: "مرحبًا بك في Linkup، أهلاً بك في مساحة تحمل اسمي وتوقيعي وضميري، هنا لا يوجد مستخدمون ولا عملاء، يوجد فقط بشر مثلي ومثلك يريدون أن يتحدثوا بحرية وأمان، وأنا أعدك أن هذه المساحة ستبقى كما هي دائمًا، هادئة، نظيفة، وصادقة، تمامًا كما وعدتك أول مرة."
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "mt-4 pt-4 border-t border-gray-200 text-gray-500 italic",
+								children: "هذا أنا، وهذا تطبيقي، وهذه دعوة مفتوحة لك لتكون جزءًا من عالم أثير الرقمي، حيث البساطة فلسفة، والخصوصية عهد، والتواصل بين الناس عودة إلى الجوهر الأول: صوت إنسان يصل إلى إنسان آخر، دون ضجيج ودون مقابل."
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "grid grid-cols-1 md:grid-cols-2 gap-4 pt-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+							href: "mailto:Linkup.helpp@gmail.com",
+							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+										className: "w-5 h-5",
+										viewBox: "0 0 24 24",
+										fill: "none",
+										stroke: "currentColor",
+										strokeWidth: "2",
+										strokeLinecap: "round",
+										strokeLinejoin: "round",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
+											x: "2",
+											y: "4",
+											width: "20",
+											height: "16",
+											rx: "2"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" })]
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "font-bold text-gray-900",
+										children: "تواصل عبر البريد"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-xs text-gray-500 mt-0.5",
+										children: "رد سريع ومباشر"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+									className: "w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors",
+									viewBox: "0 0 24 24",
+									fill: "none",
+									stroke: "currentColor",
+									strokeWidth: "2",
+									strokeLinecap: "round",
+									strokeLinejoin: "round",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
+								})
+							]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+							href: "https://wa.me/966571107181",
+							target: "_blank",
+							rel: "noopener noreferrer",
+							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+										className: "w-6 h-6",
+										viewBox: "0 0 24 24",
+										fill: "currentColor",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" })
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "font-bold text-gray-900",
+										children: "تواصل عبر واتساب"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-xs text-gray-500 mt-0.5",
+										children: "محادثة فورية وآمنة"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+									className: "w-5 h-5 text-gray-300 group-hover:text-green-500 transition-colors",
+									viewBox: "0 0 24 24",
+									fill: "none",
+									stroke: "currentColor",
+									strokeWidth: "2",
+									strokeLinecap: "round",
+									strokeLinejoin: "round",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
+								})
+							]
+						})]
+					})
+				]
+			})
+		]
+	});
+}
+//#endregion
+//#region src/features/about/AboutScreen.jsx
+function AboutScreen({ onBack }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen bg-slate-50 relative overflow-hidden",
+		dir: "rtl",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 left-0 w-[500px] h-[500px] bg-blue-200/40 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/4" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute bottom-0 right-0 w-[400px] h-[400px] bg-purple-200/40 rounded-full blur-[100px] translate-y-1/2 translate-x-1/4" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
+				className: "sticky top-0 z-30 px-6 pt-14 pb-5 backdrop-blur-xl bg-white/70 border-b border-gray-200/50",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-4",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: onBack,
+						className: "w-11 h-11 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+							className: "w-5 h-5 text-gray-700",
+							viewBox: "0 0 24 24",
+							fill: "none",
+							stroke: "currentColor",
+							strokeWidth: "2.5",
+							strokeLinecap: "round",
+							strokeLinejoin: "round",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
+						})
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+						className: "text-xl font-black text-gray-900 tracking-tight",
+						children: "من نحن"
+					})]
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+				className: "relative z-10 px-5 py-8 pb-32 space-y-8 max-w-3xl mx-auto",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800 rounded-3xl p-7 text-white shadow-2xl relative overflow-hidden",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative z-10",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "inline-block px-3 py-1 bg-white/20 backdrop-blur rounded-full text-[10px] font-bold tracking-wide mb-4 border border-white/10",
+									children: "الإصدار 1.0.0 | تحديث مستمر"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+									className: "text-3xl font-black tracking-tight mb-3",
+									children: "LinkUp"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-indigo-100 leading-relaxed text-sm",
+									children: "منصة تواصل عصرية صُممت لمن يقدر الخصوصية والسرعة والبساطة."
+								})
+							]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-white/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-lg border border-white/60 space-y-5 text-gray-700 leading-loose text-justify text-sm md:text-base",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "نحن لسنا شركة، ولستَ تقرأ الآن كتيبًا تعريفيًا كتبه قسم التسويق، نحن مجرد فكرة خرجت من رأس شخص واحد هو أنا، أثير، ووجدت طريقها إلى هاتفك تحت اسم Linkup، اسم اخترته بعناية لأنه ببساطة ما نفعله: نوصلك بمن تحب، لا أكثر ولا أقل، دون تعقيد ودون مقابل ودون أن نجعل من أنفسنا حاجزًا بينك وبين صوت من تنتظره." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "حين تقرأ \"نحن\" في هذا النص فأنت لا تقرأ عن فريق عمل ضخم ولا عن هيكل تنظيمي ولا عن مجلس إدارة، أنا أثير وحدي، وخلفي قناعة واحدة ظلت ترافقني في كل مشروع أصنعه: التكنولوجيا يجب أن تخدم الإنسان لا أن تستعبده، أنا هنا لأنني أرفض فكرة أن كل نقرة على الهاتف يجب أن يتبعها إعلان، وأن كل دقيقة اتصال يجب أن تُدفع، وأن كل خصوصية يجب أن تُباع، هذا الرفض هو نقطة البداية." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "bg-blue-50 border-r-4 border-blue-400 p-4 rounded-r-xl my-4",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-blue-900 font-medium italic",
+									children: "Linkup خرج إلى النور ليكون مساحة اتصال نقية، لا تعقيد فيها ولا تشويش، تفتح التطبيق فتجده بسيطًا لدرجة أنك لا تحتاج إلى شرح، تضغط على اسم من تحب فيتصل، تتحدث بصوت واضح كأن الشخص في الغرفة المجاورة."
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "ترى وجهه بنقاء يجعلك تنسى أن بينكما شاشات ومسافات وكيلومترات من كابلات الإنترنت، تكتب له ملاحظة سريعة أثناء المكالمة وهو يقرؤها في لحظتها، وكل هذا يحدث في ممر آمن تمامًا، لا أحد يستمع، لا أحد يتطفل، لا أحد يحلل كلامكما ليبيعكما شيئًا لاحقًا، حتى أنا شخصيًا لا أستطيع الوصول إلى ما يدور بينكما لأن التطبيق صُمم أصلًا ليكون حصينًا حتى من صانعه." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "نحن لا نجمع بياناتك لنبيعها لأننا ببساطة لا نجمعها من الأساس، لا نعرف ماذا تقول، لا نعرف مع من تتكلم، لا نعرف كم مرة اتصلت بوالدتك هذا الأسبوع، كل ما نعرفه هو بريدك الإلكتروني الذي تعطينا إياه طواعية لا لنرسل لك إعلانات بل لنحفظ لك مفتاح حسابك إذا ضاع هاتفك أو تغير، وحتى هذا البريد لن يصلك منه شيء منا، لا نشرات ولا عروض ولا رسائل تذكير، إنه مجرد حبل نجاة صغير تمسك به أنت وحدك إذا احتجته يومًا، لا أكثر." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "في Linkup لا توجد خطط اشتراك تخفي الميزات الحقيقية خلف جدار دفع، كل ما في التطبيق متاح لك الآن، وغدًا، وإلى الأبد، الصوت عالي الجودة ليس ترفًا تشتريه، الفيديو النقي ليس ميزة بريميوم، الأمان الكامل ليس حكرًا على من يدفع أكثر، هذه كلها حقوق أساسية لأي إنسان يريد أن يتواصل بكرامة، وأنا أؤمن أن بيع هذه الحقوق هو نوع من الظلم الذي لا أريد أن أكون جزءًا منه." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "ما يفرقنا عن غيرنا ليس خاصية سحرية، بل ما لا يوجد لدينا، ليس لدينا إعلانات، ليس لدينا متتبعات، ليس لدينا طرف ثالث ينتظر بياناتك، ليس لدينا رغبة في احتكار وقتك أو انتباهك، كل ما لدينا هو أداة اتصال نظيفة تؤدي وظيفتها وتختفي، تمنحك ما تحتاج بالضبط دون أن تطلب منك شيئًا." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Linkup هو الجزء الجديد من عائلة أثير الرقمية، إلى جانب مشاريع أخرى قادمة، ألعاب ألغاز هادئة، أدوات تفاعلية بسيطة، كلها تحمل الاسم نفسه والوعد نفسه، لأن فلسفتي لا تتغير بتغير نوع التطبيق، أنا أصنع مساحات للناس وليس أدوات للربح، أمنحك ما أصنعه بيدي وأثق أنه سينفعك، ولا أنتظر منك مقابلاً." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "هذه الصفحة ليست طويلة لأن لدي الكثير لأخفيه، بل لأن لدي مبادئ أريدك أن تفهمها جيدًا قبل أن تضغط على أيقونة التطبيق لأول مرة، أريدك أن تعرف أن خلف هذه الأيقونة إنسانًا حقيقيًا يهمه رأيك وتجربتك، إنسانًا يقرأ رسائلك بنفسه على بريد الدعم، إنسانًا لا يعدك بالكمال لكنه يعدك بالصدق." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900 mt-4 pt-4 border-t border-gray-200",
+								children: "مرحبًا بك في Linkup، مرحبًا بك في المساحة التي تحمل توقيع أثير، حيث البساطة أسلوب حياة، والتواصل بلا ثمن، والخصوصية ليست خيارًا بل أساس، وحيث ما زال بالإمكان أن تجد تطبيقًا يصنع لك لا لي."
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "grid grid-cols-1 md:grid-cols-2 gap-4 pt-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+							href: "mailto:Linkup.helpp@gmail.com",
+							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+										className: "w-5 h-5",
+										viewBox: "0 0 24 24",
+										fill: "none",
+										stroke: "currentColor",
+										strokeWidth: "2",
+										strokeLinecap: "round",
+										strokeLinejoin: "round",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
+											x: "2",
+											y: "4",
+											width: "20",
+											height: "16",
+											rx: "2"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" })]
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "font-bold text-gray-900",
+										children: "تواصل عبر البريد"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-xs text-gray-500 mt-0.5",
+										children: "رد سريع ومباشر"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+									className: "w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors",
+									viewBox: "0 0 24 24",
+									fill: "none",
+									stroke: "currentColor",
+									strokeWidth: "2",
+									strokeLinecap: "round",
+									strokeLinejoin: "round",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
+								})
+							]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+							href: "https://wa.me/966571107181",
+							target: "_blank",
+							rel: "noopener noreferrer",
+							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+										className: "w-6 h-6",
+										viewBox: "0 0 24 24",
+										fill: "currentColor",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" })
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "font-bold text-gray-900",
+										children: "تواصل عبر واتساب"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-xs text-gray-500 mt-0.5",
+										children: "محادثة فورية وآمنة"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+									className: "w-5 h-5 text-gray-300 group-hover:text-green-500 transition-colors",
+									viewBox: "0 0 24 24",
+									fill: "none",
+									stroke: "currentColor",
+									strokeWidth: "2",
+									strokeLinecap: "round",
+									strokeLinejoin: "round",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
+								})
+							]
+						})]
+					})
+				]
+			})
+		]
+	});
+}
+//#endregion
+//#region src/features/Settings/PrivacyPolicyScreen.jsx
+function PrivacyPolicyScreen({ onBack }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen bg-slate-50 relative overflow-hidden",
+		dir: "rtl",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-1/4 left-1/4 w-64 h-64 bg-purple-200/40 rounded-full blur-[80px]" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-200/40 rounded-full blur-[80px]" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
+				className: "sticky top-0 z-30 px-6 pt-14 pb-5 backdrop-blur-xl bg-white/70 border-b border-gray-200/50",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-4",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: onBack,
+						className: "w-11 h-11 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all active:scale-95",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+							className: "w-5 h-5 text-gray-700",
+							viewBox: "0 0 24 24",
+							fill: "none",
+							stroke: "currentColor",
+							strokeWidth: "2.5",
+							strokeLinecap: "round",
+							strokeLinejoin: "round",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
+						})
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+						className: "text-xl font-black text-gray-900 tracking-tight",
+						children: "سياسة الخصوصية"
+					})]
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+				className: "relative z-10 px-5 py-8 pb-32 space-y-8 max-w-3xl mx-auto",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-3 mb-3",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+									className: "w-8 h-8 text-blue-200",
+									viewBox: "0 0 24 24",
+									fill: "none",
+									stroke: "currentColor",
+									strokeWidth: "2",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" })
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+									className: "font-black text-lg",
+									children: "كلمة من أثير"
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-blue-50 text-sm leading-loose",
+								children: "هذه ليست وثيقة قانونية معقدة، بل هي كلمتي لك. أنا لا أريد منك شيئًا، فقط أريدك أن تتواصل مع من تحب بأمان وراحة."
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "mt-4 text-[10px] font-bold text-blue-200 opacity-80",
+								children: "آخر تحديث: ٢٨ أبريل ٢٠٢٦"
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-white/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-lg border border-white/60 space-y-6 text-gray-700 leading-loose text-justify text-sm md:text-base",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+								className: "text-base font-black text-gray-900 mb-2 flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-8 h-1 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full" }), "ما نعرفه عنك"]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "كل ما نعرفه عنك هو بريدك الإلكتروني فقط، وذلك لسبب وحيد هو أن تحمي نفسك من ضياع حسابك. إذا تغير هاتفك أو فقدته، فبريدك هو المفتاح الذي تستعيد به كل شيء. لا نرسل لك أي رسائل، لا نطلع على محتوى بريدك، ولا نستخدمه لأي غرض آخر. ببساطة، هو مجرد مفتاح طوارئ تحتفظ به أنت وحدك." })] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+								className: "text-base font-black text-gray-900 mb-2 flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-8 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" }), "اتصالاتك خاصة تمامًا"]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "أما كل ما يتعلق باتصالاتك، صوتًا وصورةً ورسائل، فلا نعرف عنه شيئًا ولا نخزنه ولا نستطيع الوصول إليه. ما تقوله وترسله يبقى بينك وبين الطرف الآخر، دون أن يمر على خادم يمكننا فتحه، ودون أن يكون لنا أي قدرة على الاطلاع عليه، حتى لو أراد أحدنا ذلك لا يملك السبيل. يعني حين تتصل بوالدتك أو بصديقك، فالعالم الخارجي كله يقف خارج الغرفة، ونحن معه." })] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "bg-purple-50 border-r-4 border-purple-400 p-4 rounded-r-xl my-4",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-purple-900 font-medium italic",
+									children: "لا توجد لدينا إعلانات في التطبيق، ولا خطط اشتراك، ولا أطراف ثالثة نشاركها بياناتك لأننا أصلًا لا نملك بيانات نشاركها."
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+								className: "text-base font-black text-gray-900 mb-2 flex items-center gap-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-8 h-1 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full" }), "الشفافية والحذف"]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "لا نبيع شيئًا، لا نؤجر شيئًا، لا نحلل سلوكك ولا نبني ملفًا عنك، وكل ما يهمنا هو أن تبقى تجربتك نظيفة وخاصة. إذا قررت يومًا أن تغادر Linkup، فبإمكانك حذف حسابك من داخل التطبيق وسيُمسح بريدك الإلكتروني نهائيًا ولا يبقى له أثر." })] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "text-center pt-6 border-t border-gray-200",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-sm font-bold text-gray-900 mb-2",
+									children: "هذا هو وعدي لك"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-xs text-gray-600 leading-relaxed",
+									children: "لا بنود مخفية ولا مفاجآت. خصوصيتك ليست سلعة، بل هي حجر الأساس الذي بنيت عليه هذا التطبيق. شكرًا لثقتك فيّ وفي Linkup."
+								})]
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "grid grid-cols-1 md:grid-cols-2 gap-4 pt-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+							href: "mailto:Linkup.helpp@gmail.com",
+							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+										className: "w-5 h-5",
+										viewBox: "0 0 24 24",
+										fill: "none",
+										stroke: "currentColor",
+										strokeWidth: "2",
+										strokeLinecap: "round",
+										strokeLinejoin: "round",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
+											x: "2",
+											y: "4",
+											width: "20",
+											height: "16",
+											rx: "2"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" })]
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "font-bold text-gray-900",
+										children: "تواصل عبر البريد"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-xs text-gray-500 mt-0.5",
+										children: "دعم فني مباشر"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+									className: "w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors",
+									viewBox: "0 0 24 24",
+									fill: "none",
+									stroke: "currentColor",
+									strokeWidth: "2",
+									strokeLinecap: "round",
+									strokeLinejoin: "round",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
+								})
+							]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+							href: "https://wa.me/966571107181",
+							target: "_blank",
+							rel: "noopener noreferrer",
+							className: "group flex items-center gap-4 p-5 bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all border border-gray-100 active:scale-95",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-12 h-12 rounded-xl bg-gradient-to-tr from-green-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-green-500/30 group-hover:scale-110 transition-transform",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+										className: "w-6 h-6",
+										viewBox: "0 0 24 24",
+										fill: "currentColor",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" })
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "font-bold text-gray-900",
+										children: "تواصل عبر واتساب"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-xs text-gray-500 mt-0.5",
+										children: "محادثة فورية وآمنة"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+									className: "w-5 h-5 text-gray-300 group-hover:text-green-500 transition-colors",
+									viewBox: "0 0 24 24",
+									fill: "none",
+									stroke: "currentColor",
+									strokeWidth: "2",
+									strokeLinecap: "round",
+									strokeLinejoin: "round",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
+								})
+							]
+						})]
+					})
+				]
+			})
+		]
+	});
+}
+//#endregion
+//#region src/features/Settings/TermsOfServiceScreen.jsx
+function TermsOfServiceScreen({ onBack }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 pb-10",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "px-5 py-4 max-w-2xl mx-auto",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "mb-4",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+					variant: "ghost",
+					onClick: onBack,
+					className: "rounded-full",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "h-5 w-5 ml-2" }), " رجوع"]
+				})
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("article", {
+				className: "prose prose-gray max-w-none text-right leading-relaxed space-y-6",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-sm text-gray-500",
+						children: "آخر تحديث: أبريل 2026"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+						className: "text-2xl font-bold text-gray-900",
+						children: "كلمة من أثير"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "مرحباً بك في Tero Quick Call. قبل أن تبدأ، أريدك أن تقرأ هذه السطور القليلة. إنها \"قواعد البيت\" الذي بنيته لك. بسيطة، ومنطقية، ومبنية على الاحترام المتبادل." }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "باستخدامك للتطبيق، أنت توافق على هذه البنود. إذا لم تعجبك، لا مشكلة، لكن لا يحق لك الاستمرار." }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-xl font-bold text-gray-900",
+						children: "١. ما تلتزم به أنت"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "تطبيقنا مساحة للتواصل النقي. لذلك، أنت توعدني بأنك:" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
+						className: "list-disc list-inside space-y-1 text-gray-800",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "ستكون إنساناً طيباً:" }), " لا مضايقات، لا تهديدات، لا سب، لا محتوى غير أخلاقي، ولا أي فعل يؤذي الآخرين أو يخيفهم."] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "لن تستخدم التطبيق في الحرام:" }), " أي نشاط غير قانوني أو ينتهك حقوق الغير ممنوع تماماً."] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "لن تعبث بالتطبيق:" }), " لا تحاول اختراقه، أو نسخه، أو إعادة بيعه، أو استخدامه لإرسال رسائل مزعجة."] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "ستحافظ على حسابك:" }), " أنت مسؤول عن الحفاظ على سرية بيانات دخولك."] })
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "أي خرق واضح لهذه البنود يعطيني الحق في وقف حسابك فوراً دون سابق إنذار. هذه المساحة نظيفة، وسأحافظ عليها نظيفة." }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-xl font-bold text-gray-900",
+						children: "٢. ما نلتزم به نحن"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
+						className: "list-disc list-inside space-y-1 text-gray-800",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "الخدمة مجانية للأبد:" }), " لا اشتراكات، لا إعلانات، لا مفاجآت مالية."] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "خصوصيتك مصانة:" }), " لا نقرأ محادثاتك، لا نبيع بياناتك. سياسة الخصوصية تشرح هذا بالتفصيل."] }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "نبذل جهدنا:" }), " نسعى لأن تكون المكالمات واضحة والخدمة مستقرة، لكن لا نضمن الكمال المطلق."] })
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-xl font-bold text-gray-900",
+						children: "٣. حدود المسؤولية (بكل صراحة)"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "أنا أقدم لك هذه الأداة كما هي، من شخص يحب أن يصنع أشياء مفيدة. لكن الحياة لا تخلو من مفاجآت:" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
+						className: "list-disc list-inside space-y-1 text-gray-800",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "أنا غير مسؤول عن أي ضرر مباشر أو غير مباشر يحدث بسبب استخدامك للتطبيق أو عدم قدرتك على استخدامه (مثلاً: انقطاع مكالمة مهمة بسبب ضعف شبكتك، أو أي خسارة تنتج عن ذلك)." }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "الاستخدام مسؤوليتك الشخصية:" }), " أنت تتحمل وحدك كل ما ترسله أو تشاركه."] })]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-xl font-bold text-gray-900",
+						children: "٤. إنهاء الخدمة"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "أنت حر في أي وقت. يمكنك حذف حسابك من داخل التطبيق. وأنا أيضاً أحتفظ بحقي في إنهاء حساب أي شخص يخالف هذه الشروط البسيطة، دون تعويض أو إشعار مسبق إذا كان الضرر واضحاً." }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-xl font-bold text-gray-900",
+						children: "٥. تغييرات على هذه الشروط"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "إذا طرأ أي تعديل، سأخبرك عبر إشعار في التطبيق. استمرارك في الاستخدام بعد التعديل يعني قبولك به." }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-xl font-bold text-gray-900",
+						children: "تواصل معي"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "هذه الشروط كتبتها بنفسي. إذا عندك سؤال، أنا موجود:" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex flex-wrap gap-4 mt-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+							href: "mailto:Linkup.helpp@gmail.com",
+							className: "group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 active:scale-95 overflow-hidden",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "h-5 w-5 relative z-10" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "relative z-10",
+									children: "البريد الإلكتروني"
+								})
+							]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+							href: "https://wa.me/966571107181",
+							target: "_blank",
+							rel: "noopener noreferrer",
+							className: "group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 active:scale-95 overflow-hidden",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+									className: "h-5 w-5 relative z-10",
+									viewBox: "0 0 24 24",
+									fill: "currentColor",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" })
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "relative z-10",
+									children: "واتساب"
+								})
+							]
+						})]
+					})
+				]
+			})]
+		})
+	});
+}
+//#endregion
+//#region src/features/Settings/DataManagementScreen.jsx
+function DataManagementScreen({ onBack }) {
+	const [loading, setLoading] = (0, import_react.useState)(null);
+	const [toast, setToast] = (0, import_react.useState)({
+		show: false,
+		msg: "",
+		type: "success"
+	});
+	const user = auth.currentUser;
+	const showToast = (msg, type = "success") => {
+		setToast({
+			show: true,
+			msg,
+			type
+		});
+		setTimeout(() => setToast({
+			show: false,
+			msg: "",
+			type: "success"
+		}), 3e3);
+	};
+	const handleExport = async () => {
+		if (!user) return;
+		setLoading("export");
+		try {
+			const data = (await getDocs(query(collection(db, "chats"), where("participants", "array-contains", user.uid)))).docs.map((d) => d.data());
+			const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `linkup_backup_${Date.now()}.json`;
+			a.click();
+			URL.revokeObjectURL(url);
+			showToast("تم تصدير البيانات بنجاح");
+		} catch (e) {
+			showToast("فشل التصدير", "error");
+		} finally {
+			setLoading(null);
+		}
+	};
+	const handleClearCache = () => {
+		setLoading("cache");
+		setTimeout(() => {
+			localStorage.removeItem("vibecall_has_seen_welcome");
+			sessionStorage.clear();
+			showToast("تم مسح ذاكرة التخزين المؤقت");
+			setLoading(null);
+		}, 800);
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen bg-slate-50/50 pb-24",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
+				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-16 pb-4",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-3 mb-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: onBack,
+							className: "w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+							className: "text-2xl font-black text-gray-900 tracking-tight",
+							children: "إدارة البيانات"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-gray-500",
+						children: "تحكم كامل في بياناتك ونسخك الاحتياطي"
+					}),
+					"      "
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+				className: "px-5 pt-6 space-y-4",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-white rounded-2xl p-5 border border-gray-100 shadow-sm",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-3 mb-4",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "p-2.5 rounded-xl bg-blue-100 text-blue-600",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Database$1, { className: "w-5 h-5" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								className: "font-bold text-gray-900",
+								children: "النسخ الاحتياطي"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-500",
+								children: "حفظ محادثاتك وبياناتك بأمان"
+							})] })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							onClick: handleExport,
+							disabled: loading === "export",
+							className: "w-full h-12 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl font-bold transition-all active:scale-[0.98] disabled:opacity-50",
+							children: loading === "export" ? "جارٍ التصدير..." : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, { className: "w-4 h-4 ml-2" }), " تصدير البيانات (JSON)"] })
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-white rounded-2xl p-5 border border-gray-100 shadow-sm",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-3 mb-4",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "p-2.5 rounded-xl bg-purple-100 text-purple-600",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Cloud, { className: "w-5 h-5" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								className: "font-bold text-gray-900",
+								children: "مسح الذاكرة المؤقتة"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-500",
+								children: "تسريع التطبيق وحل مشاكل العرض"
+							})] })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							onClick: handleClearCache,
+							disabled: loading === "cache",
+							variant: "outline",
+							className: "w-full h-12 rounded-xl border-gray-200 hover:bg-gray-50 transition-all active:scale-[0.98] disabled:opacity-50",
+							children: loading === "cache" ? "جارٍ المسح..." : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Upload, { className: "w-4 h-4 ml-2" }), " مسح الكاش"] })
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-red-50 rounded-2xl p-5 border border-red-100",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-3 mb-3",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "p-2.5 rounded-xl bg-red-100 text-red-600",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-5 h-5" })
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+									className: "font-bold text-red-800",
+									children: "منطقة الخطر"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-xs text-red-600",
+									children: "إجراءات لا يمكن التراجع عنها"
+								})] })]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-red-700 mb-4 leading-relaxed",
+								children: "حذف البيانات سيؤدي إلى إزالة جميع المحادثات، الإعدادات، والبيانات المحلية. لن يتم حذف حسابك من الخادم."
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+								variant: "destructive",
+								className: "w-full h-12 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-all active:scale-[0.98]",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4 ml-2" }), " حذف البيانات المحلية"]
+							})
+						]
+					})
+				]
+			}),
+			toast.show && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: `fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-4 ${toast.type === "error" ? "bg-red-600" : "bg-gray-900"} text-white`,
+				children: [
+					toast.type === "error" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-5 h-5 text-emerald-400" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-sm font-medium",
+						children: toast.msg
+					}),
+					"        "
+				]
+			})
+		]
+	});
+}
+//#endregion
+//#region src/features/Settings/AppLockScreen.jsx
+function AppLockScreen({ onBack }) {
+	const [enabled, setEnabled] = (0, import_react.useState)(false);
+	const [pin, setPin] = (0, import_react.useState)("");
+	const [showPin, setShowPin] = (0, import_react.useState)(false);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen bg-slate-50/50 pb-24 relative overflow-hidden",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
+			className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-16 pb-4",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-3",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					onClick: onBack,
+					className: "w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors active:scale-95",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+					className: "text-2xl font-black text-gray-900 tracking-tight",
+					children: "قفل التطبيق"
+				})]
+			})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+			className: "px-5 pt-8 space-y-6 relative z-10",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex items-center justify-between",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-4",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "p-3 rounded-xl bg-purple-100 text-purple-600",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-6 h-6" })
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "font-bold text-gray-900 text-base",
+						children: "تفعيل القفل الأمني"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-gray-500 mt-1",
+						children: "طلب رمز PIN عند كل فتح"
+					})] })]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					onClick: () => setEnabled(!enabled),
+					className: `w-14 h-8 rounded-full transition-colors relative ${enabled ? "bg-purple-600" : "bg-gray-200"}`,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${enabled ? "translate-x-6" : ""}` })
+				})]
+			}), enabled && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5 animate-in fade-in slide-in-from-top-4",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+						className: "text-sm font-bold text-gray-700 block",
+						children: "تعيين رمز PIN"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "relative",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							type: showPin ? "text" : "password",
+							value: pin,
+							onChange: (e) => setPin(e.target.value),
+							placeholder: "مثال: 1234",
+							maxLength: 6,
+							className: "h-14 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200 text-center tracking-[0.5em] text-xl font-mono"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => setShowPin(!showPin),
+							className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600",
+							children: showPin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-3 text-xs text-gray-500 bg-gray-50 p-4 rounded-xl",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-5 h-5 text-purple-600 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "يمكنك تفعيل البصمة لاحقاً من إعدادات النظام" })]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						className: "w-full h-14 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98]",
+						children: "حفظ القفل"
+					})
+				]
+			})]
+		})]
+	});
+}
+//#endregion
+//#region src/features/profile/ChangeEmailScreen.jsx
+function ChangeEmailScreen({ onSuccess, onBack }) {
+	const [currentPassword, setCurrentPassword] = (0, import_react.useState)("");
+	const [newEmail, setNewEmail] = (0, import_react.useState)("");
+	const [loading, setLoading] = (0, import_react.useState)(false);
+	const [error, setError] = (0, import_react.useState)("");
+	const [success, setSuccess] = (0, import_react.useState)("");
+	const user = auth.currentUser;
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		if (!currentPassword || !newEmail) {
+			setError("يرجى ملء جميع الحقول");
+			return;
+		}
+		setLoading(true);
+		setError("");
+		setSuccess("");
+		try {
+			await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, currentPassword));
+			await updateEmail(user, newEmail);
+			setSuccess("تم تحديث البريد بنجاح");
+			onSuccess?.(user);
+		} catch (err) {
+			setError(err.code === "auth/invalid-credential" ? "كلمة المرور غير صحيحة" : "فشل التحديث، حاول مرة أخرى");
+		} finally {
+			setLoading(false);
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "pt-28 px-5 pb-24 min-h-screen bg-slate-50/50 flex items-start justify-center",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "w-full max-w-md bg-white rounded-3xl p-6 shadow-lg shadow-gray-200/50 border border-gray-100 space-y-6 relative",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					onClick: onBack,
+					className: "absolute top-6 right-6 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors active:scale-95",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-5 h-5 text-gray-600" })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "text-center mb-2",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-3",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "w-7 h-7 text-purple-600" })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							className: "text-2xl font-black text-gray-900",
+							children: "تغيير البريد"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-500 mt-1",
+							children: "قم بتحديث بريدك الإلكتروني لحسابك"
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+					className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
+					children: "البريد الحالي"
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "h-12 px-4 rounded-xl bg-gray-50 border border-gray-200 flex items-center text-gray-600 text-sm font-medium",
+					children: user?.email || "غير محدد"
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+					onSubmit: handleSubmit,
+					className: "space-y-4",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
+							children: "تأكيد كلمة المرور"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								type: "password",
+								value: currentPassword,
+								onChange: (e) => setCurrentPassword(e.target.value),
+								placeholder: "••••••••",
+								className: "pr-12 h-12 rounded-xl bg-white border-gray-200 focus-visible:ring-purple-200",
+								required: true
+							})]
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
+							children: "البريد الإلكتروني الجديد"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								type: "email",
+								value: newEmail,
+								onChange: (e) => setNewEmail(e.target.value),
+								placeholder: "new@example.com",
+								className: "pr-12 h-12 rounded-xl bg-white border-gray-200 focus-visible:ring-purple-200",
+								required: true
+							})]
+						})] }),
+						error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4 shrink-0" }), error]
+						}),
+						success && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "bg-emerald-50 border border-emerald-100 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-4 h-4 shrink-0" }), success]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "submit",
+							disabled: loading,
+							className: "w-full h-12 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] disabled:opacity-50",
+							children: loading ? "جارٍ التحديث..." : "تحديث البريد"
+						})
+					]
+				})
+			]
+		})
+	});
+}
+//#endregion
+//#region src/features/profile/ResetPasswordScreen.jsx
+function ResetPasswordProfileScreen({ onBack, onOpenForgotPassword }) {
+	const [currentPassword, setCurrentPassword] = (0, import_react.useState)("");
+	const [newPassword, setNewPassword] = (0, import_react.useState)("");
+	const [confirmPassword, setConfirmPassword] = (0, import_react.useState)("");
+	const [loading, setLoading] = (0, import_react.useState)(false);
+	const [error, setError] = (0, import_react.useState)("");
+	const [success, setSuccess] = (0, import_react.useState)(false);
+	const [showCurrent, setShowCurrent] = (0, import_react.useState)(false);
+	const [showNew, setShowNew] = (0, import_react.useState)(false);
+	const [showConfirm, setShowConfirm] = (0, import_react.useState)(false);
+	const user = auth.currentUser;
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		setError("");
+		if (!currentPassword || !newPassword || !confirmPassword) {
+			setError("يرجى ملء جميع الحقول");
+			return;
+		}
+		if (newPassword !== confirmPassword) {
+			setError("كلمتا المرور غير متطابقتين");
+			return;
+		}
+		if (newPassword.length < 6) {
+			setError("يجب أن تكون كلمة المرور 6 أحرف على الأقل");
+			return;
+		}
+		setLoading(true);
+		try {
+			await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, currentPassword));
+			await updatePassword(user, newPassword);
+			setSuccess(true);
+			setCurrentPassword("");
+			setNewPassword("");
+			setConfirmPassword("");
+		} catch (err) {
+			console.error(err);
+			if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") setError("كلمة المرور الحالية غير صحيحة. إذا نسيتها، استخدم رابط إعادة التعيين أدناه.");
+			else setError("حدث خطأ أثناء التغيير. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.");
+		} finally {
+			setLoading(false);
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "pt-28 px-5 pb-24 min-h-screen bg-slate-50/50 flex items-start justify-center",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "w-full max-w-md bg-white rounded-3xl p-6 shadow-lg shadow-gray-200/50 border border-gray-100 space-y-6",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-3 mb-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						variant: "ghost",
+						size: "icon",
+						onClick: onBack,
+						className: "rounded-full hover:bg-gray-100",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "h-5 w-5" })
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-sm font-medium text-gray-500",
+						children: "العودة للملف الشخصي"
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "text-center mb-2",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-3",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-7 h-7 text-purple-600" })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							className: "text-2xl font-black text-gray-900",
+							children: "تغيير كلمة المرور"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-500 mt-1",
+							children: "أدخل كلمة المرور الحالية للتحقق أولاً"
+						})
+					]
+				}),
+				!success ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+					onSubmit: handleSubmit,
+					className: "space-y-4",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
+								children: "كلمة المرور الحالية"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "relative",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+										type: showCurrent ? "text" : "password",
+										value: currentPassword,
+										onChange: (e) => setCurrentPassword(e.target.value),
+										placeholder: "••••••••",
+										className: "pr-12 h-12 rounded-xl bg-white border-gray-200 focus-visible:ring-purple-200",
+										required: true
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										onClick: () => setShowCurrent(!showCurrent),
+										className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1",
+										children: showCurrent ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
+									})
+								]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								type: "button",
+								onClick: onOpenForgotPassword,
+								className: "text-xs text-purple-600 hover:text-purple-800 font-medium mt-1.5 flex items-center gap-1 transition-colors",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "w-3.5 h-3.5" }), " نسيت كلمة المرور؟ إرسال رابط إعادة التعيين"]
+							})
+						] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
+							children: "كلمة المرور الجديدة"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									type: showNew ? "text" : "password",
+									value: newPassword,
+									onChange: (e) => setNewPassword(e.target.value),
+									placeholder: "••••••••",
+									className: "pr-12 h-12 rounded-xl bg-white border-gray-200 focus-visible:ring-purple-200",
+									required: true
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => setShowNew(!showNew),
+									className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1",
+									children: showNew ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
+								})
+							]
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "text-xs font-bold text-gray-500 mb-1.5 block uppercase tracking-wide",
+							children: "تأكيد كلمة المرور الجديدة"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+									type: showConfirm ? "text" : "password",
+									value: confirmPassword,
+									onChange: (e) => setConfirmPassword(e.target.value),
+									placeholder: "••••••••",
+									className: "pr-12 h-12 rounded-xl bg-white border-gray-200 focus-visible:ring-purple-200",
+									required: true
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => setShowConfirm(!showConfirm),
+									className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1",
+									children: showConfirm ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
+								})
+							]
+						})] }),
+						error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleAlert, { className: "w-4 h-4 shrink-0" }), error]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							type: "submit",
+							disabled: loading,
+							className: "w-full h-12 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] disabled:opacity-50",
+							children: loading ? "جارٍ التحقق والتحديث..." : "تحديث كلمة المرور"
+						})
+					]
+				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "text-center py-8 animate-in fade-in zoom-in duration-300",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-10 h-10 text-emerald-600" })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "text-xl font-bold text-gray-900 mb-2",
+							children: "تم التغيير بنجاح!"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-500 mb-6",
+							children: "يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							onClick: onBack,
+							className: "w-full h-12 bg-gray-900 hover:bg-gray-800 text-white rounded-xl font-bold",
+							children: "العودة للملف الشخصي"
+						})
+					]
+				})
+			]
+		})
+	});
+}
+typeof window !== "undefined" && window.document && window.document.createElement;
+function composeEventHandlers(originalEventHandler, ourEventHandler, { checkForDefaultPrevented = true } = {}) {
+	return function handleEvent(event) {
+		originalEventHandler?.(event);
+		if (checkForDefaultPrevented === false || !event.defaultPrevented) return ourEventHandler?.(event);
+	};
+}
+//#endregion
+//#region node_modules/@radix-ui/react-dialog/node_modules/@radix-ui/react-context/dist/index.mjs
+function createContext2(rootComponentName, defaultContext) {
+	const Context = import_react.createContext(defaultContext);
+	const Provider = (props) => {
+		const { children, ...context } = props;
+		const value = import_react.useMemo(() => context, Object.values(context));
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Context.Provider, {
+			value,
+			children
+		});
+	};
+	Provider.displayName = rootComponentName + "Provider";
+	function useContext2(consumerName) {
+		const context = import_react.useContext(Context);
+		if (context) return context;
+		if (defaultContext !== void 0) return defaultContext;
+		throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
+	}
+	return [Provider, useContext2];
+}
+function createContextScope(scopeName, createContextScopeDeps = []) {
+	let defaultContexts = [];
+	function createContext3(rootComponentName, defaultContext) {
+		const BaseContext = import_react.createContext(defaultContext);
+		const index = defaultContexts.length;
+		defaultContexts = [...defaultContexts, defaultContext];
+		const Provider = (props) => {
+			const { scope, children, ...context } = props;
+			const Context = scope?.[scopeName]?.[index] || BaseContext;
+			const value = import_react.useMemo(() => context, Object.values(context));
+			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Context.Provider, {
+				value,
+				children
+			});
+		};
+		Provider.displayName = rootComponentName + "Provider";
+		function useContext2(consumerName, scope) {
+			const Context = scope?.[scopeName]?.[index] || BaseContext;
+			const context = import_react.useContext(Context);
+			if (context) return context;
+			if (defaultContext !== void 0) return defaultContext;
+			throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
+		}
+		return [Provider, useContext2];
+	}
+	const createScope = () => {
+		const scopeContexts = defaultContexts.map((defaultContext) => {
+			return import_react.createContext(defaultContext);
+		});
+		return function useScope(scope) {
+			const contexts = scope?.[scopeName] || scopeContexts;
+			return import_react.useMemo(() => ({ [`__scope${scopeName}`]: {
+				...scope,
+				[scopeName]: contexts
+			} }), [scope, contexts]);
+		};
+	};
+	createScope.scopeName = scopeName;
+	return [createContext3, composeContextScopes(createScope, ...createContextScopeDeps)];
+}
+function composeContextScopes(...scopes) {
+	const baseScope = scopes[0];
+	if (scopes.length === 1) return baseScope;
+	const createScope = () => {
+		const scopeHooks = scopes.map((createScope2) => ({
+			useScope: createScope2(),
+			scopeName: createScope2.scopeName
+		}));
+		return function useComposedScopes(overrideScopes) {
+			const nextScopes = scopeHooks.reduce((nextScopes2, { useScope, scopeName }) => {
+				const currentScope = useScope(overrideScopes)[`__scope${scopeName}`];
+				return {
+					...nextScopes2,
+					...currentScope
+				};
+			}, {});
+			return import_react.useMemo(() => ({ [`__scope${baseScope.scopeName}`]: nextScopes }), [nextScopes]);
+		};
+	};
+	createScope.scopeName = baseScope.scopeName;
+	return createScope;
+}
+//#endregion
+//#region node_modules/@radix-ui/react-id/dist/index.mjs
+var useReactId = import_react[" useId ".trim().toString()] || (() => void 0);
+var count$1 = 0;
+function useId(deterministicId) {
+	const [id, setId] = import_react.useState(useReactId());
+	useLayoutEffect2(() => {
+		if (!deterministicId) setId((reactId) => reactId ?? String(count$1++));
+	}, [deterministicId]);
+	return deterministicId || (id ? `radix-${id}` : "");
+}
+//#endregion
+//#region node_modules/@radix-ui/react-use-controllable-state/dist/index.mjs
+var useInsertionEffect = import_react[" useInsertionEffect ".trim().toString()] || useLayoutEffect2;
+function useControllableState({ prop, defaultProp, onChange = () => {}, caller }) {
+	const [uncontrolledProp, setUncontrolledProp, onChangeRef] = useUncontrolledState({
+		defaultProp,
+		onChange
+	});
+	const isControlled = prop !== void 0;
+	const value = isControlled ? prop : uncontrolledProp;
+	{
+		const isControlledRef = import_react.useRef(prop !== void 0);
+		import_react.useEffect(() => {
+			const wasControlled = isControlledRef.current;
+			if (wasControlled !== isControlled) console.warn(`${caller} is changing from ${wasControlled ? "controlled" : "uncontrolled"} to ${isControlled ? "controlled" : "uncontrolled"}. Components should not switch from controlled to uncontrolled (or vice versa). Decide between using a controlled or uncontrolled value for the lifetime of the component.`);
+			isControlledRef.current = isControlled;
+		}, [isControlled, caller]);
+	}
+	return [value, import_react.useCallback((nextValue) => {
+		if (isControlled) {
+			const value2 = isFunction(nextValue) ? nextValue(prop) : nextValue;
+			if (value2 !== prop) onChangeRef.current?.(value2);
+		} else setUncontrolledProp(nextValue);
+	}, [
+		isControlled,
+		prop,
+		setUncontrolledProp,
+		onChangeRef
+	])];
+}
+function useUncontrolledState({ defaultProp, onChange }) {
+	const [value, setValue] = import_react.useState(defaultProp);
+	const prevValueRef = import_react.useRef(value);
+	const onChangeRef = import_react.useRef(onChange);
+	useInsertionEffect(() => {
+		onChangeRef.current = onChange;
+	}, [onChange]);
+	import_react.useEffect(() => {
+		if (prevValueRef.current !== value) {
+			onChangeRef.current?.(value);
+			prevValueRef.current = value;
+		}
+	}, [value, prevValueRef]);
+	return [
+		value,
+		setValue,
+		onChangeRef
+	];
+}
+function isFunction(value) {
+	return typeof value === "function";
+}
+//#endregion
+//#region node_modules/@radix-ui/react-dismissable-layer/node_modules/@radix-ui/react-slot/dist/index.mjs
+/* @__NO_SIDE_EFFECTS__ */
+function createSlot$3(ownerName) {
+	const SlotClone = /* @__PURE__ */ createSlotClone$3(ownerName);
+	const Slot2 = import_react.forwardRef((props, forwardedRef) => {
+		const { children, ...slotProps } = props;
+		const childrenArray = import_react.Children.toArray(children);
+		const slottable = childrenArray.find(isSlottable$3);
+		if (slottable) {
+			const newElement = slottable.props.children;
+			const newChildren = childrenArray.map((child) => {
+				if (child === slottable) {
+					if (import_react.Children.count(newElement) > 1) return import_react.Children.only(null);
+					return import_react.isValidElement(newElement) ? newElement.props.children : null;
+				} else return child;
+			});
+			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
+				...slotProps,
+				ref: forwardedRef,
+				children: import_react.isValidElement(newElement) ? import_react.cloneElement(newElement, void 0, newChildren) : null
+			});
+		}
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
+			...slotProps,
+			ref: forwardedRef,
+			children
+		});
+	});
+	Slot2.displayName = `${ownerName}.Slot`;
+	return Slot2;
+}
+/* @__NO_SIDE_EFFECTS__ */
+function createSlotClone$3(ownerName) {
+	const SlotClone = import_react.forwardRef((props, forwardedRef) => {
+		const { children, ...slotProps } = props;
+		if (import_react.isValidElement(children)) {
+			const childrenRef = getElementRef$4(children);
+			const props2 = mergeProps$3(slotProps, children.props);
+			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
+			return import_react.cloneElement(children, props2);
+		}
+		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
+	});
+	SlotClone.displayName = `${ownerName}.SlotClone`;
+	return SlotClone;
+}
+var SLOTTABLE_IDENTIFIER$3 = Symbol("radix.slottable");
+function isSlottable$3(child) {
+	return import_react.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER$3;
+}
+function mergeProps$3(slotProps, childProps) {
+	const overrideProps = { ...childProps };
+	for (const propName in childProps) {
+		const slotPropValue = slotProps[propName];
+		const childPropValue = childProps[propName];
+		if (/^on[A-Z]/.test(propName)) {
+			if (slotPropValue && childPropValue) overrideProps[propName] = (...args) => {
+				const result = childPropValue(...args);
+				slotPropValue(...args);
+				return result;
+			};
+			else if (slotPropValue) overrideProps[propName] = slotPropValue;
+		} else if (propName === "style") overrideProps[propName] = {
+			...slotPropValue,
+			...childPropValue
+		};
+		else if (propName === "className") overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
+	}
+	return {
+		...slotProps,
+		...overrideProps
+	};
+}
+function getElementRef$4(element) {
+	let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
+	let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+	if (mayWarn) return element.ref;
+	getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
+	mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+	if (mayWarn) return element.props.ref;
+	return element.props.ref || element.ref;
+}
+//#endregion
+//#region node_modules/@radix-ui/react-dismissable-layer/node_modules/@radix-ui/react-primitive/dist/index.mjs
+var Primitive$3 = [
+	"a",
+	"button",
+	"div",
+	"form",
+	"h2",
+	"h3",
+	"img",
+	"input",
+	"label",
+	"li",
+	"nav",
+	"ol",
+	"p",
+	"select",
+	"span",
+	"svg",
+	"ul"
+].reduce((primitive, node) => {
+	const Slot = /* @__PURE__ */ createSlot$3(`Primitive.${node}`);
+	const Node = import_react.forwardRef((props, forwardedRef) => {
+		const { asChild, ...primitiveProps } = props;
+		const Comp = asChild ? Slot : node;
+		if (typeof window !== "undefined") window[Symbol.for("radix-ui")] = true;
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Comp, {
+			...primitiveProps,
+			ref: forwardedRef
+		});
+	});
+	Node.displayName = `Primitive.${node}`;
+	return {
+		...primitive,
+		[node]: Node
+	};
+}, {});
+function dispatchDiscreteCustomEvent(target, event) {
+	if (target) import_react_dom.flushSync(() => target.dispatchEvent(event));
+}
+//#endregion
+//#region node_modules/@radix-ui/react-use-escape-keydown/dist/index.mjs
+function useEscapeKeydown(onEscapeKeyDownProp, ownerDocument = globalThis?.document) {
+	const onEscapeKeyDown = useCallbackRef$1(onEscapeKeyDownProp);
+	import_react.useEffect(() => {
+		const handleKeyDown = (event) => {
+			if (event.key === "Escape") onEscapeKeyDown(event);
+		};
+		ownerDocument.addEventListener("keydown", handleKeyDown, { capture: true });
+		return () => ownerDocument.removeEventListener("keydown", handleKeyDown, { capture: true });
+	}, [onEscapeKeyDown, ownerDocument]);
+}
+//#endregion
+//#region node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs
+var DISMISSABLE_LAYER_NAME = "DismissableLayer";
+var CONTEXT_UPDATE = "dismissableLayer.update";
+var POINTER_DOWN_OUTSIDE = "dismissableLayer.pointerDownOutside";
+var FOCUS_OUTSIDE = "dismissableLayer.focusOutside";
+var originalBodyPointerEvents;
+var DismissableLayerContext = import_react.createContext({
+	layers: /* @__PURE__ */ new Set(),
+	layersWithOutsidePointerEventsDisabled: /* @__PURE__ */ new Set(),
+	branches: /* @__PURE__ */ new Set()
+});
+var DismissableLayer = import_react.forwardRef((props, forwardedRef) => {
+	const { disableOutsidePointerEvents = false, onEscapeKeyDown, onPointerDownOutside, onFocusOutside, onInteractOutside, onDismiss, ...layerProps } = props;
+	const context = import_react.useContext(DismissableLayerContext);
+	const [node, setNode] = import_react.useState(null);
+	const ownerDocument = node?.ownerDocument ?? globalThis?.document;
+	const [, force] = import_react.useState({});
+	const composedRefs = useComposedRefs$1(forwardedRef, (node2) => setNode(node2));
+	const layers = Array.from(context.layers);
+	const [highestLayerWithOutsidePointerEventsDisabled] = [...context.layersWithOutsidePointerEventsDisabled].slice(-1);
+	const highestLayerWithOutsidePointerEventsDisabledIndex = layers.indexOf(highestLayerWithOutsidePointerEventsDisabled);
+	const index = node ? layers.indexOf(node) : -1;
+	const isBodyPointerEventsDisabled = context.layersWithOutsidePointerEventsDisabled.size > 0;
+	const isPointerEventsEnabled = index >= highestLayerWithOutsidePointerEventsDisabledIndex;
+	const pointerDownOutside = usePointerDownOutside((event) => {
+		const target = event.target;
+		const isPointerDownOnBranch = [...context.branches].some((branch) => branch.contains(target));
+		if (!isPointerEventsEnabled || isPointerDownOnBranch) return;
+		onPointerDownOutside?.(event);
+		onInteractOutside?.(event);
+		if (!event.defaultPrevented) onDismiss?.();
+	}, ownerDocument);
+	const focusOutside = useFocusOutside((event) => {
+		const target = event.target;
+		if ([...context.branches].some((branch) => branch.contains(target))) return;
+		onFocusOutside?.(event);
+		onInteractOutside?.(event);
+		if (!event.defaultPrevented) onDismiss?.();
+	}, ownerDocument);
+	useEscapeKeydown((event) => {
+		if (!(index === context.layers.size - 1)) return;
+		onEscapeKeyDown?.(event);
+		if (!event.defaultPrevented && onDismiss) {
+			event.preventDefault();
+			onDismiss();
+		}
+	}, ownerDocument);
+	import_react.useEffect(() => {
+		if (!node) return;
+		if (disableOutsidePointerEvents) {
+			if (context.layersWithOutsidePointerEventsDisabled.size === 0) {
+				originalBodyPointerEvents = ownerDocument.body.style.pointerEvents;
+				ownerDocument.body.style.pointerEvents = "none";
+			}
+			context.layersWithOutsidePointerEventsDisabled.add(node);
+		}
+		context.layers.add(node);
+		dispatchUpdate();
+		return () => {
+			if (disableOutsidePointerEvents && context.layersWithOutsidePointerEventsDisabled.size === 1) ownerDocument.body.style.pointerEvents = originalBodyPointerEvents;
+		};
+	}, [
+		node,
+		ownerDocument,
+		disableOutsidePointerEvents,
+		context
+	]);
+	import_react.useEffect(() => {
+		return () => {
+			if (!node) return;
+			context.layers.delete(node);
+			context.layersWithOutsidePointerEventsDisabled.delete(node);
+			dispatchUpdate();
+		};
+	}, [node, context]);
+	import_react.useEffect(() => {
+		const handleUpdate = () => force({});
+		document.addEventListener(CONTEXT_UPDATE, handleUpdate);
+		return () => document.removeEventListener(CONTEXT_UPDATE, handleUpdate);
+	}, []);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$3.div, {
+		...layerProps,
+		ref: composedRefs,
+		style: {
+			pointerEvents: isBodyPointerEventsDisabled ? isPointerEventsEnabled ? "auto" : "none" : void 0,
+			...props.style
+		},
+		onFocusCapture: composeEventHandlers(props.onFocusCapture, focusOutside.onFocusCapture),
+		onBlurCapture: composeEventHandlers(props.onBlurCapture, focusOutside.onBlurCapture),
+		onPointerDownCapture: composeEventHandlers(props.onPointerDownCapture, pointerDownOutside.onPointerDownCapture)
+	});
+});
+DismissableLayer.displayName = DISMISSABLE_LAYER_NAME;
+var BRANCH_NAME = "DismissableLayerBranch";
+var DismissableLayerBranch = import_react.forwardRef((props, forwardedRef) => {
+	const context = import_react.useContext(DismissableLayerContext);
+	const ref = import_react.useRef(null);
+	const composedRefs = useComposedRefs$1(forwardedRef, ref);
+	import_react.useEffect(() => {
+		const node = ref.current;
+		if (node) {
+			context.branches.add(node);
+			return () => {
+				context.branches.delete(node);
+			};
+		}
+	}, [context.branches]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$3.div, {
+		...props,
+		ref: composedRefs
+	});
+});
+DismissableLayerBranch.displayName = BRANCH_NAME;
+function usePointerDownOutside(onPointerDownOutside, ownerDocument = globalThis?.document) {
+	const handlePointerDownOutside = useCallbackRef$1(onPointerDownOutside);
+	const isPointerInsideReactTreeRef = import_react.useRef(false);
+	const handleClickRef = import_react.useRef(() => {});
+	import_react.useEffect(() => {
+		const handlePointerDown = (event) => {
+			if (event.target && !isPointerInsideReactTreeRef.current) {
+				let handleAndDispatchPointerDownOutsideEvent2 = function() {
+					handleAndDispatchCustomEvent(POINTER_DOWN_OUTSIDE, handlePointerDownOutside, eventDetail, { discrete: true });
+				};
+				const eventDetail = { originalEvent: event };
+				if (event.pointerType === "touch") {
+					ownerDocument.removeEventListener("click", handleClickRef.current);
+					handleClickRef.current = handleAndDispatchPointerDownOutsideEvent2;
+					ownerDocument.addEventListener("click", handleClickRef.current, { once: true });
+				} else handleAndDispatchPointerDownOutsideEvent2();
+			} else ownerDocument.removeEventListener("click", handleClickRef.current);
+			isPointerInsideReactTreeRef.current = false;
+		};
+		const timerId = window.setTimeout(() => {
+			ownerDocument.addEventListener("pointerdown", handlePointerDown);
+		}, 0);
+		return () => {
+			window.clearTimeout(timerId);
+			ownerDocument.removeEventListener("pointerdown", handlePointerDown);
+			ownerDocument.removeEventListener("click", handleClickRef.current);
+		};
+	}, [ownerDocument, handlePointerDownOutside]);
+	return { onPointerDownCapture: () => isPointerInsideReactTreeRef.current = true };
+}
+function useFocusOutside(onFocusOutside, ownerDocument = globalThis?.document) {
+	const handleFocusOutside = useCallbackRef$1(onFocusOutside);
+	const isFocusInsideReactTreeRef = import_react.useRef(false);
+	import_react.useEffect(() => {
+		const handleFocus = (event) => {
+			if (event.target && !isFocusInsideReactTreeRef.current) handleAndDispatchCustomEvent(FOCUS_OUTSIDE, handleFocusOutside, { originalEvent: event }, { discrete: false });
+		};
+		ownerDocument.addEventListener("focusin", handleFocus);
+		return () => ownerDocument.removeEventListener("focusin", handleFocus);
+	}, [ownerDocument, handleFocusOutside]);
+	return {
+		onFocusCapture: () => isFocusInsideReactTreeRef.current = true,
+		onBlurCapture: () => isFocusInsideReactTreeRef.current = false
+	};
+}
+function dispatchUpdate() {
+	const event = new CustomEvent(CONTEXT_UPDATE);
+	document.dispatchEvent(event);
+}
+function handleAndDispatchCustomEvent(name, handler, detail, { discrete }) {
+	const target = detail.originalEvent.target;
+	const event = new CustomEvent(name, {
+		bubbles: false,
+		cancelable: true,
+		detail
+	});
+	if (handler) target.addEventListener(name, handler, { once: true });
+	if (discrete) dispatchDiscreteCustomEvent(target, event);
+	else target.dispatchEvent(event);
+}
+//#endregion
+//#region node_modules/@radix-ui/react-focus-scope/node_modules/@radix-ui/react-slot/dist/index.mjs
+/* @__NO_SIDE_EFFECTS__ */
+function createSlot$2(ownerName) {
+	const SlotClone = /* @__PURE__ */ createSlotClone$2(ownerName);
+	const Slot2 = import_react.forwardRef((props, forwardedRef) => {
+		const { children, ...slotProps } = props;
+		const childrenArray = import_react.Children.toArray(children);
+		const slottable = childrenArray.find(isSlottable$2);
+		if (slottable) {
+			const newElement = slottable.props.children;
+			const newChildren = childrenArray.map((child) => {
+				if (child === slottable) {
+					if (import_react.Children.count(newElement) > 1) return import_react.Children.only(null);
+					return import_react.isValidElement(newElement) ? newElement.props.children : null;
+				} else return child;
+			});
+			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
+				...slotProps,
+				ref: forwardedRef,
+				children: import_react.isValidElement(newElement) ? import_react.cloneElement(newElement, void 0, newChildren) : null
+			});
+		}
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
+			...slotProps,
+			ref: forwardedRef,
+			children
+		});
+	});
+	Slot2.displayName = `${ownerName}.Slot`;
+	return Slot2;
+}
+/* @__NO_SIDE_EFFECTS__ */
+function createSlotClone$2(ownerName) {
+	const SlotClone = import_react.forwardRef((props, forwardedRef) => {
+		const { children, ...slotProps } = props;
+		if (import_react.isValidElement(children)) {
+			const childrenRef = getElementRef$3(children);
+			const props2 = mergeProps$2(slotProps, children.props);
+			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
+			return import_react.cloneElement(children, props2);
+		}
+		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
+	});
+	SlotClone.displayName = `${ownerName}.SlotClone`;
+	return SlotClone;
+}
+var SLOTTABLE_IDENTIFIER$2 = Symbol("radix.slottable");
+function isSlottable$2(child) {
+	return import_react.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER$2;
+}
+function mergeProps$2(slotProps, childProps) {
+	const overrideProps = { ...childProps };
+	for (const propName in childProps) {
+		const slotPropValue = slotProps[propName];
+		const childPropValue = childProps[propName];
+		if (/^on[A-Z]/.test(propName)) {
+			if (slotPropValue && childPropValue) overrideProps[propName] = (...args) => {
+				const result = childPropValue(...args);
+				slotPropValue(...args);
+				return result;
+			};
+			else if (slotPropValue) overrideProps[propName] = slotPropValue;
+		} else if (propName === "style") overrideProps[propName] = {
+			...slotPropValue,
+			...childPropValue
+		};
+		else if (propName === "className") overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
+	}
+	return {
+		...slotProps,
+		...overrideProps
+	};
+}
+function getElementRef$3(element) {
+	let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
+	let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+	if (mayWarn) return element.ref;
+	getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
+	mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+	if (mayWarn) return element.props.ref;
+	return element.props.ref || element.ref;
+}
+//#endregion
+//#region node_modules/@radix-ui/react-focus-scope/node_modules/@radix-ui/react-primitive/dist/index.mjs
+var Primitive$2 = [
+	"a",
+	"button",
+	"div",
+	"form",
+	"h2",
+	"h3",
+	"img",
+	"input",
+	"label",
+	"li",
+	"nav",
+	"ol",
+	"p",
+	"select",
+	"span",
+	"svg",
+	"ul"
+].reduce((primitive, node) => {
+	const Slot = /* @__PURE__ */ createSlot$2(`Primitive.${node}`);
+	const Node = import_react.forwardRef((props, forwardedRef) => {
+		const { asChild, ...primitiveProps } = props;
+		const Comp = asChild ? Slot : node;
+		if (typeof window !== "undefined") window[Symbol.for("radix-ui")] = true;
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Comp, {
+			...primitiveProps,
+			ref: forwardedRef
+		});
+	});
+	Node.displayName = `Primitive.${node}`;
+	return {
+		...primitive,
+		[node]: Node
+	};
+}, {});
+//#endregion
+//#region node_modules/@radix-ui/react-focus-scope/dist/index.mjs
+var AUTOFOCUS_ON_MOUNT = "focusScope.autoFocusOnMount";
+var AUTOFOCUS_ON_UNMOUNT = "focusScope.autoFocusOnUnmount";
+var EVENT_OPTIONS = {
+	bubbles: false,
+	cancelable: true
+};
+var FOCUS_SCOPE_NAME = "FocusScope";
+var FocusScope = import_react.forwardRef((props, forwardedRef) => {
+	const { loop = false, trapped = false, onMountAutoFocus: onMountAutoFocusProp, onUnmountAutoFocus: onUnmountAutoFocusProp, ...scopeProps } = props;
+	const [container, setContainer] = import_react.useState(null);
+	const onMountAutoFocus = useCallbackRef$1(onMountAutoFocusProp);
+	const onUnmountAutoFocus = useCallbackRef$1(onUnmountAutoFocusProp);
+	const lastFocusedElementRef = import_react.useRef(null);
+	const composedRefs = useComposedRefs$1(forwardedRef, (node) => setContainer(node));
+	const focusScope = import_react.useRef({
+		paused: false,
+		pause() {
+			this.paused = true;
+		},
+		resume() {
+			this.paused = false;
+		}
+	}).current;
+	import_react.useEffect(() => {
+		if (trapped) {
+			let handleFocusIn2 = function(event) {
+				if (focusScope.paused || !container) return;
+				const target = event.target;
+				if (container.contains(target)) lastFocusedElementRef.current = target;
+				else focus(lastFocusedElementRef.current, { select: true });
+			}, handleFocusOut2 = function(event) {
+				if (focusScope.paused || !container) return;
+				const relatedTarget = event.relatedTarget;
+				if (relatedTarget === null) return;
+				if (!container.contains(relatedTarget)) focus(lastFocusedElementRef.current, { select: true });
+			}, handleMutations2 = function(mutations) {
+				if (document.activeElement !== document.body) return;
+				for (const mutation of mutations) if (mutation.removedNodes.length > 0) focus(container);
+			};
+			document.addEventListener("focusin", handleFocusIn2);
+			document.addEventListener("focusout", handleFocusOut2);
+			const mutationObserver = new MutationObserver(handleMutations2);
+			if (container) mutationObserver.observe(container, {
+				childList: true,
+				subtree: true
+			});
+			return () => {
+				document.removeEventListener("focusin", handleFocusIn2);
+				document.removeEventListener("focusout", handleFocusOut2);
+				mutationObserver.disconnect();
+			};
+		}
+	}, [
+		trapped,
+		container,
+		focusScope.paused
+	]);
+	import_react.useEffect(() => {
+		if (container) {
+			focusScopesStack.add(focusScope);
+			const previouslyFocusedElement = document.activeElement;
+			if (!container.contains(previouslyFocusedElement)) {
+				const mountEvent = new CustomEvent(AUTOFOCUS_ON_MOUNT, EVENT_OPTIONS);
+				container.addEventListener(AUTOFOCUS_ON_MOUNT, onMountAutoFocus);
+				container.dispatchEvent(mountEvent);
+				if (!mountEvent.defaultPrevented) {
+					focusFirst(removeLinks(getTabbableCandidates(container)), { select: true });
+					if (document.activeElement === previouslyFocusedElement) focus(container);
+				}
+			}
+			return () => {
+				container.removeEventListener(AUTOFOCUS_ON_MOUNT, onMountAutoFocus);
+				setTimeout(() => {
+					const unmountEvent = new CustomEvent(AUTOFOCUS_ON_UNMOUNT, EVENT_OPTIONS);
+					container.addEventListener(AUTOFOCUS_ON_UNMOUNT, onUnmountAutoFocus);
+					container.dispatchEvent(unmountEvent);
+					if (!unmountEvent.defaultPrevented) focus(previouslyFocusedElement ?? document.body, { select: true });
+					container.removeEventListener(AUTOFOCUS_ON_UNMOUNT, onUnmountAutoFocus);
+					focusScopesStack.remove(focusScope);
+				}, 0);
+			};
+		}
+	}, [
+		container,
+		onMountAutoFocus,
+		onUnmountAutoFocus,
+		focusScope
+	]);
+	const handleKeyDown = import_react.useCallback((event) => {
+		if (!loop && !trapped) return;
+		if (focusScope.paused) return;
+		const isTabKey = event.key === "Tab" && !event.altKey && !event.ctrlKey && !event.metaKey;
+		const focusedElement = document.activeElement;
+		if (isTabKey && focusedElement) {
+			const container2 = event.currentTarget;
+			const [first, last] = getTabbableEdges(container2);
+			if (!(first && last)) {
+				if (focusedElement === container2) event.preventDefault();
+			} else if (!event.shiftKey && focusedElement === last) {
+				event.preventDefault();
+				if (loop) focus(first, { select: true });
+			} else if (event.shiftKey && focusedElement === first) {
+				event.preventDefault();
+				if (loop) focus(last, { select: true });
+			}
+		}
+	}, [
+		loop,
+		trapped,
+		focusScope.paused
+	]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$2.div, {
+		tabIndex: -1,
+		...scopeProps,
+		ref: composedRefs,
+		onKeyDown: handleKeyDown
+	});
+});
+FocusScope.displayName = FOCUS_SCOPE_NAME;
+function focusFirst(candidates, { select = false } = {}) {
+	const previouslyFocusedElement = document.activeElement;
+	for (const candidate of candidates) {
+		focus(candidate, { select });
+		if (document.activeElement !== previouslyFocusedElement) return;
+	}
+}
+function getTabbableEdges(container) {
+	const candidates = getTabbableCandidates(container);
+	return [findVisible(candidates, container), findVisible(candidates.reverse(), container)];
+}
+function getTabbableCandidates(container) {
+	const nodes = [];
+	const walker = document.createTreeWalker(container, NodeFilter.SHOW_ELEMENT, { acceptNode: (node) => {
+		const isHiddenInput = node.tagName === "INPUT" && node.type === "hidden";
+		if (node.disabled || node.hidden || isHiddenInput) return NodeFilter.FILTER_SKIP;
+		return node.tabIndex >= 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+	} });
+	while (walker.nextNode()) nodes.push(walker.currentNode);
+	return nodes;
+}
+function findVisible(elements, container) {
+	for (const element of elements) if (!isHidden(element, { upTo: container })) return element;
+}
+function isHidden(node, { upTo }) {
+	if (getComputedStyle(node).visibility === "hidden") return true;
+	while (node) {
+		if (upTo !== void 0 && node === upTo) return false;
+		if (getComputedStyle(node).display === "none") return true;
+		node = node.parentElement;
+	}
+	return false;
+}
+function isSelectableInput(element) {
+	return element instanceof HTMLInputElement && "select" in element;
+}
+function focus(element, { select = false } = {}) {
+	if (element && element.focus) {
+		const previouslyFocusedElement = document.activeElement;
+		element.focus({ preventScroll: true });
+		if (element !== previouslyFocusedElement && isSelectableInput(element) && select) element.select();
+	}
+}
+var focusScopesStack = createFocusScopesStack();
+function createFocusScopesStack() {
+	let stack = [];
+	return {
+		add(focusScope) {
+			const activeFocusScope = stack[0];
+			if (focusScope !== activeFocusScope) activeFocusScope?.pause();
+			stack = arrayRemove(stack, focusScope);
+			stack.unshift(focusScope);
+		},
+		remove(focusScope) {
+			stack = arrayRemove(stack, focusScope);
+			stack[0]?.resume();
+		}
+	};
+}
+function arrayRemove(array, item) {
+	const updatedArray = [...array];
+	const index = updatedArray.indexOf(item);
+	if (index !== -1) updatedArray.splice(index, 1);
+	return updatedArray;
+}
+function removeLinks(items) {
+	return items.filter((item) => item.tagName !== "A");
+}
+//#endregion
+//#region node_modules/@radix-ui/react-portal/node_modules/@radix-ui/react-slot/dist/index.mjs
+/* @__NO_SIDE_EFFECTS__ */
+function createSlot$1(ownerName) {
+	const SlotClone = /* @__PURE__ */ createSlotClone$1(ownerName);
+	const Slot2 = import_react.forwardRef((props, forwardedRef) => {
+		const { children, ...slotProps } = props;
+		const childrenArray = import_react.Children.toArray(children);
+		const slottable = childrenArray.find(isSlottable$1);
+		if (slottable) {
+			const newElement = slottable.props.children;
+			const newChildren = childrenArray.map((child) => {
+				if (child === slottable) {
+					if (import_react.Children.count(newElement) > 1) return import_react.Children.only(null);
+					return import_react.isValidElement(newElement) ? newElement.props.children : null;
+				} else return child;
+			});
+			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
+				...slotProps,
+				ref: forwardedRef,
+				children: import_react.isValidElement(newElement) ? import_react.cloneElement(newElement, void 0, newChildren) : null
+			});
+		}
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
+			...slotProps,
+			ref: forwardedRef,
+			children
+		});
+	});
+	Slot2.displayName = `${ownerName}.Slot`;
+	return Slot2;
+}
+/* @__NO_SIDE_EFFECTS__ */
+function createSlotClone$1(ownerName) {
+	const SlotClone = import_react.forwardRef((props, forwardedRef) => {
+		const { children, ...slotProps } = props;
+		if (import_react.isValidElement(children)) {
+			const childrenRef = getElementRef$2(children);
+			const props2 = mergeProps$1(slotProps, children.props);
+			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
+			return import_react.cloneElement(children, props2);
+		}
+		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
+	});
+	SlotClone.displayName = `${ownerName}.SlotClone`;
+	return SlotClone;
+}
+var SLOTTABLE_IDENTIFIER$1 = Symbol("radix.slottable");
+function isSlottable$1(child) {
+	return import_react.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER$1;
+}
+function mergeProps$1(slotProps, childProps) {
+	const overrideProps = { ...childProps };
+	for (const propName in childProps) {
+		const slotPropValue = slotProps[propName];
+		const childPropValue = childProps[propName];
+		if (/^on[A-Z]/.test(propName)) {
+			if (slotPropValue && childPropValue) overrideProps[propName] = (...args) => {
+				const result = childPropValue(...args);
+				slotPropValue(...args);
+				return result;
+			};
+			else if (slotPropValue) overrideProps[propName] = slotPropValue;
+		} else if (propName === "style") overrideProps[propName] = {
+			...slotPropValue,
+			...childPropValue
+		};
+		else if (propName === "className") overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
+	}
+	return {
+		...slotProps,
+		...overrideProps
+	};
+}
+function getElementRef$2(element) {
+	let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
+	let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+	if (mayWarn) return element.ref;
+	getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
+	mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+	if (mayWarn) return element.props.ref;
+	return element.props.ref || element.ref;
+}
+//#endregion
+//#region node_modules/@radix-ui/react-portal/node_modules/@radix-ui/react-primitive/dist/index.mjs
+var Primitive$1 = [
+	"a",
+	"button",
+	"div",
+	"form",
+	"h2",
+	"h3",
+	"img",
+	"input",
+	"label",
+	"li",
+	"nav",
+	"ol",
+	"p",
+	"select",
+	"span",
+	"svg",
+	"ul"
+].reduce((primitive, node) => {
+	const Slot = /* @__PURE__ */ createSlot$1(`Primitive.${node}`);
+	const Node = import_react.forwardRef((props, forwardedRef) => {
+		const { asChild, ...primitiveProps } = props;
+		const Comp = asChild ? Slot : node;
+		if (typeof window !== "undefined") window[Symbol.for("radix-ui")] = true;
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Comp, {
+			...primitiveProps,
+			ref: forwardedRef
+		});
+	});
+	Node.displayName = `Primitive.${node}`;
+	return {
+		...primitive,
+		[node]: Node
+	};
+}, {});
+//#endregion
+//#region node_modules/@radix-ui/react-portal/dist/index.mjs
+var PORTAL_NAME$1 = "Portal";
+var Portal$1 = import_react.forwardRef((props, forwardedRef) => {
+	const { container: containerProp, ...portalProps } = props;
+	const [mounted, setMounted] = import_react.useState(false);
+	useLayoutEffect2(() => setMounted(true), []);
+	const container = containerProp || mounted && globalThis?.document?.body;
+	return container ? import_react_dom.createPortal(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$1.div, {
+		...portalProps,
+		ref: forwardedRef
+	}), container) : null;
+});
+Portal$1.displayName = PORTAL_NAME$1;
+//#endregion
+//#region node_modules/@radix-ui/react-presence/dist/index.mjs
+function useStateMachine(initialState, machine) {
+	return import_react.useReducer((state, event) => {
+		return machine[state][event] ?? state;
+	}, initialState);
+}
+var Presence = (props) => {
+	const { present, children } = props;
+	const presence = usePresence$1(present);
+	const child = typeof children === "function" ? children({ present: presence.isPresent }) : import_react.Children.only(children);
+	const ref = useComposedRefs$1(presence.ref, getElementRef$1(child));
+	return typeof children === "function" || presence.isPresent ? import_react.cloneElement(child, { ref }) : null;
+};
+Presence.displayName = "Presence";
+function usePresence$1(present) {
+	const [node, setNode] = import_react.useState();
+	const stylesRef = import_react.useRef(null);
+	const prevPresentRef = import_react.useRef(present);
+	const prevAnimationNameRef = import_react.useRef("none");
+	const [state, send] = useStateMachine(present ? "mounted" : "unmounted", {
+		mounted: {
+			UNMOUNT: "unmounted",
+			ANIMATION_OUT: "unmountSuspended"
+		},
+		unmountSuspended: {
+			MOUNT: "mounted",
+			ANIMATION_END: "unmounted"
+		},
+		unmounted: { MOUNT: "mounted" }
+	});
+	import_react.useEffect(() => {
+		const currentAnimationName = getAnimationName(stylesRef.current);
+		prevAnimationNameRef.current = state === "mounted" ? currentAnimationName : "none";
+	}, [state]);
+	useLayoutEffect2(() => {
+		const styles = stylesRef.current;
+		const wasPresent = prevPresentRef.current;
+		if (wasPresent !== present) {
+			const prevAnimationName = prevAnimationNameRef.current;
+			const currentAnimationName = getAnimationName(styles);
+			if (present) send("MOUNT");
+			else if (currentAnimationName === "none" || styles?.display === "none") send("UNMOUNT");
+			else if (wasPresent && prevAnimationName !== currentAnimationName) send("ANIMATION_OUT");
+			else send("UNMOUNT");
+			prevPresentRef.current = present;
+		}
+	}, [present, send]);
+	useLayoutEffect2(() => {
+		if (node) {
+			let timeoutId;
+			const ownerWindow = node.ownerDocument.defaultView ?? window;
+			const handleAnimationEnd = (event) => {
+				const isCurrentAnimation = getAnimationName(stylesRef.current).includes(CSS.escape(event.animationName));
+				if (event.target === node && isCurrentAnimation) {
+					send("ANIMATION_END");
+					if (!prevPresentRef.current) {
+						const currentFillMode = node.style.animationFillMode;
+						node.style.animationFillMode = "forwards";
+						timeoutId = ownerWindow.setTimeout(() => {
+							if (node.style.animationFillMode === "forwards") node.style.animationFillMode = currentFillMode;
+						});
+					}
+				}
+			};
+			const handleAnimationStart = (event) => {
+				if (event.target === node) prevAnimationNameRef.current = getAnimationName(stylesRef.current);
+			};
+			node.addEventListener("animationstart", handleAnimationStart);
+			node.addEventListener("animationcancel", handleAnimationEnd);
+			node.addEventListener("animationend", handleAnimationEnd);
+			return () => {
+				ownerWindow.clearTimeout(timeoutId);
+				node.removeEventListener("animationstart", handleAnimationStart);
+				node.removeEventListener("animationcancel", handleAnimationEnd);
+				node.removeEventListener("animationend", handleAnimationEnd);
+			};
+		} else send("ANIMATION_END");
+	}, [node, send]);
+	return {
+		isPresent: ["mounted", "unmountSuspended"].includes(state),
+		ref: import_react.useCallback((node2) => {
+			stylesRef.current = node2 ? getComputedStyle(node2) : null;
+			setNode(node2);
+		}, [])
+	};
+}
+function getAnimationName(styles) {
+	return styles?.animationName || "none";
+}
+function getElementRef$1(element) {
+	let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
+	let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+	if (mayWarn) return element.ref;
+	getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
+	mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+	if (mayWarn) return element.props.ref;
+	return element.props.ref || element.ref;
+}
+//#endregion
+//#region node_modules/@radix-ui/react-dialog/node_modules/@radix-ui/react-slot/dist/index.mjs
+/* @__NO_SIDE_EFFECTS__ */
+function createSlot(ownerName) {
+	const SlotClone = /* @__PURE__ */ createSlotClone(ownerName);
+	const Slot2 = import_react.forwardRef((props, forwardedRef) => {
+		const { children, ...slotProps } = props;
+		const childrenArray = import_react.Children.toArray(children);
+		const slottable = childrenArray.find(isSlottable);
+		if (slottable) {
+			const newElement = slottable.props.children;
+			const newChildren = childrenArray.map((child) => {
+				if (child === slottable) {
+					if (import_react.Children.count(newElement) > 1) return import_react.Children.only(null);
+					return import_react.isValidElement(newElement) ? newElement.props.children : null;
+				} else return child;
+			});
+			return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
+				...slotProps,
+				ref: forwardedRef,
+				children: import_react.isValidElement(newElement) ? import_react.cloneElement(newElement, void 0, newChildren) : null
+			});
+		}
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SlotClone, {
+			...slotProps,
+			ref: forwardedRef,
+			children
+		});
+	});
+	Slot2.displayName = `${ownerName}.Slot`;
+	return Slot2;
+}
+/* @__NO_SIDE_EFFECTS__ */
+function createSlotClone(ownerName) {
+	const SlotClone = import_react.forwardRef((props, forwardedRef) => {
+		const { children, ...slotProps } = props;
+		if (import_react.isValidElement(children)) {
+			const childrenRef = getElementRef(children);
+			const props2 = mergeProps(slotProps, children.props);
+			if (children.type !== import_react.Fragment) props2.ref = forwardedRef ? composeRefs$1(forwardedRef, childrenRef) : childrenRef;
+			return import_react.cloneElement(children, props2);
+		}
+		return import_react.Children.count(children) > 1 ? import_react.Children.only(null) : null;
+	});
+	SlotClone.displayName = `${ownerName}.SlotClone`;
+	return SlotClone;
+}
+var SLOTTABLE_IDENTIFIER = Symbol("radix.slottable");
+function isSlottable(child) {
+	return import_react.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER;
+}
+function mergeProps(slotProps, childProps) {
+	const overrideProps = { ...childProps };
+	for (const propName in childProps) {
+		const slotPropValue = slotProps[propName];
+		const childPropValue = childProps[propName];
+		if (/^on[A-Z]/.test(propName)) {
+			if (slotPropValue && childPropValue) overrideProps[propName] = (...args) => {
+				const result = childPropValue(...args);
+				slotPropValue(...args);
+				return result;
+			};
+			else if (slotPropValue) overrideProps[propName] = slotPropValue;
+		} else if (propName === "style") overrideProps[propName] = {
+			...slotPropValue,
+			...childPropValue
+		};
+		else if (propName === "className") overrideProps[propName] = [slotPropValue, childPropValue].filter(Boolean).join(" ");
+	}
+	return {
+		...slotProps,
+		...overrideProps
+	};
+}
+function getElementRef(element) {
+	let getter = Object.getOwnPropertyDescriptor(element.props, "ref")?.get;
+	let mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+	if (mayWarn) return element.ref;
+	getter = Object.getOwnPropertyDescriptor(element, "ref")?.get;
+	mayWarn = getter && "isReactWarning" in getter && getter.isReactWarning;
+	if (mayWarn) return element.props.ref;
+	return element.props.ref || element.ref;
+}
+//#endregion
+//#region node_modules/@radix-ui/react-dialog/node_modules/@radix-ui/react-primitive/dist/index.mjs
+var Primitive = [
+	"a",
+	"button",
+	"div",
+	"form",
+	"h2",
+	"h3",
+	"img",
+	"input",
+	"label",
+	"li",
+	"nav",
+	"ol",
+	"p",
+	"select",
+	"span",
+	"svg",
+	"ul"
+].reduce((primitive, node) => {
+	const Slot = /* @__PURE__ */ createSlot(`Primitive.${node}`);
+	const Node = import_react.forwardRef((props, forwardedRef) => {
+		const { asChild, ...primitiveProps } = props;
+		const Comp = asChild ? Slot : node;
+		if (typeof window !== "undefined") window[Symbol.for("radix-ui")] = true;
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Comp, {
+			...primitiveProps,
+			ref: forwardedRef
+		});
+	});
+	Node.displayName = `Primitive.${node}`;
+	return {
+		...primitive,
+		[node]: Node
+	};
+}, {});
+//#endregion
+//#region node_modules/@radix-ui/react-focus-guards/dist/index.mjs
+var count = 0;
+function useFocusGuards() {
+	import_react.useEffect(() => {
+		const edgeGuards = document.querySelectorAll("[data-radix-focus-guard]");
+		document.body.insertAdjacentElement("afterbegin", edgeGuards[0] ?? createFocusGuard());
+		document.body.insertAdjacentElement("beforeend", edgeGuards[1] ?? createFocusGuard());
+		count++;
+		return () => {
+			if (count === 1) document.querySelectorAll("[data-radix-focus-guard]").forEach((node) => node.remove());
+			count--;
+		};
+	}, []);
+}
+function createFocusGuard() {
+	const element = document.createElement("span");
+	element.setAttribute("data-radix-focus-guard", "");
+	element.tabIndex = 0;
+	element.style.outline = "none";
+	element.style.opacity = "0";
+	element.style.position = "fixed";
+	element.style.pointerEvents = "none";
+	return element;
+}
+//#endregion
+//#region node_modules/tslib/tslib.es6.mjs
+var __assign = function() {
+	__assign = Object.assign || function __assign(t) {
+		for (var s, i = 1, n = arguments.length; i < n; i++) {
+			s = arguments[i];
+			for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+		}
+		return t;
+	};
+	return __assign.apply(this, arguments);
+};
+function __rest(s, e) {
+	var t = {};
+	for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0) t[p] = s[p];
+	if (s != null && typeof Object.getOwnPropertySymbols === "function") {
+		for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i])) t[p[i]] = s[p[i]];
+	}
+	return t;
+}
+function __spreadArray(to, from, pack) {
+	if (pack || arguments.length === 2) {
+		for (var i = 0, l = from.length, ar; i < l; i++) if (ar || !(i in from)) {
+			if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+			ar[i] = from[i];
+		}
+	}
+	return to.concat(ar || Array.prototype.slice.call(from));
+}
+//#endregion
+//#region node_modules/react-remove-scroll-bar/dist/es2015/constants.js
+var zeroRightClassName = "right-scroll-bar-position";
+var fullWidthClassName = "width-before-scroll-bar";
+var noScrollbarsClassName = "with-scroll-bars-hidden";
+/**
+* Name of a CSS variable containing the amount of "hidden" scrollbar
+* ! might be undefined ! use will fallback!
+*/
+var removedBarSizeVariable = "--removed-body-scroll-bar-size";
+//#endregion
+//#region node_modules/use-callback-ref/dist/es2015/assignRef.js
+/**
+* Assigns a value for a given ref, no matter of the ref format
+* @param {RefObject} ref - a callback function or ref object
+* @param value - a new value
+*
+* @see https://github.com/theKashey/use-callback-ref#assignref
+* @example
+* const refObject = useRef();
+* const refFn = (ref) => {....}
+*
+* assignRef(refObject, "refValue");
+* assignRef(refFn, "refValue");
+*/
+function assignRef(ref, value) {
+	if (typeof ref === "function") ref(value);
+	else if (ref) ref.current = value;
+	return ref;
+}
+//#endregion
+//#region node_modules/use-callback-ref/dist/es2015/useRef.js
+/**
+* creates a MutableRef with ref change callback
+* @param initialValue - initial ref value
+* @param {Function} callback - a callback to run when value changes
+*
+* @example
+* const ref = useCallbackRef(0, (newValue, oldValue) => console.log(oldValue, '->', newValue);
+* ref.current = 1;
+* // prints 0 -> 1
+*
+* @see https://reactjs.org/docs/hooks-reference.html#useref
+* @see https://github.com/theKashey/use-callback-ref#usecallbackref---to-replace-reactuseref
+* @returns {MutableRefObject}
+*/
+function useCallbackRef(initialValue, callback) {
+	var ref = (0, import_react.useState)(function() {
+		return {
+			value: initialValue,
+			callback,
+			facade: {
+				get current() {
+					return ref.value;
+				},
+				set current(value) {
+					var last = ref.value;
+					if (last !== value) {
+						ref.value = value;
+						ref.callback(value, last);
+					}
+				}
+			}
+		};
+	})[0];
+	ref.callback = callback;
+	return ref.facade;
+}
+//#endregion
+//#region node_modules/use-callback-ref/dist/es2015/useMergeRef.js
+var useIsomorphicLayoutEffect = typeof window !== "undefined" ? import_react.useLayoutEffect : import_react.useEffect;
+var currentValues = /* @__PURE__ */ new WeakMap();
+/**
+* Merges two or more refs together providing a single interface to set their value
+* @param {RefObject|Ref} refs
+* @returns {MutableRefObject} - a new ref, which translates all changes to {refs}
+*
+* @see {@link mergeRefs} a version without buit-in memoization
+* @see https://github.com/theKashey/use-callback-ref#usemergerefs
+* @example
+* const Component = React.forwardRef((props, ref) => {
+*   const ownRef = useRef();
+*   const domRef = useMergeRefs([ref, ownRef]); // 👈 merge together
+*   return <div ref={domRef}>...</div>
+* }
+*/
+function useMergeRefs(refs, defaultValue) {
+	var callbackRef = useCallbackRef(defaultValue || null, function(newValue) {
+		return refs.forEach(function(ref) {
+			return assignRef(ref, newValue);
+		});
+	});
+	useIsomorphicLayoutEffect(function() {
+		var oldValue = currentValues.get(callbackRef);
+		if (oldValue) {
+			var prevRefs_1 = new Set(oldValue);
+			var nextRefs_1 = new Set(refs);
+			var current_1 = callbackRef.current;
+			prevRefs_1.forEach(function(ref) {
+				if (!nextRefs_1.has(ref)) assignRef(ref, null);
+			});
+			nextRefs_1.forEach(function(ref) {
+				if (!prevRefs_1.has(ref)) assignRef(ref, current_1);
+			});
+		}
+		currentValues.set(callbackRef, refs);
+	}, [refs]);
+	return callbackRef;
+}
+//#endregion
+//#region node_modules/use-sidecar/dist/es2015/medium.js
+function ItoI(a) {
+	return a;
+}
+function innerCreateMedium(defaults, middleware) {
+	if (middleware === void 0) middleware = ItoI;
+	var buffer = [];
+	var assigned = false;
+	return {
+		read: function() {
+			if (assigned) throw new Error("Sidecar: could not `read` from an `assigned` medium. `read` could be used only with `useMedium`.");
+			if (buffer.length) return buffer[buffer.length - 1];
+			return defaults;
+		},
+		useMedium: function(data) {
+			var item = middleware(data, assigned);
+			buffer.push(item);
+			return function() {
+				buffer = buffer.filter(function(x) {
+					return x !== item;
+				});
+			};
+		},
+		assignSyncMedium: function(cb) {
+			assigned = true;
+			while (buffer.length) {
+				var cbs = buffer;
+				buffer = [];
+				cbs.forEach(cb);
+			}
+			buffer = {
+				push: function(x) {
+					return cb(x);
+				},
+				filter: function() {
+					return buffer;
+				}
+			};
+		},
+		assignMedium: function(cb) {
+			assigned = true;
+			var pendingQueue = [];
+			if (buffer.length) {
+				var cbs = buffer;
+				buffer = [];
+				cbs.forEach(cb);
+				pendingQueue = buffer;
+			}
+			var executeQueue = function() {
+				var cbs = pendingQueue;
+				pendingQueue = [];
+				cbs.forEach(cb);
+			};
+			var cycle = function() {
+				return Promise.resolve().then(executeQueue);
+			};
+			cycle();
+			buffer = {
+				push: function(x) {
+					pendingQueue.push(x);
+					cycle();
+				},
+				filter: function(filter) {
+					pendingQueue = pendingQueue.filter(filter);
+					return buffer;
+				}
+			};
+		}
+	};
+}
+function createSidecarMedium(options) {
+	if (options === void 0) options = {};
+	var medium = innerCreateMedium(null);
+	medium.options = __assign({
+		async: true,
+		ssr: false
+	}, options);
+	return medium;
+}
+//#endregion
+//#region node_modules/use-sidecar/dist/es2015/exports.js
+var SideCar = function(_a) {
+	var sideCar = _a.sideCar, rest = __rest(_a, ["sideCar"]);
+	if (!sideCar) throw new Error("Sidecar: please provide `sideCar` property to import the right car");
+	var Target = sideCar.read();
+	if (!Target) throw new Error("Sidecar medium not found");
+	return import_react.createElement(Target, __assign({}, rest));
+};
+SideCar.isSideCarExport = true;
+function exportSidecar(medium, exported) {
+	medium.useMedium(exported);
+	return SideCar;
+}
+//#endregion
+//#region node_modules/react-remove-scroll/dist/es2015/medium.js
+var effectCar = createSidecarMedium();
+//#endregion
+//#region node_modules/react-remove-scroll/dist/es2015/UI.js
+var nothing = function() {};
+/**
+* Removes scrollbar from the page and contain the scroll within the Lock
+*/
+var RemoveScroll = import_react.forwardRef(function(props, parentRef) {
+	var ref = import_react.useRef(null);
+	var _a = import_react.useState({
+		onScrollCapture: nothing,
+		onWheelCapture: nothing,
+		onTouchMoveCapture: nothing
+	}), callbacks = _a[0], setCallbacks = _a[1];
+	var forwardProps = props.forwardProps, children = props.children, className = props.className, removeScrollBar = props.removeScrollBar, enabled = props.enabled, shards = props.shards, sideCar = props.sideCar, noRelative = props.noRelative, noIsolation = props.noIsolation, inert = props.inert, allowPinchZoom = props.allowPinchZoom, _b = props.as, Container = _b === void 0 ? "div" : _b, gapMode = props.gapMode, rest = __rest(props, [
+		"forwardProps",
+		"children",
+		"className",
+		"removeScrollBar",
+		"enabled",
+		"shards",
+		"sideCar",
+		"noRelative",
+		"noIsolation",
+		"inert",
+		"allowPinchZoom",
+		"as",
+		"gapMode"
+	]);
+	var SideCar = sideCar;
+	var containerRef = useMergeRefs([ref, parentRef]);
+	var containerProps = __assign(__assign({}, rest), callbacks);
+	return import_react.createElement(import_react.Fragment, null, enabled && import_react.createElement(SideCar, {
+		sideCar: effectCar,
+		removeScrollBar,
+		shards,
+		noRelative,
+		noIsolation,
+		inert,
+		setCallbacks,
+		allowPinchZoom: !!allowPinchZoom,
+		lockRef: ref,
+		gapMode
+	}), forwardProps ? import_react.cloneElement(import_react.Children.only(children), __assign(__assign({}, containerProps), { ref: containerRef })) : import_react.createElement(Container, __assign({}, containerProps, {
+		className,
+		ref: containerRef
+	}), children));
+});
+RemoveScroll.defaultProps = {
+	enabled: true,
+	removeScrollBar: true,
+	inert: false
+};
+RemoveScroll.classNames = {
+	fullWidth: fullWidthClassName,
+	zeroRight: zeroRightClassName
+};
+//#endregion
+//#region node_modules/get-nonce/dist/es2015/index.js
+var currentNonce;
+var getNonce = function() {
+	if (currentNonce) return currentNonce;
+	if (typeof __webpack_nonce__ !== "undefined") return __webpack_nonce__;
+};
+//#endregion
+//#region node_modules/react-style-singleton/dist/es2015/singleton.js
+function makeStyleTag() {
+	if (!document) return null;
+	var tag = document.createElement("style");
+	tag.type = "text/css";
+	var nonce = getNonce();
+	if (nonce) tag.setAttribute("nonce", nonce);
+	return tag;
+}
+function injectStyles(tag, css) {
+	if (tag.styleSheet) tag.styleSheet.cssText = css;
+	else tag.appendChild(document.createTextNode(css));
+}
+function insertStyleTag(tag) {
+	(document.head || document.getElementsByTagName("head")[0]).appendChild(tag);
+}
+var stylesheetSingleton = function() {
+	var counter = 0;
+	var stylesheet = null;
+	return {
+		add: function(style) {
+			if (counter == 0) {
+				if (stylesheet = makeStyleTag()) {
+					injectStyles(stylesheet, style);
+					insertStyleTag(stylesheet);
+				}
+			}
+			counter++;
+		},
+		remove: function() {
+			counter--;
+			if (!counter && stylesheet) {
+				stylesheet.parentNode && stylesheet.parentNode.removeChild(stylesheet);
+				stylesheet = null;
+			}
+		}
+	};
+};
+//#endregion
+//#region node_modules/react-style-singleton/dist/es2015/hook.js
+/**
+* creates a hook to control style singleton
+* @see {@link styleSingleton} for a safer component version
+* @example
+* ```tsx
+* const useStyle = styleHookSingleton();
+* ///
+* useStyle('body { overflow: hidden}');
+*/
+var styleHookSingleton = function() {
+	var sheet = stylesheetSingleton();
+	return function(styles, isDynamic) {
+		import_react.useEffect(function() {
+			sheet.add(styles);
+			return function() {
+				sheet.remove();
+			};
+		}, [styles && isDynamic]);
+	};
+};
+//#endregion
+//#region node_modules/react-style-singleton/dist/es2015/component.js
+/**
+* create a Component to add styles on demand
+* - styles are added when first instance is mounted
+* - styles are removed when the last instance is unmounted
+* - changing styles in runtime does nothing unless dynamic is set. But with multiple components that can lead to the undefined behavior
+*/
+var styleSingleton = function() {
+	var useStyle = styleHookSingleton();
+	var Sheet = function(_a) {
+		var styles = _a.styles, dynamic = _a.dynamic;
+		useStyle(styles, dynamic);
+		return null;
+	};
+	return Sheet;
+};
+//#endregion
+//#region node_modules/react-remove-scroll-bar/dist/es2015/utils.js
+var zeroGap = {
+	left: 0,
+	top: 0,
+	right: 0,
+	gap: 0
+};
+var parse = function(x) {
+	return parseInt(x || "", 10) || 0;
+};
+var getOffset = function(gapMode) {
+	var cs = window.getComputedStyle(document.body);
+	var left = cs[gapMode === "padding" ? "paddingLeft" : "marginLeft"];
+	var top = cs[gapMode === "padding" ? "paddingTop" : "marginTop"];
+	var right = cs[gapMode === "padding" ? "paddingRight" : "marginRight"];
+	return [
+		parse(left),
+		parse(top),
+		parse(right)
+	];
+};
+var getGapWidth = function(gapMode) {
+	if (gapMode === void 0) gapMode = "margin";
+	if (typeof window === "undefined") return zeroGap;
+	var offsets = getOffset(gapMode);
+	var documentWidth = document.documentElement.clientWidth;
+	var windowWidth = window.innerWidth;
+	return {
+		left: offsets[0],
+		top: offsets[1],
+		right: offsets[2],
+		gap: Math.max(0, windowWidth - documentWidth + offsets[2] - offsets[0])
+	};
+};
+//#endregion
+//#region node_modules/react-remove-scroll-bar/dist/es2015/component.js
+var Style = styleSingleton();
+var lockAttribute = "data-scroll-locked";
+var getStyles = function(_a, allowRelative, gapMode, important) {
+	var left = _a.left, top = _a.top, right = _a.right, gap = _a.gap;
+	if (gapMode === void 0) gapMode = "margin";
+	return "\n  .".concat(noScrollbarsClassName, " {\n   overflow: hidden ").concat(important, ";\n   padding-right: ").concat(gap, "px ").concat(important, ";\n  }\n  body[").concat(lockAttribute, "] {\n    overflow: hidden ").concat(important, ";\n    overscroll-behavior: contain;\n    ").concat([
+		allowRelative && "position: relative ".concat(important, ";"),
+		gapMode === "margin" && "\n    padding-left: ".concat(left, "px;\n    padding-top: ").concat(top, "px;\n    padding-right: ").concat(right, "px;\n    margin-left:0;\n    margin-top:0;\n    margin-right: ").concat(gap, "px ").concat(important, ";\n    "),
+		gapMode === "padding" && "padding-right: ".concat(gap, "px ").concat(important, ";")
+	].filter(Boolean).join(""), "\n  }\n  \n  .").concat(zeroRightClassName, " {\n    right: ").concat(gap, "px ").concat(important, ";\n  }\n  \n  .").concat(fullWidthClassName, " {\n    margin-right: ").concat(gap, "px ").concat(important, ";\n  }\n  \n  .").concat(zeroRightClassName, " .").concat(zeroRightClassName, " {\n    right: 0 ").concat(important, ";\n  }\n  \n  .").concat(fullWidthClassName, " .").concat(fullWidthClassName, " {\n    margin-right: 0 ").concat(important, ";\n  }\n  \n  body[").concat(lockAttribute, "] {\n    ").concat(removedBarSizeVariable, ": ").concat(gap, "px;\n  }\n");
+};
+var getCurrentUseCounter = function() {
+	var counter = parseInt(document.body.getAttribute("data-scroll-locked") || "0", 10);
+	return isFinite(counter) ? counter : 0;
+};
+var useLockAttribute = function() {
+	import_react.useEffect(function() {
+		document.body.setAttribute(lockAttribute, (getCurrentUseCounter() + 1).toString());
+		return function() {
+			var newCounter = getCurrentUseCounter() - 1;
+			if (newCounter <= 0) document.body.removeAttribute(lockAttribute);
+			else document.body.setAttribute(lockAttribute, newCounter.toString());
+		};
+	}, []);
+};
+/**
+* Removes page scrollbar and blocks page scroll when mounted
+*/
+var RemoveScrollBar = function(_a) {
+	var noRelative = _a.noRelative, noImportant = _a.noImportant, _b = _a.gapMode, gapMode = _b === void 0 ? "margin" : _b;
+	useLockAttribute();
+	var gap = import_react.useMemo(function() {
+		return getGapWidth(gapMode);
+	}, [gapMode]);
+	return import_react.createElement(Style, { styles: getStyles(gap, !noRelative, gapMode, !noImportant ? "!important" : "") });
+};
+//#endregion
+//#region node_modules/react-remove-scroll/dist/es2015/aggresiveCapture.js
+var passiveSupported = false;
+if (typeof window !== "undefined") try {
+	var options = Object.defineProperty({}, "passive", { get: function() {
+		passiveSupported = true;
+		return true;
+	} });
+	window.addEventListener("test", options, options);
+	window.removeEventListener("test", options, options);
+} catch (err) {
+	passiveSupported = false;
+}
+var nonPassive = passiveSupported ? { passive: false } : false;
+//#endregion
+//#region node_modules/react-remove-scroll/dist/es2015/handleScroll.js
+var alwaysContainsScroll = function(node) {
+	return node.tagName === "TEXTAREA";
+};
+var elementCanBeScrolled = function(node, overflow) {
+	if (!(node instanceof Element)) return false;
+	var styles = window.getComputedStyle(node);
+	return styles[overflow] !== "hidden" && !(styles.overflowY === styles.overflowX && !alwaysContainsScroll(node) && styles[overflow] === "visible");
+};
+var elementCouldBeVScrolled = function(node) {
+	return elementCanBeScrolled(node, "overflowY");
+};
+var elementCouldBeHScrolled = function(node) {
+	return elementCanBeScrolled(node, "overflowX");
+};
+var locationCouldBeScrolled = function(axis, node) {
+	var ownerDocument = node.ownerDocument;
+	var current = node;
+	do {
+		if (typeof ShadowRoot !== "undefined" && current instanceof ShadowRoot) current = current.host;
+		if (elementCouldBeScrolled(axis, current)) {
+			var _a = getScrollVariables(axis, current);
+			if (_a[1] > _a[2]) return true;
+		}
+		current = current.parentNode;
+	} while (current && current !== ownerDocument.body);
+	return false;
+};
+var getVScrollVariables = function(_a) {
+	return [
+		_a.scrollTop,
+		_a.scrollHeight,
+		_a.clientHeight
+	];
+};
+var getHScrollVariables = function(_a) {
+	return [
+		_a.scrollLeft,
+		_a.scrollWidth,
+		_a.clientWidth
+	];
+};
+var elementCouldBeScrolled = function(axis, node) {
+	return axis === "v" ? elementCouldBeVScrolled(node) : elementCouldBeHScrolled(node);
+};
+var getScrollVariables = function(axis, node) {
+	return axis === "v" ? getVScrollVariables(node) : getHScrollVariables(node);
+};
+var getDirectionFactor = function(axis, direction) {
+	/**
+	* If the element's direction is rtl (right-to-left), then scrollLeft is 0 when the scrollbar is at its rightmost position,
+	* and then increasingly negative as you scroll towards the end of the content.
+	* @see https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollLeft
+	*/
+	return axis === "h" && direction === "rtl" ? -1 : 1;
+};
+var handleScroll = function(axis, endTarget, event, sourceDelta, noOverscroll) {
+	var directionFactor = getDirectionFactor(axis, window.getComputedStyle(endTarget).direction);
+	var delta = directionFactor * sourceDelta;
+	var target = event.target;
+	var targetInLock = endTarget.contains(target);
+	var shouldCancelScroll = false;
+	var isDeltaPositive = delta > 0;
+	var availableScroll = 0;
+	var availableScrollTop = 0;
+	do {
+		if (!target) break;
+		var _a = getScrollVariables(axis, target), position = _a[0];
+		var elementScroll = _a[1] - _a[2] - directionFactor * position;
+		if (position || elementScroll) {
+			if (elementCouldBeScrolled(axis, target)) {
+				availableScroll += elementScroll;
+				availableScrollTop += position;
+			}
+		}
+		var parent_1 = target.parentNode;
+		target = parent_1 && parent_1.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? parent_1.host : parent_1;
+	} while (!targetInLock && target !== document.body || targetInLock && (endTarget.contains(target) || endTarget === target));
+	if (isDeltaPositive && (noOverscroll && Math.abs(availableScroll) < 1 || !noOverscroll && delta > availableScroll)) shouldCancelScroll = true;
+	else if (!isDeltaPositive && (noOverscroll && Math.abs(availableScrollTop) < 1 || !noOverscroll && -delta > availableScrollTop)) shouldCancelScroll = true;
+	return shouldCancelScroll;
+};
+//#endregion
+//#region node_modules/react-remove-scroll/dist/es2015/SideEffect.js
+var getTouchXY = function(event) {
+	return "changedTouches" in event ? [event.changedTouches[0].clientX, event.changedTouches[0].clientY] : [0, 0];
+};
+var getDeltaXY = function(event) {
+	return [event.deltaX, event.deltaY];
+};
+var extractRef = function(ref) {
+	return ref && "current" in ref ? ref.current : ref;
+};
+var deltaCompare = function(x, y) {
+	return x[0] === y[0] && x[1] === y[1];
+};
+var generateStyle = function(id) {
+	return "\n  .block-interactivity-".concat(id, " {pointer-events: none;}\n  .allow-interactivity-").concat(id, " {pointer-events: all;}\n");
+};
+var idCounter = 0;
+var lockStack = [];
+function RemoveScrollSideCar(props) {
+	var shouldPreventQueue = import_react.useRef([]);
+	var touchStartRef = import_react.useRef([0, 0]);
+	var activeAxis = import_react.useRef();
+	var id = import_react.useState(idCounter++)[0];
+	var Style = import_react.useState(styleSingleton)[0];
+	var lastProps = import_react.useRef(props);
+	import_react.useEffect(function() {
+		lastProps.current = props;
+	}, [props]);
+	import_react.useEffect(function() {
+		if (props.inert) {
+			document.body.classList.add("block-interactivity-".concat(id));
+			var allow_1 = __spreadArray([props.lockRef.current], (props.shards || []).map(extractRef), true).filter(Boolean);
+			allow_1.forEach(function(el) {
+				return el.classList.add("allow-interactivity-".concat(id));
+			});
+			return function() {
+				document.body.classList.remove("block-interactivity-".concat(id));
+				allow_1.forEach(function(el) {
+					return el.classList.remove("allow-interactivity-".concat(id));
+				});
+			};
+		}
+	}, [
+		props.inert,
+		props.lockRef.current,
+		props.shards
+	]);
+	var shouldCancelEvent = import_react.useCallback(function(event, parent) {
+		if ("touches" in event && event.touches.length === 2 || event.type === "wheel" && event.ctrlKey) return !lastProps.current.allowPinchZoom;
+		var touch = getTouchXY(event);
+		var touchStart = touchStartRef.current;
+		var deltaX = "deltaX" in event ? event.deltaX : touchStart[0] - touch[0];
+		var deltaY = "deltaY" in event ? event.deltaY : touchStart[1] - touch[1];
+		var currentAxis;
+		var target = event.target;
+		var moveDirection = Math.abs(deltaX) > Math.abs(deltaY) ? "h" : "v";
+		if ("touches" in event && moveDirection === "h" && target.type === "range") return false;
+		var selection = window.getSelection();
+		var anchorNode = selection && selection.anchorNode;
+		if (anchorNode ? anchorNode === target || anchorNode.contains(target) : false) return false;
+		var canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
+		if (!canBeScrolledInMainDirection) return true;
+		if (canBeScrolledInMainDirection) currentAxis = moveDirection;
+		else {
+			currentAxis = moveDirection === "v" ? "h" : "v";
+			canBeScrolledInMainDirection = locationCouldBeScrolled(moveDirection, target);
+		}
+		if (!canBeScrolledInMainDirection) return false;
+		if (!activeAxis.current && "changedTouches" in event && (deltaX || deltaY)) activeAxis.current = currentAxis;
+		if (!currentAxis) return true;
+		var cancelingAxis = activeAxis.current || currentAxis;
+		return handleScroll(cancelingAxis, parent, event, cancelingAxis === "h" ? deltaX : deltaY, true);
+	}, []);
+	var shouldPrevent = import_react.useCallback(function(_event) {
+		var event = _event;
+		if (!lockStack.length || lockStack[lockStack.length - 1] !== Style) return;
+		var delta = "deltaY" in event ? getDeltaXY(event) : getTouchXY(event);
+		var sourceEvent = shouldPreventQueue.current.filter(function(e) {
+			return e.name === event.type && (e.target === event.target || event.target === e.shadowParent) && deltaCompare(e.delta, delta);
+		})[0];
+		if (sourceEvent && sourceEvent.should) {
+			if (event.cancelable) event.preventDefault();
+			return;
+		}
+		if (!sourceEvent) {
+			var shardNodes = (lastProps.current.shards || []).map(extractRef).filter(Boolean).filter(function(node) {
+				return node.contains(event.target);
+			});
+			if (shardNodes.length > 0 ? shouldCancelEvent(event, shardNodes[0]) : !lastProps.current.noIsolation) {
+				if (event.cancelable) event.preventDefault();
+			}
+		}
+	}, []);
+	var shouldCancel = import_react.useCallback(function(name, delta, target, should) {
+		var event = {
+			name,
+			delta,
+			target,
+			should,
+			shadowParent: getOutermostShadowParent(target)
+		};
+		shouldPreventQueue.current.push(event);
+		setTimeout(function() {
+			shouldPreventQueue.current = shouldPreventQueue.current.filter(function(e) {
+				return e !== event;
+			});
+		}, 1);
+	}, []);
+	var scrollTouchStart = import_react.useCallback(function(event) {
+		touchStartRef.current = getTouchXY(event);
+		activeAxis.current = void 0;
+	}, []);
+	var scrollWheel = import_react.useCallback(function(event) {
+		shouldCancel(event.type, getDeltaXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
+	}, []);
+	var scrollTouchMove = import_react.useCallback(function(event) {
+		shouldCancel(event.type, getTouchXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
+	}, []);
+	import_react.useEffect(function() {
+		lockStack.push(Style);
+		props.setCallbacks({
+			onScrollCapture: scrollWheel,
+			onWheelCapture: scrollWheel,
+			onTouchMoveCapture: scrollTouchMove
+		});
+		document.addEventListener("wheel", shouldPrevent, nonPassive);
+		document.addEventListener("touchmove", shouldPrevent, nonPassive);
+		document.addEventListener("touchstart", scrollTouchStart, nonPassive);
+		return function() {
+			lockStack = lockStack.filter(function(inst) {
+				return inst !== Style;
+			});
+			document.removeEventListener("wheel", shouldPrevent, nonPassive);
+			document.removeEventListener("touchmove", shouldPrevent, nonPassive);
+			document.removeEventListener("touchstart", scrollTouchStart, nonPassive);
+		};
+	}, []);
+	var removeScrollBar = props.removeScrollBar, inert = props.inert;
+	return import_react.createElement(import_react.Fragment, null, inert ? import_react.createElement(Style, { styles: generateStyle(id) }) : null, removeScrollBar ? import_react.createElement(RemoveScrollBar, {
+		noRelative: props.noRelative,
+		gapMode: props.gapMode
+	}) : null);
+}
+function getOutermostShadowParent(node) {
+	var shadowParent = null;
+	while (node !== null) {
+		if (node instanceof ShadowRoot) {
+			shadowParent = node.host;
+			node = node.host;
+		}
+		node = node.parentNode;
+	}
+	return shadowParent;
+}
+//#endregion
+//#region node_modules/react-remove-scroll/dist/es2015/sidecar.js
+var sidecar_default = exportSidecar(effectCar, RemoveScrollSideCar);
+//#endregion
+//#region node_modules/react-remove-scroll/dist/es2015/Combination.js
+var ReactRemoveScroll = import_react.forwardRef(function(props, ref) {
+	return import_react.createElement(RemoveScroll, __assign({}, props, {
+		ref,
+		sideCar: sidecar_default
+	}));
+});
+ReactRemoveScroll.classNames = RemoveScroll.classNames;
+//#endregion
+//#region node_modules/aria-hidden/dist/es2015/index.js
+var getDefaultParent = function(originalTarget) {
+	if (typeof document === "undefined") return null;
+	return (Array.isArray(originalTarget) ? originalTarget[0] : originalTarget).ownerDocument.body;
+};
+var counterMap = /* @__PURE__ */ new WeakMap();
+var uncontrolledNodes = /* @__PURE__ */ new WeakMap();
+var markerMap = {};
+var lockCount = 0;
+var unwrapHost = function(node) {
+	return node && (node.host || unwrapHost(node.parentNode));
+};
+var correctTargets = function(parent, targets) {
+	return targets.map(function(target) {
+		if (parent.contains(target)) return target;
+		var correctedTarget = unwrapHost(target);
+		if (correctedTarget && parent.contains(correctedTarget)) return correctedTarget;
+		console.error("aria-hidden", target, "in not contained inside", parent, ". Doing nothing");
+		return null;
+	}).filter(function(x) {
+		return Boolean(x);
+	});
+};
+/**
+* Marks everything except given node(or nodes) as aria-hidden
+* @param {Element | Element[]} originalTarget - elements to keep on the page
+* @param [parentNode] - top element, defaults to document.body
+* @param {String} [markerName] - a special attribute to mark every node
+* @param {String} [controlAttribute] - html Attribute to control
+* @return {Undo} undo command
+*/
+var applyAttributeToOthers = function(originalTarget, parentNode, markerName, controlAttribute) {
+	var targets = correctTargets(parentNode, Array.isArray(originalTarget) ? originalTarget : [originalTarget]);
+	if (!markerMap[markerName]) markerMap[markerName] = /* @__PURE__ */ new WeakMap();
+	var markerCounter = markerMap[markerName];
+	var hiddenNodes = [];
+	var elementsToKeep = /* @__PURE__ */ new Set();
+	var elementsToStop = new Set(targets);
+	var keep = function(el) {
+		if (!el || elementsToKeep.has(el)) return;
+		elementsToKeep.add(el);
+		keep(el.parentNode);
+	};
+	targets.forEach(keep);
+	var deep = function(parent) {
+		if (!parent || elementsToStop.has(parent)) return;
+		Array.prototype.forEach.call(parent.children, function(node) {
+			if (elementsToKeep.has(node)) deep(node);
+			else try {
+				var attr = node.getAttribute(controlAttribute);
+				var alreadyHidden = attr !== null && attr !== "false";
+				var counterValue = (counterMap.get(node) || 0) + 1;
+				var markerValue = (markerCounter.get(node) || 0) + 1;
+				counterMap.set(node, counterValue);
+				markerCounter.set(node, markerValue);
+				hiddenNodes.push(node);
+				if (counterValue === 1 && alreadyHidden) uncontrolledNodes.set(node, true);
+				if (markerValue === 1) node.setAttribute(markerName, "true");
+				if (!alreadyHidden) node.setAttribute(controlAttribute, "true");
+			} catch (e) {
+				console.error("aria-hidden: cannot operate on ", node, e);
+			}
+		});
+	};
+	deep(parentNode);
+	elementsToKeep.clear();
+	lockCount++;
+	return function() {
+		hiddenNodes.forEach(function(node) {
+			var counterValue = counterMap.get(node) - 1;
+			var markerValue = markerCounter.get(node) - 1;
+			counterMap.set(node, counterValue);
+			markerCounter.set(node, markerValue);
+			if (!counterValue) {
+				if (!uncontrolledNodes.has(node)) node.removeAttribute(controlAttribute);
+				uncontrolledNodes.delete(node);
+			}
+			if (!markerValue) node.removeAttribute(markerName);
+		});
+		lockCount--;
+		if (!lockCount) {
+			counterMap = /* @__PURE__ */ new WeakMap();
+			counterMap = /* @__PURE__ */ new WeakMap();
+			uncontrolledNodes = /* @__PURE__ */ new WeakMap();
+			markerMap = {};
+		}
+	};
+};
+/**
+* Marks everything except given node(or nodes) as aria-hidden
+* @param {Element | Element[]} originalTarget - elements to keep on the page
+* @param [parentNode] - top element, defaults to document.body
+* @param {String} [markerName] - a special attribute to mark every node
+* @return {Undo} undo command
+*/
+var hideOthers = function(originalTarget, parentNode, markerName) {
+	if (markerName === void 0) markerName = "data-aria-hidden";
+	var targets = Array.from(Array.isArray(originalTarget) ? originalTarget : [originalTarget]);
+	var activeParentNode = parentNode || getDefaultParent(originalTarget);
+	if (!activeParentNode) return function() {
+		return null;
+	};
+	targets.push.apply(targets, Array.from(activeParentNode.querySelectorAll("[aria-live], script")));
+	return applyAttributeToOthers(targets, activeParentNode, markerName, "aria-hidden");
+};
+//#endregion
+//#region node_modules/@radix-ui/react-dialog/dist/index.mjs
+var DIALOG_NAME = "Dialog";
+var [createDialogContext, createDialogScope] = createContextScope(DIALOG_NAME);
+var [DialogProvider, useDialogContext] = createDialogContext(DIALOG_NAME);
+var Dialog$1 = (props) => {
+	const { __scopeDialog, children, open: openProp, defaultOpen, onOpenChange, modal = true } = props;
+	const triggerRef = import_react.useRef(null);
+	const contentRef = import_react.useRef(null);
+	const [open, setOpen] = useControllableState({
+		prop: openProp,
+		defaultProp: defaultOpen ?? false,
+		onChange: onOpenChange,
+		caller: DIALOG_NAME
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogProvider, {
+		scope: __scopeDialog,
+		triggerRef,
+		contentRef,
+		contentId: useId(),
+		titleId: useId(),
+		descriptionId: useId(),
+		open,
+		onOpenChange: setOpen,
+		onOpenToggle: import_react.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
+		modal,
+		children
+	});
+};
+Dialog$1.displayName = DIALOG_NAME;
+var TRIGGER_NAME = "DialogTrigger";
+var DialogTrigger = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeDialog, ...triggerProps } = props;
+	const context = useDialogContext(TRIGGER_NAME, __scopeDialog);
+	const composedTriggerRef = useComposedRefs$1(forwardedRef, context.triggerRef);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.button, {
+		type: "button",
+		"aria-haspopup": "dialog",
+		"aria-expanded": context.open,
+		"aria-controls": context.contentId,
+		"data-state": getState(context.open),
+		...triggerProps,
+		ref: composedTriggerRef,
+		onClick: composeEventHandlers(props.onClick, context.onOpenToggle)
+	});
+});
+DialogTrigger.displayName = TRIGGER_NAME;
+var PORTAL_NAME = "DialogPortal";
+var [PortalProvider, usePortalContext] = createDialogContext(PORTAL_NAME, { forceMount: void 0 });
+var DialogPortal$1 = (props) => {
+	const { __scopeDialog, forceMount, children, container } = props;
+	const context = useDialogContext(PORTAL_NAME, __scopeDialog);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PortalProvider, {
+		scope: __scopeDialog,
+		forceMount,
+		children: import_react.Children.map(children, (child) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Presence, {
+			present: forceMount || context.open,
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Portal$1, {
+				asChild: true,
+				container,
+				children: child
+			})
+		}))
+	});
+};
+DialogPortal$1.displayName = PORTAL_NAME;
+var OVERLAY_NAME = "DialogOverlay";
+var DialogOverlay$1 = import_react.forwardRef((props, forwardedRef) => {
+	const portalContext = usePortalContext(OVERLAY_NAME, props.__scopeDialog);
+	const { forceMount = portalContext.forceMount, ...overlayProps } = props;
+	const context = useDialogContext(OVERLAY_NAME, props.__scopeDialog);
+	return context.modal ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Presence, {
+		present: forceMount || context.open,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogOverlayImpl, {
+			...overlayProps,
+			ref: forwardedRef
+		})
+	}) : null;
+});
+DialogOverlay$1.displayName = OVERLAY_NAME;
+var Slot = /* @__PURE__ */ createSlot("DialogOverlay.RemoveScroll");
+var DialogOverlayImpl = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeDialog, ...overlayProps } = props;
+	const context = useDialogContext(OVERLAY_NAME, __scopeDialog);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ReactRemoveScroll, {
+		as: Slot,
+		allowPinchZoom: true,
+		shards: [context.contentRef],
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.div, {
+			"data-state": getState(context.open),
+			...overlayProps,
+			ref: forwardedRef,
+			style: {
+				pointerEvents: "auto",
+				...overlayProps.style
+			}
+		})
+	});
+});
+var CONTENT_NAME = "DialogContent";
+var DialogContent$1 = import_react.forwardRef((props, forwardedRef) => {
+	const portalContext = usePortalContext(CONTENT_NAME, props.__scopeDialog);
+	const { forceMount = portalContext.forceMount, ...contentProps } = props;
+	const context = useDialogContext(CONTENT_NAME, props.__scopeDialog);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Presence, {
+		present: forceMount || context.open,
+		children: context.modal ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogContentModal, {
+			...contentProps,
+			ref: forwardedRef
+		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogContentNonModal, {
+			...contentProps,
+			ref: forwardedRef
+		})
+	});
+});
+DialogContent$1.displayName = CONTENT_NAME;
+var DialogContentModal = import_react.forwardRef((props, forwardedRef) => {
+	const context = useDialogContext(CONTENT_NAME, props.__scopeDialog);
+	const contentRef = import_react.useRef(null);
+	const composedRefs = useComposedRefs$1(forwardedRef, context.contentRef, contentRef);
+	import_react.useEffect(() => {
+		const content = contentRef.current;
+		if (content) return hideOthers(content);
+	}, []);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogContentImpl, {
+		...props,
+		ref: composedRefs,
+		trapFocus: context.open,
+		disableOutsidePointerEvents: true,
+		onCloseAutoFocus: composeEventHandlers(props.onCloseAutoFocus, (event) => {
+			event.preventDefault();
+			context.triggerRef.current?.focus();
+		}),
+		onPointerDownOutside: composeEventHandlers(props.onPointerDownOutside, (event) => {
+			const originalEvent = event.detail.originalEvent;
+			const ctrlLeftClick = originalEvent.button === 0 && originalEvent.ctrlKey === true;
+			if (originalEvent.button === 2 || ctrlLeftClick) event.preventDefault();
+		}),
+		onFocusOutside: composeEventHandlers(props.onFocusOutside, (event) => event.preventDefault())
+	});
+});
+var DialogContentNonModal = import_react.forwardRef((props, forwardedRef) => {
+	const context = useDialogContext(CONTENT_NAME, props.__scopeDialog);
+	const hasInteractedOutsideRef = import_react.useRef(false);
+	const hasPointerDownOutsideRef = import_react.useRef(false);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogContentImpl, {
+		...props,
+		ref: forwardedRef,
+		trapFocus: false,
+		disableOutsidePointerEvents: false,
+		onCloseAutoFocus: (event) => {
+			props.onCloseAutoFocus?.(event);
+			if (!event.defaultPrevented) {
+				if (!hasInteractedOutsideRef.current) context.triggerRef.current?.focus();
+				event.preventDefault();
+			}
+			hasInteractedOutsideRef.current = false;
+			hasPointerDownOutsideRef.current = false;
+		},
+		onInteractOutside: (event) => {
+			props.onInteractOutside?.(event);
+			if (!event.defaultPrevented) {
+				hasInteractedOutsideRef.current = true;
+				if (event.detail.originalEvent.type === "pointerdown") hasPointerDownOutsideRef.current = true;
+			}
+			const target = event.target;
+			if (context.triggerRef.current?.contains(target)) event.preventDefault();
+			if (event.detail.originalEvent.type === "focusin" && hasPointerDownOutsideRef.current) event.preventDefault();
+		}
+	});
+});
+var DialogContentImpl = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeDialog, trapFocus, onOpenAutoFocus, onCloseAutoFocus, ...contentProps } = props;
+	const context = useDialogContext(CONTENT_NAME, __scopeDialog);
+	const contentRef = import_react.useRef(null);
+	const composedRefs = useComposedRefs$1(forwardedRef, contentRef);
+	useFocusGuards();
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FocusScope, {
+		asChild: true,
+		loop: true,
+		trapped: trapFocus,
+		onMountAutoFocus: onOpenAutoFocus,
+		onUnmountAutoFocus: onCloseAutoFocus,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DismissableLayer, {
+			role: "dialog",
+			id: context.contentId,
+			"aria-describedby": context.descriptionId,
+			"aria-labelledby": context.titleId,
+			"data-state": getState(context.open),
+			...contentProps,
+			ref: composedRefs,
+			onDismiss: () => context.onOpenChange(false)
+		})
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TitleWarning, { titleId: context.titleId }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DescriptionWarning, {
+		contentRef,
+		descriptionId: context.descriptionId
+	})] })] });
+});
+var TITLE_NAME = "DialogTitle";
+var DialogTitle$1 = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeDialog, ...titleProps } = props;
+	const context = useDialogContext(TITLE_NAME, __scopeDialog);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.h2, {
+		id: context.titleId,
+		...titleProps,
+		ref: forwardedRef
+	});
+});
+DialogTitle$1.displayName = TITLE_NAME;
+var DESCRIPTION_NAME = "DialogDescription";
+var DialogDescription$1 = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeDialog, ...descriptionProps } = props;
+	const context = useDialogContext(DESCRIPTION_NAME, __scopeDialog);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.p, {
+		id: context.descriptionId,
+		...descriptionProps,
+		ref: forwardedRef
+	});
+});
+DialogDescription$1.displayName = DESCRIPTION_NAME;
+var CLOSE_NAME = "DialogClose";
+var DialogClose = import_react.forwardRef((props, forwardedRef) => {
+	const { __scopeDialog, ...closeProps } = props;
+	const context = useDialogContext(CLOSE_NAME, __scopeDialog);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive.button, {
+		type: "button",
+		...closeProps,
+		ref: forwardedRef,
+		onClick: composeEventHandlers(props.onClick, () => context.onOpenChange(false))
+	});
+});
+DialogClose.displayName = CLOSE_NAME;
+function getState(open) {
+	return open ? "open" : "closed";
+}
+var TITLE_WARNING_NAME = "DialogTitleWarning";
+var [WarningProvider, useWarningContext] = createContext2(TITLE_WARNING_NAME, {
+	contentName: CONTENT_NAME,
+	titleName: TITLE_NAME,
+	docsSlug: "dialog"
+});
+var TitleWarning = ({ titleId }) => {
+	const titleWarningContext = useWarningContext(TITLE_WARNING_NAME);
+	const MESSAGE = `\`${titleWarningContext.contentName}\` requires a \`${titleWarningContext.titleName}\` for the component to be accessible for screen reader users.
+
+If you want to hide the \`${titleWarningContext.titleName}\`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/${titleWarningContext.docsSlug}`;
+	import_react.useEffect(() => {
+		if (titleId) {
+			if (!document.getElementById(titleId)) console.error(MESSAGE);
+		}
+	}, [MESSAGE, titleId]);
+	return null;
+};
+var DESCRIPTION_WARNING_NAME = "DialogDescriptionWarning";
+var DescriptionWarning = ({ contentRef, descriptionId }) => {
+	const MESSAGE = `Warning: Missing \`Description\` or \`aria-describedby={undefined}\` for {${useWarningContext(DESCRIPTION_WARNING_NAME).contentName}}.`;
+	import_react.useEffect(() => {
+		const describedById = contentRef.current?.getAttribute("aria-describedby");
+		if (descriptionId && describedById) {
+			if (!document.getElementById(descriptionId)) console.warn(MESSAGE);
+		}
+	}, [
+		MESSAGE,
+		contentRef,
+		descriptionId
+	]);
+	return null;
+};
+var Root$1 = Dialog$1;
+var Portal = DialogPortal$1;
+var Overlay = DialogOverlay$1;
+var Content = DialogContent$1;
+var Title = DialogTitle$1;
+var Description = DialogDescription$1;
+var Close = DialogClose;
+//#endregion
+//#region src/components/ui/dialog.jsx
+var Dialog = Root$1;
+var DialogPortal = Portal;
+var DialogOverlay = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Overlay, {
+	ref,
+	className: cn("fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", className),
+	...props
+}));
+DialogOverlay.displayName = Overlay.displayName;
+var DialogContent = import_react.forwardRef(({ className, children, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogPortal, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogOverlay, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Content, {
+	ref,
+	className: cn("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg", className),
+	...props,
+	children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Close, {
+		className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "h-4 w-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+			className: "sr-only",
+			children: "Close"
+		})]
+	})]
+})] }));
+DialogContent.displayName = Content.displayName;
+var DialogHeader = ({ className, ...props }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	className: cn("flex flex-col space-y-1.5 text-center sm:text-left", className),
+	...props
+});
+DialogHeader.displayName = "DialogHeader";
+var DialogFooter = ({ className, ...props }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+	className: cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className),
+	...props
+});
+DialogFooter.displayName = "DialogFooter";
+var DialogTitle = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Title, {
+	ref,
+	className: cn("text-lg font-semibold leading-none tracking-tight", className),
+	...props
+}));
+DialogTitle.displayName = Title.displayName;
+var DialogDescription = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Description, {
+	ref,
+	className: cn("text-sm text-muted-foreground", className),
+	...props
+}));
+DialogDescription.displayName = Description.displayName;
+//#endregion
+//#region src/features/call/CallScreen.jsx
+function CallScreen({ open, onClose, contact, muteMicOnJoin, callType = "audio", callStatus, localStream, remoteStream, remoteUserData, startCall, stopCall, switchCamera, toggleVideo, isVideoEnabled, getRemotePeerId }) {
+	const [micEnabled, setMicEnabled] = (0, import_react.useState)(!muteMicOnJoin);
+	const [videoEnabled, setVideoEnabled] = (0, import_react.useState)(callType === "video");
+	const [callTimer, setCallTimer] = (0, import_react.useState)(0);
+	const localVideoRef = (0, import_react.useRef)(null);
+	const remoteVideoRef = (0, import_react.useRef)(null);
+	const timerRef = (0, import_react.useRef)(null);
+	const appliedMuteRef = (0, import_react.useRef)(false);
+	(0, import_react.useEffect)(() => {
+		if (open && contact?.uid) {
+			setVideoEnabled(callType === "video");
+			appliedMuteRef.current = false;
+			getRemotePeerId(contact.uid).then((pid) => {
+				if (!pid) {
+					ue.error("المستخدم غير متصل حاليًا", { description: "لا يمكن إجراء المكالمة الآن، حاول لاحقًا" });
+					onClose();
+					return;
+				}
+				startCall(pid, {
+					displayName: contact.displayName || "",
+					photoURL: contact.photoURL || "",
+					username: contact.username || ""
+				}, callType);
+			});
+		}
+	}, [
+		open,
+		contact?.uid,
+		callType,
+		startCall,
+		getRemotePeerId,
+		onClose
+	]);
+	(0, import_react.useEffect)(() => {
+		if (muteMicOnJoin && localStream && !appliedMuteRef.current) {
+			const audioTrack = localStream.getAudioTracks()[0];
+			if (audioTrack) {
+				audioTrack.enabled = false;
+				setMicEnabled(false);
+				appliedMuteRef.current = true;
+			}
+		}
+	}, [localStream, muteMicOnJoin]);
+	(0, import_react.useEffect)(() => {
+		if (localVideoRef.current && localStream) localVideoRef.current.srcObject = localStream;
+	}, [localStream]);
+	(0, import_react.useEffect)(() => {
+		if (remoteVideoRef.current && remoteStream) remoteVideoRef.current.srcObject = remoteStream;
+	}, [remoteStream]);
+	(0, import_react.useEffect)(() => {
+		if (callStatus?.includes("متصل")) timerRef.current = setInterval(() => setCallTimer((p) => p + 1), 1e3);
+		else {
+			clearInterval(timerRef.current);
+			if (callStatus?.includes("انتهت") || callStatus?.includes("فشل")) setCallTimer(0);
+		}
+		return () => clearInterval(timerRef.current);
+	}, [callStatus]);
+	const handleEndCall = () => {
+		stopCall();
+		clearInterval(timerRef.current);
+		setCallTimer(0);
+		onClose();
+	};
+	const toggleMic = () => {
+		if (localStream) {
+			const t = localStream.getAudioTracks()[0];
+			if (t) {
+				t.enabled = !t.enabled;
+				setMicEnabled(t.enabled);
+			}
+		}
+	};
+	const handleToggleVideo = () => {
+		setVideoEnabled(toggleVideo());
+	};
+	const handleSwitchCamera = () => switchCamera();
+	const formatTime = (s) => {
+		return `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
+	};
+	const displayName = remoteUserData?.displayName || contact?.displayName || contact?.username || "مستخدم";
+	const isVideoCall = callType === "video";
+	const isConnected = callStatus?.includes("متصل");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+		open,
+		onOpenChange: (isOpen) => !isOpen && handleEndCall(),
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogContent, {
+			className: "w-full h-full max-w-none max-h-none p-0 m-0 border-none bg-black flex items-center justify-center",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "relative w-full h-full max-w-md mx-auto bg-gray-900 overflow-hidden",
+				children: [
+					isVideoCall && remoteStream && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
+						ref: remoteVideoRef,
+						autoPlay: true,
+						playsInline: true,
+						className: "absolute inset-0 w-full h-full object-cover"
+					}),
+					(!isVideoCall || !remoteStream) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "absolute inset-0 flex flex-col items-center justify-center px-6",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-sm text-gray-400 mb-4 bg-white/10 px-4 py-1 rounded-full",
+								children: callStatus
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Avatar, {
+								className: "h-28 w-28 border-4 border-white/20 shadow-2xl mb-4",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
+									className: "bg-gradient-to-br from-blue-600 to-cyan-500 text-white text-3xl font-bold",
+									children: displayName?.charAt(0) || /* @__PURE__ */ (0, import_jsx_runtime.jsx)(User$1, { className: "h-10 w-10" })
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xl font-bold text-white mb-1",
+								children: displayName
+							}),
+							contact?.username && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-sm text-gray-400",
+								children: ["@", contact.username]
+							}),
+							isConnected && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-2xl font-mono text-white mt-2",
+								children: formatTime(callTimer)
+							})
+						]
+					}),
+					isVideoCall && localStream && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "absolute top-4 right-4 w-28 h-40 rounded-xl overflow-hidden border-2 border-white/30 shadow-lg z-10 bg-black",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
+							ref: localVideoRef,
+							autoPlay: true,
+							muted: true,
+							playsInline: true,
+							className: "w-full h-full object-cover"
+						}), !videoEnabled && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "absolute inset-0 bg-gray-800/80 flex items-center justify-center",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoOff, { className: "h-6 w-6 text-white" })
+						})]
+					}),
+					isVideoCall && isConnected && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "absolute top-4 left-4 z-10 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-white text-sm font-mono",
+							children: formatTime(callTimer)
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: `absolute bottom-0 left-0 right-0 px-6 py-4 flex items-center justify-center gap-4 ${isVideoCall ? "bg-gradient-to-t from-black/80 to-transparent" : "bg-gray-900"}`,
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								variant: "outline",
+								size: "icon",
+								onClick: toggleMic,
+								className: `h-14 w-14 rounded-full border-2 ${micEnabled ? "bg-gray-800/80 border-gray-500" : "bg-red-600 border-red-500"}`,
+								children: micEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mic, { className: "h-5 w-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MicOff, { className: "h-5 w-5" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								variant: "destructive",
+								size: "icon",
+								onClick: handleEndCall,
+								className: "h-16 w-16 rounded-full bg-red-600 hover:bg-red-700 border-4 border-red-400/50 shadow-[0_0_25px_rgba(239,68,68,0.5)]",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PhoneOff, { className: "h-7 w-7" })
+							}),
+							isVideoCall && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								variant: "outline",
+								size: "icon",
+								onClick: handleToggleVideo,
+								className: `h-14 w-14 rounded-full border-2 ${videoEnabled ? "bg-gray-800/80 border-gray-500" : "bg-red-600 border-red-500"}`,
+								children: videoEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Video, { className: "h-5 w-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoOff, { className: "h-5 w-5" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								variant: "outline",
+								size: "icon",
+								onClick: handleSwitchCamera,
+								className: "h-14 w-14 rounded-full border-2 bg-gray-800/80 border-gray-500",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Camera, { className: "h-5 w-5" })
+							})] })
+						]
+					})
+				]
+			})
+		})
+	});
+}
+//#endregion
+//#region src/features/chat/ChatScreen.jsx
+var MessageActionsPopup$1 = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position }) => {
+	if (!position) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "fixed inset-0 z-50",
+		onClick: onClose,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "absolute bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 w-48 animate-in fade-in slide-in-from-bottom-2 duration-150",
+			style: {
+				top: Math.min(position.y, window.innerHeight - 200),
+				left: position.x > window.innerWidth / 2 ? position.x - 192 : position.x
+			},
+			onClick: (e) => e.stopPropagation(),
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+				onClick: () => {
+					onReply(message);
+					onClose();
+				},
+				className: "w-full text-right px-4 py-3 hover:bg-purple-50 flex items-center gap-3 text-sm",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+					className: "w-4 h-4 text-purple-600",
+					viewBox: "0 0 24 24",
+					fill: "none",
+					stroke: "currentColor",
+					strokeWidth: "2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: "9 17 4 12 9 7" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M20 18v-2a4 4 0 0 0-4-4H4" })]
+				}), "رد"]
+			}), isOwn && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+				onClick: () => {
+					onDeleteForEveryone(message);
+					onClose();
+				},
+				className: "w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }), " حذف للكل"]
+			})]
+		})
+	});
+};
+function ChatScreen({ contact, onBack, onCall }) {
+	const [message, setMessage] = (0, import_react.useState)("");
+	const [messages, setMessages] = (0, import_react.useState)([]);
+	const [loading, setLoading] = (0, import_react.useState)(true);
+	const [replyTo, setReplyTo] = (0, import_react.useState)(null);
+	const [actionPopup, setActionPopup] = (0, import_react.useState)(null);
+	const messagesEndRef = (0, import_react.useRef)(null);
+	const inputRef = (0, import_react.useRef)(null);
+	const currentUser = auth.currentUser;
+	const contactUid = contact?.uid || contact?.id;
+	const chatId = currentUser?.uid && contactUid ? [currentUser.uid, contactUid].sort().join("_") : null;
+	(0, import_react.useEffect)(() => {
+		if (!chatId) return;
+		const unsubscribe = onSnapshot(query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc")), (snapshot) => {
+			setMessages(snapshot.docs.map((d) => ({
+				id: d.id,
+				...d.data()
+			})));
+			setLoading(false);
+		}, (err) => {
+			console.error(err);
+			setLoading(false);
+		});
+		return () => unsubscribe();
+	}, [chatId]);
+	(0, import_react.useEffect)(() => {
+		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+	}, [messages]);
+	const handleSend = async () => {
+		if (!message.trim() || !chatId || !currentUser) return;
+		const text = message.trim();
+		setMessage("");
+		inputRef.current?.focus();
+		try {
+			await addDoc(collection(db, "chats", chatId, "messages"), {
+				text,
+				senderId: currentUser.uid,
+				timestamp: serverTimestamp$2(),
+				replyTo: replyTo ? {
+					id: replyTo.id,
+					text: replyTo.text,
+					senderName: replyTo.senderName
+				} : null
+			});
+			setReplyTo(null);
+		} catch (err) {
+			ue.error("تعذر إرسال الرسالة");
+			setMessage(text);
+		}
+	};
+	const handleDeleteForEveryone = async (msg) => {
+		if (!chatId) return;
+		try {
+			await updateDoc(doc(db, "chats", chatId, "messages", msg.id), { deleted: true });
+			ue.success("تم حذف الرسالة");
+		} catch (err) {
+			ue.error("فشل حذف الرسالة");
+		}
+	};
+	const handleLongPress = (msg, e) => {
+		const touch = e.touches?.[0] || e;
+		setActionPopup({
+			message: msg,
+			position: {
+				x: touch.clientX,
+				y: touch.clientY
+			}
+		});
+	};
+	const groupedMessages = (0, import_react.useMemo)(() => {
+		const groups = [];
+		let currentDate = "";
+		let currentGroup = [];
+		messages.forEach((msg) => {
+			const dateStr = (msg.timestamp?.toDate?.() || new Date(msg.timestamp)).toLocaleDateString("ar-SA", {
+				weekday: "long",
+				year: "numeric",
+				month: "numeric",
+				day: "numeric"
+			});
+			if (dateStr !== currentDate) {
+				if (currentGroup.length > 0) groups.push({
+					date: currentDate,
+					messages: currentGroup
+				});
+				currentDate = dateStr;
+				currentGroup = [msg];
+			} else currentGroup.push(msg);
+		});
+		if (currentGroup.length > 0) groups.push({
+			date: currentDate,
+			messages: currentGroup
+		});
+		return groups;
+	}, [messages]);
+	const formatTime = (ts) => {
+		if (!ts) return "";
+		return (ts.toDate ? ts.toDate() : new Date(ts)).toLocaleTimeString("ar-SA", {
+			hour: "2-digit",
+			minute: "2-digit"
+		});
+	};
+	const getSafeName = () => {
+		const candidates = [
+			contact?.displayName,
+			contact?.username,
+			contact?.name
+		];
+		for (let candidate of candidates) if (candidate && !/@/.test(candidate)) return candidate;
+		return "مستخدم";
+	};
+	if (!chatId) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "flex items-center justify-center h-screen bg-slate-50 text-gray-500",
+		children: "جارٍ تهيئة المحادثة..."
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen flex flex-col bg-gray-50",
+		dir: "rtl",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
+				className: "sticky top-0 z-30 px-4 pt-12 pb-3 bg-white border-b border-gray-200",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-3",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: onBack,
+							className: "w-10 h-10 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-3 flex-1 min-w-0",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-sm",
+								children: getSafeName().charAt(0)?.toUpperCase() || "?"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex-1 min-w-0",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
+									className: "font-bold text-gray-900 truncate",
+									children: ["@", getSafeName()]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-xs text-gray-500",
+									children: contact.status === "online" ? "متصل الآن" : "غير متصل"
+								})]
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "flex items-center gap-1.5",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: () => onCall?.(contact, "audio"),
+								className: "w-10 h-10 rounded-2xl bg-gray-100 hover:bg-purple-100 flex items-center justify-center",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+									className: "w-5 h-5 text-gray-600",
+									viewBox: "0 0 24 24",
+									fill: "none",
+									stroke: "currentColor",
+									strokeWidth: "2",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" })
+								})
+							})
+						})
+					]
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+				className: "flex-1 overflow-y-auto px-4 py-4 space-y-6",
+				style: { paddingBottom: "120px" },
+				children: [loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex justify-center py-10",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" })
+				}) : groupedMessages.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex justify-center py-16 text-gray-400 text-sm",
+					children: "لا توجد رسائل بعد"
+				}) : groupedMessages.map((group, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex justify-center mb-4",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs bg-white border border-gray-200 text-gray-500 px-3 py-1 rounded-full shadow-sm",
+						children: group.date
+					})
+				}), group.messages.map((msg) => {
+					const isMe = msg.senderId === currentUser.uid;
+					return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: `mb-4 ${isMe ? "flex justify-end" : "flex justify-start"} group`,
+						onTouchStart: (e) => {
+							const timer = setTimeout(() => handleLongPress(msg, e), 500);
+							e.target._timer = timer;
+						},
+						onTouchEnd: (e) => clearTimeout(e.target._timer),
+						onTouchMove: (e) => clearTimeout(e.target._timer),
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: `max-w-[80%] ${isMe ? "items-end" : "items-start"}`,
+							children: [
+								msg.replyTo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: `mb-1 p-2 rounded-lg text-xs border border-gray-200 bg-gray-50 ${isMe ? "mr-2" : "ml-2"}`,
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "font-bold text-gray-700",
+										children: msg.replyTo.senderName
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-gray-500 truncate",
+										children: msg.replyTo.text
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									style: {
+										backgroundColor: msg.deleted ? "#F3F4F6" : isMe ? "#6D28D9" : "#FFFFFF",
+										color: msg.deleted ? "#9CA3AF" : isMe ? "#FFFFFF" : "#111827",
+										borderRadius: isMe ? "1rem 1rem 0 1rem" : "1rem 1rem 1rem 0",
+										padding: "0.75rem 1rem",
+										boxShadow: msg.deleted ? "none" : isMe ? "0 4px 12px rgba(109, 40, 217, 0.25)" : "0 2px 8px rgba(0,0,0,0.05)",
+										border: msg.deleted ? "1px dashed #E5E7EB" : !isMe ? "1px solid #E5E7EB" : "none"
+									},
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										style: {
+											margin: 0,
+											whiteSpace: "pre-wrap",
+											wordBreak: "break-word",
+											fontStyle: msg.deleted ? "italic" : "normal"
+										},
+										children: msg.deleted ? "تم حذف هذه الرسالة" : msg.text
+									})
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[10px] text-gray-400 mt-1 block text-right",
+									children: formatTime(msg.timestamp)
+								})
+							]
+						})
+					}, msg.id);
+				})] }, idx)), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { ref: messagesEndRef })]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("footer", {
+				className: "fixed bottom-0 left-0 right-0 z-30 px-4 pb-5 pt-1 bg-white",
+				children: [replyTo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-2 bg-gray-100 p-2 rounded-t-xl mx-2 border border-gray-200",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex-1 text-xs text-gray-600 truncate",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "font-bold",
+								children: [
+									"الرد على ",
+									replyTo.senderName,
+									":"
+								]
+							}),
+							" ",
+							replyTo.text
+						]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => setReplyTo(null),
+						className: "p-1 rounded-full hover:bg-gray-200",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-end gap-2 bg-white rounded-3xl border border-gray-200 shadow-lg p-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
+						ref: inputRef,
+						value: message,
+						onChange: (e) => setMessage(e.target.value),
+						placeholder: "اكتب رسالتك...",
+						rows: 1,
+						className: "flex-1 bg-transparent border-0 focus:ring-0 resize-none text-sm text-gray-800 placeholder:text-gray-400 py-2.5 px-1 max-h-32",
+						style: { minHeight: "40px" }
+					}), message.trim() ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: handleSend,
+						className: "w-10 h-10 rounded-full bg-purple-600 hover:bg-purple-700 flex items-center justify-center text-white shadow-lg",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-5 h-5" })
+					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						className: "w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-5 h-5 text-gray-400" })
+					})]
+				})]
+			}),
+			actionPopup && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageActionsPopup$1, {
+				message: actionPopup.message,
+				isOwn: actionPopup.message.senderId === currentUser.uid,
+				onReply: setReplyTo,
+				onDeleteForEveryone: handleDeleteForEveryone,
+				onClose: () => setActionPopup(null),
+				position: actionPopup.position
+			})
+		]
+	});
+}
+//#endregion
+//#region src/features/admin/AdminScreen.jsx
+var StatCard = ({ icon: Icon, label, value, color, trend }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+	className: "group relative bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden",
+	children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute top-0 left-0 w-1 h-full ${color} rounded-r-full opacity-60 group-hover:opacity-100 transition-opacity` }),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex items-start justify-between mb-3",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: `p-2.5 rounded-xl bg-gradient-to-br ${color} text-white shadow-md group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`,
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5" })
+			}), trend && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full border border-emerald-100",
+				children: trend
+			})]
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-2xl font-black text-gray-900 tracking-tight",
+			children: value
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-xs text-gray-500 font-medium mt-1",
+			children: label
+		})
+	]
+});
+var StatusBadge$1 = ({ status }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+	className: `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${status === "banned" ? "bg-red-50 text-red-600 border-red-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"}`,
+	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-1.5 h-1.5 rounded-full ${status === "banned" ? "bg-red-500" : "bg-emerald-500 animate-pulse"}` }), status === "banned" ? "محظور" : "نشط"]
+});
+function AdminScreen({ onBack }) {
+	const [users, setUsers] = (0, import_react.useState)([]);
+	const [loading, setLoading] = (0, import_react.useState)(true);
+	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
+	const [actionLoading, setActionLoading] = (0, import_react.useState)(null);
+	const [showBroadcast, setShowBroadcast] = (0, import_react.useState)(false);
+	const [broadcastText, setBroadcastText] = (0, import_react.useState)("");
+	const [showWarning, setShowWarning] = (0, import_react.useState)(null);
+	const [warningText, setWarningText] = (0, import_react.useState)("");
+	const [generatedKey, setGeneratedKey] = (0, import_react.useState)("");
+	const [toast, setToast] = (0, import_react.useState)({
+		show: false,
+		message: "",
+		type: "success"
+	});
+	const [copied, setCopied] = (0, import_react.useState)(false);
+	const adminId = auth.currentUser?.uid;
+	const stats = {
+		total: users?.length || 0,
+		active: (users || []).filter((u) => u.status !== "banned").length,
+		banned: (users || []).filter((u) => u.status === "banned").length,
+		newToday: (users || []).filter((u) => {
+			const created = u.createdAt?.toDate?.();
+			return created && Date.now() - created.getTime() < 1440 * 60 * 1e3;
+		}).length
+	};
+	const showToast = (message, type = "success") => {
+		setToast({
+			show: true,
+			message,
+			type
+		});
+		setTimeout(() => setToast({
+			show: false,
+			message: "",
+			type: "success"
+		}), 3e3);
+	};
+	const logAction = async (action, targetUserId, details = "") => {
+		if (!adminId) return;
+		try {
+			await addDoc(collection(db, "admin_logs"), {
+				action,
+				adminId,
+				targetUserId,
+				details,
+				timestamp: serverTimestamp$2()
+			});
+		} catch (e) {
+			console.error("log error", e);
+		}
+	};
+	(0, import_react.useEffect)(() => {
+		const fetchServer = async () => {
+			try {
+				setUsers((await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(100)), { source: "server" })).docs.map((d) => ({
+					id: d.id,
+					...d.data()
+				})));
+			} catch (e) {
+				console.error(e);
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchServer();
+		const unsubscribe = onSnapshot(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(100)), (snapshot) => {
+			setUsers(snapshot.docs.map((d) => ({
+				id: d.id,
+				...d.data()
+			})));
+		});
+		return () => unsubscribe();
+	}, []);
+	const refreshUsers = async () => {
+		try {
+			setUsers((await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(100)), { source: "server" })).docs.map((d) => ({
+				id: d.id,
+				...d.data()
+			})));
+		} catch (e) {
+			console.error(e);
+		}
+	};
+	const toggleBan = async (userId, currentStatus) => {
+		const newStatus = currentStatus === "banned" ? "online" : "banned";
+		setActionLoading(userId);
+		try {
+			await updateDoc(doc(db, "users", userId), { status: newStatus });
+			await logAction(newStatus === "banned" ? "ban_user" : "unban_user", userId);
+			showToast(newStatus === "banned" ? "تم حظر المستخدم" : "تم فك الحظر");
+			refreshUsers();
+		} catch (e) {
+			showToast("فشل في تحديث الحالة", "error");
+		} finally {
+			setActionLoading(null);
+		}
+	};
+	const deleteUser = async (userId, username) => {
+		if (!confirm(`حذف نهائي لـ ${username || userId}؟ لا يمكن التراجع.`)) return;
+		setActionLoading(userId);
+		try {
+			const batch = writeBatch(db);
+			batch.delete(doc(db, "users", userId));
+			if (username) batch.delete(doc(db, "usernames", username));
+			(await getDocs(query(collection(db, "chats"), where("participants", "array-contains", userId)))).forEach((chatDoc) => batch.delete(doc(db, "chats", chatDoc.id)));
+			await batch.commit();
+			await logAction("delete_user", userId, `username: ${username}`);
+			showToast("تم الحذف بنجاح");
+			refreshUsers();
+		} catch (e) {
+			showToast("خطأ في الحذف", "error");
+		} finally {
+			setActionLoading(null);
+		}
+	};
+	const sendWarning = async (userId) => {
+		if (!warningText.trim()) return;
+		setActionLoading(`warn-${userId}`);
+		try {
+			await updateDoc(doc(db, "users", userId), { warning: {
+				message: warningText.trim(),
+				timestamp: /* @__PURE__ */ new Date()
+			} });
+			await logAction("warn_user", userId, warningText.trim());
+			showToast("تم إرسال التحذير");
+			setShowWarning(null);
+			setWarningText("");
+			refreshUsers();
+		} catch (e) {
+			showToast("فشل الإرسال", "error");
+		} finally {
+			setActionLoading(null);
+		}
+	};
+	const sendBroadcast = async () => {
+		if (!broadcastText.trim()) return;
+		setActionLoading("broadcast");
+		try {
+			await addDoc(collection(db, "notifications"), {
+				message: broadcastText.trim(),
+				timestamp: serverTimestamp$2()
+			});
+			await logAction("broadcast", null, broadcastText.trim());
+			showToast("تم إرسال الإشعار العام");
+			setBroadcastText("");
+			setShowBroadcast(false);
+		} catch (e) {
+			showToast("فشل الإرسال", "error");
+		} finally {
+			setActionLoading(null);
+		}
+	};
+	const copyToClipboard = async (text) => {
+		try {
+			await navigator.clipboard.writeText(text);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2e3);
+		} catch (e) {
+			const textarea = document.createElement("textarea");
+			textarea.value = text;
+			document.body.appendChild(textarea);
+			textarea.select();
+			document.execCommand("copy");
+			document.body.removeChild(textarea);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2e3);
+		}
+	};
+	const generateInviteKey = async () => {
+		setActionLoading("key");
+		try {
+			const key = "ADM-" + Math.random().toString(36).substring(2, 9).toUpperCase();
+			await setDoc(doc(db, "adminInvites", key), {
+				used: false,
+				createdAt: serverTimestamp$2(),
+				createdBy: auth.currentUser?.uid
+			});
+			setGeneratedKey(key);
+			await copyToClipboard(key);
+			showToast(`✅ تم إنشاء ونسخ المفتاح: ${key}`);
+		} catch (e) {
+			console.error("generateKey error", e);
+			showToast("فشل إنشاء المفتاح", "error");
+		} finally {
+			setActionLoading(null);
+		}
+	};
+	const exportCSV = () => {
+		let csv = "email,username,status,createdAt\n";
+		(users || []).forEach((u) => {
+			csv += `${u.email},${u.username || ""},${u.status},${u.createdAt?.toDate?.()?.toISOString() || ""}\n`;
+		});
+		const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+		const link = document.createElement("a");
+		link.href = URL.createObjectURL(blob);
+		link.download = `users_${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.csv`;
+		link.click();
+		showToast("تم التصدير");
+	};
+	const filteredUsers = (users || []).filter((u) => u.email?.toLowerCase().includes(searchTerm.toLowerCase()) || u.username?.toLowerCase().includes(searchTerm.toLowerCase()));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen bg-[#f8f9fc] pb-24 relative",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "fixed inset-0 opacity-[0.03] pointer-events-none",
+				style: {
+					backgroundImage: "radial-gradient(#6366f1 1px, transparent 1px)",
+					backgroundSize: "24px 24px"
+				}
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
+				className: "sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200/60 shadow-sm",
+				style: { paddingTop: "calc(0.75rem + env(safe-area-inset-top, 0px))" },
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "max-w-7xl mx-auto px-4 sm:px-6 py-3",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex flex-col sm:flex-row sm:items-center justify-between gap-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-3 w-full sm:w-auto",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: onBack,
+								className: "w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors active:scale-95 shrink-0",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+								className: "text-xl font-black text-gray-900 tracking-tight",
+								children: "لوحة الإدارة"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-500 font-medium mt-0.5",
+								children: "مراقبة وتحكم كامل"
+							})] })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-2 flex-wrap justify-end sm:justify-start w-full sm:w-auto",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+									onClick: generateInviteKey,
+									disabled: actionLoading === "key",
+									size: "sm",
+									className: "rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-xs px-3 py-2 shadow-md shadow-emerald-500/20 transition-all active:scale-95 shrink-0",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Key, { className: "w-3.5 h-3.5 ml-1.5" }), " مفتاح"]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+									onClick: () => setShowBroadcast(true),
+									size: "sm",
+									variant: "outline",
+									className: "rounded-xl text-xs px-3 py-2 border-gray-200 hover:bg-gray-50 transition-all active:scale-95 shrink-0",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-3.5 h-3.5 ml-1.5" }), " إشعار"]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+									onClick: exportCSV,
+									size: "sm",
+									variant: "outline",
+									className: "rounded-xl text-xs px-3 py-2 border-gray-200 hover:bg-gray-50 transition-all active:scale-95 shrink-0",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, { className: "w-3.5 h-3.5 ml-1.5" }), " تصدير"]
+								})
+							]
+						})]
+					})
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+				className: "max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-8 space-y-6",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
+								icon: Users,
+								label: "إجمالي المستخدمين",
+								value: stats.total,
+								color: "from-blue-500 to-cyan-500"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
+								icon: Zap,
+								label: "نشط الآن",
+								value: stats.active,
+								color: "from-emerald-500 to-teal-500",
+								trend: `${stats.total ? Math.round(stats.active / stats.total * 100) : 0}%`
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
+								icon: Shield,
+								label: "محظورين",
+								value: stats.banned,
+								color: "from-red-500 to-rose-500"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
+								icon: UserPlus,
+								label: "انضموا اليوم",
+								value: stats.newToday,
+								color: "from-purple-500 to-indigo-500"
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col md:flex-row gap-4 items-center animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative flex-1 w-full group",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								placeholder: "بحث بالبريد أو المعرف...",
+								value: searchTerm,
+								onChange: (e) => setSearchTerm(e.target.value),
+								className: "pr-12 h-12 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200 focus:bg-white transition-all"
+							})]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "text-xs text-gray-500 font-medium bg-gray-100 px-3 py-1.5 rounded-full shrink-0",
+							children: [
+								"عرض ",
+								filteredUsers.length,
+								" / ",
+								stats.total
+							]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200",
+						children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex flex-col items-center justify-center py-16 space-y-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-sm text-gray-500 font-medium",
+								children: "جاري تحميل البيانات..."
+							})]
+						}) : filteredUsers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "text-center py-16 text-gray-400",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-14 h-14 mx-auto mb-3 opacity-40" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-medium",
+								children: "لا يوجد نتائج مطابقة"
+							})]
+						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "divide-y divide-gray-50",
+							children: filteredUsers.map((u) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "p-4 hover:bg-purple-50/30 transition-colors duration-200 group/row",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex flex-col md:flex-row md:items-center justify-between gap-4",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-4 flex-1 min-w-0",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Avatar, {
+												className: "h-12 w-12 ring-2 ring-white shadow-sm shrink-0 group-hover/row:scale-105 transition-transform duration-300",
+												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
+													className: "bg-gradient-to-br from-purple-500 to-blue-500 text-white font-bold text-sm",
+													children: u.email?.charAt(0)?.toUpperCase() || "?"
+												})
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+												className: "min-w-0 text-right flex-1",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+													className: "font-bold text-gray-900 truncate text-sm group-hover/row:text-purple-700 transition-colors",
+													children: u.email
+												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+													className: "text-xs text-gray-500 mt-0.5 font-mono",
+													children: ["@", u.username || "غير محدد"]
+												})]
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge$1, { status: u.status })
+										]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "flex items-center gap-2 justify-end opacity-0 group-hover/row:opacity-100 transition-opacity duration-200 md:opacity-100",
+										children: showWarning === u.id ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "flex items-center gap-2 bg-white rounded-xl p-1.5 shadow-lg border border-gray-200 w-full md:w-auto animate-in zoom-in-95 duration-200",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+													autoFocus: true,
+													value: warningText,
+													onChange: (e) => setWarningText(e.target.value),
+													placeholder: "نص التحذير...",
+													className: "h-8 text-xs rounded-lg bg-gray-50 border-gray-200"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+													size: "sm",
+													onClick: () => sendWarning(u.id),
+													disabled: !warningText.trim(),
+													className: "h-8 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold",
+													children: "إرسال"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+													size: "sm",
+													variant: "ghost",
+													onClick: () => setShowWarning(null),
+													className: "h-8 w-8 p-0 text-gray-400",
+													children: "✕"
+												})
+											]
+										}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+												onClick: () => {
+													setShowWarning(u.id);
+													setWarningText("");
+												},
+												className: "p-2 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-all active:scale-95",
+												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-4 h-4" })
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+												onClick: () => toggleBan(u.id, u.status),
+												className: `p-2 rounded-lg transition-all active:scale-95 ${u.status === "banned" ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" : "bg-red-50 text-red-600 hover:bg-red-100"}`,
+												children: u.status === "banned" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleX, { className: "w-4 h-4" })
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+												onClick: () => deleteUser(u.id, u.username),
+												className: "p-2 rounded-lg bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all active:scale-95",
+												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" })
+											})
+										] })
+									})]
+								})
+							}, u.id))
+						})
+					})
+				]
+			}),
+			showBroadcast && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "fixed inset-0 z-[60] flex items-center justify-center p-5 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200",
+				onClick: () => setShowBroadcast(false),
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-gray-100 animate-in zoom-in-95 duration-200",
+					onClick: (e) => e.stopPropagation(),
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center justify-between mb-4",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								className: "text-lg font-bold text-gray-900",
+								children: "إشعار عام"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: () => setShowBroadcast(false),
+								className: "w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-lg leading-none",
+									children: "×"
+								})
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
+							value: broadcastText,
+							onChange: (e) => setBroadcastText(e.target.value),
+							placeholder: "اكتب رسالة الإشعار...",
+							rows: 4,
+							className: "w-full rounded-xl bg-gray-50 border border-gray-200 p-3 text-sm focus:ring-2 focus:ring-purple-200 focus:border-transparent outline-none resize-none mb-4 transition-all"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex gap-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								variant: "outline",
+								onClick: () => setShowBroadcast(false),
+								className: "flex-1 h-11 rounded-xl border-gray-200",
+								children: "إلغاء"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								onClick: sendBroadcast,
+								disabled: !broadcastText.trim() || actionLoading === "broadcast",
+								className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold shadow-md shadow-purple-500/20 transition-all",
+								children: actionLoading === "broadcast" ? "جارٍ..." : "إرسال للجميع"
+							})]
+						})
+					]
+				})
+			}),
+			generatedKey && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "fixed bottom-28 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-4 fade-in duration-300 max-w-[90%]",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Key, { className: "w-5 h-5 shrink-0" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex-1 min-w-0",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-xs opacity-80 mb-0.5",
+							children: "مفتاح الدعوة"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "font-mono font-bold text-sm truncate",
+							children: generatedKey
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => copyToClipboard(generatedKey),
+						className: "p-2 hover:bg-white/20 rounded-lg transition-colors shrink-0",
+						title: copied ? "تم النسخ" : "نسخ مجدداً",
+						children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => setGeneratedKey(""),
+						className: "p-2 hover:bg-red-400/30 rounded-lg transition-colors shrink-0",
+						children: "×"
+					})
+				]
+			}),
+			toast.show && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: `fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in slide-in-from-bottom-4 fade-in duration-300 ${toast.type === "error" ? "bg-red-600" : "bg-gray-900"} text-white`,
+				children: [toast.type === "error" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-5 h-5 text-emerald-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-sm font-medium",
+					children: toast.message
+				})]
+			})
+		]
+	});
+}
+//#endregion
+//#region src/features/UserManagement/UserManagementScreen.jsx
+var StatusBadge = ({ status }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+	className: `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${status === "banned" ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`,
+	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-1.5 h-1.5 rounded-full ${status === "banned" ? "bg-red-500" : "bg-emerald-500"}` }), status === "banned" ? "محظور" : "نشط"]
+});
+var InfoRow = ({ icon: Icon, label, value }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+	className: "flex items-center gap-3 p-3 bg-gray-50 rounded-xl",
+	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-4 h-4 text-gray-500 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "flex-1 text-right",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-xs text-gray-500 font-medium",
+			children: label
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-sm font-bold text-gray-900 truncate",
+			children: value || "—"
+		})]
+	})]
+});
+function UserManagementScreen({ onBack }) {
+	const [users, setUsers] = (0, import_react.useState)([]);
+	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
+	const [selectedUser, setSelectedUser] = (0, import_react.useState)(null);
+	const [loading, setLoading] = (0, import_react.useState)(true);
+	const [refreshing, setRefreshing] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		const fetchData = async () => {
+			try {
+				setUsers((await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50)), { source: "server" })).docs.map((doc) => ({
+					id: doc.id,
+					...doc.data()
+				})));
+			} catch (e) {
+				console.error("خطأ جلب الخادم:", e);
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchData();
+		const unsubscribe = onSnapshot(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50)), (snapshot) => {
+			setUsers(snapshot.docs.map((doc) => ({
+				id: doc.id,
+				...doc.data()
+			})));
+		});
+		return () => unsubscribe();
+	}, []);
+	const handleRefresh = async () => {
+		setRefreshing(true);
+		try {
+			setUsers((await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50)), { source: "server" })).docs.map((doc) => ({
+				id: doc.id,
+				...doc.data()
+			})));
+		} catch (e) {
+			console.error(e);
+		} finally {
+			setRefreshing(false);
+		}
+	};
+	const filteredUsers = users.filter((u) => u.email?.toLowerCase().includes(searchTerm.toLowerCase()) || u.username?.toLowerCase().includes(searchTerm.toLowerCase()) || u.displayName?.toLowerCase().includes(searchTerm.toLowerCase()));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen flex flex-col bg-slate-50/50 pb-24",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
+			className: "sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-16 pb-5",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center justify-between mb-4",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-3",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						variant: "ghost",
+						size: "icon",
+						onClick: onBack,
+						className: "rounded-full hover:bg-gray-100",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "h-5 w-5" })
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+						className: "text-2xl font-black text-gray-900 tracking-tight",
+						children: "إدارة المستخدمين"
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+					variant: "outline",
+					size: "icon",
+					onClick: handleRefresh,
+					disabled: refreshing,
+					className: "rounded-full",
+					title: "تحديث القائمة من الخادم",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: `h-4 w-4 ${refreshing ? "animate-spin" : ""}` })
+				})]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "relative",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+					placeholder: "البحث بالاسم، البريد، أو المعرف...",
+					value: searchTerm,
+					onChange: (e) => setSearchTerm(e.target.value),
+					className: "pr-12 h-12 rounded-xl bg-white border-gray-200 shadow-sm focus-visible:ring-purple-200"
+				})]
+			})]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
+			className: "flex-1 overflow-y-auto px-5 pt-6",
+			children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "flex justify-center py-12",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" })
+			}) : filteredUsers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "text-center py-16 opacity-50",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserCheck, { className: "w-16 h-16 mx-auto mb-4 text-gray-300" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-gray-600 font-bold text-lg",
+					children: "لا يوجد مستخدمين"
+				})]
+			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "space-y-3",
+				children: filteredUsers.map((u) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					onClick: () => setSelectedUser(selectedUser?.id === u.id ? null : u),
+					className: `bg-white rounded-2xl p-4 border shadow-sm cursor-pointer transition-all ${selectedUser?.id === u.id ? "border-purple-300 shadow-md" : "border-gray-100 hover:border-purple-200 hover:shadow-md"}`,
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-3 mb-3",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Avatar, {
+								className: "h-12 w-12 ring-2 ring-white shadow-sm",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
+									className: "bg-gradient-to-br from-purple-500 to-blue-500 text-white font-bold",
+									children: (u.displayName || u.email || "?").charAt(0).toUpperCase()
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex-1 min-w-0 text-right",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "font-bold text-gray-900 truncate",
+									children: u.displayName || u.email
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+									className: "text-xs text-gray-500",
+									children: ["@", u.username || "غير محدد"]
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: u.status })
+						]
+					}), selectedUser?.id === u.id && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "grid grid-cols-2 gap-2 pt-3 border-t border-gray-100 animate-in fade-in slide-in-from-top-2",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
+								icon: Mail,
+								label: "البريد الإلكتروني",
+								value: u.email
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
+								icon: Phone,
+								label: "رقم الهاتف",
+								value: u.phone || "غير مسجل"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
+								icon: Calendar,
+								label: "تاريخ الانضمام",
+								value: u.createdAt?.toDate?.().toLocaleDateString("ar-SA") || "—"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(InfoRow, {
+								icon: UserCheck,
+								label: "حالة الحساب",
+								value: u.status === "banned" ? "محظور" : "نشط"
+							})
+						]
+					})]
+				}, u.id))
+			})
+		})]
+	});
+}
+//#endregion
+//#region src/features/partner/PartnerScreen.jsx
+function PartnerScreen({ onBack }) {
+	const [adminKey, setAdminKey] = (0, import_react.useState)("");
+	const [status, setStatus] = (0, import_react.useState)(null);
+	const [message, setMessage] = (0, import_react.useState)("");
+	const [loading, setLoading] = (0, import_react.useState)(false);
+	const [debugInfo, setDebugInfo] = (0, import_react.useState)("");
+	const currentUser = auth.currentUser;
+	const handleActivate = async () => {
+		const trimmed = adminKey.replace(/\s+/g, "").toUpperCase().trim();
+		if (!trimmed) {
+			setStatus("error");
+			setMessage("يرجى إدخال معرف المدير.");
+			return;
+		}
+		if (!currentUser) {
+			setStatus("error");
+			setMessage("يجب تسجيل الدخول أولاً.");
+			return;
+		}
+		setLoading(true);
+		setStatus(null);
+		setMessage("");
+		setDebugInfo("");
+		try {
+			const inviteRef = doc(db, "adminInvites", trimmed);
+			const inviteSnap = await getDoc(inviteRef);
+			if (!inviteSnap.exists()) {
+				setStatus("error");
+				setMessage("معرف المدير غير صحيح أو منتهي الصلاحية.");
+				setLoading(false);
+				return;
+			}
+			if (inviteSnap.data().used === true) {
+				setStatus("error");
+				setMessage("هذا المفتاح تم استخدامه بالفعل ولا يمكن إعادة استخدامه.");
+				setLoading(false);
+				return;
+			}
+			await setDoc(inviteRef, {
+				used: true,
+				usedBy: currentUser.uid,
+				usedAt: serverTimestamp$2()
+			}, { merge: true });
+			await setDoc(doc(db, "users", currentUser.uid), {
+				isAdmin: true,
+				upgradedBy: inviteSnap.data().createdBy || "admin"
+			}, { merge: true });
+			await deleteDoc(inviteRef).catch(() => {});
+			setStatus("success");
+			setMessage("🎉 تم تفعيل صلاحيات المدير بنجاح! سيتم تحويلك للوحة الإدارة.");
+			setAdminKey("");
+			setTimeout(() => {
+				if (onBack) onBack();
+			}, 2e3);
+		} catch (error) {
+			console.error("❌ خطأ التفاصيل الكامل:", error);
+			let errorMsg = "حدث خطأ غير متوقع.";
+			if (error.code === "permission-denied") errorMsg = "⛔ صلاحيات محدودة. يرجى التواصل مع المطور لضبط قواعد الأمان.";
+			else if (error.message?.includes("serverTimestamp")) errorMsg = "❌ خطأ في تهيئة الوقت. تأكد من استيراد serverTimestamp.";
+			else errorMsg = `❌ ${error.message || error}`;
+			setStatus("error");
+			setMessage(errorMsg);
+			setDebugInfo(JSON.stringify(error, null, 1));
+		} finally {
+			setLoading(false);
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex flex-col items-center justify-center px-5 py-10",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "max-w-md w-full mx-auto",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "mb-4",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+						variant: "ghost",
+						onClick: onBack,
+						className: "rounded-full",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "h-5 w-5 ml-2" }), " رجوع"]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "text-center mb-6",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 text-white shadow-lg mb-4",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "h-10 w-10" })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							className: "text-3xl font-bold text-gray-900 mb-2",
+							children: "تكوين شراكة"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-gray-600 leading-relaxed",
+							children: "انضم إلى فريق LinkUp وساهم في تطوير التطبيق"
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-sm border border-white/20 mb-6 space-y-5 text-right",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+							className: "text-lg font-bold text-gray-900 flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: "h-5 w-5 text-purple-600" }), "لماذا نصمم هذا البرنامج؟"]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-700 leading-relaxed",
+							children: "لأن LinkUp ليس مجرد تطبيق، إنه مجتمع نابض بالحياة. نريد أن نفتح أبواب الإدارة للمبدعين والمتطوعين الذين يشاركونا الشغف. برنامج \"تكوين شراكة\" هو فرصتك لتصبح جزءًا من فريق التطوير والإشراف، وتمتلك صلاحيات حقيقية لمساعدة الآخرين والحفاظ على بيئة آمنة ونظيفة."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+							className: "text-lg font-bold text-gray-900 flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "h-5 w-5 text-purple-600" }), "ماذا ستحصل عليه كشريك؟"]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
+							className: "list-disc list-inside space-y-2 text-sm text-gray-700",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "لوحة تحكم إدارية:" }), " تمكنك من مراقبة المستخدمين، حظر المخالفين، وإرسال تحذيرات."] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "إدارة الإشعارات العامة:" }), " إرسال تنبيهات لجميع المستخدمين لإطلاعهم على التحديثات."] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "إنشاء مفاتيح دعوة:" }), " لترقية شركاء جدد تختارهم بنفسك."] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "تقارير وإحصاءات:" }), " رؤية شاملة لنشاط التطبيق."] }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("strong", { children: "دعم فني خاص:" }), " تواصل مباشر مع المطور الأساسي لحل المشكلات."] })
+							]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-500 italic",
+							children: "ملاحظة: صلاحيات الشريك لا تشمل الاطلاع على محادثات المستخدمين الخاصة، احترامًا لخصوصيتهم."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+							className: "text-lg font-bold text-gray-900 flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Key, { className: "h-5 w-5 text-purple-600" }), "كيف تنضم؟"]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-700 leading-relaxed",
+							children: "ببساطة، تواصل مع مدير التطبيق الحالي ليولد لك \"مفتاح دعوة\" خاصًا بك. أدخل هذا المفتاح في الحقل أدناه، واضغط \"تفعيل المدير\". ستصبح شريكًا فورًا دون الحاجة لأي إعدادات معقدة. كل مفتاح يُستخدم مرة واحدة لضمان الأمان والخصوصية."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-2 text-purple-700 bg-purple-50 rounded-xl p-3 mt-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "h-5 w-5 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-sm",
+								children: "نظام المفاتيح آمن تمامًا، ولا يمكن لأحد التنبؤ بها أو إعادة استخدامها."
+							})]
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "bg-white/80 backdrop-blur-xl rounded-2xl p-6 shadow-sm border border-white/20 mb-6 space-y-4",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "relative",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							type: "text",
+							placeholder: "أدخل معرف المدير هنا",
+							value: adminKey,
+							onChange: (e) => {
+								setAdminKey(e.target.value);
+								setStatus(null);
+								setMessage("");
+								setDebugInfo("");
+							},
+							className: "h-12 rounded-xl bg-gray-100/80 border-gray-200 text-center text-lg font-mono tracking-widest uppercase",
+							disabled: loading,
+							autoComplete: "off"
+						}), status && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-2 text-sm font-medium text-center",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: status === "success" ? "text-green-600" : "text-red-500",
+								children: message
+							}), debugInfo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", {
+								className: "mt-2 text-left bg-red-50 rounded p-2 text-xs text-red-800 max-h-24 overflow-auto",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("summary", {
+									className: "cursor-pointer font-bold",
+									children: "تفاصيل الخطأ"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("pre", {
+									className: "whitespace-pre-wrap",
+									children: debugInfo
+								})]
+							})]
+						})]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+						onClick: handleActivate,
+						disabled: loading || !adminKey.trim(),
+						className: "w-full h-12 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 text-white font-semibold shadow-md hover:shadow-lg transition-all disabled:opacity-50",
+						children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Key, { className: "h-5 w-5 mr-2" }), " تفعيل الصلاحية الآن"] })
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "space-y-3",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-sm text-gray-500 text-center",
+						children: "إذا لم تحصل على مفتاح بعد، تواصل معنا:"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+						href: "mailto:Linkup.helpp@gmail.com",
+						className: "group relative flex items-center justify-center gap-2 w-full py-3 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 active:scale-95 overflow-hidden",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "h-5 w-5 relative z-10" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "relative z-10",
+								children: "البريد الإلكتروني"
+							})
+						]
+					})]
+				})
+			]
+		})
+	});
+}
+//#endregion
+//#region src/features/notifications/NotificationsScreen.jsx
+var ADMIN_UID = "REPLACE_WITH_YOUR_ADMIN_UID";
+function NotificationsScreen({ onBack }) {
+	const [notifications, setNotifications] = (0, import_react.useState)([]);
+	const isAdmin = auth.currentUser?.uid === ADMIN_UID;
+	(0, import_react.useEffect)(() => {
+		const unsub = onSnapshot(query(collection(db, "notifications"), orderBy("timestamp", "desc")), (snap) => {
+			setNotifications(snap.docs.map((d) => ({
+				id: d.id,
+				...d.data()
+			})));
+		});
+		return () => unsub();
+	}, []);
+	const deleteNotification = async (id) => {
+		if (!isAdmin) return;
+		if (!confirm("حذف هذا الإشعار؟ سيُحذف من الجميع.")) return;
+		await deleteDoc(doc(db, "notifications", id));
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "px-5 py-4 max-w-2xl mx-auto",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "mb-4",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+						variant: "ghost",
+						onClick: onBack,
+						className: "rounded-full",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "h-5 w-5 ml-2" }), " رجوع"]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h2", {
+					className: "text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "h-6 w-6" }), " الإشعارات"]
+				}),
+				notifications.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-center text-gray-500 py-10",
+					children: "لا توجد إشعارات حالياً"
+				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "space-y-3",
+					children: notifications.map((notif) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-white/80 backdrop-blur rounded-2xl p-4 shadow-sm flex items-start gap-3",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "h-5 w-5 text-blue-500 mt-1 shrink-0" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex-1",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-gray-800",
+									children: notif.message
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-xs text-gray-400 mt-1",
+									children: notif.timestamp?.toDate?.()?.toLocaleString("ar-SA")
+								})]
+							}),
+							isAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+								variant: "ghost",
+								size: "icon",
+								onClick: () => deleteNotification(notif.id),
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "h-4 w-4 text-red-500" })
+							})
+						]
+					}, notif.id))
+				})
+			]
+		})
+	});
+}
+//#endregion
+//#region src/components/onboarding/OnboardingScreen.jsx
+var slides = [
+	{
+		id: 1,
+		icon: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+			width: "80",
+			height: "80",
+			viewBox: "0 0 24 24",
+			fill: "none",
+			stroke: "currentColor",
+			strokeWidth: "1.2",
+			strokeLinecap: "round",
+			strokeLinejoin: "round",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M22 11.08V12a10 10 0 1 1-5.93-9.14" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: "22 4 12 14.01 9 11.01" })]
+		}),
+		title: "تأكيد الحساب بسرعة",
+		description: "سجّل دخولك بحساب Google وتأكد من بريدك الإلكتروني لتصبح جاهزاً للتواصل."
+	},
+	{
+		id: 2,
+		icon: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+			width: "80",
+			height: "80",
+			viewBox: "0 0 24 24",
+			fill: "none",
+			stroke: "currentColor",
+			strokeWidth: "1.2",
+			strokeLinecap: "round",
+			strokeLinejoin: "round",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+					cx: "9",
+					cy: "7",
+					r: "4"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M23 21v-2a4 4 0 0 0-3-3.87" }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M16 3.13a4 4 0 0 1 0 7.75" })
+			]
+		}),
+		title: "أضف أصدقاءك",
+		description: "ابحث عن أصدقائك باستخدام معرفهم الفريد وأضفهم إلى جهات اتصالك."
+	},
+	{
+		id: 3,
+		icon: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+			width: "80",
+			height: "80",
+			viewBox: "0 0 24 24",
+			fill: "none",
+			stroke: "currentColor",
+			strokeWidth: "1.2",
+			strokeLinecap: "round",
+			strokeLinejoin: "round",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("polygon", { points: "11 5 6 9 2 9 2 15 6 15 11 19 11 5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" })]
+		}),
+		title: "مكالمات صوتية وفيديو",
+		description: "اتصل بأصدقائك صوتياً أو فيديو مباشرة من جهات الاتصال."
+	},
+	{
+		id: 4,
+		icon: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+			width: "80",
+			height: "80",
+			viewBox: "0 0 24 24",
+			fill: "none",
+			stroke: "currentColor",
+			strokeWidth: "1.2",
+			strokeLinecap: "round",
+			strokeLinejoin: "round",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
+					x: "3",
+					y: "3",
+					width: "18",
+					height: "18",
+					rx: "3"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", {
+					x1: "8",
+					y1: "8",
+					x2: "16",
+					y2: "8"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", {
+					x1: "8",
+					y1: "12",
+					x2: "16",
+					y2: "12"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", {
+					x1: "8",
+					y1: "16",
+					x2: "12",
+					y2: "16"
+				})
+			]
+		}),
+		title: "محادثات نصية فورية",
+		description: "تبادل الرسائل النصية مع أصدقائك أثناء المكالمات أو في أي وقت."
+	},
+	{
+		id: 5,
+		icon: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+			width: "80",
+			height: "80",
+			viewBox: "0 0 24 24",
+			fill: "none",
+			stroke: "currentColor",
+			strokeWidth: "1.2",
+			strokeLinecap: "round",
+			strokeLinejoin: "round",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M9 12l2 2 4-4" })]
+		}),
+		title: "خصوصية وأمان",
+		description: "محادثاتك ومكالماتك مشفرة ولا يمكن لأحد الاطلاع عليها."
+	}
+];
+function OnboardingScreen({ onFinish }) {
+	const [current, setCurrent] = (0, import_react.useState)(0);
+	const [isExiting, setIsExiting] = (0, import_react.useState)(false);
+	const next = () => {
+		if (current < slides.length - 1) setCurrent(current + 1);
+		else handleFinish();
+	};
+	const prev = () => {
+		if (current > 0) setCurrent(current - 1);
+	};
+	const handleFinish = () => {
+		setIsExiting(true);
+		setTimeout(() => onFinish(), 600);
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: `fixed inset-0 bg-[#0e0e1a] flex flex-col items-center justify-between py-12 px-6 transition-opacity duration-500 ${isExiting ? "opacity-0" : "opacity-100"}`,
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "absolute top-6 right-6 text-xs font-medium text-gray-600 uppercase tracking-[0.15em]",
+				children: "LinkUp"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				onClick: handleFinish,
+				className: "absolute top-6 left-6 text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors",
+				children: "تخطي"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex-1 flex flex-col items-center justify-center text-center max-w-sm",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "mb-8 text-blue-500",
+						children: slides[current].icon
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+						className: "text-2xl font-bold text-white mb-3",
+						children: slides[current].title
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-gray-400 leading-relaxed text-sm",
+						children: slides[current].description
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "w-full max-w-xs",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex justify-center gap-2 mb-6",
+					children: slides.map((_, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `h-1.5 rounded-full transition-all duration-300 ${i === current ? "w-8 bg-blue-500" : "w-1.5 bg-gray-700"}` }, i))
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center justify-between",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: prev,
+						disabled: current === 0,
+						className: `text-sm font-medium ${current === 0 ? "text-gray-700 cursor-not-allowed" : "text-gray-400 hover:text-white"}`,
+						children: "السابق"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: next,
+						className: "px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold text-sm shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all active:scale-95",
+						children: current === slides.length - 1 ? "ابدأ الآن" : "التالي"
+					})]
+				})]
+			})
+		]
+	});
+}
+//#endregion
+//#region src/features/Support/SupportScreen.jsx
+function SupportScreen({ onBack }) {
+	const [copied, setCopied] = (0, import_react.useState)(false);
+	const handleCopy = () => {
+		navigator.clipboard.writeText("Linkup.helpp@gmail.com");
+		setCopied(true);
+		setTimeout(() => setCopied(false), 2e3);
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen flex flex-col bg-slate-50/50",
+		dir: "rtl",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
+			className: "sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-14 pb-4",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-3",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					onClick: onBack,
+					className: "w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors active:scale-95",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+						className: "w-5 h-5 text-gray-700",
+						viewBox: "0 0 24 24",
+						fill: "none",
+						stroke: "currentColor",
+						strokeWidth: "2",
+						strokeLinecap: "round",
+						strokeLinejoin: "round",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
+					})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+					className: "text-xl font-black text-gray-900 tracking-tight",
+					children: "تواصل مع المطور"
+				})]
+			})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+			className: "flex-1 overflow-y-auto px-5 py-6 pb-24 space-y-5",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "text-center mb-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "w-16 h-16 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+							className: "w-8 h-8 text-purple-600",
+							viewBox: "0 0 24 24",
+							fill: "none",
+							stroke: "currentColor",
+							strokeWidth: "2",
+							strokeLinecap: "round",
+							strokeLinejoin: "round",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })
+						})
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-sm text-gray-600",
+						children: "نحن هنا لمساعدتك. اختر القناة المناسبة وسنرد خلال 24 ساعة."
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+					href: "mailto:Linkup.helpp@gmail.com",
+					className: "group block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+									className: "w-6 h-6",
+									viewBox: "0 0 24 24",
+									fill: "none",
+									stroke: "currentColor",
+									strokeWidth: "2",
+									strokeLinecap: "round",
+									strokeLinejoin: "round",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
+										x: "2",
+										y: "4",
+										width: "20",
+										height: "16",
+										rx: "2"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" })]
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex-1",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "font-bold text-gray-900",
+									children: "البريد الإلكتروني"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-xs text-gray-500 mt-0.5 font-mono",
+									children: "Linkup.helpp@gmail.com"
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+								className: "w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors",
+								viewBox: "0 0 24 24",
+								fill: "none",
+								stroke: "currentColor",
+								strokeWidth: "2",
+								strokeLinecap: "round",
+								strokeLinejoin: "round",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
+							})
+						]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+					href: "https://wa.me/966500000000",
+					target: "_blank",
+					rel: "noopener noreferrer",
+					className: "group block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:border-green-200 hover:shadow-md transition-all active:scale-[0.98]",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-green-100 transition-colors",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+									className: "w-6 h-6",
+									viewBox: "0 0 24 24",
+									fill: "none",
+									stroke: "currentColor",
+									strokeWidth: "2",
+									strokeLinecap: "round",
+									strokeLinejoin: "round",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" })
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex-1",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "font-bold text-gray-900",
+									children: "واتساب"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-xs text-gray-500 mt-0.5",
+									children: "تواصل مباشر وسريع"
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+								className: "w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors",
+								viewBox: "0 0 24 24",
+								fill: "none",
+								stroke: "currentColor",
+								strokeWidth: "2",
+								strokeLinecap: "round",
+								strokeLinejoin: "round",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
+							})
+						]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					onClick: handleCopy,
+					className: "w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3.5 rounded-2xl transition-colors flex items-center justify-center gap-2 active:scale-[0.98]",
+					children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+						className: "w-4 h-4 text-green-600",
+						viewBox: "0 0 24 24",
+						fill: "none",
+						stroke: "currentColor",
+						strokeWidth: "2",
+						strokeLinecap: "round",
+						strokeLinejoin: "round",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: "20 6 9 17 4 12" })
+					}), " تم نسخ البريد بنجاح"] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+						className: "w-4 h-4",
+						viewBox: "0 0 24 24",
+						fill: "none",
+						stroke: "currentColor",
+						strokeWidth: "2",
+						strokeLinecap: "round",
+						strokeLinejoin: "round",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
+							x: "9",
+							y: "9",
+							width: "13",
+							height: "13",
+							rx: "2",
+							ry: "2"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" })]
+					}), " نسخ عنوان البريد الإلكتروني"] })
+				})
+			]
+		})]
+	});
+}
+//#endregion
+//#region src/features/groups/GroupsScreen.jsx
+var LinkUpLogo = () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+	className: "flex items-center gap-2.5",
+	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "relative w-9 h-9",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl rotate-6 opacity-20" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-br from-purple-600 to-blue-500 rounded-xl -rotate-6 opacity-20" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "absolute inset-0 bg-white rounded-xl flex items-center justify-center shadow-sm border border-gray-100",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-5 h-5 text-purple-600" })
+			})
+		]
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+		className: "text-2xl font-black tracking-tight text-gray-900",
+		children: ["Link", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+			className: "text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
+			children: "Up"
+		})]
+	})]
+});
+var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick }) => {
+	const [lastMsg, setLastMsg] = (0, import_react.useState)(null);
+	const [membersData, setMembersData] = (0, import_react.useState)([]);
+	const memberCount = group.members?.length || 0;
+	(0, import_react.useEffect)(() => {
+		if (!group.id) return;
+		const unsub = onSnapshot(query(collection(db, "groups", group.id, "messages"), orderBy("timestamp", "desc")), (snap) => {
+			if (!snap.empty) setLastMsg(snap.docs[0].data());
+		});
+		return () => unsub();
+	}, [group.id]);
+	(0, import_react.useEffect)(() => {
+		if (!group.members) return;
+		Promise.all(group.members.slice(0, 3).map(async (uid) => {
+			const snap = await getDoc(doc(db, "users", uid));
+			if (snap.exists()) return {
+				uid,
+				name: snap.data().displayName || uid.charAt(0).toUpperCase()
+			};
+			return {
+				uid,
+				name: uid.charAt(0).toUpperCase()
+			};
+		})).then((arr) => setMembersData(arr));
+	}, [group.members]);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4 hover:shadow-md transition-all active:scale-[0.98] cursor-pointer",
+		onClick: () => onClick?.(),
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "relative",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: `w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-md`,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-6 h-6 text-white" })
+				}), isFavorite && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: "absolute -top-1 -right-1 w-5 h-5 text-yellow-500 fill-yellow-500" })]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex-1 min-w-0 text-right",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center justify-between",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "font-bold text-gray-900 truncate",
+						children: group.name || "مجموعة"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "text-xs text-gray-400",
+						children: [memberCount, " أعضاء"]
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-xs text-gray-500 mt-1 truncate",
+					children: lastMsg?.text || "ابدأ المحادثة"
+				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				onClick: (e) => {
+					e.stopPropagation();
+					onToggleFavorite(group.id);
+				},
+				className: "p-2 rounded-full hover:bg-gray-100",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-4 h-4 ${isFavorite ? "text-yellow-500 fill-yellow-500" : "text-gray-300"}` })
+			})
+		]
+	});
+};
+function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
+	const [groups, setGroups] = (0, import_react.useState)([]);
+	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
+	const [favorites, setFavorites] = (0, import_react.useState)(() => {
+		try {
+			return JSON.parse(localStorage.getItem("group_favorites") || "[]");
+		} catch {
+			return [];
+		}
+	});
+	(0, import_react.useEffect)(() => {
+		localStorage.setItem("group_favorites", JSON.stringify(favorites));
+	}, [favorites]);
+	const toggleFavorite = (groupId) => {
+		setFavorites((prev) => prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]);
+	};
+	(0, import_react.useEffect)(() => {
+		const unsubscribe = onSnapshot(query(collection(db, "groups"), orderBy("createdAt", "desc")), (snap) => {
+			setGroups(snap.docs.map((doc) => ({
+				id: doc.id,
+				...doc.data()
+			})));
+		});
+		return () => unsubscribe();
+	}, []);
+	const filtered = groups.filter((g) => g.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen flex flex-col bg-slate-50/50 pb-24",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
+				className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-12 pb-4",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between mb-5",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(LinkUpLogo, {}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: onOpenCreateGroup,
+							className: "w-10 h-10 rounded-full bg-purple-50 text-purple-600 hover:bg-purple-100 flex items-center justify-center",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-5 h-5" })
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mb-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+							className: "text-3xl font-black text-gray-900 tracking-tight",
+							children: "المجموعات"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-500 mt-1",
+							children: "تعاون وتواصل مع فرقك بسهولة"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "relative",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+							placeholder: "ابحث عن مجموعة...",
+							value: searchTerm,
+							onChange: (e) => setSearchTerm(e.target.value),
+							className: "w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm"
+						})]
+					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
+				className: "flex-1 overflow-y-auto px-5 pt-4 space-y-3",
+				children: filtered.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex flex-col items-center justify-center py-16 text-center",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-4 shadow-inner",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-9 h-9 text-purple-600/70" })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-gray-800 font-bold text-lg",
+							children: "لا توجد مجموعات"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-sm text-gray-500 mt-1.5",
+							children: "ابدأ بإنشاء مجموعتك الأولى"
+						})
+					]
+				}) : filtered.map((g) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GroupCard, {
+					group: g,
+					isFavorite: favorites.includes(g.id),
+					onToggleFavorite: toggleFavorite,
+					onClick: () => onOpenGroup?.(g)
+				}, g.id))
+			}),
+			groups.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "fixed bottom-32 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 px-2",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					onClick: onOpenCreateGroup,
+					className: "w-full bg-white border-2 border-purple-100 rounded-2xl p-4 flex items-center justify-between shadow-lg hover:shadow-xl hover:border-purple-300 transition-all active:scale-[0.98] group",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "w-11 h-11 rounded-xl bg-gradient-to-br from-purple-100 to-blue-50 flex items-center justify-center group-hover:scale-105 transition-transform",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-5 h-5 text-purple-600" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "text-right",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900 text-sm",
+								children: "إنشاء مجموعة جديدة"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-[10px] text-gray-500",
+								children: "ادعُ أصدقاءك وابدأ النقاش"
+							})]
+						})]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl px-4 py-2 flex items-center gap-1.5 shadow-md shadow-purple-500/20",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs font-bold",
+							children: "إنشاء"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-4 h-4" })]
+					})]
+				})
+			})
+		]
+	});
+}
+//#endregion
+//#region src/features/groups/CreateGroupScreen.jsx
+function CreateGroupScreen({ onBack }) {
+	const [name, setName] = (0, import_react.useState)("");
+	const [description, setDescription] = (0, import_react.useState)("");
+	const [isPrivate, setIsPrivate] = (0, import_react.useState)(false);
+	const [loading, setLoading] = (0, import_react.useState)(false);
+	const [success, setSuccess] = (0, import_react.useState)(false);
+	const [error, setError] = (0, import_react.useState)("");
+	const [contacts, setContacts] = (0, import_react.useState)([]);
+	const [selectedContacts, setSelectedContacts] = (0, import_react.useState)([]);
+	const currentUser = auth.currentUser;
+	(0, import_react.useEffect)(() => {
+		if (!currentUser?.uid) return;
+		const unsub = onSnapshot(query(collection(db, "contacts"), where("participants", "array-contains", currentUser.uid)), (snap) => {
+			setContacts(snap.docs.map((doc) => ({
+				id: doc.id,
+				...doc.data(),
+				contactId: doc.data().participants.find((p) => p !== currentUser.uid)
+			})));
+		});
+		return () => unsub();
+	}, [currentUser]);
+	const handleToggleContact = (contactId) => {
+		setSelectedContacts((prev) => prev.includes(contactId) ? prev.filter((id) => id !== contactId) : [...prev, contactId]);
+	};
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		setError("");
+		if (!name.trim()) return setError("يرجى كتابة اسم المجموعة");
+		if (!currentUser) {
+			setError("يجب تسجيل الدخول أولاً.");
+			return;
+		}
+		setLoading(true);
+		try {
+			const memberIds = [currentUser.uid, ...selectedContacts];
+			const groupRef = await addDoc(collection(db, "groups"), {
+				name: name.trim(),
+				description: description.trim(),
+				isPrivate,
+				createdBy: currentUser.uid,
+				members: memberIds,
+				createdAt: serverTimestamp$2()
+			});
+			const batch = [];
+			for (const memberId of selectedContacts) {
+				if (memberId === currentUser.uid) continue;
+				batch.push(addDoc(collection(db, "notifications"), {
+					type: "added_to_group",
+					groupId: groupRef.id,
+					groupName: name.trim(),
+					recipientId: memberId,
+					senderId: currentUser.uid,
+					read: false,
+					createdAt: serverTimestamp$2()
+				}));
+			}
+			await Promise.all(batch);
+			setSuccess(true);
+			setTimeout(() => onBack?.(), 1500);
+		} catch (err) {
+			console.error(err);
+			setError("حدث خطأ أثناء الإنشاء. حاول مرة أخرى.");
+		} finally {
+			setLoading(false);
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen flex flex-col bg-slate-50/50",
+		dir: "rtl",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
+			className: "sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-14 pb-4",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center justify-between",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: onBack,
+						className: "w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors active:scale-95",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+							className: "w-5 h-5 text-gray-700",
+							viewBox: "0 0 24 24",
+							fill: "none",
+							stroke: "currentColor",
+							strokeWidth: "2",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+						className: "text-xl font-black text-gray-900 tracking-tight",
+						children: "إنشاء مجموعة"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
+				]
+			})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("main", {
+			className: "flex-1 overflow-y-auto px-5 py-6 pb-24",
+			children: success ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex flex-col items-center justify-center py-12 text-center animate-in fade-in zoom-in duration-300",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mb-4",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+							className: "w-10 h-10 text-emerald-600",
+							viewBox: "0 0 24 24",
+							fill: "none",
+							stroke: "currentColor",
+							strokeWidth: "2",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: "20 6 9 17 4 12" })
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-xl font-bold text-gray-900 mb-2",
+						children: "تم إنشاء المجموعة بنجاح!"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-sm text-gray-500",
+						children: "جاري العودة إلى القائمة..."
+					})
+				]
+			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+				onSubmit: handleSubmit,
+				className: "space-y-6",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-5",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+							className: "text-sm font-bold text-gray-700 mb-2 block",
+							children: ["اسم المجموعة ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-red-500",
+								children: "*"
+							})]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							type: "text",
+							value: name,
+							onChange: (e) => setName(e.target.value),
+							placeholder: "مثال: فريق التطوير",
+							className: "w-full h-12 px-4 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-transparent transition-all",
+							maxLength: 50
+						})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "text-sm font-bold text-gray-700 mb-2 block",
+							children: "الوصف (اختياري)"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
+							value: description,
+							onChange: (e) => setDescription(e.target.value),
+							placeholder: "اكتب وصفاً مختصراً للمجموعة...",
+							rows: 3,
+							className: "w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-transparent transition-all resize-none",
+							maxLength: 200
+						})] })]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-white rounded-3xl p-5 border border-gray-100 shadow-sm",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "text-sm font-bold text-gray-900 mb-4",
+							children: "إعدادات الخصوصية"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center justify-between p-4 bg-gray-50 rounded-xl",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900 text-sm",
+								children: "مجموعة خاصة"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-500 mt-0.5",
+								children: "الدعوة مطلوبة للانضمام"
+							})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
+								onClick: () => setIsPrivate(!isPrivate),
+								className: `w-12 h-7 rounded-full transition-colors relative ${isPrivate ? "bg-purple-600" : "bg-gray-300"}`,
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${isPrivate ? "translate-x-5" : ""}` })
+							})]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-white rounded-3xl p-5 border border-gray-100 shadow-sm",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+							className: "text-sm font-bold text-gray-900 mb-4",
+							children: [
+								"إضافة أعضاء (",
+								selectedContacts.length,
+								")"
+							]
+						}), contacts.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-xs text-gray-400 text-center py-4",
+							children: "لا توجد جهات اتصال مضافة بعد"
+						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "space-y-2 max-h-60 overflow-y-auto",
+							children: contacts.map((contact) => {
+								const isSelected = selectedContacts.includes(contact.contactId);
+								return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									onClick: () => handleToggleContact(contact.contactId),
+									className: `flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${isSelected ? "bg-purple-50 border-purple-300 shadow-sm" : "bg-gray-50 border-gray-100 hover:border-purple-200"}`,
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-3",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: `w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs ${isSelected ? "bg-purple-600 border-purple-600 text-white" : "border-gray-300 text-transparent"}`,
+											children: isSelected && "✓"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+											className: "text-sm font-medium text-gray-900",
+											children: contact.displayName || contact.email || "مستخدم"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+											className: "text-[10px] text-gray-500",
+											children: ["@", contact.username || contact.contactId?.slice(0, 8)]
+										})] })]
+									})
+								}, contact.id);
+							})
+						})]
+					}),
+					error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "bg-red-50 border border-red-100 text-red-600 text-sm p-4 rounded-xl flex items-center gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+							className: "w-5 h-5 shrink-0",
+							viewBox: "0 0 24 24",
+							fill: "none",
+							stroke: "currentColor",
+							strokeWidth: "2",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+									cx: "12",
+									cy: "12",
+									r: "10"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", {
+									x1: "12",
+									y1: "8",
+									x2: "12",
+									y2: "12"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("line", {
+									x1: "12",
+									y1: "16",
+									x2: "12.01",
+									y2: "16"
+								})
+							]
+						}), error]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "submit",
+						disabled: loading || !name.trim(),
+						className: "w-full h-14 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
+						children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+							className: "w-5 h-5 animate-spin",
+							viewBox: "0 0 24 24",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("circle", {
+								cx: "12",
+								cy: "12",
+								r: "10",
+								stroke: "currentColor",
+								strokeWidth: "4",
+								className: "opacity-25"
+							})
+						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+							className: "w-5 h-5",
+							viewBox: "0 0 24 24",
+							fill: "none",
+							stroke: "currentColor",
+							strokeWidth: "2",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M12 5v14M5 12h14" })
+						}), "إنشاء المجموعة"] })
+					})
+				]
+			})
+		})]
+	});
+}
+//#endregion
+//#region src/features/home/MainMenuScreen.jsx
+function MainMenuScreen({ onNavigate, username }) {
+	const user = auth.currentUser;
+	const [copied, setCopied] = (0, import_react.useState)(false);
+	const [idVisible, setIdVisible] = (0, import_react.useState)(true);
+	const displayName = user?.displayName || user?.email?.split("@")[0] || "مستخدم";
+	const userHandle = username || "غير محدد";
+	const handleCopy = async () => {
+		if (!username || username === "غير محدد") return;
+		try {
+			await navigator.clipboard.writeText(username);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2e3);
+		} catch (err) {
+			console.error("فشل النسخ:", err);
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen flex flex-col bg-slate-50/50 pb-24",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", {
+			className: "bg-white/80 backdrop-blur-xl sticky top-0 z-20 px-5 pt-16 pb-5 border-b border-gray-200/60",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+				className: "text-2xl font-black text-gray-900 tracking-tight",
+				children: "القائمة الرئيسية"
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-xs text-gray-500 mt-1",
+				children: "مرحباً بك في LinkUp"
+			})]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+			className: "flex-1 overflow-y-auto px-5 pt-6 space-y-6",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "bg-white rounded-3xl p-6 shadow-sm border border-gray-100 text-center relative overflow-hidden",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-purple-600 to-blue-500 opacity-5" }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "relative inline-block mb-4",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
+								className: "w-28 h-28 border-4 border-white shadow-xl ring-4 ring-purple-500/10 mx-auto",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
+									src: user?.photoURL,
+									className: "object-cover"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
+									className: "bg-gradient-to-br from-purple-600 to-blue-500 text-white text-4xl font-bold",
+									children: displayName.charAt(0)
+								})]
+							})
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							className: "text-2xl font-black text-gray-900",
+							children: displayName
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "bg-white rounded-2xl p-5 shadow-sm border border-gray-100",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center justify-between mb-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								className: "text-sm font-bold text-gray-800",
+								children: "اسم المستخدم الخاص بك"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								onClick: () => setIdVisible(!idVisible),
+								className: "text-xs text-gray-500 hover:text-purple-600 font-medium flex items-center gap-1 transition-colors",
+								children: [idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" }), idVisible ? "إخفاء" : "إظهار"]
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "bg-slate-50 rounded-xl p-4 border border-gray-200 flex items-center justify-between group transition-colors hover:border-purple-200",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("code", {
+								className: "text-lg font-mono text-purple-700 font-bold truncate flex-1 text-right select-all",
+								dir: "ltr",
+								children: ["@", idVisible ? userHandle : "••••••••"]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: handleCopy,
+								disabled: !username || username === "غير محدد",
+								className: "mr-3 p-3 rounded-xl bg-purple-100 text-purple-600 hover:bg-purple-200 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed",
+								children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-5 h-5" })
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "text-[10px] text-gray-500 mt-3 text-center font-medium",
+							children: [
+								"شارك اسم المستخدم (@",
+								username,
+								") مع أصدقائك ليعثروا عليك بسهولة في جهات الاتصال."
+							]
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "grid grid-cols-2 gap-3",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						onClick: () => onNavigate?.("contacts"),
+						className: "bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-purple-200 transition-all active:scale-[0.98] text-right group",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center mb-3 group-hover:bg-purple-100 transition-colors",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-6 h-6 text-purple-600" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900 text-sm",
+								children: "جهات الاتصال"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-500 mt-0.5",
+								children: "إدارة القائمة"
+							})
+						]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						onClick: () => onNavigate?.("settings"),
+						className: "bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all active:scale-[0.98] text-right group",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center mb-3 group-hover:bg-blue-100 transition-colors",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Settings, { className: "w-6 h-6 text-blue-600" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900 text-sm",
+								children: "الإعدادات"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-500 mt-0.5",
+								children: "تخصيص التطبيق"
+							})
+						]
+					})]
+				})
+			]
+		})]
+	});
+}
+//#endregion
+//#region node_modules/@radix-ui/react-label/dist/index.mjs
+var NAME = "Label";
+var Label$1 = import_react.forwardRef((props, forwardedRef) => {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Primitive$4.label, {
+		...props,
+		ref: forwardedRef,
+		onMouseDown: (event) => {
+			if (event.target.closest("button, input, select, textarea")) return;
+			props.onMouseDown?.(event);
+			if (!event.defaultPrevented && event.detail > 1) event.preventDefault();
+		}
+	});
+});
+Label$1.displayName = NAME;
+var Root = Label$1;
+//#endregion
+//#region src/components/ui/label.jsx
+var labelVariants = cva("text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70");
+var Label = import_react.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Root, {
+	ref,
+	className: cn(labelVariants(), className),
+	...props
+}));
+Label.displayName = Root.displayName;
+//#endregion
+//#region src/components/common/DisplayNameModal.jsx
+function DisplayNameModal({ open, suggestedName, onConfirm }) {
+	const [displayName, setDisplayName] = (0, import_react.useState)(suggestedName);
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		if (displayName.trim().length > 0) onConfirm(displayName.trim());
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
+		open,
+		onOpenChange: () => {},
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogContent, {
+			className: "sm:max-w-md w-[calc(100%-2rem)] mx-auto my-8 bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border-0 p-6",
+			onPointerDownOutside: (e) => e.preventDefault(),
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(DialogHeader, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogTitle, {
+				className: "text-center text-2xl font-bold text-gray-800 dark:text-white",
+				children: "أكمل ملفك الشخصي"
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogDescription, {
+				className: "text-center text-gray-600 dark:text-gray-400",
+				children: "اختر اسم العرض الذي سيظهر للمستخدمين الآخرين"
+			})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+				onSubmit: handleSubmit,
+				className: "space-y-6 py-4",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "space-y-2",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Label, {
+							className: "text-gray-700 dark:text-gray-300 font-medium",
+							children: "اسم العرض"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User$1, { className: "absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
+								type: "text",
+								placeholder: "مثال: محمد أحمد",
+								value: displayName,
+								onChange: (e) => setDisplayName(e.target.value),
+								className: "pl-10 h-12 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-base",
+								autoFocus: true
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-xs text-gray-500 dark:text-gray-400",
+							children: "يمكنك تغييره لاحقاً من الملف الشخصي"
+						})
+					]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DialogFooter, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button, {
+					type: "submit",
+					disabled: !displayName.trim(),
+					className: "w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-md",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "h-4 w-4 mr-2" }), "متابعة"]
+				}) })]
+			})]
+		})
+	});
+}
 //#endregion
 //#region src/components/common/WelcomeModal.jsx
 var AppIcon = () => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
