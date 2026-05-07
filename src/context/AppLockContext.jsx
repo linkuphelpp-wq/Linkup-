@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 
 const AppLockContext = createContext();
 export const useAppLock = () => useContext(AppLockContext);
@@ -18,82 +18,10 @@ function arrayBufferToBase64(buffer) {
 }
 
 export function AppLockProvider({ children }) {
-  const [lockEnabled, setLockEnabled] = useState(() => localStorage.getItem('app_lock_enabled') === 'true');
-  const [pin, setPin] = useState(() => localStorage.getItem('app_lock_pin') || '');
-  const [isLocked, setIsLocked] = useState(() => lockEnabled && !!pin);
-  const [lockTimeout, setLockTimeout] = useState(() => parseInt(localStorage.getItem('app_lock_timeout') || '0', 10));
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [lockUntil, setLockUntil] = useState(null);
-  const [biometricEnabled, setBiometricEnabled] = useState(() => localStorage.getItem('app_lock_biometric') === 'true');
+  const [lockEnabled, setLockEnabled] = useState(() => localStorage.getItem('app_lock_biometric') === 'true');
+  const [isLocked, setIsLocked] = useState(() => lockEnabled);
+  const [biometricEnabled, setBiometricEnabled] = useState(() => lockEnabled);
 
-  const lastActivityRef = useState(Date.now());
-
-  useEffect(() => {
-    if (!lockEnabled || !pin) return;
-    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
-    const handleActivity = () => { lastActivityRef[1](Date.now()); };
-    events.forEach(e => window.addEventListener(e, handleActivity));
-    const interval = setInterval(() => {
-      if (lockTimeout > 0 && Date.now() - lastActivityRef[0] > lockTimeout * 1000) {
-        setIsLocked(true);
-      }
-    }, 1000);
-    return () => {
-      events.forEach(e => window.removeEventListener(e, handleActivity));
-      clearInterval(interval);
-    };
-  }, [lockEnabled, pin, lockTimeout]);
-
-  const enableLock = useCallback((newPin, timeout = 0) => {
-    localStorage.setItem('app_lock_enabled', 'true');
-    localStorage.setItem('app_lock_pin', newPin);
-    localStorage.setItem('app_lock_timeout', timeout.toString());
-    setLockEnabled(true);
-    setPin(newPin);
-    setLockTimeout(timeout);
-    setIsLocked(false);
-  }, []);
-
-  const disableLock = useCallback(() => {
-    localStorage.removeItem('app_lock_enabled');
-    localStorage.removeItem('app_lock_pin');
-    localStorage.removeItem('app_lock_timeout');
-    localStorage.removeItem('app_lock_biometric');
-    localStorage.removeItem('app_lock_credential_id');
-    localStorage.removeItem('app_lock_public_key');
-    setLockEnabled(false);
-    setPin('');
-    setIsLocked(false);
-    setBiometricEnabled(false);
-    setFailedAttempts(0);
-    setLockUntil(null);
-  }, []);
-
-  const verifyPin = useCallback((enteredPin) => {
-    if (lockUntil && Date.now() < lockUntil) {
-      return { success: false, locked: true, remainingTime: Math.ceil((lockUntil - Date.now()) / 1000) };
-    }
-    if (enteredPin === pin) {
-      setIsLocked(false);
-      setFailedAttempts(0);
-      setLockUntil(null);
-      lastActivityRef[1](Date.now());
-      return { success: true };
-    }
-    const newAttempts = failedAttempts + 1;
-    setFailedAttempts(newAttempts);
-    if (newAttempts >= 3) {
-      setLockUntil(Date.now() + 60000);
-      return { success: false, locked: true, remainingTime: 60 };
-    }
-    return { success: false, locked: false, attemptsLeft: 3 - newAttempts };
-  }, [pin, failedAttempts, lockUntil]);
-
-  const lockNow = useCallback(() => {
-    if (lockEnabled && pin) setIsLocked(true);
-  }, [lockEnabled, pin]);
-
-  // ───────── دوال البصمة ─────────
   const enableBiometric = async () => {
     try {
       const credential = await navigator.credentials.create({
@@ -119,6 +47,8 @@ export function AppLockProvider({ children }) {
         localStorage.setItem('app_lock_credential_id', credentialId);
         localStorage.setItem('app_lock_biometric', 'true');
         setBiometricEnabled(true);
+        setLockEnabled(true);
+        setIsLocked(false);
         return true;
       }
     } catch (e) {
@@ -147,9 +77,6 @@ export function AppLockProvider({ children }) {
       });
       if (assertion) {
         setIsLocked(false);
-        setFailedAttempts(0);
-        setLockUntil(null);
-        lastActivityRef[1](Date.now());
         return { success: true };
       }
     } catch (e) {
@@ -162,13 +89,18 @@ export function AppLockProvider({ children }) {
     localStorage.removeItem('app_lock_biometric');
     localStorage.removeItem('app_lock_credential_id');
     setBiometricEnabled(false);
+    setLockEnabled(false);
+    setIsLocked(false);
   };
+
+  const lockNow = useCallback(() => {
+    if (lockEnabled) setIsLocked(true);
+  }, [lockEnabled]);
 
   return (
     <AppLockContext.Provider value={{
-      lockEnabled, pin, isLocked, lockTimeout, failedAttempts, lockUntil, biometricEnabled,
-      enableLock, disableLock, verifyPin, lockNow,
-      enableBiometric, verifyBiometric, disableBiometric,
+      lockEnabled, isLocked, biometricEnabled,
+      enableBiometric, verifyBiometric, disableBiometric, lockNow
     }}>
       {children}
     </AppLockContext.Provider>
