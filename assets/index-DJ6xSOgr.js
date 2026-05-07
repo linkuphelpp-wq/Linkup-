@@ -10113,6 +10113,10 @@ var ChevronLeft = createLucideIcon("chevron-left", [["path", {
 	d: "m15 18-6-6 6-6",
 	key: "1wnfg3"
 }]]);
+var ChevronRight = createLucideIcon("chevron-right", [["path", {
+	d: "m9 18 6-6-6-6",
+	key: "mthhwq"
+}]]);
 var ChevronUp = createLucideIcon("chevron-up", [["path", {
 	d: "m18 15-6-6-6 6",
 	key: "153udz"
@@ -58859,58 +58863,71 @@ var motion = /* @__PURE__ */ createMotionProxy({
 }, createDomVisualElement);
 //#endregion
 //#region src/features/Settings/SettingsScreen.jsx
-var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-	whileHover: {
-		scale: 1.01,
-		backgroundColor: "#f9fafb"
-	},
-	whileTap: { scale: .98 },
-	onClick: toggle ? void 0 : onClick,
-	className: "flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-100/80 shadow-sm cursor-pointer transition-all group",
-	children: [
-		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "p-2.5 rounded-xl bg-purple-50 text-purple-600 shrink-0 group-hover:bg-purple-100 transition-colors",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5" })
-		}),
-		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex-1 min-w-0 text-right",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-sm font-bold text-gray-900",
-				children: label
-			}), desc && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-xs text-gray-500 mt-0.5 truncate",
-				children: desc
-			})]
-		}),
-		toggle ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-			onClick: (e) => {
-				e.stopPropagation();
-				onToggle?.();
-			},
-			className: `relative w-12 h-7 rounded-full transition-colors shrink-0 ${isToggled ? "bg-purple-600" : "bg-gray-300"}`,
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
-				animate: { x: isToggled ? 20 : 2 },
-				transition: {
-					type: "spring",
-					stiffness: 500,
-					damping: 30
-				},
-				className: "absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
-			})
-		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-4 h-4 text-gray-400 shrink-0 group-hover:text-purple-500 transition-colors" })
-	]
-});
+var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle, color = "purple" }) => {
+	const colorsMap = {
+		purple: "from-purple-500 to-indigo-500 bg-purple-50 text-purple-600",
+		blue: "from-blue-500 to-cyan-500 bg-blue-50 text-blue-600",
+		green: "from-emerald-500 to-teal-500 bg-emerald-50 text-emerald-600",
+		orange: "from-orange-500 to-red-500 bg-orange-50 text-orange-600",
+		pink: "from-pink-500 to-rose-500 bg-pink-50 text-pink-600"
+	};
+	const [gradientFrom, gradientTo, bgColor, textColor] = (colorsMap[color] || colorsMap.purple).split(" ");
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+		whileHover: {
+			y: -3,
+			boxShadow: "0 12px 24px -8px rgba(0,0,0,0.12)"
+		},
+		whileTap: { scale: .97 },
+		onClick: toggle ? void 0 : onClick,
+		className: "group relative overflow-hidden rounded-2xl bg-white border border-gray-100/80 cursor-pointer transition-all shadow-sm hover:shadow-lg p-4",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-purple-500/0 via-transparent to-blue-500/0 group-hover:from-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "relative flex items-center gap-4",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: `p-3 rounded-xl bg-gradient-to-br ${gradientFrom} ${gradientTo} text-white shadow-md group-hover:shadow-lg transition-all group-hover:scale-110`,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5" })
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex-1 min-w-0 text-right",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-sm font-bold text-gray-800",
+						children: label
+					}), desc && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-gray-500 mt-0.5 truncate",
+						children: desc
+					})]
+				}),
+				toggle ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					onClick: (e) => {
+						e.stopPropagation();
+						onToggle?.();
+					},
+					className: `relative w-14 h-7 rounded-full transition-all duration-300 shrink-0 ${isToggled ? "bg-gradient-to-r from-purple-500 to-blue-500 shadow-md" : "bg-gray-300"}`,
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
+						animate: { x: isToggled ? 24 : 2 },
+						transition: {
+							type: "spring",
+							stiffness: 500,
+							damping: 30
+						},
+						className: "absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+					})
+				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-5 h-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" })
+			]
+		})]
+	});
+};
 var SimpleModal = ({ open, onClose, title, children }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 	initial: { opacity: 0 },
 	animate: { opacity: 1 },
 	exit: { opacity: 0 },
-	className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm",
+	className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md",
 	onClick: onClose,
 	children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 		initial: {
 			scale: .9,
 			opacity: 0,
-			y: 20
+			y: 30
 		},
 		animate: {
 			scale: 1,
@@ -58918,51 +58935,57 @@ var SimpleModal = ({ open, onClose, title, children }) => /* @__PURE__ */ (0, im
 			y: 0
 		},
 		exit: {
-			scale: .9,
+			scale: .85,
 			opacity: 0,
-			y: 20
+			y: 30
 		},
 		transition: {
 			type: "spring",
-			stiffness: 400,
-			damping: 25
+			stiffness: 500,
+			damping: 30
 		},
-		className: "bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl",
+		className: "bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-gray-100",
 		onClick: (e) => e.stopPropagation(),
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex items-center justify-between mb-4",
+			className: "flex items-center justify-between mb-5",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-				className: "text-lg font-bold text-gray-900",
+				className: "text-xl font-bold text-gray-800",
 				children: title
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 				onClick: onClose,
-				className: "w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-4 h-4" })
+				className: "w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-5 h-5" })
 			})]
 		}), children]
 	})
 }) });
-var Section = ({ title, children, delay = 0 }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.section, {
+var Section = ({ title, children, delay = 0, icon: Icon }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.section, {
 	initial: {
 		opacity: 0,
-		y: 30
+		x: -30
 	},
 	animate: {
 		opacity: 1,
-		y: 0
+		x: 0
 	},
 	transition: {
-		duration: .4,
+		duration: .5,
 		delay,
 		type: "spring",
 		stiffness: 200,
-		damping: 20
+		damping: 18
 	},
-	className: "space-y-3",
-	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-		className: "text-xs font-bold text-gray-400 uppercase tracking-wider px-1 mb-2",
-		children: title
-	}), children]
+	className: "space-y-4",
+	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "flex items-center gap-3 px-1 mb-2",
+		children: [Icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+			className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
+			children: title
+		})]
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "space-y-3",
+		children
+	})]
 });
 function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile, onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker, fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner }) {
 	const [showFontModal, setShowFontModal] = (0, import_react.useState)(false);
@@ -58973,8 +58996,8 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 	const [compactMode, setCompactMode] = (0, import_react.useState)(() => localStorage.getItem("compactMode") === "true");
 	(0, import_react.useEffect)(() => {
 		localStorage.setItem("compactMode", compactMode);
-		if (compactMode) document.documentElement.classList.add("compact-ui");
-		else document.documentElement.classList.remove("compact-ui");
+		if (compactMode) document.documentElement.style.fontSize = "14px";
+		else document.documentElement.style.fontSize = "";
 	}, [compactMode]);
 	const sizes = [
 		{
@@ -59036,57 +59059,62 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-gradient-to-b from-gray-50 to-white pb-24",
+		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-24",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				initial: {
 					opacity: 0,
-					y: -20
+					y: -30
 				},
 				animate: {
 					opacity: 1,
 					y: 0
 				},
-				className: "sticky top-0 z-20 backdrop-blur-xl bg-white/70 border-b border-gray-200/60 px-5 pt-16 pb-4 text-center",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
-					className: "text-2xl font-black text-gray-900 tracking-tight",
-					children: ["خصّص ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
-						children: "تجربتك"
+				className: "sticky top-0 z-20 bg-white/60 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-12 pb-4 text-center shadow-sm",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center justify-center gap-3 mb-1",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-7 h-7 text-purple-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+						className: "text-3xl font-black text-gray-800 tracking-tight",
+						children: "الإعدادات"
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-sm text-gray-500 mt-1",
+					className: "text-sm text-gray-500",
 					children: "تحكم كامل في تطبيقك كما تحب"
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "px-5 py-6 space-y-8",
+				className: "px-4 py-6 space-y-8 max-w-lg mx-auto",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Section, {
 						title: "الحساب",
 						delay: .1,
+						icon: User$1,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 							icon: User$1,
 							label: "الملف الشخصي",
 							desc: "تعديل اسمك وصورتك",
-							onClick: onOpenProfile
+							onClick: onOpenProfile,
+							color: "purple"
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
 						title: "المظهر",
 						delay: .2,
+						icon: Palette,
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Palette,
 								label: "حجم الخط",
 								desc: sizes.find((s) => s.v === fontSize)?.l,
-								onClick: () => setShowSizeModal(true)
+								onClick: () => setShowSizeModal(true),
+								color: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Palette,
 								label: "نوع الخط",
 								desc: fonts.find((f) => f.v === fontFamily)?.l,
-								onClick: () => setShowFontModal(true)
+								onClick: () => setShowFontModal(true),
+								color: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: TabletSmartphone,
@@ -59094,60 +59122,70 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 								desc: "مناسب للشاشات الصغيرة",
 								toggle: true,
 								isToggled: compactMode,
-								onToggle: () => setCompactMode(!compactMode)
+								onToggle: () => setCompactMode(!compactMode),
+								color: "green"
 							})
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
 						title: "المكالمات",
 						delay: .3,
+						icon: Mic,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 							icon: Mic,
 							label: "كتم الميكروفون تلقائياً",
 							toggle: true,
 							isToggled: muteMicOnJoin,
-							onToggle: onToggleMuteMic
+							onToggle: onToggleMuteMic,
+							color: "orange"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 							icon: Speaker,
 							label: "مكبر الصوت افتراضياً",
 							toggle: true,
 							isToggled: speakerDefault,
-							onToggle: onToggleSpeaker
+							onToggle: onToggleSpeaker,
+							color: "orange"
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
 						title: "الخصوصية والأمان",
 						delay: .4,
+						icon: Lock,
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Lock,
 								label: "قفل التطبيق",
 								desc: "حماية إضافية برمز سري",
-								onClick: onOpenAppLock
+								onClick: onOpenAppLock,
+								color: "pink"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Shield,
 								label: "إدارة البيانات",
 								desc: "التحكم في تخزين بياناتك",
-								onClick: onOpenDataManagement
+								onClick: onOpenDataManagement,
+								color: "pink"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: RefreshCw,
 								label: "إعادة ضبط التطبيق",
 								desc: "مسح جميع المحادثات والبيانات",
-								onClick: () => setShowResetModal(true)
+								onClick: () => setShowResetModal(true),
+								color: "pink"
 							})
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
 						title: "المزيد",
 						delay: .5,
+						icon: Sparkles,
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: MessageCircle,
 								label: "تواصل مع المطور",
 								desc: "ملاحظات، اقتراحات، أو مشاكل",
-								onClick: onOpenSupport
+								onClick: onOpenSupport,
+								color: "purple"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Share2,
@@ -59156,19 +59194,22 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 								onClick: () => navigator.share?.({
 									title: "LinkUp",
 									url: window.location.origin
-								}).catch(() => {})
+								}).catch(() => {}),
+								color: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Sparkles,
 								label: "تكوين شراكة",
 								desc: "انضم كشريك رسمي",
-								onClick: onOpenPartner
+								onClick: onOpenPartner,
+								color: "green"
 							}),
 							isAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Shield,
 								label: "لوحة الإدارة",
 								desc: "إدارة المستخدمين والمحتوى",
-								onClick: onOpenAdmin
+								onClick: onOpenAdmin,
+								color: "orange"
 							})
 						]
 					}),
@@ -59182,40 +59223,40 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 							y: 0
 						},
 						transition: {
-							delay: .6,
+							delay: .7,
 							type: "spring",
 							stiffness: 200,
 							damping: 20
 						},
-						className: "grid grid-cols-3 gap-3 pt-2",
+						className: "grid grid-cols-3 gap-3",
 						children: [
 							{
 								label: "من هو أثير؟",
 								onClick: onOpenAtheer,
-								color: "purple"
+								gradient: "from-purple-500 to-indigo-500"
 							},
 							{
 								label: "من نحن",
 								onClick: onOpenAbout,
-								color: "blue"
+								gradient: "from-blue-500 to-cyan-500"
 							},
 							{
 								label: "الخصوصية",
 								onClick: onOpenPrivacy,
-								color: "gray"
+								gradient: "from-gray-500 to-gray-600"
 							}
-						].map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						].map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
 							whileHover: {
 								scale: 1.05,
-								y: -2
+								y: -5
 							},
-							whileTap: { scale: .95 },
+							whileTap: { scale: .93 },
 							onClick: item.onClick,
-							className: `flex flex-col items-center justify-center p-3 rounded-xl shadow-sm border border-gray-100 bg-white hover:bg-gray-50 transition-all`,
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: `text-xs font-bold text-${item.color}-700`,
+							className: "relative overflow-hidden rounded-2xl p-3 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all group",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "relative text-xs font-bold text-gray-700 group-hover:text-purple-700 transition-colors",
 								children: item.label
-							})
+							})]
 						}, item.label))
 					})
 				]
@@ -59227,17 +59268,22 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "space-y-2",
 					children: sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+						whileHover: {
+							scale: 1.02,
+							backgroundColor: "#f5f3ff"
+						},
 						whileTap: { scale: .97 },
 						onClick: () => {
 							onSelectFontSize?.(s.v);
 							setShowSizeModal(false);
 						},
-						className: `w-full p-3 rounded-lg text-right text-sm font-bold flex items-center justify-between ${fontSize === s.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300" : "bg-gray-50 text-gray-700 hover:bg-gray-100"}`,
-						children: [
-							s.l,
-							" ",
-							fontSize === s.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })
-						]
+						className: `w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all ${fontSize === s.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300 shadow-md" : "bg-gray-50 text-gray-700 hover:bg-purple-50"}`,
+						children: [s.l, fontSize === s.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+							initial: { scale: 0 },
+							animate: { scale: 1 },
+							className: "bg-purple-500 text-white rounded-full p-1",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })
+						})]
 					}, s.v))
 				})
 			}),
@@ -59248,20 +59294,25 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "space-y-2",
 					children: fonts.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+						whileHover: {
+							scale: 1.02,
+							backgroundColor: "#f5f3ff"
+						},
 						whileTap: { scale: .97 },
 						onClick: () => {
 							onSelectFontFamily?.(f.v);
 							setShowFontModal(false);
 						},
-						className: `w-full p-3 rounded-lg text-right text-sm font-bold flex items-center justify-between ${fontFamily === f.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300" : "bg-gray-50 text-gray-700 hover:bg-gray-100"}`,
+						className: `w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all ${fontFamily === f.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300 shadow-md" : "bg-gray-50 text-gray-700 hover:bg-purple-50"}`,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 							className: "flex items-center gap-2",
-							children: [
-								f.l,
-								" ",
-								f.featured && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-3 h-3 text-yellow-500" })
-							]
-						}), fontFamily === f.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })]
+							children: [f.l, f.featured && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-4 h-4 text-yellow-500" })]
+						}), fontFamily === f.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+							initial: { scale: 0 },
+							animate: { scale: 1 },
+							className: "bg-purple-500 text-white rounded-full p-1",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })
+						})]
 					}, f.v))
 				})
 			}),
@@ -59270,19 +59321,19 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				onClose: () => setShowResetModal(false),
 				title: "تأكيد إعادة الضبط",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "space-y-4",
+					className: "space-y-5",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex flex-col items-center gap-2",
+							className: "flex flex-col items-center gap-3",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-14 h-14 rounded-full bg-red-100 flex items-center justify-center",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-7 h-7 text-red-600" })
+								className: "w-16 h-16 rounded-full bg-red-100 flex items-center justify-center",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-8 h-8 text-red-600" })
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "text-sm text-gray-600 text-center",
+								className: "text-sm text-gray-600 text-center leading-relaxed",
 								children: [
-									"اكتب كلمة ",
+									"هذا الإجراء لا يمكن التراجع عنه. اكتب كلمة ",
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "font-bold text-red-600",
+										className: "font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded",
 										children: "\"حذف\""
 									}),
 									" للتأكيد"
@@ -59292,22 +59343,23 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							value: resetText,
 							onChange: (e) => setResetText(e.target.value),
-							placeholder: "اكتب هنا...",
-							className: "w-full h-12 px-4 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-200 text-center text-lg",
+							placeholder: "اكتب كلمة حذف هنا...",
+							className: "w-full h-12 px-4 rounded-xl bg-gray-50 border-2 border-gray-200 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200 text-center text-lg font-medium",
 							autoFocus: true
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+								whileTap: { scale: .95 },
 								onClick: () => setShowResetModal(false),
-								className: "flex-1 h-11 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 font-medium transition-colors",
+								className: "flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all",
 								children: "إلغاء"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-								whileTap: resetText.trim() === "حذف" ? { scale: .95 } : {},
+								whileTap: resetText.trim() === "حذف" ? { scale: .9 } : {},
 								onClick: handleResetApp,
 								disabled: resetText.trim() !== "حذف" || resetLoading,
-								className: "flex-1 h-11 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-red-200 transition-all",
-								children: resetLoading ? "جارٍ..." : "تأكيد"
+								className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-red-200 transition-all",
+								children: resetLoading ? "جارٍ..." : "تأكيد الحذف"
 							})]
 						})
 					]
