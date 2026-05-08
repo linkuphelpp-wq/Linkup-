@@ -61766,6 +61766,7 @@ function AppLockProvider({ children }) {
 	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(() => lockEnabled);
 	const [lockTimer, setLockTimer] = (0, import_react.useState)(() => localStorage.getItem("app_lock_timer") || "immediate");
 	const timerRef = (0, import_react.useRef)(null);
+	const isReturningRef = (0, import_react.useRef)(false);
 	const setTimerOption = (0, import_react.useCallback)((option) => {
 		localStorage.setItem("app_lock_timer", option);
 		setLockTimer(option);
@@ -61840,6 +61841,10 @@ function AppLockProvider({ children }) {
 					clearTimeout(timerRef.current);
 					timerRef.current = null;
 				}
+				isReturningRef.current = true;
+				setTimeout(() => {
+					isReturningRef.current = false;
+				}, 500);
 				return { success: true };
 			}
 		} catch (e) {
@@ -61868,8 +61873,9 @@ function AppLockProvider({ children }) {
 					setIsLocked(true);
 				}, lockTimer === "30s" ? 3e4 : 3e5);
 			} else {
+				if (isReturningRef.current) return;
 				if (lockTimer === "immediate") setIsLocked(true);
-				if (timerRef.current) {
+				else if (timerRef.current) {
 					clearTimeout(timerRef.current);
 					timerRef.current = null;
 					setIsLocked(false);
@@ -73846,15 +73852,9 @@ function AppContent() {
 	const [showInstallGuide, setShowInstallGuide] = (0, import_react.useState)(false);
 	const [modalQueue, setModalQueue] = (0, import_react.useState)([]);
 	const [incomingCallActive, setIncomingCallActive] = (0, import_react.useState)(false);
-	const [isAppVisible, setIsAppVisible] = (0, import_react.useState)(true);
 	const { myId, callStatus, localStream, remoteStream, remoteUserData, startCall, stopCall, switchCamera, toggleVideo, isVideoEnabled, getRemotePeerId, incomingCall, incomingCallerInfo, incomingCallType, acceptIncomingCall, rejectIncomingCall } = usePeer();
 	usePresence();
 	const [isAdmin, setIsAdmin] = (0, import_react.useState)(false);
-	(0, import_react.useEffect)(() => {
-		const handleVisibility = () => setIsAppVisible(!document.hidden);
-		document.addEventListener("visibilitychange", handleVisibility);
-		return () => document.removeEventListener("visibilitychange", handleVisibility);
-	}, []);
 	(0, import_react.useEffect)(() => {
 		const handleOnline = () => setIsOnline(true);
 		const handleOffline = () => setIsOnline(false);
@@ -74270,7 +74270,6 @@ function AppContent() {
 		navigateTo("groupInfo");
 	};
 	if (isLocked && lockEnabled) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PinLockScreen, {});
-	if (!isAppVisible) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fixed inset-0 z-[9999] bg-white" });
 	if (showOnboarding) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OnboardingScreen, { onFinish: handleFinishOnboarding });
 	if (bannedModalOpen) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BannedModal, {
 		open: bannedModalOpen,
