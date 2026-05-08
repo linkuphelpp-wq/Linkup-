@@ -46369,7 +46369,7 @@ var app = initializeApp({
 	measurementId: "G-YR0TL5WXDJ"
 });
 if (typeof window !== "undefined" && window.location.hostname !== "localhost") initializeAppCheck(app, {
-	provider: new ReCaptchaV3Provider("6LfOud8sAAAAAPL8iP62VWtkK5iQNG-bGvZuob0K"),
+	provider: new ReCaptchaV3Provider("6LfOud8sAAAAAGKE0hvOqVr16UN2_tqB5PU3nMrM"),
 	isTokenAutoRefreshEnabled: true
 });
 var auth = getAuth(app);
