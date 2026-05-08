@@ -10687,6 +10687,28 @@ var TabletSmartphone = createLucideIcon("tablet-smartphone", [
 		key: "lrp35t"
 	}]
 ]);
+var Timer = createLucideIcon("timer", [
+	["line", {
+		x1: "10",
+		x2: "14",
+		y1: "2",
+		y2: "2",
+		key: "14vaq8"
+	}],
+	["line", {
+		x1: "12",
+		x2: "15",
+		y1: "14",
+		y2: "11",
+		key: "17fdiu"
+	}],
+	["circle", {
+		cx: "12",
+		cy: "14",
+		r: "8",
+		key: "1e1u0o"
+	}]
+]);
 var Trash2 = createLucideIcon("trash-2", [
 	["path", {
 		d: "M10 11v6",
@@ -61742,6 +61764,42 @@ function AppLockProvider({ children }) {
 	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_biometric") === "true");
 	const [isLocked, setIsLocked] = (0, import_react.useState)(() => lockEnabled);
 	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(() => lockEnabled);
+	const [lockTimer, setLockTimer] = (0, import_react.useState)(() => localStorage.getItem("app_lock_timer") || "immediate");
+	const timerRef = (0, import_react.useRef)(null);
+	(0, import_react.useRef)(Date.now());
+	const setTimerOption = (0, import_react.useCallback)((option) => {
+		localStorage.setItem("app_lock_timer", option);
+		setLockTimer(option);
+	}, []);
+	const startLockTimer = (0, import_react.useCallback)(() => {
+		if (!lockEnabled) return;
+		if (timerRef.current) clearTimeout(timerRef.current);
+		if (lockTimer === "immediate") setIsLocked(true);
+		else timerRef.current = setTimeout(() => {
+			setIsLocked(true);
+		}, lockTimer === "30s" ? 3e4 : 3e5);
+	}, [lockEnabled, lockTimer]);
+	const resetLockTimer = (0, import_react.useCallback)(() => {
+		if (timerRef.current) {
+			clearTimeout(timerRef.current);
+			timerRef.current = null;
+		}
+		if (isLocked === false) return;
+		if (lockTimer !== "immediate") setIsLocked(false);
+	}, [lockTimer, isLocked]);
+	(0, import_react.useEffect)(() => {
+		if (!lockEnabled) return;
+		const handleVisibilityChange = () => {
+			if (document.hidden) startLockTimer();
+			else resetLockTimer();
+		};
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+		return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+	}, [
+		lockEnabled,
+		startLockTimer,
+		resetLockTimer
+	]);
 	const enableBiometric = async () => {
 		try {
 			const credential = await navigator.credentials.create({ publicKey: {
@@ -61782,20 +61840,13 @@ function AppLockProvider({ children }) {
 			}
 		} catch (e) {
 			console.error("Biometric registration failed", e);
-			alert("فشل تفعيل البصمة. قد لا يدعم جهازك هذه الميزة.");
 		}
 		return false;
 	};
 	const verifyBiometric = async () => {
-		if (!biometricEnabled) return {
-			success: false,
-			error: "البصمة غير مفعلة"
-		};
+		if (!biometricEnabled) return { success: false };
 		const credentialId = localStorage.getItem("app_lock_credential_id");
-		if (!credentialId) return {
-			success: false,
-			error: "بيانات البصمة مفقودة"
-		};
+		if (!credentialId) return { success: false };
 		try {
 			if (await navigator.credentials.get({ publicKey: {
 				challenge: new Uint8Array([
@@ -61815,35 +61866,34 @@ function AppLockProvider({ children }) {
 				userVerification: "required"
 			} })) {
 				setIsLocked(false);
+				resetLockTimer();
 				return { success: true };
 			}
 		} catch (e) {
 			console.error("Biometric verification failed", e);
 		}
-		return {
-			success: false,
-			error: "فشل التحقق من البصمة"
-		};
+		return { success: false };
 	};
 	const disableBiometric = () => {
 		localStorage.removeItem("app_lock_biometric");
 		localStorage.removeItem("app_lock_credential_id");
+		localStorage.removeItem("app_lock_timer");
 		setBiometricEnabled(false);
 		setLockEnabled(false);
 		setIsLocked(false);
 	};
-	const lockNow = (0, import_react.useCallback)(() => {
-		if (lockEnabled) setIsLocked(true);
-	}, [lockEnabled]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockContext.Provider, {
 		value: {
 			lockEnabled,
 			isLocked,
 			biometricEnabled,
+			lockTimer,
 			enableBiometric,
 			verifyBiometric,
 			disableBiometric,
-			lockNow
+			setTimerOption,
+			startLockTimer,
+			resetLockTimer
 		},
 		children
 	});
@@ -61851,8 +61901,26 @@ function AppLockProvider({ children }) {
 //#endregion
 //#region src/features/Settings/AppLockScreen.jsx
 function AppLockScreen({ onBack }) {
-	const { lockEnabled, enableBiometric, disableBiometric } = useAppLock();
+	const { lockEnabled, enableBiometric, disableBiometric, lockTimer, setTimerOption } = useAppLock();
 	const [saved, setSaved] = (0, import_react.useState)(false);
+	const [selectedTimer, setSelectedTimer] = (0, import_react.useState)(lockTimer);
+	const timerOptions = [
+		{
+			value: "immediate",
+			label: "فوراً",
+			desc: "يقفل مباشرة عند الخروج"
+		},
+		{
+			value: "30s",
+			label: "30 ثانية",
+			desc: "يقفل بعد 30 ثانية من الخروج"
+		},
+		{
+			value: "5m",
+			label: "5 دقائق",
+			desc: "يقفل بعد 5 دقائق من الخروج"
+		}
+	];
 	const handleToggle = async () => {
 		if (lockEnabled) {
 			disableBiometric();
@@ -61862,6 +61930,10 @@ function AppLockScreen({ onBack }) {
 			setSaved(true);
 			setTimeout(() => setSaved(false), 2e3);
 		}
+	};
+	const handleTimerChange = (value) => {
+		setSelectedTimer(value);
+		setTimerOption(value);
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right",
@@ -61905,42 +61977,59 @@ function AppLockScreen({ onBack }) {
 					opacity: 1,
 					y: 0
 				},
-				transition: {
-					delay: .1,
-					type: "spring",
-					stiffness: 200,
-					damping: 20
-				},
 				className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-4",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "p-3 rounded-xl bg-purple-50 text-purple-600",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-6 h-6" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "font-bold text-gray-900",
-							children: "تفعيل القفل بالبصمة"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-gray-500 mt-1",
-							children: "عند الفتح سيُطلب التحقق من هويتك"
-						})] })]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: handleToggle,
-						className: `w-14 h-8 rounded-full transition-colors relative ${lockEnabled ? "bg-purple-600" : "bg-gray-200"}`,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${lockEnabled ? "translate-x-6" : ""}` })
-					})]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "mt-4 p-4 bg-gray-50 rounded-xl",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-start gap-3",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-5 h-5 text-purple-500 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-600 leading-relaxed",
-							children: "عند تفعيل القفل، سيُطلب منك التحقق من هويتك باستخدام بصمة إصبعك عند فتح التطبيق. في حال عدم استجابة البصمة، يمكنك استخدام كلمة مرور جهازك (PIN أو النقش) كبديل من خلال نافذة النظام التي ستظهر تلقائياً."
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-4",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "p-3 rounded-xl bg-purple-50 text-purple-600",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-6 h-6" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900",
+								children: "تفعيل القفل بالبصمة"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-500 mt-1",
+								children: "عند الفتح سيُطلب التحقق من هويتك"
+							})] })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: handleToggle,
+							className: `w-14 h-8 rounded-full transition-colors relative ${lockEnabled ? "bg-purple-600" : "bg-gray-200"}`,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${lockEnabled ? "translate-x-6" : ""}` })
 						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "mt-4 p-4 bg-gray-50 rounded-xl",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-start gap-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-5 h-5 text-purple-500 shrink-0 mt-0.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-sm text-gray-600 leading-relaxed",
+								children: "عند تفعيل القفل، سيُطلب منك التحقق من هويتك باستخدام بصمة إصبعك عند فتح التطبيق. في حال عدم استجابة البصمة، يمكنك استخدام كلمة مرور جهازك (PIN أو النقش) كبديل."
+							})]
+						})
+					}),
+					lockEnabled && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-4 space-y-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-2 px-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Timer, { className: "w-4 h-4 text-gray-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
+								children: "مدة القفل التلقائي"
+							})]
+						}), timerOptions.map((option) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+							onClick: () => handleTimerChange(option.value),
+							className: `w-full p-3 rounded-xl border text-right transition-all ${selectedTimer === option.value ? "bg-purple-50 border-purple-300 text-purple-700" : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"}`,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "font-bold text-sm",
+								children: option.label
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-xs text-gray-500 mr-2",
+								children: option.desc
+							})]
+						}, option.value))]
 					})
-				})]
+				]
 			}), saved && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				initial: {
 					opacity: 0,
@@ -69186,7 +69275,12 @@ function PinLockScreen() {
 		if (attempting) return;
 		setAttempting(true);
 		setError(false);
-		if (!(await verifyBiometric()).success) {
+		try {
+			if (!(await verifyBiometric()).success) {
+				setError(true);
+				setTimeout(() => setError(false), 800);
+			}
+		} catch (e) {
 			setError(true);
 			setTimeout(() => setError(false), 800);
 		}
@@ -69197,8 +69291,8 @@ function PinLockScreen() {
 		dir: "rtl",
 		onClick: handleTap,
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -top-40 -right-40 w-80 h-80 bg-purple-100/60 rounded-full blur-3xl" }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -bottom-40 -left-40 w-80 h-80 bg-blue-100/60 rounded-full blur-3xl" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -top-40 -right-40 w-80 h-80 bg-purple-100/60 rounded-full blur-3xl pointer-events-none" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -bottom-40 -left-40 w-80 h-80 bg-blue-100/60 rounded-full blur-3xl pointer-events-none" }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				initial: {
 					opacity: 0,
@@ -69262,7 +69356,7 @@ function PinLockScreen() {
 							children: "التحقق من الهوية"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-500 mt-3",
+							className: "text-sm text-gray-500 mt-3 leading-relaxed",
 							children: error ? "لم نتمكن من التحقق، حاول مرة أخرى" : "انقر في أي مكان للتحقق"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -73762,9 +73856,17 @@ function AppContent() {
 	const [showInstallGuide, setShowInstallGuide] = (0, import_react.useState)(false);
 	const [modalQueue, setModalQueue] = (0, import_react.useState)([]);
 	const [incomingCallActive, setIncomingCallActive] = (0, import_react.useState)(false);
+	const [isAppVisible, setIsAppVisible] = (0, import_react.useState)(true);
 	const { myId, callStatus, localStream, remoteStream, remoteUserData, startCall, stopCall, switchCamera, toggleVideo, isVideoEnabled, getRemotePeerId, incomingCall, incomingCallerInfo, incomingCallType, acceptIncomingCall, rejectIncomingCall } = usePeer();
 	usePresence();
 	const [isAdmin, setIsAdmin] = (0, import_react.useState)(false);
+	(0, import_react.useEffect)(() => {
+		const handleVisibilityChange = () => {
+			setIsAppVisible(!document.hidden);
+		};
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+		return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+	}, []);
 	(0, import_react.useEffect)(() => {
 		const handleOnline = () => setIsOnline(true);
 		const handleOffline = () => setIsOnline(false);
@@ -74180,6 +74282,7 @@ function AppContent() {
 		navigateTo("groupInfo");
 	};
 	if (isLocked && lockEnabled) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PinLockScreen, {});
+	if (!isAppVisible) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "fixed inset-0 z-[9999] bg-white" });
 	if (showOnboarding) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OnboardingScreen, { onFinish: handleFinishOnboarding });
 	if (bannedModalOpen) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BannedModal, {
 		open: bannedModalOpen,
