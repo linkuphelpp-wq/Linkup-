@@ -19,10 +19,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // ✅ تفعيل App Check لحماية التطبيق من الطلبات الضارة
-// استبدل '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI' بمفتاح موقع reCAPTCHA v3 الحقيقي الخاص بك
 if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
   initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider('6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'),
+    provider: new ReCaptchaV3Provider('6LfOud8sAAAAAPL8iP62VWtkK5iQNG-bGvZuob0K'),
     isTokenAutoRefreshEnabled: true,
   });
 }
