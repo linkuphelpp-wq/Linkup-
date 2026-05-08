@@ -21,23 +21,24 @@ export function AppLockProvider({ children }) {
   const [lockEnabled, setLockEnabled] = useState(() => localStorage.getItem('app_lock_biometric') === 'true');
   const [biometricEnabled, setBiometricEnabled] = useState(() => lockEnabled);
   const [lockTimer, setLockTimer] = useState(() => localStorage.getItem('app_lock_timer') || 'immediate');
-  
-  // ✅ isLocked: true تعني أننا بحاجة لعرض شاشة البصمة (للعودة من الخروج أو إعادة الفتح)
   const [isLocked, setIsLocked] = useState(false);
-  // ✅ showPrivacyShield: true تعني عرض الستارة البيضاء (في الخلفية أو لحماية الخصوصية)
   const [showPrivacyShield, setShowPrivacyShield] = useState(false);
-  
+
   const timerRef = useRef(null);
   const isReturningFromAuth = useRef(false);
 
-  // تحديد الجلسة (لحذف التطبيق من المهام وإعادة فتحه)
+  // ✅ إصلاح الجلسة: نتحقق من الجلسة فقط إذا كان القفل مفعلاً
   useEffect(() => {
-    if (!lockEnabled) return;
-    
+    if (!lockEnabled) {
+      // إذا كان القفل غير مفعل، نتأكد من إخفاء أي قفل أو ستارة
+      setIsLocked(false);
+      setShowPrivacyShield(false);
+      return;
+    }
+
     if (!sessionStorage.getItem('app_lock_session')) {
-      // التطبيق فُتح من جديد (وليس مجرد عودة من الخلفية)
       setIsLocked(true);
-      setShowPrivacyShield(true); // الستارة البيضاء تظهر خلف شاشة القفل
+      setShowPrivacyShield(true);
     }
     sessionStorage.setItem('app_lock_session', 'true');
 
@@ -46,7 +47,7 @@ export function AppLockProvider({ children }) {
     };
     window.addEventListener('pagehide', clearSession);
     window.addEventListener('beforeunload', clearSession);
-    
+
     return () => {
       window.removeEventListener('pagehide', clearSession);
       window.removeEventListener('beforeunload', clearSession);
@@ -99,7 +100,6 @@ export function AppLockProvider({ children }) {
         },
       });
       if (assertion) {
-        // نجاح التحقق: اختفاء الستارة وشاشة القفل
         setIsLocked(false);
         setShowPrivacyShield(false);
         if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
@@ -122,13 +122,18 @@ export function AppLockProvider({ children }) {
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
   };
 
-  // ✅ جوهرة الستارة: مراقبة الخروج والعودة لتطبيق المؤقتات
+  // ✅ مراقبة الخروج والعودة: تعمل فقط إذا كان القفل مفعلاً
   useEffect(() => {
-    if (!lockEnabled || isLocked) return;
+    if (!lockEnabled) {
+      // إذا تعطل القفل، نخفي أي ستارة
+      setShowPrivacyShield(false);
+      setIsLocked(false);
+      return;
+    }
+    if (isLocked) return;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // ✅ الخروج: الستارة البيضاء تظهر فوراً
         setShowPrivacyShield(true);
         if (timerRef.current) clearTimeout(timerRef.current);
 
@@ -143,15 +148,14 @@ export function AppLockProvider({ children }) {
         if (isReturningFromAuth.current) return;
 
         if (lockTimer === 'immediate') {
-          // يبقى مقفلاً -> شاشة البصمة ستظهر
+          // يبقى مقفلاً
         } else {
           if (timerRef.current) {
             clearTimeout(timerRef.current);
             timerRef.current = null;
             setIsLocked(false);
-            setShowPrivacyShield(false); // لم ينته المؤقت، أزل الستارة
+            setShowPrivacyShield(false);
           }
-          // إذا كان المؤقت انتهى، isLocked = true والستارة موجودة
         }
       }
     };

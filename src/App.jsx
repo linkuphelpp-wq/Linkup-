@@ -141,10 +141,7 @@ function AppContent() {
     const handleOffline = () => setIsOnline(false);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
+    return () => { window.removeEventListener('online', handleOnline); window.removeEventListener('offline', handleOffline); };
   }, []);
 
   useEffect(() => {
@@ -186,10 +183,7 @@ function AppContent() {
     const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); };
     window.addEventListener('beforeinstallprompt', handler);
     window.addEventListener('appinstalled', () => { setIsAppInstalled(true); setDeferredPrompt(null); setShowInstallGuide(false); });
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
-      window.removeEventListener('appinstalled', () => {});
-    };
+    return () => { window.removeEventListener('beforeinstallprompt', handler); window.removeEventListener('appinstalled', () => {}); };
   }, []);
 
   useEffect(() => {
@@ -333,12 +327,11 @@ function AppContent() {
   const handleOpenGroup = (group) => { setCurrentGroup(group); navigateTo('groupChat'); };
   const handleOpenGroupInfo = (group) => { setCurrentGroup(group); navigateTo('groupInfo'); };
 
-  // ✅ شاشة البصمة
+  // ✅ الترتيب الصحيح: شاشة البصمة أولاً، ثم الستارة البيضاء
   if (isLocked && lockEnabled) {
     return <PinLockScreen />;
   }
 
-  // ✅ شاشة بيضاء للخصوصية
   if (showPrivacyShield && !isLocked) {
     return <PrivacyOverlay />;
   }
@@ -468,7 +461,7 @@ function AppContent() {
   );
 }
 
-// ───────── المكون الرئيسي (يغلف السياق) ─────────
+// ───────── المكون الرئيسي ─────────
 function App() {
   return (
     <AppLockProvider>
