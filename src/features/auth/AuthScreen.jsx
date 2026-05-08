@@ -2,26 +2,22 @@ import { useState, useEffect, useRef } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Shield, Users, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { auth, db } from '../../firebase/config';
 import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  signInWithRedirect,
-  getRedirectResult,
-  GoogleAuthProvider
+  signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification,
+  signInWithPopup, GoogleAuthProvider
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { useAppLock } from '../../context/AppLockContext';
 
-// ───────── مكونات مخصصة (بدون مكتبات خارجية) ─────────
+// ───────── مكونات مخصصة ─────────
 const Input = ({ className, ...props }) => (
-  <input
+  <input 
     className={`w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all ${className}`}
     {...props}
   />
 );
 
 const Button = ({ children, className, disabled, ...props }) => (
-  <button
+  <button 
     disabled={disabled}
     className={`relative overflow-hidden rounded-xl font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     {...props}
@@ -47,15 +43,23 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
   const [isLogoPressed, setIsLogoPressed] = useState(false);
   const logoRef = useRef(null);
 
-  // ✅ دوال الحماية من هجمات التخمين (Brute Force Protection)
+  // ✅ دوال الحماية من هجمات التخمين (مُصلحة)
   const MAX_ATTEMPTS = 5;
-  const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 دقائق بالميلي ثانية
+  const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 دقائق
 
   const getLockoutData = () => {
     try {
       const data = localStorage.getItem('auth_lockout');
-      return data ? JSON.parse(data) : { attempts: 0, lockUntil: null };
+      // ✅ التحقق من صحة البيانات
+      if (!data || data === 'undefined') return { attempts: 0, lockUntil: null };
+      const parsed = JSON.parse(data);
+      if (typeof parsed.attempts !== 'number' || parsed.lockUntil !== null && typeof parsed.lockUntil !== 'number') {
+        localStorage.removeItem('auth_lockout');
+        return { attempts: 0, lockUntil: null };
+      }
+      return parsed;
     } catch {
+      localStorage.removeItem('auth_lockout');
       return { attempts: 0, lockUntil: null };
     }
   };
@@ -117,35 +121,6 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
     return () => clearInterval(timer);
   }, [lockedOut]);
 
-  // ✅ التقاط نتيجة تسجيل الدخول بعد العودة من Google
-  useEffect(() => {
-    const checkRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          const user = result.user;
-          const ref = doc(db, 'users', user.uid);
-          if (!(await getDoc(ref)).exists()) {
-            await setDoc(ref, {
-              uid: user.uid, email: user.email, displayName: user.displayName || '', photoURL: user.photoURL || '',
-              username: '', status: 'online', lastSeen: serverTimestamp(),
-              loginDates: [new Date().toISOString().split('T')[0]], loginCount: 1,
-              settings: { fontSize: 'medium', fontFamily: 'tajawal', muteMicOnJoin: false, speakerDefault: false },
-              contacts: [], blockedUsers: [], createdAt: serverTimestamp()
-            });
-          }
-          onLogin?.(user);
-        }
-      } catch (err) {
-        console.error('Redirect sign-in error:', err);
-        setError('فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.');
-      } finally {
-        finishAuthentication();
-      }
-    };
-    checkRedirectResult();
-  }, []);
-
   const handleLogoClick = (e) => {
     if (!logoRef.current) return;
     const rect = logoRef.current.getBoundingClientRect();
@@ -158,7 +133,7 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
   const handleSubmit = async (e) => {
     e.preventDefault(); setError(''); setSuccess('');
 
-    // ✅ تحقق من الحظر أولاً
+    // ✅ تحقق من الحظر
     if (isLockedOut()) {
       setError('تم حظر تسجيل الدخول مؤقتاً بسبب محاولات كثيرة. حاول مجدداً بعد 5 دقائق.');
       setLockedOut(true);
@@ -170,27 +145,27 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
     if (!isLogin && password.length < 6) return setError('يجب أن تكون كلمة المرور 6 أحرف على الأقل');
     setLoading(true);
     try {
-      const { user } = isLogin
-        ? await signInWithEmailAndPassword(auth, email, password)
+      const { user } = isLogin 
+        ? await signInWithEmailAndPassword(auth, email, password) 
         : await createUserWithEmailAndPassword(auth, email, password);
 
-      resetLockout(); // ✅ نجحت العملية، امسح أي حظر سابق
+      resetLockout(); // ✅ امسح أي حظر سابق
       setLockedOut(false);
       
-      if (!user.emailVerified) {
-        await sendEmailVerification(user);
-        setSuccess('تم إرسال رابط التحقق لبريدك.');
-        setLoading(false);
-        return;
+      if (!user.emailVerified) { 
+        await sendEmailVerification(user); 
+        setSuccess('تم إرسال رابط التحقق لبريدك.'); 
+        setLoading(false); 
+        return; 
       }
       
       if (!isLogin) {
         const today = new Date().toISOString().split('T')[0];
-        await setDoc(doc(db, 'users', user.uid), {
-          uid: user.uid, email: user.email, displayName: '', photoURL: '', username: '',
-          status: 'online', lastSeen: serverTimestamp(), loginDates: [today], loginCount: 1,
-          settings: { fontSize: 'medium', fontFamily: 'tajawal', muteMicOnJoin: false, speakerDefault: false },
-          contacts: [], blockedUsers: [], createdAt: serverTimestamp()
+        await setDoc(doc(db, 'users', user.uid), { 
+          uid: user.uid, email: user.email, displayName: '', photoURL: '', username: '', 
+          status: 'online', lastSeen: serverTimestamp(), loginDates: [today], loginCount: 1, 
+          settings: { fontSize: 'medium', fontFamily: 'tajawal', muteMicOnJoin: false, speakerDefault: false }, 
+          contacts: [], blockedUsers: [], createdAt: serverTimestamp() 
         });
         await sendEmailVerification(user);
         setSuccess('تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني.');
@@ -207,10 +182,10 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
         setError('تم حظر تسجيل الدخول مؤقتاً بسبب محاولات كثيرة. حاول مجدداً بعد 5 دقائق.');
       } else {
         const remaining = MAX_ATTEMPTS - getLockoutData().attempts;
-        const baseError = ['auth/invalid-credential','auth/wrong-password'].includes(err.code) ? 'البريد أو كلمة المرور غير صحيحة' :
-               err.code === 'auth/user-not-found' ? 'لا يوجد حساب بهذا البريد' :
-               err.code === 'auth/email-already-in-use' ? 'هذا البريد مسجل مسبقاً' :
-               err.code === 'auth/weak-password' ? 'كلمة المرور ضعيفة (6 أحرف على الأقل)' :
+        const baseError = ['auth/invalid-credential','auth/wrong-password'].includes(err.code) ? 'البريد أو كلمة المرور غير صحيحة' : 
+               err.code === 'auth/user-not-found' ? 'لا يوجد حساب بهذا البريد' : 
+               err.code === 'auth/email-already-in-use' ? 'هذا البريد مسجل مسبقاً' : 
+               err.code === 'auth/weak-password' ? 'كلمة المرور ضعيفة (6 أحرف على الأقل)' : 
                'حدث خطأ. تحقق من اتصالك وحاول مرة أخرى.';
         setError(`${baseError} (${remaining} محاولات متبقية)`);
       }
@@ -221,14 +196,28 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
     setLoading(true); setError('');
     try {
       startAuthentication(); // ✅ منع قفل التطبيق أثناء المصادقة
-      const provider = new GoogleAuthProvider();
-      await signInWithRedirect(auth, provider);
-      // لن يتم تنفيذ الكود التالي مباشرة، بل عند العودة من التحويل
-    } catch (err) {
-      setError('فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.');
-      finishAuthentication();
-    } finally {
+      const result = await signInWithPopup(auth, new GoogleAuthProvider());
+      const user = result.user;
+      const ref = doc(db, 'users', user.uid);
+      if (!(await getDoc(ref)).exists()) {
+        await setDoc(ref, { 
+          uid: user.uid, email: user.email, displayName: user.displayName || '', photoURL: user.photoURL || '', 
+          username: '', status: 'online', lastSeen: serverTimestamp(), 
+          loginDates: [new Date().toISOString().split('T')[0]], loginCount: 1, 
+          settings: { fontSize: 'medium', fontFamily: 'tajawal', muteMicOnJoin: false, speakerDefault: false }, 
+          contacts: [], blockedUsers: [], createdAt: serverTimestamp() 
+        });
+      }
+      resetLockout(); // ✅ نجح الدخول، أزل الحظر
+      onLogin?.(user);
+    } catch (err) { 
+      console.error(err);
+      if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
+        setError('فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.'); 
+      }
+    } finally { 
       setLoading(false);
+      finishAuthentication(); // ✅ أعد تفعيل مراقبة القفل
     }
   };
 
@@ -265,7 +254,6 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
               <button type="button" onClick={() => { setIsLogin(false); setError(''); setSuccess(''); }} className={`relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${!isLogin ? 'text-white' : 'text-gray-400 hover:text-white'}`}>إنشاء حساب</button>
             </div>
 
-            {/* ✅ رسالة الحظر المؤقت */}
             {lockedOut && (
               <div className="bg-red-500/10 border border-red-400/20 text-red-200 text-sm p-3 rounded-xl flex flex-col items-center gap-1 mb-4 animate-in fade-in slide-in-from-top-2">
                 <div className="flex items-center gap-2 font-bold">
@@ -327,7 +315,7 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
           <p className="text-center text-xs text-gray-500/80 mt-6 font-medium tracking-wide select-none">الحقوق محفوظة لدى أثير © ٢٠٦</p>
         </div>
       </div>
-      <style>{`
+            <style>{`
         @keyframes float{0%,100%{transform:translateY(0) rotate(0);opacity:.3}50%{transform:translateY(-15px) rotate(5deg);opacity:.6}}
         .animate-float{animation:float linear infinite}
         @keyframes ripple{0%{transform:translate(-50%,-50%) scale(.5);opacity:.8}100%{transform:translate(-50%,-50%) scale(6);opacity:0}}

@@ -23,12 +23,11 @@ export function AppLockProvider({ children }) {
   const [lockTimer, setLockTimer] = useState(() => localStorage.getItem('app_lock_timer') || 'immediate');
   const [isLocked, setIsLocked] = useState(false);
   const [showPrivacyShield, setShowPrivacyShield] = useState(false);
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const timerRef = useRef(null);
   const isReturningFromAuth = useRef(false);
+  const isAuthenticating = useRef(false); // ✅ مرجع بدلاً من حالة لتجنب إعادة التصيير
 
-  // إدارة الجلسة
   useEffect(() => {
     if (!lockEnabled) {
       setIsLocked(false);
@@ -122,12 +121,18 @@ export function AppLockProvider({ children }) {
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
   };
 
-  // مراقبة الخروج والعودة
+  // ✅ مراقبة الخروج والعودة: تتجاهل حالة isAuthenticating
   useEffect(() => {
-    if (!lockEnabled || isAuthenticating) return;
+    if (!lockEnabled) {
+      setShowPrivacyShield(false);
+      setIsLocked(false);
+      return;
+    }
     if (isLocked) return;
 
     const handleVisibilityChange = () => {
+      if (isAuthenticating.current) return; // ✅ تجاهل أثناء المصادقة
+
       if (document.hidden) {
         setShowPrivacyShield(true);
         if (timerRef.current) clearTimeout(timerRef.current);
@@ -157,11 +162,15 @@ export function AppLockProvider({ children }) {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [lockEnabled, isLocked, lockTimer, isAuthenticating]);
+  }, [lockEnabled, isLocked, lockTimer]);
 
-  // دوال جديدة لتجاهل القفل أثناء المصادقة
-  const startAuthentication = useCallback(() => setIsAuthenticating(true), []);
-  const finishAuthentication = useCallback(() => setIsAuthenticating(false), []);
+  // ✅ دوال جديدة لتجاهل القفل أثناء المصادقة (تستخدم useRef لتجنب إعادة التصيير)
+  const startAuthentication = useCallback(() => {
+    isAuthenticating.current = true;
+  }, []);
+  const finishAuthentication = useCallback(() => {
+    isAuthenticating.current = false;
+  }, []);
 
   return (
     <AppLockContext.Provider value={{
