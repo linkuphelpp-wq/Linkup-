@@ -46401,6 +46401,66 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 	const [ripples, setRipples] = (0, import_react.useState)([]);
 	const [isLogoPressed, setIsLogoPressed] = (0, import_react.useState)(false);
 	const logoRef = (0, import_react.useRef)(null);
+	const MAX_ATTEMPTS = 5;
+	const LOCKOUT_DURATION = 300 * 1e3;
+	const getLockoutData = () => {
+		try {
+			const data = localStorage.getItem("auth_lockout");
+			return data ? JSON.parse(data) : {
+				attempts: 0,
+				lockUntil: null
+			};
+		} catch {
+			return {
+				attempts: 0,
+				lockUntil: null
+			};
+		}
+	};
+	const setLockoutData = (attempts, lockUntil) => {
+		localStorage.setItem("auth_lockout", JSON.stringify({
+			attempts,
+			lockUntil
+		}));
+	};
+	const resetLockout = () => {
+		localStorage.removeItem("auth_lockout");
+	};
+	const isLockedOut = () => {
+		const { lockUntil } = getLockoutData();
+		if (lockUntil && Date.now() < lockUntil) return true;
+		if (lockUntil && Date.now() >= lockUntil) {
+			resetLockout();
+			return false;
+		}
+		return false;
+	};
+	const recordFailedAttempt = () => {
+		const newAttempts = getLockoutData().attempts + 1;
+		if (newAttempts >= MAX_ATTEMPTS) setLockoutData(0, Date.now() + LOCKOUT_DURATION);
+		else setLockoutData(newAttempts, null);
+	};
+	const [lockedOut, setLockedOut] = (0, import_react.useState)(isLockedOut());
+	const [remainingTime, setRemainingTime] = (0, import_react.useState)("");
+	(0, import_react.useEffect)(() => {
+		let timer;
+		if (lockedOut) {
+			const updateTimer = () => {
+				const { lockUntil } = getLockoutData();
+				if (lockUntil) {
+					const remaining = Math.max(0, lockUntil - Date.now());
+					setRemainingTime(`${Math.floor(remaining / 6e4)}:${Math.floor(remaining % 6e4 / 1e3).toString().padStart(2, "0")}`);
+					if (remaining <= 0) {
+						setLockedOut(false);
+						resetLockout();
+					}
+				}
+			};
+			updateTimer();
+			timer = setInterval(updateTimer, 1e3);
+		}
+		return () => clearInterval(timer);
+	}, [lockedOut]);
 	const handleLogoClick = (e) => {
 		if (!logoRef.current) return;
 		const rect = logoRef.current.getBoundingClientRect();
@@ -46420,12 +46480,19 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 		e.preventDefault();
 		setError("");
 		setSuccess("");
+		if (isLockedOut()) {
+			setError("تم حظر تسجيل الدخول مؤقتاً بسبب محاولات كثيرة. حاول مجدداً بعد 5 دقائق.");
+			setLockedOut(true);
+			return;
+		}
 		if (!email || !password) return setError("يرجى ملء جميع الحقول");
 		if (!isLogin && password !== confirmPassword) return setError("كلمتا المرور غير متطابقتين");
 		if (!isLogin && password.length < 6) return setError("يجب أن تكون كلمة المرور 6 أحرف على الأقل");
 		setLoading(true);
 		try {
 			const { user } = isLogin ? await signInWithEmailAndPassword(auth, email, password) : await createUserWithEmailAndPassword(auth, email, password);
+			resetLockout();
+			setLockedOut(false);
 			if (!user.emailVerified) {
 				await sendEmailVerification(user);
 				setSuccess("تم إرسال رابط التحقق لبريدك.");
@@ -46463,7 +46530,14 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 			} else onLogin?.(user);
 		} catch (err) {
 			console.error(err);
-			setError(["auth/invalid-credential", "auth/wrong-password"].includes(err.code) ? "البريد أو كلمة المرور غير صحيحة" : err.code === "auth/user-not-found" ? "لا يوجد حساب بهذا البريد" : err.code === "auth/email-already-in-use" ? "هذا البريد مسجل مسبقاً" : err.code === "auth/weak-password" ? "كلمة المرور ضعيفة (6 أحرف على الأقل)" : "حدث خطأ. تحقق من اتصالك وحاول مرة أخرى.");
+			recordFailedAttempt();
+			if (isLockedOut()) {
+				setLockedOut(true);
+				setError("تم حظر تسجيل الدخول مؤقتاً بسبب محاولات كثيرة. حاول مجدداً بعد 5 دقائق.");
+			} else {
+				const remaining = MAX_ATTEMPTS - getLockoutData().attempts;
+				setError(`${["auth/invalid-credential", "auth/wrong-password"].includes(err.code) ? "البريد أو كلمة المرور غير صحيحة" : err.code === "auth/user-not-found" ? "لا يوجد حساب بهذا البريد" : err.code === "auth/email-already-in-use" ? "هذا البريد مسجل مسبقاً" : err.code === "auth/weak-password" ? "كلمة المرور ضعيفة (6 أحرف على الأقل)" : "حدث خطأ. تحقق من اتصالك وحاول مرة أخرى."} (${remaining} محاولات متبقية)`);
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -46494,6 +46568,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 				blockedUsers: [],
 				createdAt: serverTimestamp$2()
 			});
+			resetLockout();
 			onLogin?.(user);
 		} catch {
 			setError("فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.");
@@ -46591,6 +46666,17 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 									})
 								]
 							}),
+							lockedOut && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "bg-red-500/10 border border-red-400/20 text-red-200 text-sm p-3 rounded-xl flex flex-col items-center gap-1 mb-4 animate-in fade-in slide-in-from-top-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center gap-2 font-bold",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), " تم تعطيل تسجيل الدخول مؤقتاً"]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
+									"حاول مجدداً بعد ",
+									remainingTime,
+									" دقيقة"
+								] })]
+							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 								onSubmit: handleSubmit,
 								className: "space-y-4",
@@ -46606,7 +46692,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 												placeholder: "البريد الإلكتروني",
 												className: "h-14 pr-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-purple-400/50 focus-visible:border-purple-400/50 transition-all hover:bg-white/10 focus:bg-white/10",
 												required: true,
-												disabled: loading
+												disabled: lockedOut || loading
 											}),
 											"              "
 										]
@@ -46622,13 +46708,13 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 												placeholder: "كلمة المرور",
 												className: "h-14 pr-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-purple-400/50 focus-visible:border-purple-400/50 transition-all hover:bg-white/10 focus:bg-white/10",
 												required: true,
-												disabled: loading
+												disabled: lockedOut || loading
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 												type: "button",
 												onClick: () => setShowPassword(!showPassword),
 												className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1 active:scale-90",
-												disabled: loading,
+												disabled: lockedOut || loading,
 												children: showPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
 											})
 										]
@@ -46644,13 +46730,13 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 												placeholder: "تأكيد كلمة المرور",
 												className: "h-14 pr-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-purple-400/50 focus-visible:border-purple-400/50 transition-all hover:bg-white/10 focus:bg-white/10",
 												required: true,
-												disabled: loading
+												disabled: lockedOut || loading
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 												type: "button",
 												onClick: () => setShowConfirm(!showConfirm),
 												className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white p-1 active:scale-90",
-												disabled: loading,
+												disabled: lockedOut || loading,
 												children: showConfirm ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
 											})
 										]
@@ -46659,7 +46745,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 										type: "button",
 										onClick: onForgotPassword,
 										className: "text-xs text-purple-300 hover:text-purple-100 font-medium text-left transition-all hover:underline active:scale-95 origin-left",
-										disabled: loading,
+										disabled: lockedOut || loading,
 										children: "نسيت كلمة المرور؟"
 									}),
 									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -46672,7 +46758,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
 										type: "submit",
-										disabled: loading,
+										disabled: lockedOut || loading,
 										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group/btn",
 										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [isLogin ? "تسجيل الدخول" : "إنشاء حساب", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4 group-hover/btn:translate-x-1 transition-transform" })] })
 									})
@@ -46692,7 +46778,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Button$1, {
 								type: "button",
 								onClick: handleGoogleSignIn,
-								disabled: loading,
+								disabled: lockedOut || loading,
 								className: "w-full h-14 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-base transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group/google",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
 									className: "w-5 h-5 group-hover/google:rotate-12 transition-transform",
