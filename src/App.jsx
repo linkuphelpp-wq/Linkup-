@@ -42,17 +42,8 @@ import { usePresence } from './hooks/usePresence';
 import { AppLockProvider, useAppLock } from './context/AppLockContext';
 import { db, auth } from './firebase/config';
 import {
-  doc,
-  setDoc,
-  getDoc,
-  onSnapshot,
-  deleteDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  writeBatch,
-  serverTimestamp,
+  doc, setDoc, getDoc, onSnapshot, deleteDoc,
+  collection, query, where, getDocs, writeBatch, serverTimestamp,
 } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { Home, UsersRound, User, Settings, Shield, Bell, ArrowLeft, Contact2 } from 'lucide-react';
@@ -71,35 +62,15 @@ const BellIcon = () => <svg width="22" height="22" viewBox="0 0 24 24" fill="non
 const NavItem = ({ icon: Icon, label, isActive, onClick }) => {
   const [isHovered, setIsHovered] = useState(false);
   return (
-    <div
-      className="group relative flex flex-col items-center justify-center min-w-[3.5rem]"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <span
-        className={`absolute -top-12 transition-all duration-200 bg-black/80 backdrop-blur-md text-white text-[11px] px-3 py-1.5 rounded-full font-bold shadow-xl border border-white/10 whitespace-nowrap ${
-          isHovered ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
-        }`}
-      >
-        {label}
-      </span>
-      <div
-        onClick={onClick}
-        className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center backdrop-blur-lg rounded-full border transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_10px_20px_rgba(0,0,0,0.15)] cursor-pointer active:scale-90 ${
-          isActive ? 'bg-white text-black border-white/40 shadow-lg scale-110' : 'bg-white/10 text-gray-700 border-white/20'
-        }`}
-      >
-        <Icon />
-      </div>
+    <div className="group relative flex flex-col items-center justify-center min-w-[3.5rem]" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+      <span className={`absolute -top-12 transition-all duration-200 bg-black/80 backdrop-blur-md text-white text-[11px] px-3 py-1.5 rounded-full font-bold shadow-xl border border-white/10 whitespace-nowrap ${isHovered ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}>{label}</span>
+      <div onClick={onClick} className={`w-11 h-11 md:w-12 md:h-12 flex items-center justify-center backdrop-blur-lg rounded-full border transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_10px_20px_rgba(0,0,0,0.15)] cursor-pointer active:scale-90 ${isActive ? 'bg-white text-black border-white/40 shadow-lg scale-110' : 'bg-white/10 text-gray-700 border-white/20'}`}><Icon /></div>
     </div>
   );
 };
 
 const BottomNav = ({ currentScreen, onNavigate, isAdmin, onOpenAdmin, onOpenUserManagement }) => (
-  <div
-    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-lg"
-    style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
-  >
+  <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-lg" style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
     <div className="flex items-center justify-center gap-1.5 px-3 py-3 bg-white/80 backdrop-blur-2xl rounded-[2rem] border border-white/30 shadow-[0_10px_30px_rgba(0,0,0,0.12)]">
       <NavItem icon={Home} label="الرئيسية" isActive={currentScreen === 'mainMenu'} onClick={() => onNavigate('mainMenu')} />
       <NavItem icon={Contact2} label="جهات الاتصال" isActive={currentScreen === 'contacts'} onClick={() => onNavigate('contacts')} />
@@ -154,8 +125,6 @@ function AppContent() {
   const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [modalQueue, setModalQueue] = useState([]);
   const [incomingCallActive, setIncomingCallActive] = useState(false);
-  
-  // حالة إظهار المحتوى (للشاشة البيضاء عند الخروج)
   const [isAppVisible, setIsAppVisible] = useState(true);
 
   const {
@@ -169,14 +138,11 @@ function AppContent() {
 
   // مراقبة ظهور/اختفاء التطبيق (للشاشة البيضاء عند الخروج)
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      setIsAppVisible(!document.hidden);
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    const handleVisibility = () => setIsAppVisible(!document.hidden);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, []);
 
-  // مراقبة الاتصال بالإنترنت
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -388,9 +354,6 @@ function AppContent() {
     return <div className="fixed inset-0 z-[9999] bg-white" />;
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  // باقي محتوى التطبيق كما هو دون تغيير
-  // ─────────────────────────────────────────────────────────────────
   if (showOnboarding) return <OnboardingScreen onFinish={handleFinishOnboarding} />;
   if (bannedModalOpen) return <BannedModal open={bannedModalOpen} type={banType} onClose={handleBannedModalClose} />;
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
@@ -475,20 +438,30 @@ function AppContent() {
             {isAdmin && currentScreen !== 'admin' && <button onClick={() => navigateTo('admin')} className="p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 ml-2"><ShieldIcon /></button>}
           </header>
         )}
+
         <main className="flex-1 relative">{renderContent()}</main>
+
         {!hideBottomNav && (
-          <BottomNav currentScreen={currentScreen} onNavigate={navigateTo} isAdmin={isAdmin} onOpenAdmin={() => navigateTo('admin')} onOpenUserManagement={() => navigateTo('usermanagement')} />
+          <BottomNav
+            currentScreen={currentScreen}
+            onNavigate={navigateTo}
+            isAdmin={isAdmin}
+            onOpenAdmin={() => navigateTo('admin')}
+            onOpenUserManagement={() => navigateTo('usermanagement')}
+          />
         )}
       </div>
 
       {callOpen && remoteContact && (
         <CallScreen
-          open={callOpen} onClose={handleCloseCall} contact={remoteContact} muteMicOnJoin={muteMicOnJoin} callType={callType}
+          open={callOpen} onClose={handleCloseCall} contact={remoteContact}
+          muteMicOnJoin={muteMicOnJoin} callType={callType}
           callStatus={callStatus} localStream={localStream} remoteStream={remoteStream} remoteUserData={remoteUserData}
           startCall={startCall} stopCall={stopCall} switchCamera={switchCamera} toggleVideo={toggleVideo}
           isVideoEnabled={isVideoEnabled} getRemotePeerId={getRemotePeerId}
         />
       )}
+
       <Toaster richColors position="top-center" />
     </>
   );

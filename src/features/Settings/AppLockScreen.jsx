@@ -1,20 +1,18 @@
-// AppLockScreen.jsx (الكود الكامل بعد التعديل)
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Lock, Fingerprint, CheckCircle, Shield, Timer } from 'lucide-react';
 import { useAppLock } from '../../context/AppLockContext';
 
+const timerOptions = [
+  { value: 'immediate', label: 'فوراً', desc: 'يقفل مباشرة عند الخروج' },
+  { value: '30s', label: '30 ثانية', desc: 'يقفل بعد 30 ثانية من الخروج' },
+  { value: '5m', label: '5 دقائق', desc: 'يقفل بعد 5 دقائق من الخروج' },
+];
+
 export default function AppLockScreen({ onBack }) {
   const { lockEnabled, enableBiometric, disableBiometric, lockTimer, setTimerOption } = useAppLock();
   const [saved, setSaved] = useState(false);
   const [selectedTimer, setSelectedTimer] = useState(lockTimer);
-
-  const timerOptions = [
-    { value: 'immediate', label: 'فوراً', desc: 'يقفل مباشرة عند الخروج' },
-    { value: '30s', label: '30 ثانية', desc: 'يقفل بعد 30 ثانية من الخروج' },
-    { value: '5m', label: '5 دقائق', desc: 'يقفل بعد 5 دقائق من الخروج' },
-  ];
 
   const handleToggle = async () => {
     if (lockEnabled) {
@@ -37,7 +35,6 @@ export default function AppLockScreen({ onBack }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right" dir="rtl">
-      {/* الهيدر (نفس السابق) */}
       <motion.header
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -45,19 +42,18 @@ export default function AppLockScreen({ onBack }) {
         style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top))' }}
       >
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors active:scale-95">
+          <button onClick={onBack} className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center active:scale-95">
             <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
           <div className="flex items-center gap-2">
             <Lock className="w-6 h-6 text-purple-500" />
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">قفل التطبيق</h1>
+            <h1 className="text-2xl font-black text-gray-900">قفل التطبيق</h1>
           </div>
         </div>
         <p className="text-sm text-gray-500 mt-1">حماية إضافية باستخدام بصمتك</p>
       </motion.header>
 
       <main className="px-4 py-6 space-y-6 max-w-lg mx-auto">
-        {/* بطاقة التفعيل */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -65,22 +61,17 @@ export default function AppLockScreen({ onBack }) {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-purple-50 text-purple-600">
-                <Fingerprint className="w-6 h-6" />
-              </div>
+              <div className="p-3 rounded-xl bg-purple-50 text-purple-600"><Fingerprint className="w-6 h-6" /></div>
               <div>
                 <p className="font-bold text-gray-900">تفعيل القفل بالبصمة</p>
                 <p className="text-xs text-gray-500 mt-1">عند الفتح سيُطلب التحقق من هويتك</p>
               </div>
             </div>
-            <button
-              onClick={handleToggle}
-              className={`w-14 h-8 rounded-full transition-colors relative ${lockEnabled ? 'bg-purple-600' : 'bg-gray-200'}`}
-            >
+            <button onClick={handleToggle} className={`w-14 h-8 rounded-full transition-colors relative ${lockEnabled ? 'bg-purple-600' : 'bg-gray-200'}`}>
               <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${lockEnabled ? 'translate-x-6' : ''}`} />
             </button>
           </div>
-          
+
           <div className="mt-4 p-4 bg-gray-50 rounded-xl">
             <div className="flex items-start gap-3">
               <Shield className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
@@ -90,7 +81,6 @@ export default function AppLockScreen({ onBack }) {
             </div>
           </div>
 
-          {/* خيارات التوقيت (تظهر فقط عند التفعيل) */}
           {lockEnabled && (
             <div className="mt-4 space-y-3">
               <div className="flex items-center gap-2 px-1">
@@ -101,11 +91,7 @@ export default function AppLockScreen({ onBack }) {
                 <button
                   key={option.value}
                   onClick={() => handleTimerChange(option.value)}
-                  className={`w-full p-3 rounded-xl border text-right transition-all ${
-                    selectedTimer === option.value
-                      ? 'bg-purple-50 border-purple-300 text-purple-700'
-                      : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-                  }`}
+                  className={`w-full p-3 rounded-xl border text-right transition-all ${selectedTimer === option.value ? 'bg-purple-50 border-purple-300 text-purple-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}
                 >
                   <span className="font-bold text-sm">{option.label}</span>
                   <span className="text-xs text-gray-500 mr-2">{option.desc}</span>
@@ -116,15 +102,9 @@ export default function AppLockScreen({ onBack }) {
         </motion.div>
 
         {saved && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 text-emerald-700"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 text-emerald-700">
             <CheckCircle className="w-5 h-5" />
-            <span className="text-sm font-bold">
-              {lockEnabled ? 'تم تفعيل القفل بنجاح' : 'تم تعطيل القفل بنجاح'}
-            </span>
+            <span className="text-sm font-bold">{lockEnabled ? 'تم تفعيل القفل بنجاح' : 'تم تعطيل القفل بنجاح'}</span>
           </motion.div>
         )}
       </main>

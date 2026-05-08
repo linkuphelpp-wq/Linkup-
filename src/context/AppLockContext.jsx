@@ -1,5 +1,3 @@
-// AppLockContext.jsx
-
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 const AppLockContext = createContext();
@@ -21,70 +19,17 @@ function arrayBufferToBase64(buffer) {
 
 export function AppLockProvider({ children }) {
   const [lockEnabled, setLockEnabled] = useState(() => localStorage.getItem('app_lock_biometric') === 'true');
-  const [isLocked, setIsLocked] = useState(() => lockEnabled);
+  const [isLocked, setIsLocked] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(() => lockEnabled);
-  
-  // حالة إدارة التوقيت: 'immediate' | '30s' | '5m'
   const [lockTimer, setLockTimer] = useState(() => localStorage.getItem('app_lock_timer') || 'immediate');
   
   const timerRef = useRef(null);
-  const lastActivityRef = useRef(Date.now());
 
-  // حفظ التوقيت عند تغيره
   const setTimerOption = useCallback((option) => {
     localStorage.setItem('app_lock_timer', option);
     setLockTimer(option);
   }, []);
 
-  // دالة لبدء القفل بعد مدة محددة
-  const startLockTimer = useCallback(() => {
-    if (!lockEnabled) return;
-    
-    if (timerRef.current) clearTimeout(timerRef.current);
-
-    if (lockTimer === 'immediate') {
-      setIsLocked(true);
-    } else {
-      const delay = lockTimer === '30s' ? 30000 : 300000; // 30 ثانية أو 5 دقائق
-      timerRef.current = setTimeout(() => {
-        setIsLocked(true);
-      }, delay);
-    }
-  }, [lockEnabled, lockTimer]);
-
-  // إلغاء القفل عند النشاط (إذا كان المستخدم قد عاد قبل انتهاء المدة)
-  const resetLockTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-    if (isLocked === false) return; // لا داعي للتغيير
-    
-    // إذا لم يكن القفل فوريًا وتم استئناف النشاط، ألغِ القفل
-    if (lockTimer !== 'immediate') {
-      setIsLocked(false);
-    }
-  }, [lockTimer, isLocked]);
-
-  // مراقبة ظهور/اختفاء التطبيق (للإغلاق عند الخروج)
-  useEffect(() => {
-    if (!lockEnabled) return;
-    
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // خرج المستخدم من التطبيق -> بدء عداد القفل
-        startLockTimer();
-      } else {
-        // عاد المستخدم -> إذا لم تنتهِ المدة، ألغِ القفل وأظهر التطبيق
-        resetLockTimer();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [lockEnabled, startLockTimer, resetLockTimer]);
-
-  // تفعيل البصمة (تسجيل)
   const enableBiometric = async () => {
     try {
       const credential = await navigator.credentials.create({
@@ -107,11 +52,10 @@ export function AppLockProvider({ children }) {
         setIsLocked(false);
         return true;
       }
-    } catch (e) { console.error('Biometric registration failed', e); }
+    } catch (e) { console.error(e); }
     return false;
   };
 
-  // التحقق من البصمة
   const verifyBiometric = async () => {
     if (!biometricEnabled) return { success: false };
     const credentialId = localStorage.getItem('app_lock_credential_id');
@@ -127,10 +71,10 @@ export function AppLockProvider({ children }) {
       });
       if (assertion) {
         setIsLocked(false);
-        resetLockTimer();
+        if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
         return { success: true };
       }
-    } catch (e) { console.error('Biometric verification failed', e); }
+    } catch (e) { console.error(e); }
     return { success: false };
   };
 
@@ -141,13 +85,47 @@ export function AppLockProvider({ children }) {
     setBiometricEnabled(false);
     setLockEnabled(false);
     setIsLocked(false);
+    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
   };
+
+  // الوظيفة الأساسية: عند العودة إلى التطبيق، نقرر إن كنا سنقفل أم لا
+  useEffect(() => {
+    if (!lockEnabled) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // بدء المؤقت عند الخروج
+        if (timerRef.current) clearTimeout(timerRef.current);
+        if (lockTimer === 'immediate') {
+          // فوري: لا داعي لمؤقت، سيتم القفل مباشرة عند العودة
+        } else {
+          timerRef.current = setTimeout(() => {
+            setIsLocked(true);
+          }, lockTimer === '30s' ? 30000 : 300000);
+        }
+      } else {
+        // العودة إلى التطبيق
+        if (lockTimer === 'immediate') {
+          setIsLocked(true); // أقفل فورًا
+        }
+        // إذا كان هناك مؤقت ولم ينته بعد، نلغيه ولا نقفل
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+          setIsLocked(false);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [lockEnabled, lockTimer]);
 
   return (
     <AppLockContext.Provider value={{
       lockEnabled, isLocked, biometricEnabled, lockTimer,
       enableBiometric, verifyBiometric, disableBiometric,
-      setTimerOption, startLockTimer, resetLockTimer,
+      setTimerOption,
     }}>
       {children}
     </AppLockContext.Provider>
