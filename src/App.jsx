@@ -116,7 +116,7 @@ const BottomNav = ({ currentScreen, onNavigate, isAdmin, onOpenAdmin, onOpenUser
   </div>
 );
 
-// ───────── المكون الداخلي (تم نقله لـ AppContent) ─────────
+// ───────── المكون الداخلي (AppContent) ─────────
 function AppContent() {
   const { isLocked, lockEnabled } = useAppLock();
 
@@ -154,6 +154,9 @@ function AppContent() {
   const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [modalQueue, setModalQueue] = useState([]);
   const [incomingCallActive, setIncomingCallActive] = useState(false);
+  
+  // حالة إظهار المحتوى (للشاشة البيضاء عند الخروج)
+  const [isAppVisible, setIsAppVisible] = useState(true);
 
   const {
     myId, callStatus, localStream, remoteStream, remoteUserData,
@@ -164,6 +167,16 @@ function AppContent() {
   usePresence();
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // مراقبة ظهور/اختفاء التطبيق (للشاشة البيضاء عند الخروج)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsAppVisible(!document.hidden);
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  // مراقبة الاتصال بالإنترنت
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -361,11 +374,23 @@ function AppContent() {
   const handleOpenGroup = (group) => { setCurrentGroup(group); navigateTo('groupChat'); };
   const handleOpenGroupInfo = (group) => { setCurrentGroup(group); navigateTo('groupInfo'); };
 
-  // ✅ شرط إظهار شاشة القفل
+  // ─────────────────────────────────────────────────────────────────
+  // ✅ شرط إظهار شاشة القفل (إذا كان القفل نشطًا والمستخدم مقفل)
+  // ─────────────────────────────────────────────────────────────────
   if (isLocked && lockEnabled) {
     return <PinLockScreen />;
   }
 
+  // ─────────────────────────────────────────────────────────────────
+  // ✅ طبقة الشاشة البيضاء عند الخروج من التطبيق
+  // ─────────────────────────────────────────────────────────────────
+  if (!isAppVisible) {
+    return <div className="fixed inset-0 z-[9999] bg-white" />;
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // باقي محتوى التطبيق كما هو دون تغيير
+  // ─────────────────────────────────────────────────────────────────
   if (showOnboarding) return <OnboardingScreen onFinish={handleFinishOnboarding} />;
   if (bannedModalOpen) return <BannedModal open={bannedModalOpen} type={banType} onClose={handleBannedModalClose} />;
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
@@ -469,7 +494,7 @@ function AppContent() {
   );
 }
 
-// ───────── المكون الرئيسي الجديد الذي يغلف كل شيء ─────────
+// ───────── المكون الرئيسي (يغلف السياق) ─────────
 function App() {
   return (
     <AppLockProvider>

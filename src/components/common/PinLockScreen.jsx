@@ -12,11 +12,18 @@ export default function PinLockScreen() {
     if (attempting) return;
     setAttempting(true);
     setError(false);
-    const result = await verifyBiometric();
-    if (!result.success) {
+    
+    try {
+      const result = await verifyBiometric();
+      if (!result.success) {
+        setError(true);
+        setTimeout(() => setError(false), 800);
+      }
+    } catch (e) {
       setError(true);
       setTimeout(() => setError(false), 800);
     }
+    
     setAttempting(false);
   };
 
@@ -26,15 +33,16 @@ export default function PinLockScreen() {
       dir="rtl"
       onClick={handleTap}
     >
-      <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100/60 rounded-full blur-3xl" />
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-100/60 rounded-full blur-3xl" />
+      {/* زخارف خلفية */}
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100/60 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-100/60 rounded-full blur-3xl pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 flex flex-col items-center gap-10 w-full max-w-xs px-6 pointer-events-none"
       >
-        {/* أيقونة البصمة الضخمة */}
+        {/* أيقونة البصمة الكبيرة مع تأثير نبضي أثناء التحقق */}
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -49,7 +57,7 @@ export default function PinLockScreen() {
             <Fingerprint className="w-16 h-16 text-white" />
           </motion.div>
           
-          {/* حلقة نبضية أثناء التحقق */}
+          {/* حلقة نبضية أثناء محاولة البصمة */}
           {attempting && (
             <motion.div
               initial={{ opacity: 1, scale: 1 }}
@@ -60,7 +68,7 @@ export default function PinLockScreen() {
           )}
         </motion.div>
 
-        {/* النصوص */}
+        {/* النصوص الإرشادية */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -68,8 +76,10 @@ export default function PinLockScreen() {
           className="text-center"
         >
           <h1 className="text-2xl font-black text-gray-900">التحقق من الهوية</h1>
-          <p className="text-sm text-gray-500 mt-3">
-            {error ? 'لم نتمكن من التحقق، حاول مرة أخرى' : 'انقر في أي مكان للتحقق'}
+          <p className="text-sm text-gray-500 mt-3 leading-relaxed">
+            {error
+              ? 'لم نتمكن من التحقق، حاول مرة أخرى'
+              : 'انقر في أي مكان للتحقق'}
           </p>
           <p className="text-xs text-gray-400 mt-4">
             يمكنك أيضاً استخدام كلمة مرور جهازك

@@ -1,11 +1,20 @@
+// AppLockScreen.jsx (الكود الكامل بعد التعديل)
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Lock, Fingerprint, CheckCircle, Shield } from 'lucide-react';
+import { ArrowLeft, Lock, Fingerprint, CheckCircle, Shield, Timer } from 'lucide-react';
 import { useAppLock } from '../../context/AppLockContext';
 
 export default function AppLockScreen({ onBack }) {
-  const { lockEnabled, enableBiometric, disableBiometric } = useAppLock();
+  const { lockEnabled, enableBiometric, disableBiometric, lockTimer, setTimerOption } = useAppLock();
   const [saved, setSaved] = useState(false);
+  const [selectedTimer, setSelectedTimer] = useState(lockTimer);
+
+  const timerOptions = [
+    { value: 'immediate', label: 'فوراً', desc: 'يقفل مباشرة عند الخروج' },
+    { value: '30s', label: '30 ثانية', desc: 'يقفل بعد 30 ثانية من الخروج' },
+    { value: '5m', label: '5 دقائق', desc: 'يقفل بعد 5 دقائق من الخروج' },
+  ];
 
   const handleToggle = async () => {
     if (lockEnabled) {
@@ -21,8 +30,14 @@ export default function AppLockScreen({ onBack }) {
     }
   };
 
+  const handleTimerChange = (value) => {
+    setSelectedTimer(value);
+    setTimerOption(value);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right" dir="rtl">
+      {/* الهيدر (نفس السابق) */}
       <motion.header
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -42,10 +57,10 @@ export default function AppLockScreen({ onBack }) {
       </motion.header>
 
       <main className="px-4 py-6 space-y-6 max-w-lg mx-auto">
+        {/* بطاقة التفعيل */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 20 }}
           className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm"
         >
           <div className="flex items-center justify-between">
@@ -55,9 +70,7 @@ export default function AppLockScreen({ onBack }) {
               </div>
               <div>
                 <p className="font-bold text-gray-900">تفعيل القفل بالبصمة</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  عند الفتح سيُطلب التحقق من هويتك
-                </p>
+                <p className="text-xs text-gray-500 mt-1">عند الفتح سيُطلب التحقق من هويتك</p>
               </div>
             </div>
             <button
@@ -72,10 +85,34 @@ export default function AppLockScreen({ onBack }) {
             <div className="flex items-start gap-3">
               <Shield className="w-5 h-5 text-purple-500 shrink-0 mt-0.5" />
               <p className="text-sm text-gray-600 leading-relaxed">
-                عند تفعيل القفل، سيُطلب منك التحقق من هويتك باستخدام بصمة إصبعك عند فتح التطبيق. في حال عدم استجابة البصمة، يمكنك استخدام كلمة مرور جهازك (PIN أو النقش) كبديل من خلال نافذة النظام التي ستظهر تلقائياً.
+                عند تفعيل القفل، سيُطلب منك التحقق من هويتك باستخدام بصمة إصبعك عند فتح التطبيق. في حال عدم استجابة البصمة، يمكنك استخدام كلمة مرور جهازك (PIN أو النقش) كبديل.
               </p>
             </div>
           </div>
+
+          {/* خيارات التوقيت (تظهر فقط عند التفعيل) */}
+          {lockEnabled && (
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center gap-2 px-1">
+                <Timer className="w-4 h-4 text-gray-500" />
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">مدة القفل التلقائي</h3>
+              </div>
+              {timerOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleTimerChange(option.value)}
+                  className={`w-full p-3 rounded-xl border text-right transition-all ${
+                    selectedTimer === option.value
+                      ? 'bg-purple-50 border-purple-300 text-purple-700'
+                      : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <span className="font-bold text-sm">{option.label}</span>
+                  <span className="text-xs text-gray-500 mr-2">{option.desc}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {saved && (
