@@ -21,7 +21,7 @@ const app = initializeApp(firebaseConfig);
 // ✅ تفعيل App Check لحماية التطبيق من الطلبات الضارة
 if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
   initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider('6LfOud8sAAAAAPL8iP62VWtkK5iQNG-bGvZuob0K'),
+    provider: new ReCaptchaV3Provider('6LfOud8sAAAAAGKE0hvOqVr16UN2_tqB5PU3nMrM'),
     isTokenAutoRefreshEnabled: true,
   });
 }
