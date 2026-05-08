@@ -22,35 +22,34 @@ export function AppLockProvider({ children }) {
   const [biometricEnabled, setBiometricEnabled] = useState(() => lockEnabled);
   const [lockTimer, setLockTimer] = useState(() => localStorage.getItem('app_lock_timer') || 'immediate');
   
-  // ✅ isLocked: true تعني أننا بحاجة لعرض PinLockScreen
+  // ✅ isLocked: true تعني أننا بحاجة لعرض شاشة البصمة (للعودة من الخروج أو إعادة الفتح)
   const [isLocked, setIsLocked] = useState(false);
-  // ✅ isAppVisible: false تعني عرض شاشة بيضاء (للخصوصية في قائمة المهام)
-  const [isAppVisible, setIsAppVisible] = useState(true);
-
+  // ✅ showPrivacyShield: true تعني عرض الستارة البيضاء (في الخلفية أو لحماية الخصوصية)
+  const [showPrivacyShield, setShowPrivacyShield] = useState(false);
+  
   const timerRef = useRef(null);
-  const isReturningRef = useRef(false);
+  const isReturningFromAuth = useRef(false);
 
-  // عند تحميل المكون لأول مرة
+  // تحديد الجلسة (لحذف التطبيق من المهام وإعادة فتحه)
   useEffect(() => {
     if (!lockEnabled) return;
     
-    // ✅ إذا لم تكن هناك جلسة مفتوحة (أي أن التطبيق فُتح من جديد بعد حذف من المهام)
     if (!sessionStorage.getItem('app_lock_session')) {
-      setIsLocked(true); // إظهار شاشة البصمة فوراً
+      // التطبيق فُتح من جديد (وليس مجرد عودة من الخلفية)
+      setIsLocked(true);
+      setShowPrivacyShield(true); // الستارة البيضاء تظهر خلف شاشة القفل
     }
-    // أنشئ جلسة جديدة
     sessionStorage.setItem('app_lock_session', 'true');
 
-    // التعامل مع حدث إغلاق الصفحة لمسح الجلسة (يحدث عند الحذف من المهام)
-    const handleUnload = () => {
+    const clearSession = () => {
       sessionStorage.removeItem('app_lock_session');
     };
-    window.addEventListener('pagehide', handleUnload);
-    window.addEventListener('beforeunload', handleUnload);
+    window.addEventListener('pagehide', clearSession);
+    window.addEventListener('beforeunload', clearSession);
     
     return () => {
-      window.removeEventListener('pagehide', handleUnload);
-      window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('pagehide', clearSession);
+      window.removeEventListener('beforeunload', clearSession);
     };
   }, [lockEnabled]);
 
@@ -79,6 +78,7 @@ export function AppLockProvider({ children }) {
         setBiometricEnabled(true);
         setLockEnabled(true);
         setIsLocked(false);
+        setShowPrivacyShield(false);
         return true;
       }
     } catch (e) { console.error(e); }
@@ -99,11 +99,12 @@ export function AppLockProvider({ children }) {
         },
       });
       if (assertion) {
+        // نجاح التحقق: اختفاء الستارة وشاشة القفل
         setIsLocked(false);
-        setIsAppVisible(true);
+        setShowPrivacyShield(false);
         if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
-        isReturningRef.current = true;
-        setTimeout(() => { isReturningRef.current = false; }, 500);
+        isReturningFromAuth.current = true;
+        setTimeout(() => { isReturningFromAuth.current = false; }, 500);
         return { success: true };
       }
     } catch (e) { console.error(e); }
@@ -117,51 +118,40 @@ export function AppLockProvider({ children }) {
     setBiometricEnabled(false);
     setLockEnabled(false);
     setIsLocked(false);
-    setIsAppVisible(true);
+    setShowPrivacyShield(false);
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
   };
 
-  // ✅ آلية الخروج والعودة مع التوقيت
+  // ✅ جوهرة الستارة: مراقبة الخروج والعودة لتطبيق المؤقتات
   useEffect(() => {
-    if (!lockEnabled) return;
-    // لا نبدأ بتتبع الخروج/العودة إلا إذا كان التطبيق غير مقفل (تم التحقق مسبقاً)
-    if (isLocked) return;
+    if (!lockEnabled || isLocked) return;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // ✅ الخروج: إخفاء المحتوى فوراً (شاشة بيضاء في قائمة المهام)
-        setIsAppVisible(false);
+        // ✅ الخروج: الستارة البيضاء تظهر فوراً
+        setShowPrivacyShield(true);
         if (timerRef.current) clearTimeout(timerRef.current);
 
         if (lockTimer === 'immediate') {
-          // للفوري: نقفل فوراً عند الخروج (سينعكس عند العودة)
           setIsLocked(true);
         } else {
-          // للمؤقت: نبدأ العداد
           timerRef.current = setTimeout(() => {
             setIsLocked(true);
-            // عند انتهاء المؤقت، لا نعيد الشاشة البيضاء تلقائياً، بل ننتظر العودة
           }, lockTimer === '30s' ? 30000 : 300000);
         }
       } else {
-        // ✅ العودة إلى التطبيق
-        if (isReturningRef.current) return; // تجنب التداخل مع البصمة
+        if (isReturningFromAuth.current) return;
 
         if (lockTimer === 'immediate') {
-          // الفوري: القفل تم تعيينه مسبقاً، سيتم عرض PinLockScreen
+          // يبقى مقفلاً -> شاشة البصمة ستظهر
         } else {
-          // المؤقت: إذا انتهى المؤقت، isLocked سيكون true بالفعل وسيتم عرض PinLockScreen.
-          // إذا لم ينته المؤقت (timerRef.current موجود)، نلغيه ونعرض المحتوى.
           if (timerRef.current) {
             clearTimeout(timerRef.current);
             timerRef.current = null;
             setIsLocked(false);
+            setShowPrivacyShield(false); // لم ينته المؤقت، أزل الستارة
           }
-          // إذا كان isLocked true (المؤقت انتهى)، سنبقي عليه.
-        }
-        // في كلتا الحالتين، نعيد المحتوى للظهور (إلا إذا كان مقفلاً)
-        if (!isLocked) {
-          setIsAppVisible(true);
+          // إذا كان المؤقت انتهى، isLocked = true والستارة موجودة
         }
       }
     };
@@ -172,7 +162,7 @@ export function AppLockProvider({ children }) {
 
   return (
     <AppLockContext.Provider value={{
-      lockEnabled, isLocked, biometricEnabled, lockTimer, isAppVisible,
+      lockEnabled, isLocked, biometricEnabled, lockTimer, showPrivacyShield,
       enableBiometric, verifyBiometric, disableBiometric,
       setTimerOption,
     }}>
