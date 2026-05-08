@@ -18,14 +18,15 @@ function arrayBufferToBase64(buffer) {
 }
 
 export function AppLockProvider({ children }) {
-  const [lockEnabled, setLockEnabled] = useState(() => localStorage.getItem('app_lock_biometric') === 'true');
-  const [isLocked, setIsLocked] = useState(false);
-  const [biometricEnabled, setBiometricEnabled] = useState(() => lockEnabled);
+  const isBiometricConfigured = localStorage.getItem('app_lock_biometric') === 'true';
+  
+  const [lockEnabled, setLockEnabled] = useState(isBiometricConfigured);
+  const [isLocked, setIsLocked] = useState(isBiometricConfigured); 
+  const [biometricEnabled, setBiometricEnabled] = useState(isBiometricConfigured);
   const [lockTimer, setLockTimer] = useState(() => localStorage.getItem('app_lock_timer') || 'immediate');
-  const [isAppVisible, setIsAppVisible] = useState(true); // ✅ حالة الشاشة البيضاء
 
   const timerRef = useRef(null);
-  const isReturningRef = useRef(false);
+  const isVerifyingRef = useRef(false); // لمنع إعادة القفل أثناء ظهور نافذة البصمة
 
   const setTimerOption = useCallback((option) => {
     localStorage.setItem('app_lock_timer', option);
@@ -62,6 +63,8 @@ export function AppLockProvider({ children }) {
     if (!biometricEnabled) return { success: false };
     const credentialId = localStorage.getItem('app_lock_credential_id');
     if (!credentialId) return { success: false };
+    
+    isVerifyingRef.current = true; // نحن الآن في عملية تحقق، لا تقفل الشاشة
     try {
       const assertion = await navigator.credentials.get({
         publicKey: {
@@ -73,13 +76,15 @@ export function AppLockProvider({ children }) {
       });
       if (assertion) {
         setIsLocked(false);
-        setIsAppVisible(true); // ✅ أظهر المحتوى بعد نجاح البصمة
         if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
-        isReturningRef.current = true;
-        setTimeout(() => { isReturningRef.current = false; }, 500);
+        // انتظر قليلاً قبل السماح بإعادة القفل لضمان استقرار الشاشة
+        setTimeout(() => { isVerifyingRef.current = false; }, 1000);
         return { success: true };
       }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error(e);
+      isVerifyingRef.current = false;
+    }
     return { success: false };
   };
 
@@ -90,50 +95,58 @@ export function AppLockProvider({ children }) {
     setBiometricEnabled(false);
     setLockEnabled(false);
     setIsLocked(false);
-    setIsAppVisible(true);
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
   };
 
-  // ✅ آلية الخروج والعودة مع إخفاء المحتوى فورًا
   useEffect(() => {
     if (!lockEnabled) return;
 
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // ✅ الخروج: إخفاء المحتوى فورًا (شاشة بيضاء)
-        setIsAppVisible(false);
+    const handleLockTrigger = () => {
+      if (isVerifyingRef.current) return; // لا تقفل إذا كانت نافذة البصمة مفتوحة أصلاً
 
-        if (timerRef.current) clearTimeout(timerRef.current);
-        if (lockTimer === 'immediate') {
-          // لا شيء، سنقفل عند العودة
-        } else {
+      if (lockTimer === 'immediate') {
+        setIsLocked(true);
+      } else {
+        const delay = lockTimer === '30s' ? 30000 : 300000;
+        if (!timerRef.current) {
           timerRef.current = setTimeout(() => {
             setIsLocked(true);
-          }, lockTimer === '30s' ? 30000 : 300000);
+          }, delay);
         }
-      } else {
-        // العودة إلى التطبيق
-        if (isReturningRef.current) return;
-
-        if (lockTimer === 'immediate') {
-          setIsLocked(true);
-        } else if (timerRef.current) {
-          clearTimeout(timerRef.current);
-          timerRef.current = null;
-          setIsLocked(false);
-          setIsAppVisible(true);
-        }
-        // إن كان المؤقت قد انتهى، isLocked سيكون true بالفعل وسنعرض شاشة القفل
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [lockEnabled, lockTimer]);
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        handleLockTrigger();
+      } else {
+        if (!isLocked && timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+      }
+    };
+
+    // هذا هو السر: عند سحب قائمة المهام، يفقد التطبيق التركيز (blur)
+    // فنقوم بإظهار شاشة القفل فوراً (التي هي بيضاء) لكي لا يظهر المحتوى في المعاينة
+    const handleBlur = () => {
+      if (lockTimer === 'immediate' && !isVerifyingRef.current) {
+        setIsLocked(true);
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleBlur);
+    
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [lockEnabled, lockTimer, isLocked]);
 
   return (
     <AppLockContext.Provider value={{
-      lockEnabled, isLocked, biometricEnabled, lockTimer, isAppVisible,
+      lockEnabled, isLocked, biometricEnabled, lockTimer,
       enableBiometric, verifyBiometric, disableBiometric,
       setTimerOption,
     }}>
