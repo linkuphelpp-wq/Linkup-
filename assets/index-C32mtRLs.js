@@ -46392,7 +46392,7 @@ function arrayBufferToBase64(buffer) {
 	for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
 	return btoa(binary);
 }
-function AppLockProvider({ children }) {
+function AppLockProvider({ children, isAuthenticated }) {
 	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_biometric") === "true");
 	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(() => lockEnabled);
 	const [lockTimer, setLockTimer] = (0, import_react.useState)(() => localStorage.getItem("app_lock_timer") || "immediate");
@@ -46400,9 +46400,8 @@ function AppLockProvider({ children }) {
 	const [showPrivacyShield, setShowPrivacyShield] = (0, import_react.useState)(false);
 	const timerRef = (0, import_react.useRef)(null);
 	const isReturningFromAuth = (0, import_react.useRef)(false);
-	const isAuthenticating = (0, import_react.useRef)(false);
 	(0, import_react.useEffect)(() => {
-		if (!lockEnabled) {
+		if (!lockEnabled || !isAuthenticated) {
 			setIsLocked(false);
 			setShowPrivacyShield(false);
 			return;
@@ -46421,7 +46420,7 @@ function AppLockProvider({ children }) {
 			window.removeEventListener("pagehide", clearSession);
 			window.removeEventListener("beforeunload", clearSession);
 		};
-	}, [lockEnabled]);
+	}, [lockEnabled, isAuthenticated]);
 	const setTimerOption = (0, import_react.useCallback)((option) => {
 		localStorage.setItem("app_lock_timer", option);
 		setLockTimer(option);
@@ -46523,14 +46522,8 @@ function AppLockProvider({ children }) {
 		}
 	};
 	(0, import_react.useEffect)(() => {
-		if (!lockEnabled) {
-			setShowPrivacyShield(false);
-			setIsLocked(false);
-			return;
-		}
-		if (isLocked) return;
+		if (!lockEnabled || !isAuthenticated || isLocked) return;
 		const handleVisibilityChange = () => {
-			if (isAuthenticating.current) return;
 			if (document.hidden) {
 				setShowPrivacyShield(true);
 				if (timerRef.current) clearTimeout(timerRef.current);
@@ -46552,15 +46545,10 @@ function AppLockProvider({ children }) {
 		return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
 	}, [
 		lockEnabled,
+		isAuthenticated,
 		isLocked,
 		lockTimer
 	]);
-	const startAuthentication = (0, import_react.useCallback)(() => {
-		isAuthenticating.current = true;
-	}, []);
-	const finishAuthentication = (0, import_react.useCallback)(() => {
-		isAuthenticating.current = false;
-	}, []);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockContext.Provider, {
 		value: {
 			lockEnabled,
@@ -46571,9 +46559,7 @@ function AppLockProvider({ children }) {
 			enableBiometric,
 			verifyBiometric,
 			disableBiometric,
-			setTimerOption,
-			startAuthentication,
-			finishAuthentication
+			setTimerOption
 		},
 		children
 	});
@@ -76457,7 +76443,7 @@ function AppContent() {
 		setCurrentGroup(group);
 		navigateTo("groupInfo");
 	};
-	if (isLocked && lockEnabled) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PinLockScreen, {});
+	if (user && isLocked && lockEnabled) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PinLockScreen, {});
 	if (showPrivacyShield && !isLocked) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PrivacyOverlay, {});
 	if (showOnboarding) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(OnboardingScreen, { onFinish: handleFinishOnboarding });
 	if (bannedModalOpen) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(BannedModal, {
