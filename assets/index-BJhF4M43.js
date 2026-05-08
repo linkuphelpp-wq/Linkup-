@@ -19373,43 +19373,6 @@ var AbstractPopupRedirectOperation = class {
 */
 var _POLL_WINDOW_CLOSE_TIMEOUT = new Delay(2e3, 1e4);
 /**
-* Authenticates a Firebase client using a popup-based OAuth authentication flow.
-*
-* @remarks
-* If succeeds, returns the signed in user along with the provider's credential. If sign in was
-* unsuccessful, returns an error object containing additional information about the error.
-*
-* This method does not work in a Node.js environment or with {@link Auth} instances created with a
-* {@link @firebase/app#FirebaseServerApp}.
-*
-* @example
-* ```javascript
-* // Sign in using a popup.
-* const provider = new FacebookAuthProvider();
-* const result = await signInWithPopup(auth, provider);
-*
-* // The signed-in user info.
-* const user = result.user;
-* // This gives you a Facebook Access Token.
-* const credential = provider.credentialFromResult(auth, result);
-* const token = credential.accessToken;
-* ```
-*
-* @param auth - The {@link Auth} instance.
-* @param provider - The provider to authenticate. The provider has to be an {@link OAuthProvider}.
-* Non-OAuth providers like {@link EmailAuthProvider} will throw an error.
-* @param resolver - An instance of {@link PopupRedirectResolver}, optional
-* if already supplied to {@link initializeAuth} or provided by {@link getAuth}.
-*
-* @public
-*/
-async function signInWithPopup(auth, provider, resolver) {
-	if (_isFirebaseServerApp(auth.app)) return Promise.reject(_createError(auth, "operation-not-supported-in-this-environment"));
-	const authInternal = _castAuth(auth);
-	_assertInstanceOf(auth, provider, FederatedAuthProvider);
-	return new PopupOperation(authInternal, "signInViaPopup", provider, _withDefaultResolver(authInternal, resolver)).executeNotNull();
-}
-/**
 * Popup event manager. Handles the popup's entire lifecycle; listens to auth
 * events
 *
@@ -19540,6 +19503,9 @@ async function _getAndClearPendingRedirectStatus(resolver, auth) {
 	await persistence._remove(key);
 	return hasPendingRedirect;
 }
+async function _setPendingRedirectStatus(resolver, auth) {
+	return resolverPersistence(resolver)._set(pendingRedirectKey(auth), "true");
+}
 function _overrideRedirectResult(auth, result) {
 	redirectOutcomeMap.set(auth._key(), result);
 }
@@ -19548,6 +19514,123 @@ function resolverPersistence(resolver) {
 }
 function pendingRedirectKey(auth) {
 	return _persistenceKeyName(PENDING_REDIRECT_KEY, auth.config.apiKey, auth.name);
+}
+/**
+* @license
+* Copyright 2020 Google LLC
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+/**
+* Authenticates a Firebase client using a full-page redirect flow.
+*
+* @remarks
+* To handle the results and errors for this operation, refer to {@link getRedirectResult}.
+* Follow the {@link https://firebase.google.com/docs/auth/web/redirect-best-practices
+* | best practices} when using {@link signInWithRedirect}.
+*
+* This method does not work in a Node.js environment or with {@link Auth} instances created with a
+* {@link @firebase/app#FirebaseServerApp}.
+*
+* @example
+* ```javascript
+* // Sign in using a redirect.
+* const provider = new FacebookAuthProvider();
+* // You can add additional scopes to the provider:
+* provider.addScope('user_birthday');
+* // Start a sign in process for an unauthenticated user.
+* await signInWithRedirect(auth, provider);
+* // This will trigger a full page redirect away from your app
+*
+* // After returning from the redirect when your app initializes you can obtain the result
+* const result = await getRedirectResult(auth);
+* if (result) {
+*   // This is the signed-in user
+*   const user = result.user;
+*   // This gives you a Facebook Access Token.
+*   const credential = provider.credentialFromResult(auth, result);
+*   const token = credential.accessToken;
+* }
+* // As this API can be used for sign-in, linking and reauthentication,
+* // check the operationType to determine what triggered this redirect
+* // operation.
+* const operationType = result.operationType;
+* ```
+*
+* @param auth - The {@link Auth} instance.
+* @param provider - The provider to authenticate. The provider has to be an {@link OAuthProvider}.
+* Non-OAuth providers like {@link EmailAuthProvider} will throw an error.
+* @param resolver - An instance of {@link PopupRedirectResolver}, optional
+* if already supplied to {@link initializeAuth} or provided by {@link getAuth}.
+*
+* @public
+*/
+function signInWithRedirect(auth, provider, resolver) {
+	return _signInWithRedirect(auth, provider, resolver);
+}
+async function _signInWithRedirect(auth, provider, resolver) {
+	if (_isFirebaseServerApp(auth.app)) return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(auth));
+	const authInternal = _castAuth(auth);
+	_assertInstanceOf(auth, provider, FederatedAuthProvider);
+	await authInternal._initializationPromise;
+	const resolverInternal = _withDefaultResolver(authInternal, resolver);
+	await _setPendingRedirectStatus(resolverInternal, authInternal);
+	return resolverInternal._openRedirect(authInternal, provider, "signInViaRedirect");
+}
+/**
+* Returns a {@link UserCredential} from the redirect-based sign-in flow.
+*
+* @remarks
+* If sign-in succeeded, returns the signed in user. If sign-in was unsuccessful, fails with an
+* error. If no redirect operation was called, returns `null`.
+*
+* This method does not work in a Node.js environment or with {@link Auth} instances created with a
+* {@link @firebase/app#FirebaseServerApp}.
+*
+* @example
+* ```javascript
+* // Sign in using a redirect.
+* const provider = new FacebookAuthProvider();
+* // You can add additional scopes to the provider:
+* provider.addScope('user_birthday');
+* // Start a sign in process for an unauthenticated user.
+* await signInWithRedirect(auth, provider);
+* // This will trigger a full page redirect away from your app
+*
+* // After returning from the redirect when your app initializes you can obtain the result
+* const result = await getRedirectResult(auth);
+* if (result) {
+*   // This is the signed-in user
+*   const user = result.user;
+*   // This gives you a Facebook Access Token.
+*   const credential = provider.credentialFromResult(auth, result);
+*   const token = credential.accessToken;
+* }
+* // As this API can be used for sign-in, linking and reauthentication,
+* // check the operationType to determine what triggered this redirect
+* // operation.
+* const operationType = result.operationType;
+* ```
+*
+* @param auth - The {@link Auth} instance.
+* @param resolver - An instance of {@link PopupRedirectResolver}, optional
+* if already supplied to {@link initializeAuth} or provided by {@link getAuth}.
+*
+* @public
+*/
+async function getRedirectResult(auth, resolver) {
+	await _castAuth(auth)._initializationPromise;
+	return _getRedirectResult(auth, resolver, false);
 }
 async function _getRedirectResult(auth, resolverExtern, bypassAuthState = false) {
 	if (_isFirebaseServerApp(auth.app)) return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(auth));
@@ -46377,6 +46460,200 @@ var db = getFirestore(app);
 getStorage(app);
 var rtdb = getDatabase(app);
 //#endregion
+//#region src/context/AppLockContext.jsx
+var AppLockContext = (0, import_react.createContext)();
+var useAppLock = () => (0, import_react.useContext)(AppLockContext);
+function base64ToArrayBuffer(base64) {
+	const binary = atob(base64);
+	const bytes = new Uint8Array(binary.length);
+	for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+	return bytes.buffer;
+}
+function arrayBufferToBase64(buffer) {
+	const bytes = new Uint8Array(buffer);
+	let binary = "";
+	for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+	return btoa(binary);
+}
+function AppLockProvider({ children }) {
+	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_biometric") === "true");
+	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(() => lockEnabled);
+	const [lockTimer, setLockTimer] = (0, import_react.useState)(() => localStorage.getItem("app_lock_timer") || "immediate");
+	const [isLocked, setIsLocked] = (0, import_react.useState)(false);
+	const [showPrivacyShield, setShowPrivacyShield] = (0, import_react.useState)(false);
+	const [isAuthenticating, setIsAuthenticating] = (0, import_react.useState)(false);
+	const timerRef = (0, import_react.useRef)(null);
+	const isReturningFromAuth = (0, import_react.useRef)(false);
+	(0, import_react.useEffect)(() => {
+		if (!lockEnabled) {
+			setIsLocked(false);
+			setShowPrivacyShield(false);
+			return;
+		}
+		if (!sessionStorage.getItem("app_lock_session")) {
+			setIsLocked(true);
+			setShowPrivacyShield(true);
+		}
+		sessionStorage.setItem("app_lock_session", "true");
+		const clearSession = () => {
+			sessionStorage.removeItem("app_lock_session");
+		};
+		window.addEventListener("pagehide", clearSession);
+		window.addEventListener("beforeunload", clearSession);
+		return () => {
+			window.removeEventListener("pagehide", clearSession);
+			window.removeEventListener("beforeunload", clearSession);
+		};
+	}, [lockEnabled]);
+	const setTimerOption = (0, import_react.useCallback)((option) => {
+		localStorage.setItem("app_lock_timer", option);
+		setLockTimer(option);
+	}, []);
+	const enableBiometric = async () => {
+		try {
+			const credential = await navigator.credentials.create({ publicKey: {
+				challenge: new Uint8Array([
+					8,
+					12,
+					3,
+					77,
+					94,
+					4,
+					1
+				]),
+				rp: { name: "LinkUp App" },
+				user: {
+					id: new Uint8Array(16),
+					name: "user@linkup.app",
+					displayName: "LinkUp User"
+				},
+				pubKeyCredParams: [{
+					type: "public-key",
+					alg: -7
+				}],
+				authenticatorSelection: {
+					authenticatorAttachment: "platform",
+					userVerification: "required"
+				},
+				timeout: 6e4,
+				attestation: "none"
+			} });
+			if (credential) {
+				const credentialId = arrayBufferToBase64(credential.rawId);
+				localStorage.setItem("app_lock_credential_id", credentialId);
+				localStorage.setItem("app_lock_biometric", "true");
+				setBiometricEnabled(true);
+				setLockEnabled(true);
+				setIsLocked(false);
+				setShowPrivacyShield(false);
+				return true;
+			}
+		} catch (e) {
+			console.error(e);
+		}
+		return false;
+	};
+	const verifyBiometric = async () => {
+		if (!biometricEnabled) return { success: false };
+		const credentialId = localStorage.getItem("app_lock_credential_id");
+		if (!credentialId) return { success: false };
+		try {
+			if (await navigator.credentials.get({ publicKey: {
+				challenge: new Uint8Array([
+					9,
+					34,
+					5,
+					66,
+					12,
+					4,
+					8
+				]),
+				allowCredentials: [{
+					id: base64ToArrayBuffer(credentialId),
+					type: "public-key"
+				}],
+				timeout: 6e4,
+				userVerification: "required"
+			} })) {
+				setIsLocked(false);
+				setShowPrivacyShield(false);
+				if (timerRef.current) {
+					clearTimeout(timerRef.current);
+					timerRef.current = null;
+				}
+				isReturningFromAuth.current = true;
+				setTimeout(() => {
+					isReturningFromAuth.current = false;
+				}, 500);
+				return { success: true };
+			}
+		} catch (e) {
+			console.error(e);
+		}
+		return { success: false };
+	};
+	const disableBiometric = () => {
+		localStorage.removeItem("app_lock_biometric");
+		localStorage.removeItem("app_lock_credential_id");
+		localStorage.removeItem("app_lock_timer");
+		setBiometricEnabled(false);
+		setLockEnabled(false);
+		setIsLocked(false);
+		setShowPrivacyShield(false);
+		if (timerRef.current) {
+			clearTimeout(timerRef.current);
+			timerRef.current = null;
+		}
+	};
+	(0, import_react.useEffect)(() => {
+		if (!lockEnabled || isAuthenticating) return;
+		if (isLocked) return;
+		const handleVisibilityChange = () => {
+			if (document.hidden) {
+				setShowPrivacyShield(true);
+				if (timerRef.current) clearTimeout(timerRef.current);
+				if (lockTimer === "immediate") setIsLocked(true);
+				else timerRef.current = setTimeout(() => {
+					setIsLocked(true);
+				}, lockTimer === "30s" ? 3e4 : 3e5);
+			} else {
+				if (isReturningFromAuth.current) return;
+				if (lockTimer === "immediate") {} else if (timerRef.current) {
+					clearTimeout(timerRef.current);
+					timerRef.current = null;
+					setIsLocked(false);
+					setShowPrivacyShield(false);
+				}
+			}
+		};
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+		return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+	}, [
+		lockEnabled,
+		isLocked,
+		lockTimer,
+		isAuthenticating
+	]);
+	const startAuthentication = (0, import_react.useCallback)(() => setIsAuthenticating(true), []);
+	const finishAuthentication = (0, import_react.useCallback)(() => setIsAuthenticating(false), []);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockContext.Provider, {
+		value: {
+			lockEnabled,
+			isLocked,
+			biometricEnabled,
+			lockTimer,
+			showPrivacyShield,
+			enableBiometric,
+			verifyBiometric,
+			disableBiometric,
+			setTimerOption,
+			startAuthentication,
+			finishAuthentication
+		},
+		children
+	});
+}
+//#endregion
 //#region src/features/auth/AuthScreen.jsx
 var Input$1 = ({ className, ...props }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 	className: `w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all ${className}`,
@@ -46389,6 +46666,7 @@ var Button$1 = ({ children, className, disabled, ...props }) => /* @__PURE__ */ 
 	children
 });
 function AuthScreen({ onLogin, onForgotPassword }) {
+	const { startAuthentication, finishAuthentication } = useAppLock();
 	const [isLogin, setIsLogin] = (0, import_react.useState)(true);
 	const [email, setEmail] = (0, import_react.useState)("");
 	const [password, setPassword] = (0, import_react.useState)("");
@@ -46461,6 +46739,44 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 		}
 		return () => clearInterval(timer);
 	}, [lockedOut]);
+	(0, import_react.useEffect)(() => {
+		const checkRedirectResult = async () => {
+			try {
+				const result = await getRedirectResult(auth);
+				if (result?.user) {
+					const user = result.user;
+					const ref = doc(db, "users", user.uid);
+					if (!(await getDoc(ref)).exists()) await setDoc(ref, {
+						uid: user.uid,
+						email: user.email,
+						displayName: user.displayName || "",
+						photoURL: user.photoURL || "",
+						username: "",
+						status: "online",
+						lastSeen: serverTimestamp$2(),
+						loginDates: [(/* @__PURE__ */ new Date()).toISOString().split("T")[0]],
+						loginCount: 1,
+						settings: {
+							fontSize: "medium",
+							fontFamily: "tajawal",
+							muteMicOnJoin: false,
+							speakerDefault: false
+						},
+						contacts: [],
+						blockedUsers: [],
+						createdAt: serverTimestamp$2()
+					});
+					onLogin?.(user);
+				}
+			} catch (err) {
+				console.error("Redirect sign-in error:", err);
+				setError("فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.");
+			} finally {
+				finishAuthentication();
+			}
+		};
+		checkRedirectResult();
+	}, []);
 	const handleLogoClick = (e) => {
 		if (!logoRef.current) return;
 		const rect = logoRef.current.getBoundingClientRect();
@@ -46546,32 +46862,11 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 		setLoading(true);
 		setError("");
 		try {
-			const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
-			const ref = doc(db, "users", user.uid);
-			if (!(await getDoc(ref)).exists()) await setDoc(ref, {
-				uid: user.uid,
-				email: user.email,
-				displayName: user.displayName || "",
-				photoURL: user.photoURL || "",
-				username: "",
-				status: "online",
-				lastSeen: serverTimestamp$2(),
-				loginDates: [(/* @__PURE__ */ new Date()).toISOString().split("T")[0]],
-				loginCount: 1,
-				settings: {
-					fontSize: "medium",
-					fontFamily: "tajawal",
-					muteMicOnJoin: false,
-					speakerDefault: false
-				},
-				contacts: [],
-				blockedUsers: [],
-				createdAt: serverTimestamp$2()
-			});
-			resetLockout();
-			onLogin?.(user);
-		} catch {
+			startAuthentication();
+			await signInWithRedirect(auth, new GoogleAuthProvider());
+		} catch (err) {
 			setError("فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.");
+			finishAuthentication();
 		} finally {
 			setLoading(false);
 		}
@@ -63863,198 +64158,6 @@ function DataManagementScreen({ onBack }) {
 				]
 			})
 		]
-	});
-}
-//#endregion
-//#region src/context/AppLockContext.jsx
-var AppLockContext = (0, import_react.createContext)();
-var useAppLock = () => (0, import_react.useContext)(AppLockContext);
-function base64ToArrayBuffer(base64) {
-	const binary = atob(base64);
-	const bytes = new Uint8Array(binary.length);
-	for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-	return bytes.buffer;
-}
-function arrayBufferToBase64(buffer) {
-	const bytes = new Uint8Array(buffer);
-	let binary = "";
-	for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-	return btoa(binary);
-}
-function AppLockProvider({ children }) {
-	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_biometric") === "true");
-	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(() => lockEnabled);
-	const [lockTimer, setLockTimer] = (0, import_react.useState)(() => localStorage.getItem("app_lock_timer") || "immediate");
-	const [isLocked, setIsLocked] = (0, import_react.useState)(false);
-	const [showPrivacyShield, setShowPrivacyShield] = (0, import_react.useState)(false);
-	const timerRef = (0, import_react.useRef)(null);
-	const isReturningFromAuth = (0, import_react.useRef)(false);
-	(0, import_react.useEffect)(() => {
-		if (!lockEnabled) {
-			setIsLocked(false);
-			setShowPrivacyShield(false);
-			return;
-		}
-		if (!sessionStorage.getItem("app_lock_session")) {
-			setIsLocked(true);
-			setShowPrivacyShield(true);
-		}
-		sessionStorage.setItem("app_lock_session", "true");
-		const clearSession = () => {
-			sessionStorage.removeItem("app_lock_session");
-		};
-		window.addEventListener("pagehide", clearSession);
-		window.addEventListener("beforeunload", clearSession);
-		return () => {
-			window.removeEventListener("pagehide", clearSession);
-			window.removeEventListener("beforeunload", clearSession);
-		};
-	}, [lockEnabled]);
-	const setTimerOption = (0, import_react.useCallback)((option) => {
-		localStorage.setItem("app_lock_timer", option);
-		setLockTimer(option);
-	}, []);
-	const enableBiometric = async () => {
-		try {
-			const credential = await navigator.credentials.create({ publicKey: {
-				challenge: new Uint8Array([
-					8,
-					12,
-					3,
-					77,
-					94,
-					4,
-					1
-				]),
-				rp: { name: "LinkUp App" },
-				user: {
-					id: new Uint8Array(16),
-					name: "user@linkup.app",
-					displayName: "LinkUp User"
-				},
-				pubKeyCredParams: [{
-					type: "public-key",
-					alg: -7
-				}],
-				authenticatorSelection: {
-					authenticatorAttachment: "platform",
-					userVerification: "required"
-				},
-				timeout: 6e4,
-				attestation: "none"
-			} });
-			if (credential) {
-				const credentialId = arrayBufferToBase64(credential.rawId);
-				localStorage.setItem("app_lock_credential_id", credentialId);
-				localStorage.setItem("app_lock_biometric", "true");
-				setBiometricEnabled(true);
-				setLockEnabled(true);
-				setIsLocked(false);
-				setShowPrivacyShield(false);
-				return true;
-			}
-		} catch (e) {
-			console.error(e);
-		}
-		return false;
-	};
-	const verifyBiometric = async () => {
-		if (!biometricEnabled) return { success: false };
-		const credentialId = localStorage.getItem("app_lock_credential_id");
-		if (!credentialId) return { success: false };
-		try {
-			if (await navigator.credentials.get({ publicKey: {
-				challenge: new Uint8Array([
-					9,
-					34,
-					5,
-					66,
-					12,
-					4,
-					8
-				]),
-				allowCredentials: [{
-					id: base64ToArrayBuffer(credentialId),
-					type: "public-key"
-				}],
-				timeout: 6e4,
-				userVerification: "required"
-			} })) {
-				setIsLocked(false);
-				setShowPrivacyShield(false);
-				if (timerRef.current) {
-					clearTimeout(timerRef.current);
-					timerRef.current = null;
-				}
-				isReturningFromAuth.current = true;
-				setTimeout(() => {
-					isReturningFromAuth.current = false;
-				}, 500);
-				return { success: true };
-			}
-		} catch (e) {
-			console.error(e);
-		}
-		return { success: false };
-	};
-	const disableBiometric = () => {
-		localStorage.removeItem("app_lock_biometric");
-		localStorage.removeItem("app_lock_credential_id");
-		localStorage.removeItem("app_lock_timer");
-		setBiometricEnabled(false);
-		setLockEnabled(false);
-		setIsLocked(false);
-		setShowPrivacyShield(false);
-		if (timerRef.current) {
-			clearTimeout(timerRef.current);
-			timerRef.current = null;
-		}
-	};
-	(0, import_react.useEffect)(() => {
-		if (!lockEnabled) {
-			setShowPrivacyShield(false);
-			setIsLocked(false);
-			return;
-		}
-		if (isLocked) return;
-		const handleVisibilityChange = () => {
-			if (document.hidden) {
-				setShowPrivacyShield(true);
-				if (timerRef.current) clearTimeout(timerRef.current);
-				if (lockTimer === "immediate") setIsLocked(true);
-				else timerRef.current = setTimeout(() => {
-					setIsLocked(true);
-				}, lockTimer === "30s" ? 3e4 : 3e5);
-			} else {
-				if (isReturningFromAuth.current) return;
-				if (lockTimer === "immediate") {} else if (timerRef.current) {
-					clearTimeout(timerRef.current);
-					timerRef.current = null;
-					setIsLocked(false);
-					setShowPrivacyShield(false);
-				}
-			}
-		};
-		document.addEventListener("visibilitychange", handleVisibilityChange);
-		return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-	}, [
-		lockEnabled,
-		isLocked,
-		lockTimer
-	]);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockContext.Provider, {
-		value: {
-			lockEnabled,
-			isLocked,
-			biometricEnabled,
-			lockTimer,
-			showPrivacyShield,
-			enableBiometric,
-			verifyBiometric,
-			disableBiometric,
-			setTimerOption
-		},
-		children
 	});
 }
 //#endregion
