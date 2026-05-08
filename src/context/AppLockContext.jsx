@@ -17,7 +17,7 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-export function AppLockProvider({ children }) {
+export function AppLockProvider({ children, isAuthenticated }) {
   const [lockEnabled, setLockEnabled] = useState(() => localStorage.getItem('app_lock_biometric') === 'true');
   const [biometricEnabled, setBiometricEnabled] = useState(() => lockEnabled);
   const [lockTimer, setLockTimer] = useState(() => localStorage.getItem('app_lock_timer') || 'immediate');
@@ -26,10 +26,9 @@ export function AppLockProvider({ children }) {
 
   const timerRef = useRef(null);
   const isReturningFromAuth = useRef(false);
-  const isAuthenticating = useRef(false); // ✅ مرجع بدلاً من حالة لتجنب إعادة التصيير
 
   useEffect(() => {
-    if (!lockEnabled) {
+    if (!lockEnabled || !isAuthenticated) {
       setIsLocked(false);
       setShowPrivacyShield(false);
       return;
@@ -51,7 +50,7 @@ export function AppLockProvider({ children }) {
       window.removeEventListener('pagehide', clearSession);
       window.removeEventListener('beforeunload', clearSession);
     };
-  }, [lockEnabled]);
+  }, [lockEnabled, isAuthenticated]);
 
   const setTimerOption = useCallback((option) => {
     localStorage.setItem('app_lock_timer', option);
@@ -121,18 +120,10 @@ export function AppLockProvider({ children }) {
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
   };
 
-  // ✅ مراقبة الخروج والعودة: تتجاهل حالة isAuthenticating
   useEffect(() => {
-    if (!lockEnabled) {
-      setShowPrivacyShield(false);
-      setIsLocked(false);
-      return;
-    }
-    if (isLocked) return;
+    if (!lockEnabled || !isAuthenticated || isLocked) return;
 
     const handleVisibilityChange = () => {
-      if (isAuthenticating.current) return; // ✅ تجاهل أثناء المصادقة
-
       if (document.hidden) {
         setShowPrivacyShield(true);
         if (timerRef.current) clearTimeout(timerRef.current);
@@ -162,21 +153,13 @@ export function AppLockProvider({ children }) {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [lockEnabled, isLocked, lockTimer]);
-
-  // ✅ دوال جديدة لتجاهل القفل أثناء المصادقة (تستخدم useRef لتجنب إعادة التصيير)
-  const startAuthentication = useCallback(() => {
-    isAuthenticating.current = true;
-  }, []);
-  const finishAuthentication = useCallback(() => {
-    isAuthenticating.current = false;
-  }, []);
+  }, [lockEnabled, isAuthenticated, isLocked, lockTimer]);
 
   return (
     <AppLockContext.Provider value={{
       lockEnabled, isLocked, biometricEnabled, lockTimer, showPrivacyShield,
       enableBiometric, verifyBiometric, disableBiometric,
-      setTimerOption, startAuthentication, finishAuthentication,
+      setTimerOption,
     }}>
       {children}
     </AppLockContext.Provider>

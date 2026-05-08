@@ -327,8 +327,8 @@ function AppContent() {
   const handleOpenGroup = (group) => { setCurrentGroup(group); navigateTo('groupChat'); };
   const handleOpenGroupInfo = (group) => { setCurrentGroup(group); navigateTo('groupInfo'); };
 
-  // ✅ الترتيب الصحيح: شاشة البصمة أولاً، ثم الستارة البيضاء
-  if (isLocked && lockEnabled) {
+  // ✅ تم تعديل الترتيب: شرط البصمة أصبح مقيدًا بوجود المستخدم
+  if (user && isLocked && lockEnabled) {
     return <PinLockScreen />;
   }
 
