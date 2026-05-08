@@ -1,19 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Shield, Users, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { auth, db } from '../../firebase/config';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  signInWithRedirect,
+  getRedirectResult,
+  GoogleAuthProvider
+} from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { useAppLock } from '../../context/AppLockContext';
 
 // ───────── مكونات مخصصة (بدون مكتبات خارجية) ─────────
 const Input = ({ className, ...props }) => (
-  <input 
+  <input
     className={`w-full px-4 py-3 rounded-xl border border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all ${className}`}
     {...props}
   />
 );
 
 const Button = ({ children, className, disabled, ...props }) => (
-  <button 
+  <button
     disabled={disabled}
     className={`relative overflow-hidden rounded-xl font-bold transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     {...props}
@@ -24,6 +32,8 @@ const Button = ({ children, className, disabled, ...props }) => (
 
 // ───────── مكون الشاشة الرئيسي ─────────
 export default function AuthScreen({ onLogin, onForgotPassword }) {
+  const { startAuthentication, finishAuthentication } = useAppLock();
+
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -107,6 +117,35 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
     return () => clearInterval(timer);
   }, [lockedOut]);
 
+  // ✅ التقاط نتيجة تسجيل الدخول بعد العودة من Google
+  useEffect(() => {
+    const checkRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          const user = result.user;
+          const ref = doc(db, 'users', user.uid);
+          if (!(await getDoc(ref)).exists()) {
+            await setDoc(ref, {
+              uid: user.uid, email: user.email, displayName: user.displayName || '', photoURL: user.photoURL || '',
+              username: '', status: 'online', lastSeen: serverTimestamp(),
+              loginDates: [new Date().toISOString().split('T')[0]], loginCount: 1,
+              settings: { fontSize: 'medium', fontFamily: 'tajawal', muteMicOnJoin: false, speakerDefault: false },
+              contacts: [], blockedUsers: [], createdAt: serverTimestamp()
+            });
+          }
+          onLogin?.(user);
+        }
+      } catch (err) {
+        console.error('Redirect sign-in error:', err);
+        setError('فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.');
+      } finally {
+        finishAuthentication();
+      }
+    };
+    checkRedirectResult();
+  }, []);
+
   const handleLogoClick = (e) => {
     if (!logoRef.current) return;
     const rect = logoRef.current.getBoundingClientRect();
@@ -131,27 +170,27 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
     if (!isLogin && password.length < 6) return setError('يجب أن تكون كلمة المرور 6 أحرف على الأقل');
     setLoading(true);
     try {
-      const { user } = isLogin 
-        ? await signInWithEmailAndPassword(auth, email, password) 
+      const { user } = isLogin
+        ? await signInWithEmailAndPassword(auth, email, password)
         : await createUserWithEmailAndPassword(auth, email, password);
 
       resetLockout(); // ✅ نجحت العملية، امسح أي حظر سابق
       setLockedOut(false);
       
-      if (!user.emailVerified) { 
-        await sendEmailVerification(user); 
-        setSuccess('تم إرسال رابط التحقق لبريدك.'); 
-        setLoading(false); 
-        return; 
+      if (!user.emailVerified) {
+        await sendEmailVerification(user);
+        setSuccess('تم إرسال رابط التحقق لبريدك.');
+        setLoading(false);
+        return;
       }
       
       if (!isLogin) {
         const today = new Date().toISOString().split('T')[0];
-        await setDoc(doc(db, 'users', user.uid), { 
-          uid: user.uid, email: user.email, displayName: '', photoURL: '', username: '', 
-          status: 'online', lastSeen: serverTimestamp(), loginDates: [today], loginCount: 1, 
-          settings: { fontSize: 'medium', fontFamily: 'tajawal', muteMicOnJoin: false, speakerDefault: false }, 
-          contacts: [], blockedUsers: [], createdAt: serverTimestamp() 
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid, email: user.email, displayName: '', photoURL: '', username: '',
+          status: 'online', lastSeen: serverTimestamp(), loginDates: [today], loginCount: 1,
+          settings: { fontSize: 'medium', fontFamily: 'tajawal', muteMicOnJoin: false, speakerDefault: false },
+          contacts: [], blockedUsers: [], createdAt: serverTimestamp()
         });
         await sendEmailVerification(user);
         setSuccess('تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني.');
@@ -168,10 +207,10 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
         setError('تم حظر تسجيل الدخول مؤقتاً بسبب محاولات كثيرة. حاول مجدداً بعد 5 دقائق.');
       } else {
         const remaining = MAX_ATTEMPTS - getLockoutData().attempts;
-        const baseError = ['auth/invalid-credential','auth/wrong-password'].includes(err.code) ? 'البريد أو كلمة المرور غير صحيحة' : 
-               err.code === 'auth/user-not-found' ? 'لا يوجد حساب بهذا البريد' : 
-               err.code === 'auth/email-already-in-use' ? 'هذا البريد مسجل مسبقاً' : 
-               err.code === 'auth/weak-password' ? 'كلمة المرور ضعيفة (6 أحرف على الأقل)' : 
+        const baseError = ['auth/invalid-credential','auth/wrong-password'].includes(err.code) ? 'البريد أو كلمة المرور غير صحيحة' :
+               err.code === 'auth/user-not-found' ? 'لا يوجد حساب بهذا البريد' :
+               err.code === 'auth/email-already-in-use' ? 'هذا البريد مسجل مسبقاً' :
+               err.code === 'auth/weak-password' ? 'كلمة المرور ضعيفة (6 أحرف على الأقل)' :
                'حدث خطأ. تحقق من اتصالك وحاول مرة أخرى.';
         setError(`${baseError} (${remaining} محاولات متبقية)`);
       }
@@ -181,23 +220,15 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
   const handleGoogleSignIn = async () => {
     setLoading(true); setError('');
     try {
-      const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
-      const ref = doc(db, 'users', user.uid);
-      if (!(await getDoc(ref)).exists()) {
-        await setDoc(ref, { 
-          uid: user.uid, email: user.email, displayName: user.displayName || '', photoURL: user.photoURL || '', 
-          username: '', status: 'online', lastSeen: serverTimestamp(), 
-          loginDates: [new Date().toISOString().split('T')[0]], loginCount: 1, 
-          settings: { fontSize: 'medium', fontFamily: 'tajawal', muteMicOnJoin: false, speakerDefault: false }, 
-          contacts: [], blockedUsers: [], createdAt: serverTimestamp() 
-        });
-      }
-      resetLockout(); // ✅ نجح الدخول، أزل الحظر
-      onLogin?.(user);
-    } catch { 
-      setError('فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.'); 
-    } finally { 
-      setLoading(false); 
+      startAuthentication(); // ✅ منع قفل التطبيق أثناء المصادقة
+      const provider = new GoogleAuthProvider();
+      await signInWithRedirect(auth, provider);
+      // لن يتم تنفيذ الكود التالي مباشرة، بل عند العودة من التحويل
+    } catch (err) {
+      setError('فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.');
+      finishAuthentication();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -296,7 +327,7 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
           <p className="text-center text-xs text-gray-500/80 mt-6 font-medium tracking-wide select-none">الحقوق محفوظة لدى أثير © ٢٠٦</p>
         </div>
       </div>
-            <style>{`
+      <style>{`
         @keyframes float{0%,100%{transform:translateY(0) rotate(0);opacity:.3}50%{transform:translateY(-15px) rotate(5deg);opacity:.6}}
         .animate-float{animation:float linear infinite}
         @keyframes ripple{0%{transform:translate(-50%,-50%) scale(.5);opacity:.8}100%{transform:translate(-50%,-50%) scale(6);opacity:0}}

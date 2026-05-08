@@ -23,14 +23,14 @@ export function AppLockProvider({ children }) {
   const [lockTimer, setLockTimer] = useState(() => localStorage.getItem('app_lock_timer') || 'immediate');
   const [isLocked, setIsLocked] = useState(false);
   const [showPrivacyShield, setShowPrivacyShield] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const timerRef = useRef(null);
   const isReturningFromAuth = useRef(false);
 
-  // ✅ إصلاح الجلسة: نتحقق من الجلسة فقط إذا كان القفل مفعلاً
+  // إدارة الجلسة
   useEffect(() => {
     if (!lockEnabled) {
-      // إذا كان القفل غير مفعل، نتأكد من إخفاء أي قفل أو ستارة
       setIsLocked(false);
       setShowPrivacyShield(false);
       return;
@@ -122,14 +122,9 @@ export function AppLockProvider({ children }) {
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
   };
 
-  // ✅ مراقبة الخروج والعودة: تعمل فقط إذا كان القفل مفعلاً
+  // مراقبة الخروج والعودة
   useEffect(() => {
-    if (!lockEnabled) {
-      // إذا تعطل القفل، نخفي أي ستارة
-      setShowPrivacyShield(false);
-      setIsLocked(false);
-      return;
-    }
+    if (!lockEnabled || isAuthenticating) return;
     if (isLocked) return;
 
     const handleVisibilityChange = () => {
@@ -162,13 +157,17 @@ export function AppLockProvider({ children }) {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [lockEnabled, isLocked, lockTimer]);
+  }, [lockEnabled, isLocked, lockTimer, isAuthenticating]);
+
+  // دوال جديدة لتجاهل القفل أثناء المصادقة
+  const startAuthentication = useCallback(() => setIsAuthenticating(true), []);
+  const finishAuthentication = useCallback(() => setIsAuthenticating(false), []);
 
   return (
     <AppLockContext.Provider value={{
       lockEnabled, isLocked, biometricEnabled, lockTimer, showPrivacyShield,
       enableBiometric, verifyBiometric, disableBiometric,
-      setTimerOption,
+      setTimerOption, startAuthentication, finishAuthentication,
     }}>
       {children}
     </AppLockContext.Provider>
