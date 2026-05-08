@@ -22,8 +22,9 @@ export function AppLockProvider({ children }) {
   const [isLocked, setIsLocked] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(() => lockEnabled);
   const [lockTimer, setLockTimer] = useState(() => localStorage.getItem('app_lock_timer') || 'immediate');
-  
+
   const timerRef = useRef(null);
+  const isReturningRef = useRef(false); // منع القفل الفوري عند العودة من البصمة نفسها
 
   const setTimerOption = useCallback((option) => {
     localStorage.setItem('app_lock_timer', option);
@@ -72,6 +73,8 @@ export function AppLockProvider({ children }) {
       if (assertion) {
         setIsLocked(false);
         if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+        isReturningRef.current = true;
+        setTimeout(() => { isReturningRef.current = false; }, 500);
         return { success: true };
       }
     } catch (e) { console.error(e); }
@@ -88,32 +91,36 @@ export function AppLockProvider({ children }) {
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
   };
 
-  // الوظيفة الأساسية: عند العودة إلى التطبيق، نقرر إن كنا سنقفل أم لا
+  // مراقبة الخروج والعودة من التطبيق
   useEffect(() => {
     if (!lockEnabled) return;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // بدء المؤقت عند الخروج
+        // خرج من التطبيق
         if (timerRef.current) clearTimeout(timerRef.current);
         if (lockTimer === 'immediate') {
-          // فوري: لا داعي لمؤقت، سيتم القفل مباشرة عند العودة
+          // للفوري، لا نضع مؤقتًا بل سنقفل عند أول عودة (في else)
         } else {
           timerRef.current = setTimeout(() => {
             setIsLocked(true);
           }, lockTimer === '30s' ? 30000 : 300000);
         }
       } else {
-        // العودة إلى التطبيق
+        // عاد إلى التطبيق – تجنبنا تداخل البصمة عبر isReturningRef
+        if (isReturningRef.current) return;
+
         if (lockTimer === 'immediate') {
-          setIsLocked(true); // أقفل فورًا
-        }
-        // إذا كان هناك مؤقت ولم ينته بعد، نلغيه ولا نقفل
-        if (timerRef.current) {
+          // معاملة خاصة: إذا لم يكن هناك مؤقت، أقفل فورًا عند العودة
+          setIsLocked(true);
+        } else if (timerRef.current) {
+          // هناك مؤقت لم ينته بعد: ألغِ المؤقت ولا تقفل
           clearTimeout(timerRef.current);
           timerRef.current = null;
           setIsLocked(false);
         }
+        // إذا كان المؤقت قد انتهى سابقًا (أي أن `setIsLocked(true)` نُفذ)،
+        // سنكون قد وصلنا إلى هنا مع `isLocked === true` بالفعل (لا حاجة لفعل شيء)
       }
     };
 

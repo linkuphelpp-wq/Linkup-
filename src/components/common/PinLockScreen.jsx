@@ -21,7 +21,11 @@ export default function PinLockScreen() {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-gradient-to-br from-purple-50 via-white to-blue-50 flex flex-col items-center justify-center text-right cursor-pointer" dir="rtl" onClick={handleTap}>
+    <div
+      className="fixed inset-0 z-[9999] bg-gradient-to-br from-purple-50 via-white to-blue-50 flex flex-col items-center justify-center text-right cursor-pointer"
+      dir="rtl"
+      onClick={handleTap}
+    >
       <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100/60 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-100/60 rounded-full blur-3xl pointer-events-none" />
       <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 flex flex-col items-center gap-10 w-full max-w-xs px-6 pointer-events-none">

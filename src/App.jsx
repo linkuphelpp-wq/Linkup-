@@ -125,7 +125,6 @@ function AppContent() {
   const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [modalQueue, setModalQueue] = useState([]);
   const [incomingCallActive, setIncomingCallActive] = useState(false);
-  const [isAppVisible, setIsAppVisible] = useState(true);
 
   const {
     myId, callStatus, localStream, remoteStream, remoteUserData,
@@ -136,13 +135,7 @@ function AppContent() {
   usePresence();
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // مراقبة ظهور/اختفاء التطبيق (للشاشة البيضاء عند الخروج)
-  useEffect(() => {
-    const handleVisibility = () => setIsAppVisible(!document.hidden);
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, []);
-
+  // مراقبة الاتصال بالإنترنت
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -329,12 +322,20 @@ function AppContent() {
   const handleFinishOnboarding = () => { localStorage.setItem('linkup_onboarding_seen', 'true'); setShowOnboarding(false); };
 
   useEffect(() => {
-    const sizes = { small: '14px', medium: '16px', large: '18px', xlarge: '20px' }; document.documentElement.style.fontSize = sizes[fontSize] || '16px'; localStorage.setItem('fontSize', fontSize);
+    const sizes = { small: '14px', medium: '16px', large: '18px', xlarge: '20px' };
+    document.documentElement.style.fontSize = sizes[fontSize] || '16px';
+    localStorage.setItem('fontSize', fontSize);
   }, [fontSize]);
 
   useEffect(() => {
-    const fonts = { tajawal: '"Tajawal", sans-serif', cairo: '"Cairo", sans-serif', rubik: '"Rubik", sans-serif', changa: '"Changa", sans-serif', 'ibm-plex': '"IBM Plex Sans Arabic", sans-serif' };
-    const selectedFont = fonts[fontFamily] || '"Tajawal", sans-serif'; document.documentElement.style.fontFamily = selectedFont; document.body.style.fontFamily = selectedFont; localStorage.setItem('fontFamily', fontFamily);
+    const fonts = {
+      tajawal: '"Tajawal", sans-serif', cairo: '"Cairo", sans-serif', rubik: '"Rubik", sans-serif',
+      changa: '"Changa", sans-serif', 'ibm-plex': '"IBM Plex Sans Arabic", sans-serif'
+    };
+    const selectedFont = fonts[fontFamily] || '"Tajawal", sans-serif';
+    document.documentElement.style.fontFamily = selectedFont;
+    document.body.style.fontFamily = selectedFont;
+    localStorage.setItem('fontFamily', fontFamily);
   }, [fontFamily]);
 
   const handleOpenGroup = (group) => { setCurrentGroup(group); navigateTo('groupChat'); };
@@ -347,13 +348,6 @@ function AppContent() {
     return <PinLockScreen />;
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  // ✅ طبقة الشاشة البيضاء عند الخروج من التطبيق
-  // ─────────────────────────────────────────────────────────────────
-  if (!isAppVisible) {
-    return <div className="fixed inset-0 z-[9999] bg-white" />;
-  }
-
   if (showOnboarding) return <OnboardingScreen onFinish={handleFinishOnboarding} />;
   if (bannedModalOpen) return <BannedModal open={bannedModalOpen} type={banType} onClose={handleBannedModalClose} />;
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
@@ -364,14 +358,22 @@ function AppContent() {
   if (currentScreen === 'resetpassword') return <ResetPasswordScreen onBack={handleBack} />;
 
   if (incomingCall && incomingCallerInfo && !incomingCallActive) {
-    return <IncomingCallModal open={true} caller={incomingCallerInfo} callType={incomingCallType} onAccept={handleAcceptIncoming} onReject={handleRejectIncoming} />;
+    return (
+      <IncomingCallModal
+        open={true}
+        caller={incomingCallerInfo}
+        callType={incomingCallType}
+        onAccept={handleAcceptIncoming}
+        onReject={handleRejectIncoming}
+      />
+    );
   }
 
   const pagesWithOwnHeader = [
-    'atheer','about','privacy','support','createGroup','data',
-    'lock','changeEmail','resetPasswordProfile','forgotpassword',
-    'resetpassword','contacts','chat','groupChat','groupInfo',
-    'settings','mainMenu','notifications','usermanagement','groups','admin'
+    'atheer', 'about', 'privacy', 'support', 'createGroup', 'data',
+    'lock', 'changeEmail', 'resetPasswordProfile', 'forgotpassword',
+    'resetpassword', 'contacts', 'chat', 'groupChat', 'groupInfo',
+    'settings', 'mainMenu', 'notifications', 'usermanagement', 'groups', 'admin'
   ];
 
   const headerTitle = {
@@ -392,7 +394,17 @@ function AppContent() {
     if (currentScreen === 'usermanagement') return <UserManagementScreen onBack={handleBack} />;
     if (currentScreen === 'profile') return <ProfileScreen user={user} onUpdateProfile={handleUpdateProfile} onLogout={handleLogout} onChangeEmail={() => navigateTo('changeEmail')} onResetPassword={() => navigateTo('resetPasswordProfile')} onSwitchAccount={handleSwitchAccount} />;
     if (currentScreen === 'settings')
-      return <SettingsScreen onOpenAtheer={() => navigateTo('atheer')} onOpenAbout={() => navigateTo('about')} onOpenPrivacy={() => navigateTo('privacy')} onOpenTerms={() => navigateTo('terms')} onOpenDataManagement={() => navigateTo('data')} onOpenAppLock={() => navigateTo('lock')} onOpenProfile={() => navigateTo('profile')} onOpenSupport={() => navigateTo('support')} onOpenReport={() => navigateTo('support')} onResetApp={handleResetApp} muteMicOnJoin={muteMicOnJoin} speakerDefault={speakerDefault} onToggleMuteMic={handleToggleMuteMic} onToggleSpeaker={handleToggleSpeaker} fontSize={fontSize} fontFamily={fontFamily} onSelectFontSize={setFontSize} onSelectFontFamily={setFontFamily} isAdmin={isAdmin} onOpenAdmin={() => navigateTo('admin')} onOpenPartner={() => navigateTo('partner')} onBack={handleBack} />;
+      return (
+        <SettingsScreen
+          onOpenAtheer={() => navigateTo('atheer')} onOpenAbout={() => navigateTo('about')} onOpenPrivacy={() => navigateTo('privacy')}
+          onOpenTerms={() => navigateTo('terms')} onOpenDataManagement={() => navigateTo('data')} onOpenAppLock={() => navigateTo('lock')}
+          onOpenProfile={() => navigateTo('profile')} onOpenSupport={() => navigateTo('support')} onOpenReport={() => navigateTo('support')}
+          onResetApp={handleResetApp} muteMicOnJoin={muteMicOnJoin} speakerDefault={speakerDefault}
+          onToggleMuteMic={handleToggleMuteMic} onToggleSpeaker={handleToggleSpeaker} fontSize={fontSize} fontFamily={fontFamily}
+          onSelectFontSize={setFontSize} onSelectFontFamily={setFontFamily} isAdmin={isAdmin}
+          onOpenAdmin={() => navigateTo('admin')} onOpenPartner={() => navigateTo('partner')} onBack={handleBack}
+        />
+      );
     if (currentScreen === 'contacts') return <ContactsScreen onBack={handleBack} onChat={handleOpenChat} onCall={handleOpenCall} myUsername={myUsername} />;
     if (currentScreen === 'chat') return <ChatScreen contact={currentChatContact} onBack={handleBack} onCall={handleOpenCall} />;
     if (currentScreen === 'atheer') return <AtheerScreen onBack={handleBack} />;
@@ -404,13 +416,15 @@ function AppContent() {
     if (currentScreen === 'partner') return <PartnerScreen onBack={handleBack} />;
     if (currentScreen === 'createGroup') return <CreateGroupScreen onBack={handleBack} />;
     if (currentScreen === 'groups')
-      return <GroupsScreen onBack={handleBack} onOpenCreateGroup={() => navigateTo('createGroup')} onOpenGroup={handleOpenGroup} />;
+      return (
+        <GroupsScreen onBack={handleBack} onOpenCreateGroup={() => navigateTo('createGroup')} onOpenGroup={handleOpenGroup} />
+      );
     if (currentScreen === 'groupChat') return <GroupChatScreen group={currentGroup} onBack={handleBack} onOpenGroupInfo={handleOpenGroupInfo} />;
     if (currentScreen === 'groupInfo') return <GroupInfoScreen group={currentGroup} onBack={handleBack} onOpenChat={handleOpenChat} />;
     return <HomeScreen myId={myId} myUsername={myUsername} user={user} />;
   };
 
-  const hideBottomNav = ['chat','notifications','support','usermanagement','admin','createGroup','groupChat','groupInfo','changeEmail','resetPasswordProfile','data','lock','partner','atheer','about','privacy','terms','forgotpassword','resetpassword','settings'].includes(currentScreen);
+  const hideBottomNav = ['chat', 'notifications', 'support', 'usermanagement', 'admin', 'createGroup', 'groupChat', 'groupInfo', 'changeEmail', 'resetPasswordProfile', 'data', 'lock', 'partner', 'atheer', 'about', 'privacy', 'terms', 'forgotpassword', 'resetpassword', 'settings'].includes(currentScreen);
 
   return (
     <>
@@ -431,7 +445,10 @@ function AppContent() {
 
       <div className="min-h-screen flex flex-col bg-slate-50/50 text-gray-900">
         {!pagesWithOwnHeader.includes(currentScreen) && (
-          <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50 px-5 py-3 flex items-center shadow-sm" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
+          <header
+            className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 border-b border-gray-200/50 px-5 py-3 flex items-center shadow-sm"
+            style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
+          >
             <button onClick={handleBack} className="p-2 -ml-2 rounded-full hover:bg-gray-100"><ArrowLeftIcon /></button>
             <h1 className="text-xl font-bold flex-1 text-right">{headerTitle}</h1>
             {!isAdmin && currentScreen !== 'notifications' && <button onClick={() => navigateTo('notifications')} className="p-2 rounded-full hover:bg-gray-100 relative"><BellIcon /></button>}
