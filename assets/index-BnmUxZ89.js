@@ -61761,13 +61761,27 @@ function arrayBufferToBase64(buffer) {
 	return btoa(binary);
 }
 function AppLockProvider({ children }) {
-	const isBiometricConfigured = localStorage.getItem("app_lock_biometric") === "true";
-	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(isBiometricConfigured);
-	const [isLocked, setIsLocked] = (0, import_react.useState)(isBiometricConfigured);
-	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(isBiometricConfigured);
+	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_biometric") === "true");
+	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(() => lockEnabled);
 	const [lockTimer, setLockTimer] = (0, import_react.useState)(() => localStorage.getItem("app_lock_timer") || "immediate");
+	const [isLocked, setIsLocked] = (0, import_react.useState)(false);
+	const [isAppVisible, setIsAppVisible] = (0, import_react.useState)(true);
 	const timerRef = (0, import_react.useRef)(null);
-	const isVerifyingRef = (0, import_react.useRef)(false);
+	const isReturningRef = (0, import_react.useRef)(false);
+	(0, import_react.useEffect)(() => {
+		if (!lockEnabled) return;
+		if (!sessionStorage.getItem("app_lock_session")) setIsLocked(true);
+		sessionStorage.setItem("app_lock_session", "true");
+		const handleUnload = () => {
+			sessionStorage.removeItem("app_lock_session");
+		};
+		window.addEventListener("pagehide", handleUnload);
+		window.addEventListener("beforeunload", handleUnload);
+		return () => {
+			window.removeEventListener("pagehide", handleUnload);
+			window.removeEventListener("beforeunload", handleUnload);
+		};
+	}, [lockEnabled]);
 	const setTimerOption = (0, import_react.useCallback)((option) => {
 		localStorage.setItem("app_lock_timer", option);
 		setLockTimer(option);
@@ -61819,7 +61833,6 @@ function AppLockProvider({ children }) {
 		if (!biometricEnabled) return { success: false };
 		const credentialId = localStorage.getItem("app_lock_credential_id");
 		if (!credentialId) return { success: false };
-		isVerifyingRef.current = true;
 		try {
 			if (await navigator.credentials.get({ publicKey: {
 				challenge: new Uint8Array([
@@ -61839,18 +61852,19 @@ function AppLockProvider({ children }) {
 				userVerification: "required"
 			} })) {
 				setIsLocked(false);
+				setIsAppVisible(true);
 				if (timerRef.current) {
 					clearTimeout(timerRef.current);
 					timerRef.current = null;
 				}
+				isReturningRef.current = true;
 				setTimeout(() => {
-					isVerifyingRef.current = false;
-				}, 1e3);
+					isReturningRef.current = false;
+				}, 500);
 				return { success: true };
 			}
 		} catch (e) {
 			console.error(e);
-			isVerifyingRef.current = false;
 		}
 		return { success: false };
 	};
@@ -61861,6 +61875,7 @@ function AppLockProvider({ children }) {
 		setBiometricEnabled(false);
 		setLockEnabled(false);
 		setIsLocked(false);
+		setIsAppVisible(true);
 		if (timerRef.current) {
 			clearTimeout(timerRef.current);
 			timerRef.current = null;
@@ -61868,36 +61883,31 @@ function AppLockProvider({ children }) {
 	};
 	(0, import_react.useEffect)(() => {
 		if (!lockEnabled) return;
-		const handleLockTrigger = () => {
-			if (isVerifyingRef.current) return;
-			if (lockTimer === "immediate") setIsLocked(true);
-			else {
-				const delay = lockTimer === "30s" ? 3e4 : 3e5;
-				if (!timerRef.current) timerRef.current = setTimeout(() => {
-					setIsLocked(true);
-				}, delay);
-			}
-		};
+		if (isLocked) return;
 		const handleVisibilityChange = () => {
-			if (document.hidden) handleLockTrigger();
-			else if (!isLocked && timerRef.current) {
-				clearTimeout(timerRef.current);
-				timerRef.current = null;
+			if (document.hidden) {
+				setIsAppVisible(false);
+				if (timerRef.current) clearTimeout(timerRef.current);
+				if (lockTimer === "immediate") setIsLocked(true);
+				else timerRef.current = setTimeout(() => {
+					setIsLocked(true);
+				}, lockTimer === "30s" ? 3e4 : 3e5);
+			} else {
+				if (isReturningRef.current) return;
+				if (lockTimer === "immediate") {} else if (timerRef.current) {
+					clearTimeout(timerRef.current);
+					timerRef.current = null;
+					setIsLocked(false);
+				}
+				if (!isLocked) setIsAppVisible(true);
 			}
 		};
-		const handleBlur = () => {
-			if (lockTimer === "immediate" && !isVerifyingRef.current) setIsLocked(true);
-		};
-		window.addEventListener("visibilitychange", handleVisibilityChange);
-		window.addEventListener("blur", handleBlur);
-		return () => {
-			window.removeEventListener("visibilitychange", handleVisibilityChange);
-			window.removeEventListener("blur", handleBlur);
-		};
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+		return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
 	}, [
 		lockEnabled,
-		lockTimer,
-		isLocked
+		isLocked,
+		lockTimer
 	]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockContext.Provider, {
 		value: {
@@ -61905,6 +61915,7 @@ function AppLockProvider({ children }) {
 			isLocked,
 			biometricEnabled,
 			lockTimer,
+			isAppVisible,
 			enableBiometric,
 			verifyBiometric,
 			disableBiometric,
@@ -69283,64 +69294,55 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 //#endregion
 //#region src/components/common/PinLockScreen.jsx
 function PinLockScreen() {
-	const [attempting, setAttempting] = (0, import_react.useState)(false);
 	const [error, setError] = (0, import_react.useState)(false);
-	const [showUI, setShowUI] = (0, import_react.useState)(false);
 	const { verifyBiometric } = useAppLock();
 	(0, import_react.useEffect)(() => {
-		const timer = setTimeout(() => setShowUI(true), 300);
+		const triggerVerify = async () => {
+			if (!(await verifyBiometric()).success) {
+				setError(true);
+				setTimeout(() => setError(false), 2e3);
+			}
+		};
+		const timer = setTimeout(triggerVerify, 500);
 		return () => clearTimeout(timer);
 	}, []);
-	const handleVerify = async () => {
-		if (attempting) return;
-		setAttempting(true);
-		setError(false);
-		if (!(await verifyBiometric()).success) {
-			setError(true);
-			setTimeout(() => setError(false), 800);
-		}
-		setAttempting(false);
-	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-[999999] bg-white flex flex-col items-center justify-center",
 		dir: "rtl",
-		onClick: handleVerify,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: showUI && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-			initial: { opacity: 0 },
-			animate: { opacity: 1 },
-			exit: { opacity: 0 },
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+			initial: {
+				opacity: 0,
+				y: 20
+			},
+			animate: {
+				opacity: 1,
+				y: 0
+			},
 			className: "flex flex-col items-center gap-8",
 			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-					whileHover: { scale: 1.05 },
-					whileTap: { scale: .95 },
-					className: `w-24 h-24 rounded-full flex items-center justify-center shadow-lg transition-colors duration-300 ${error ? "bg-red-50" : "bg-slate-50"}`,
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					onClick: () => verifyBiometric(),
+					className: `w-24 h-24 rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-90 ${error ? "bg-red-50" : "bg-slate-50"}`,
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: `w-12 h-12 ${error ? "text-red-500" : "text-indigo-600"}` })
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "text-center",
+					className: "text-center px-6",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-						className: "text-xl font-bold text-gray-800",
-						children: "تطبيق أثير مقفل"
+						className: "text-2xl font-bold text-gray-800",
+						children: "تطبيق أثير"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-sm text-gray-500 mt-2",
-						children: "المس الشاشة للتحقق من الهوية"
+						className: "text-gray-500 mt-2",
+						children: "استخدم البصمة للعودة للمحادثات"
 					})]
 				}),
 				error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.p, {
-					initial: {
-						y: 10,
-						opacity: 0
-					},
-					animate: {
-						y: 0,
-						opacity: 1
-					},
-					className: "text-red-500 text-sm font-bold",
-					children: "فشل التحقق، حاول مجدداً"
+					initial: { opacity: 0 },
+					animate: { opacity: 1 },
+					className: "text-red-500 font-medium",
+					children: "لم يتم التعرف على البصمة، حاول مرة أخرى"
 				})
 			]
-		}) })
+		})
 	});
 }
 //#endregion
