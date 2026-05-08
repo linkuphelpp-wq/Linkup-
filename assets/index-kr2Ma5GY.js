@@ -61769,7 +61769,11 @@ function AppLockProvider({ children }) {
 	const timerRef = (0, import_react.useRef)(null);
 	const isReturningFromAuth = (0, import_react.useRef)(false);
 	(0, import_react.useEffect)(() => {
-		if (!lockEnabled) return;
+		if (!lockEnabled) {
+			setIsLocked(false);
+			setShowPrivacyShield(false);
+			return;
+		}
 		if (!sessionStorage.getItem("app_lock_session")) {
 			setIsLocked(true);
 			setShowPrivacyShield(true);
@@ -61886,7 +61890,12 @@ function AppLockProvider({ children }) {
 		}
 	};
 	(0, import_react.useEffect)(() => {
-		if (!lockEnabled || isLocked) return;
+		if (!lockEnabled) {
+			setShowPrivacyShield(false);
+			setIsLocked(false);
+			return;
+		}
+		if (isLocked) return;
 		const handleVisibilityChange = () => {
 			if (document.hidden) {
 				setShowPrivacyShield(true);
