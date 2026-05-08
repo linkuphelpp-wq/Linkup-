@@ -61762,44 +61762,14 @@ function arrayBufferToBase64(buffer) {
 }
 function AppLockProvider({ children }) {
 	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_biometric") === "true");
-	const [isLocked, setIsLocked] = (0, import_react.useState)(() => lockEnabled);
+	const [isLocked, setIsLocked] = (0, import_react.useState)(false);
 	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(() => lockEnabled);
 	const [lockTimer, setLockTimer] = (0, import_react.useState)(() => localStorage.getItem("app_lock_timer") || "immediate");
 	const timerRef = (0, import_react.useRef)(null);
-	(0, import_react.useRef)(Date.now());
 	const setTimerOption = (0, import_react.useCallback)((option) => {
 		localStorage.setItem("app_lock_timer", option);
 		setLockTimer(option);
 	}, []);
-	const startLockTimer = (0, import_react.useCallback)(() => {
-		if (!lockEnabled) return;
-		if (timerRef.current) clearTimeout(timerRef.current);
-		if (lockTimer === "immediate") setIsLocked(true);
-		else timerRef.current = setTimeout(() => {
-			setIsLocked(true);
-		}, lockTimer === "30s" ? 3e4 : 3e5);
-	}, [lockEnabled, lockTimer]);
-	const resetLockTimer = (0, import_react.useCallback)(() => {
-		if (timerRef.current) {
-			clearTimeout(timerRef.current);
-			timerRef.current = null;
-		}
-		if (isLocked === false) return;
-		if (lockTimer !== "immediate") setIsLocked(false);
-	}, [lockTimer, isLocked]);
-	(0, import_react.useEffect)(() => {
-		if (!lockEnabled) return;
-		const handleVisibilityChange = () => {
-			if (document.hidden) startLockTimer();
-			else resetLockTimer();
-		};
-		document.addEventListener("visibilitychange", handleVisibilityChange);
-		return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-	}, [
-		lockEnabled,
-		startLockTimer,
-		resetLockTimer
-	]);
 	const enableBiometric = async () => {
 		try {
 			const credential = await navigator.credentials.create({ publicKey: {
@@ -61839,7 +61809,7 @@ function AppLockProvider({ children }) {
 				return true;
 			}
 		} catch (e) {
-			console.error("Biometric registration failed", e);
+			console.error(e);
 		}
 		return false;
 	};
@@ -61866,11 +61836,14 @@ function AppLockProvider({ children }) {
 				userVerification: "required"
 			} })) {
 				setIsLocked(false);
-				resetLockTimer();
+				if (timerRef.current) {
+					clearTimeout(timerRef.current);
+					timerRef.current = null;
+				}
 				return { success: true };
 			}
 		} catch (e) {
-			console.error("Biometric verification failed", e);
+			console.error(e);
 		}
 		return { success: false };
 	};
@@ -61881,7 +61854,31 @@ function AppLockProvider({ children }) {
 		setBiometricEnabled(false);
 		setLockEnabled(false);
 		setIsLocked(false);
+		if (timerRef.current) {
+			clearTimeout(timerRef.current);
+			timerRef.current = null;
+		}
 	};
+	(0, import_react.useEffect)(() => {
+		if (!lockEnabled) return;
+		const handleVisibilityChange = () => {
+			if (document.hidden) {
+				if (timerRef.current) clearTimeout(timerRef.current);
+				if (lockTimer === "immediate") {} else timerRef.current = setTimeout(() => {
+					setIsLocked(true);
+				}, lockTimer === "30s" ? 3e4 : 3e5);
+			} else {
+				if (lockTimer === "immediate") setIsLocked(true);
+				if (timerRef.current) {
+					clearTimeout(timerRef.current);
+					timerRef.current = null;
+					setIsLocked(false);
+				}
+			}
+		};
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+		return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+	}, [lockEnabled, lockTimer]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockContext.Provider, {
 		value: {
 			lockEnabled,
@@ -61891,36 +61888,34 @@ function AppLockProvider({ children }) {
 			enableBiometric,
 			verifyBiometric,
 			disableBiometric,
-			setTimerOption,
-			startLockTimer,
-			resetLockTimer
+			setTimerOption
 		},
 		children
 	});
 }
 //#endregion
 //#region src/features/Settings/AppLockScreen.jsx
+var timerOptions = [
+	{
+		value: "immediate",
+		label: "فوراً",
+		desc: "يقفل مباشرة عند الخروج"
+	},
+	{
+		value: "30s",
+		label: "30 ثانية",
+		desc: "يقفل بعد 30 ثانية من الخروج"
+	},
+	{
+		value: "5m",
+		label: "5 دقائق",
+		desc: "يقفل بعد 5 دقائق من الخروج"
+	}
+];
 function AppLockScreen({ onBack }) {
 	const { lockEnabled, enableBiometric, disableBiometric, lockTimer, setTimerOption } = useAppLock();
 	const [saved, setSaved] = (0, import_react.useState)(false);
 	const [selectedTimer, setSelectedTimer] = (0, import_react.useState)(lockTimer);
-	const timerOptions = [
-		{
-			value: "immediate",
-			label: "فوراً",
-			desc: "يقفل مباشرة عند الخروج"
-		},
-		{
-			value: "30s",
-			label: "30 ثانية",
-			desc: "يقفل بعد 30 ثانية من الخروج"
-		},
-		{
-			value: "5m",
-			label: "5 دقائق",
-			desc: "يقفل بعد 5 دقائق من الخروج"
-		}
-	];
 	const handleToggle = async () => {
 		if (lockEnabled) {
 			disableBiometric();
@@ -61953,12 +61948,12 @@ function AppLockScreen({ onBack }) {
 				className: "flex items-center gap-3",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 					onClick: onBack,
-					className: "w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors active:scale-95",
+					className: "w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center active:scale-95",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-2",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-6 h-6 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-						className: "text-2xl font-black text-gray-900 tracking-tight",
+						className: "text-2xl font-black text-gray-900",
 						children: "قفل التطبيق"
 					})]
 				})]
@@ -69275,12 +69270,7 @@ function PinLockScreen() {
 		if (attempting) return;
 		setAttempting(true);
 		setError(false);
-		try {
-			if (!(await verifyBiometric()).success) {
-				setError(true);
-				setTimeout(() => setError(false), 800);
-			}
-		} catch (e) {
+		if (!(await verifyBiometric()).success) {
 			setError(true);
 			setTimeout(() => setError(false), 800);
 		}
@@ -73861,11 +73851,9 @@ function AppContent() {
 	usePresence();
 	const [isAdmin, setIsAdmin] = (0, import_react.useState)(false);
 	(0, import_react.useEffect)(() => {
-		const handleVisibilityChange = () => {
-			setIsAppVisible(!document.hidden);
-		};
-		document.addEventListener("visibilitychange", handleVisibilityChange);
-		return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+		const handleVisibility = () => setIsAppVisible(!document.hidden);
+		document.addEventListener("visibilitychange", handleVisibility);
+		return () => document.removeEventListener("visibilitychange", handleVisibility);
 	}, []);
 	(0, import_react.useEffect)(() => {
 		const handleOnline = () => setIsOnline(true);
