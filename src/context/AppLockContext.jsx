@@ -4,24 +4,23 @@ const AppLockContext = createContext();
 export const useAppLock = () => useContext(AppLockContext);
 
 export function AppLockProvider({ children }) {
-  // حالة القفل
   const [lockEnabled, setLockEnabled] = useState(() => {
     const pin = localStorage.getItem('app_lock_pin');
     return pin !== null && pin.length >= 4;
+  });
+  const [pinLength, setPinLength] = useState(() => {
+    const len = localStorage.getItem('app_lock_pin_length');
+    return len ? parseInt(len, 10) : 4;
   });
   const [isLocked, setIsLocked] = useState(false);
   const [showPrivacyShield, setShowPrivacyShield] = useState(false);
   const [autoVerify, setAutoVerify] = useState(() =>
     localStorage.getItem('app_lock_auto_verify') === 'true'
   );
-  const [lockTimer, setLockTimer] = useState(() =>
-    localStorage.getItem('app_lock_timer') || 'immediate'
-  );
 
-  const timerRef = useRef(null);
   const isReturningFromAuth = useRef(false);
 
-  // إدارة دورة حياة القفل
+  // عند تفعيل القفل لأول مرة بعد إعادة تحميل الصفحة
   useEffect(() => {
     if (!lockEnabled) {
       setIsLocked(false);
@@ -29,6 +28,7 @@ export function AppLockProvider({ children }) {
       return;
     }
 
+    // إذا كانت الجلسة جديدة، نقفل
     if (!sessionStorage.getItem('app_lock_session')) {
       setIsLocked(true);
       setShowPrivacyShield(true);
@@ -47,42 +47,31 @@ export function AppLockProvider({ children }) {
     };
   }, [lockEnabled]);
 
-  // ضبط المؤقت عند تبديل التطبيق
+  // القفل الفوري عند إخفاء التطبيق
   useEffect(() => {
-    if (!lockEnabled || isLocked) return;
+    if (!lockEnabled) return;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
+        // إخفاء المحتوى وقفل فوري
         setShowPrivacyShield(true);
-        if (timerRef.current) clearTimeout(timerRef.current);
-
-        if (lockTimer === 'immediate') {
-          setIsLocked(true);
-        } else {
-          timerRef.current = setTimeout(() => {
-            setIsLocked(true);
-          }, lockTimer === '30s' ? 30000 : 300000);
-        }
+        setIsLocked(true);
       } else {
-        if (isReturningFromAuth.current) return;
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-          timerRef.current = null;
-          setIsLocked(false);
-          setShowPrivacyShield(false);
-        }
+        // عند العودة لا نفتح القفل تلقائياً، يبقى PinLockScreen ظاهراً
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [lockEnabled, isLocked, lockTimer]);
+  }, [lockEnabled]);
 
-  // ========== دوال PIN الجديدة ==========
+  // دوال PIN
   const setPIN = useCallback((pin) => {
     if (pin && pin.length >= 4) {
       localStorage.setItem('app_lock_pin', pin);
+      localStorage.setItem('app_lock_pin_length', pin.length.toString());
       setLockEnabled(true);
+      setPinLength(pin.length);
       setIsLocked(false);
       setShowPrivacyShield(false);
       return true;
@@ -95,10 +84,6 @@ export function AppLockProvider({ children }) {
     if (stored === pin) {
       setIsLocked(false);
       setShowPrivacyShield(false);
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
       isReturningFromAuth.current = true;
       setTimeout(() => { isReturningFromAuth.current = false; }, 500);
       return true;
@@ -108,20 +93,11 @@ export function AppLockProvider({ children }) {
 
   const disableLock = useCallback(() => {
     localStorage.removeItem('app_lock_pin');
+    localStorage.removeItem('app_lock_pin_length');
     localStorage.removeItem('app_lock_auto_verify');
-    localStorage.removeItem('app_lock_timer');
     setLockEnabled(false);
     setIsLocked(false);
     setShowPrivacyShield(false);
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
-
-  const setTimerOption = useCallback((option) => {
-    localStorage.setItem('app_lock_timer', option);
-    setLockTimer(option);
   }, []);
 
   const setAutoVerifyOption = useCallback((val) => {
@@ -131,9 +107,8 @@ export function AppLockProvider({ children }) {
 
   return (
     <AppLockContext.Provider value={{
-      lockEnabled, isLocked, lockTimer, showPrivacyShield, autoVerify,
-      setPIN, verifyPIN, disableLock,
-      setTimerOption, setAutoVerifyOption,
+      lockEnabled, isLocked, showPrivacyShield, autoVerify, pinLength,
+      setPIN, verifyPIN, disableLock, setAutoVerifyOption,
     }}>
       {children}
     </AppLockContext.Provider>
