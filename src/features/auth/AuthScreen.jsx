@@ -28,7 +28,8 @@ const Button = ({ children, className, disabled, ...props }) => (
 
 // ───────── مكون الشاشة الرئيسي ─────────
 export default function AuthScreen({ onLogin, onForgotPassword }) {
-  const { startAuthentication, finishAuthentication } = useAppLock();
+  // ❌ تم تعطيل استدعاء useAppLock مؤقتاً لتشخيص الخلل
+  // const { startAuthentication, finishAuthentication } = useAppLock();
 
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -42,8 +43,6 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
   const [ripples, setRipples] = useState([]);
   const [isLogoPressed, setIsLogoPressed] = useState(false);
   const logoRef = useRef(null);
-
-  // ❌ تمت إزالة نظام حماية التخمين بالكامل
 
   const handleLogoClick = (e) => {
     if (!logoRef.current) return;
@@ -101,7 +100,9 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
   const handleGoogleSignIn = async () => {
     setLoading(true); setError('');
     try {
-      startAuthentication();
+      // ❌ تم تعطيل منع قفل التطبيق مؤقتاً لتشخيص الخلل
+      // startAuthentication();
+      
       const result = await signInWithPopup(auth, new GoogleAuthProvider());
       const user = result.user;
       const ref = doc(db, 'users', user.uid);
@@ -122,7 +123,8 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
       }
     } finally { 
       setLoading(false);
-      finishAuthentication();
+      // ❌ تم تعطيل إعادة تفعيل مراقبة القفل مؤقتاً
+      // finishAuthentication();
     }
   };
 
@@ -158,8 +160,6 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
               <button type="button" onClick={() => { setIsLogin(true); setError(''); setSuccess(''); }} className={`relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isLogin ? 'text-white' : 'text-gray-400 hover:text-white'}`}>تسجيل الدخول</button>
               <button type="button" onClick={() => { setIsLogin(false); setError(''); setSuccess(''); }} className={`relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${!isLogin ? 'text-white' : 'text-gray-400 hover:text-white'}`}>إنشاء حساب</button>
             </div>
-
-            {/* ❌ إزالة رسالة الحظر */}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative group/input">
