@@ -3,7 +3,8 @@ import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getDatabase } from 'firebase/database';
-import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
+// App Check تم تعطيله مؤقتًا للتشخيص
+// import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzDq5YrWhsbeA0DvmaM5IYV_PmZ4ivHjE",
@@ -18,13 +19,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// ✅ تفعيل App Check لحماية التطبيق من الطلبات الضارة
-if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-  initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider('6LfOud8sAAAAAGKE0hvOqVr16UN2_tqB5PU3nMrM'),
-    isTokenAutoRefreshEnabled: true,
-  });
-}
+// ✅ تم تعطيل App Check مؤقتًا لتحديد سبب فشل تسجيل الدخول
+// if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+//   initializeAppCheck(app, {
+//     provider: new ReCaptchaV3Provider('6LfOud8sAAAAAGKE0hvOqVr16UN2_tqB5PU3nMrM'),
+//     isTokenAutoRefreshEnabled: true,
+//   });
+// }
 
 const auth = getAuth(app);
 const db = getFirestore(app);
