@@ -45482,7 +45482,6 @@ var Button$1 = ({ children, className, disabled, ...props }) => /* @__PURE__ */ 
 	children
 });
 function AuthScreen({ onLogin, onForgotPassword }) {
-	const { startAuthentication, finishAuthentication } = useAppLock();
 	const [isLogin, setIsLogin] = (0, import_react.useState)(true);
 	const [email, setEmail] = (0, import_react.useState)("");
 	const [password, setPassword] = (0, import_react.useState)("");
@@ -45566,7 +45565,6 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 		setLoading(true);
 		setError("");
 		try {
-			startAuthentication();
 			const user = (await signInWithPopup(auth, new GoogleAuthProvider())).user;
 			const ref = doc(db, "users", user.uid);
 			if (!(await getDoc(ref)).exists()) await setDoc(ref, {
@@ -45595,7 +45593,6 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 			if (err.code !== "auth/cancelled-popup-request" && err.code !== "auth/popup-closed-by-user") setError("فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.");
 		} finally {
 			setLoading(false);
-			finishAuthentication();
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
