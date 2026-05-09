@@ -45268,7 +45268,7 @@ registerDatabase();
 //#endregion
 //#region src/firebase/config.js
 var app = initializeApp({
-	apiKey: "AIzaSyCzDq5YrWhsbeA0DvmaM5IYV_PmZ4ivHjE",
+	apiKey: "AIzaSyCXQUQ12WH0LQRPyuszK8sSfw_nyb7Mnss",
 	authDomain: "p2p-call-app-a1418.firebaseapp.com",
 	databaseURL: "https://p2p-call-app-a1418-default-rtdb.firebaseio.com",
 	projectId: "p2p-call-app-a1418",
