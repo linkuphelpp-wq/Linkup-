@@ -6,7 +6,6 @@ import {
   signInWithPopup, GoogleAuthProvider
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { useAppLock } from '../../context/AppLockContext';
 
 // ───────── مكونات مخصصة ─────────
 const Input = ({ className, ...props }) => (
@@ -28,9 +27,6 @@ const Button = ({ children, className, disabled, ...props }) => (
 
 // ───────── مكون الشاشة الرئيسي ─────────
 export default function AuthScreen({ onLogin, onForgotPassword }) {
-  // ❌ تم تعطيل استدعاء useAppLock مؤقتاً لتشخيص الخلل
-  // const { startAuthentication, finishAuthentication } = useAppLock();
-
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -100,9 +96,6 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
   const handleGoogleSignIn = async () => {
     setLoading(true); setError('');
     try {
-      // ❌ تم تعطيل منع قفل التطبيق مؤقتاً لتشخيص الخلل
-      // startAuthentication();
-      
       const result = await signInWithPopup(auth, new GoogleAuthProvider());
       const user = result.user;
       const ref = doc(db, 'users', user.uid);
@@ -123,8 +116,6 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
       }
     } finally { 
       setLoading(false);
-      // ❌ تم تعطيل إعادة تفعيل مراقبة القفل مؤقتاً
-      // finishAuthentication();
     }
   };
 
@@ -211,7 +202,7 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
               </div>
             </div>
           </div>
-          <p className="text-center text-xs text-gray-500/80 mt-6 font-medium tracking-wide select-none">الحقوق محفوظة لدى أثير © ٢٠٦</p>
+          <p className="text-center text-xs text-gray-500/80 mt-6 font-medium tracking-wide select-none">الحقوق محفوظة لدى أثير © ٢٠٢٦</p>
         </div>
       </div>
       <style>{`
