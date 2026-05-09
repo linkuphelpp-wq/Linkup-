@@ -3,11 +3,11 @@ import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getDatabase } from 'firebase/database';
-// App Check تم تعطيله مؤقتًا للتشخيص
+// App Check معطل مؤقتاً
 // import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCzDq5YrWhsbeA0DvmaM5IYV_PmZ4ivHjE",
+  apiKey: "AIzaSyCXQUQ12WH0LQRPyuszK8sSfw_nyb7Mnss",
   authDomain: "p2p-call-app-a1418.firebaseapp.com",
   databaseURL: "https://p2p-call-app-a1418-default-rtdb.firebaseio.com",
   projectId: "p2p-call-app-a1418",
@@ -19,7 +19,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// ✅ تم تعطيل App Check مؤقتًا لتحديد سبب فشل تسجيل الدخول
+// تم تعطيل App Check مؤقتاً
 // if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
 //   initializeAppCheck(app, {
 //     provider: new ReCaptchaV3Provider('6LfOud8sAAAAAGKE0hvOqVr16UN2_tqB5PU3nMrM'),
