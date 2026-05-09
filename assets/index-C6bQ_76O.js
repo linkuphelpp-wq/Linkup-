@@ -75259,7 +75259,15 @@ function AppContent() {
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" })
 	});
 	if (!user) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AuthScreen, {
-		onLogin: () => {},
+		onLogin: (loggedInUser) => {
+			setUser({
+				uid: loggedInUser.uid,
+				email: loggedInUser.email,
+				displayName: loggedInUser.displayName || "",
+				photoURL: loggedInUser.photoURL || "",
+				emailVerified: loggedInUser.emailVerified
+			});
+		},
 		onForgotPassword: () => navigateTo("forgotpassword")
 	});
 	if (showVerifyEmail) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VerifyEmailScreen, {
