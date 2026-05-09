@@ -45269,10 +45269,10 @@ registerDatabase();
 //#region src/firebase/config.js
 var app = initializeApp({
 	apiKey: "AIzaSyCXQUQ12WH0LQRPyuszK8sSfw_nyb7Mnss",
-	authDomain: "p2p-call-app-a1418.firebaseapp.com",
-	databaseURL: "https://p2p-call-app-a1418-default-rtdb.firebaseio.com",
-	projectId: "p2p-call-app-a1418",
-	storageBucket: "p2p-call-app-a1418.firebasestorage.app",
+	authDomain: "tero-2792b.firebaseapp.com",
+	databaseURL: "https://tero-2792b-default-rtdb.firebaseio.com",
+	projectId: "tero-2792b",
+	storageBucket: "tero-2792b.firebasestorage.app",
 	messagingSenderId: "1077235796363",
 	appId: "1:1077235796363:web:4ea99f463a2805d6a75c64",
 	measurementId: "G-YR0TL5WXDJ"
