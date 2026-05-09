@@ -45367,8 +45367,8 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 				}, 3e3);
 			} else onLogin?.(user);
 		} catch (err) {
-			console.error(err);
-			setError(["auth/invalid-credential", "auth/wrong-password"].includes(err.code) ? "البريد أو كلمة المرور غير صحيحة" : err.code === "auth/user-not-found" ? "لا يوجد حساب بهذا البريد" : err.code === "auth/email-already-in-use" ? "هذا البريد مسجل مسبقاً" : err.code === "auth/weak-password" ? "كلمة المرور ضعيفة (6 أحرف على الأقل)" : "حدث خطأ. تحقق من اتصالك وحاول مرة أخرى.");
+			console.error("تفاصيل الخطأ الكاملة:", err);
+			setError(`[${err.code}] - ${err.message}`);
 		} finally {
 			setLoading(false);
 		}
@@ -45401,8 +45401,8 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 			});
 			onLogin?.(user);
 		} catch (err) {
-			console.error(err);
-			if (err.code !== "auth/cancelled-popup-request" && err.code !== "auth/popup-closed-by-user") setError("فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.");
+			console.error("خطأ تسجيل الدخول بجوجل:", err);
+			if (err.code !== "auth/cancelled-popup-request" && err.code !== "auth/popup-closed-by-user") setError(`خطأ جوجل: [${err.code}] - ${err.message}`);
 		} finally {
 			setLoading(false);
 		}
@@ -45566,6 +45566,10 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 									}),
 									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "bg-red-500/10 border border-red-400/20 text-red-200 text-sm p-3 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2",
+										style: {
+											direction: "ltr",
+											textAlign: "left"
+										},
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), error]
 									}),
 									success && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
