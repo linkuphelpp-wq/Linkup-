@@ -12402,56 +12402,6 @@ var stringLength = function(str) {
 };
 /**
 * @license
-* Copyright 2019 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* The amount of milliseconds to exponentially increase.
-*/
-var DEFAULT_INTERVAL_MILLIS = 1e3;
-/**
-* The factor to backoff by.
-* Should be a number greater than 1.
-*/
-var DEFAULT_BACKOFF_FACTOR = 2;
-/**
-* The maximum milliseconds to increase to.
-*
-* <p>Visible for testing
-*/
-var MAX_VALUE_MILLIS = 14400 * 1e3;
-/**
-* The percentage of backoff time to randomize by.
-* See
-* http://go/safe-client-behavior#step-1-determine-the-appropriate-retry-interval-to-handle-spike-traffic
-* for context.
-*
-* <p>Visible for testing
-*/
-var RANDOM_FACTOR = .5;
-/**
-* Based on the backoff method from
-* https://github.com/google/closure-library/blob/master/closure/goog/math/exponentialbackoff.js.
-* Extracted here so we don't need to pass metadata and a stateful ExponentialBackoff object around.
-*/
-function calculateBackoffMillis(backoffCount, intervalMillis = DEFAULT_INTERVAL_MILLIS, backoffFactor = DEFAULT_BACKOFF_FACTOR) {
-	const currBaseValue = intervalMillis * Math.pow(backoffFactor, backoffCount);
-	const randomWait = Math.round(RANDOM_FACTOR * currBaseValue * (Math.random() - .5) * 2);
-	return Math.min(MAX_VALUE_MILLIS, currBaseValue + randomWait);
-}
-/**
-* @license
 * Copyright 2021 Google LLC
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13192,7 +13142,7 @@ var version$1$1 = "0.14.11";
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-var logger$2 = new Logger("@firebase/app");
+var logger$1 = new Logger("@firebase/app");
 var name$p = "@firebase/app-compat";
 var name$o = "@firebase/analytics-compat";
 var name$n = "@firebase/analytics";
@@ -13215,11 +13165,11 @@ var name$7 = "@firebase/remote-config";
 var name$6 = "@firebase/remote-config-compat";
 var name$5 = "@firebase/storage";
 var name$4 = "@firebase/storage-compat";
-var name$3$1 = "@firebase/firestore";
+var name$3 = "@firebase/firestore";
 var name$2$1 = "@firebase/ai";
 var name$1$1 = "@firebase/firestore-compat";
 var name$10 = "firebase";
-var version$4 = "12.12.0";
+var version$3 = "12.12.0";
 /**
 * @license
 * Copyright 2019 Google LLC
@@ -13266,7 +13216,7 @@ var PLATFORM_LOG_STRING = {
 	[name$6]: "fire-rc-compat",
 	[name$5]: "fire-gcs",
 	[name$4]: "fire-gcs-compat",
-	[name$3$1]: "fire-fst",
+	[name$3]: "fire-fst",
 	[name$1$1]: "fire-fst-compat",
 	[name$2$1]: "fire-vertex",
 	"fire-js": "fire-js",
@@ -13311,7 +13261,7 @@ function _addComponent(app, component) {
 	try {
 		app.container.addComponent(component);
 	} catch (e) {
-		logger$2.debug(`Component ${component.name} failed to register with FirebaseApp ${app.name}`, e);
+		logger$1.debug(`Component ${component.name} failed to register with FirebaseApp ${app.name}`, e);
 	}
 }
 /**
@@ -13324,7 +13274,7 @@ function _addComponent(app, component) {
 function _registerComponent(component) {
 	const componentName = component.name;
 	if (_components.has(componentName)) {
-		logger$2.debug(`There were multiple attempts to register component ${componentName}.`);
+		logger$1.debug(`There were multiple attempts to register component ${componentName}.`);
 		return false;
 	}
 	_components.set(componentName, component);
@@ -13358,7 +13308,7 @@ function _isFirebaseServerApp(obj) {
 	if (obj === null || obj === void 0) return false;
 	return obj.settings !== void 0;
 }
-var ERROR_FACTORY$1 = new ErrorFactory("app", "Firebase", {
+var ERROR_FACTORY = new ErrorFactory("app", "Firebase", {
 	["no-app"]: "No Firebase App '{$appName}' has been created - call initializeApp() first",
 	["bad-app-name"]: "Illegal App name: '{$appName}'",
 	["duplicate-app"]: "Firebase App named '{$appName}' already exists with different options or config",
@@ -13434,7 +13384,7 @@ var FirebaseAppImpl = class {
 	* use before performing API actions on the App.
 	*/
 	checkDestroyed() {
-		if (this.isDeleted) throw ERROR_FACTORY$1.create("app-deleted", { appName: this._name });
+		if (this.isDeleted) throw ERROR_FACTORY.create("app-deleted", { appName: this._name });
 	}
 };
 /**
@@ -13458,7 +13408,7 @@ var FirebaseAppImpl = class {
 *
 * @public
 */
-var SDK_VERSION$1 = version$4;
+var SDK_VERSION$1 = version$3;
 function initializeApp(_options, rawConfig = {}) {
 	let options = _options;
 	if (typeof rawConfig !== "object") rawConfig = { name: rawConfig };
@@ -13468,12 +13418,12 @@ function initializeApp(_options, rawConfig = {}) {
 		...rawConfig
 	};
 	const name = config.name;
-	if (typeof name !== "string" || !name) throw ERROR_FACTORY$1.create("bad-app-name", { appName: String(name) });
+	if (typeof name !== "string" || !name) throw ERROR_FACTORY.create("bad-app-name", { appName: String(name) });
 	options || (options = getDefaultAppConfig());
-	if (!options) throw ERROR_FACTORY$1.create("no-options");
+	if (!options) throw ERROR_FACTORY.create("no-options");
 	const existingApp = _apps.get(name);
 	if (existingApp) if (deepEqual(options, existingApp.options) && deepEqual(config, existingApp.config)) return existingApp;
-	else throw ERROR_FACTORY$1.create("duplicate-app", { appName: name });
+	else throw ERROR_FACTORY.create("duplicate-app", { appName: name });
 	const container = new ComponentContainer(name);
 	for (const component of _components.values()) container.addComponent(component);
 	const newApp = new FirebaseAppImpl(options, config, container);
@@ -13512,7 +13462,7 @@ function initializeApp(_options, rawConfig = {}) {
 function getApp(name = DEFAULT_ENTRY_NAME) {
 	const app = _apps.get(name);
 	if (!app && name === "[DEFAULT]" && getDefaultAppConfig()) return initializeApp();
-	if (!app) throw ERROR_FACTORY$1.create("no-app", { appName: name });
+	if (!app) throw ERROR_FACTORY.create("no-app", { appName: name });
 	return app;
 }
 /**
@@ -13533,7 +13483,7 @@ function registerVersion(libraryKeyOrName, version, variant) {
 		if (libraryMismatch) warning.push(`library name "${library}" contains illegal characters (whitespace or "/")`);
 		if (libraryMismatch && versionMismatch) warning.push("and");
 		if (versionMismatch) warning.push(`version name "${version}" contains illegal characters (whitespace or "/")`);
-		logger$2.warn(warning.join(" "));
+		logger$1.warn(warning.join(" "));
 		return;
 	}
 	_registerComponent(new Component$1(`${library}-version`, () => ({
@@ -13557,52 +13507,52 @@ function registerVersion(libraryKeyOrName, version, variant) {
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-var DB_NAME$2 = "firebase-heartbeat-database";
-var DB_VERSION$2 = 1;
-var STORE_NAME$1 = "firebase-heartbeat-store";
-var dbPromise$1 = null;
+var DB_NAME$1 = "firebase-heartbeat-database";
+var DB_VERSION$1 = 1;
+var STORE_NAME = "firebase-heartbeat-store";
+var dbPromise = null;
 function getDbPromise() {
-	if (!dbPromise$1) dbPromise$1 = openDB(DB_NAME$2, DB_VERSION$2, { upgrade: (db, oldVersion) => {
+	if (!dbPromise) dbPromise = openDB(DB_NAME$1, DB_VERSION$1, { upgrade: (db, oldVersion) => {
 		switch (oldVersion) {
 			case 0: try {
-				db.createObjectStore(STORE_NAME$1);
+				db.createObjectStore(STORE_NAME);
 			} catch (e) {
 				console.warn(e);
 			}
 		}
 	} }).catch((e) => {
-		throw ERROR_FACTORY$1.create("idb-open", { originalErrorMessage: e.message });
+		throw ERROR_FACTORY.create("idb-open", { originalErrorMessage: e.message });
 	});
-	return dbPromise$1;
+	return dbPromise;
 }
 async function readHeartbeatsFromIndexedDB(app) {
 	try {
-		const tx = (await getDbPromise()).transaction(STORE_NAME$1);
-		const result = await tx.objectStore(STORE_NAME$1).get(computeKey$1(app));
+		const tx = (await getDbPromise()).transaction(STORE_NAME);
+		const result = await tx.objectStore(STORE_NAME).get(computeKey(app));
 		await tx.done;
 		return result;
 	} catch (e) {
-		if (e instanceof FirebaseError) logger$2.warn(e.message);
+		if (e instanceof FirebaseError) logger$1.warn(e.message);
 		else {
-			const idbGetError = ERROR_FACTORY$1.create("idb-get", { originalErrorMessage: e?.message });
-			logger$2.warn(idbGetError.message);
+			const idbGetError = ERROR_FACTORY.create("idb-get", { originalErrorMessage: e?.message });
+			logger$1.warn(idbGetError.message);
 		}
 	}
 }
 async function writeHeartbeatsToIndexedDB(app, heartbeatObject) {
 	try {
-		const tx = (await getDbPromise()).transaction(STORE_NAME$1, "readwrite");
-		await tx.objectStore(STORE_NAME$1).put(heartbeatObject, computeKey$1(app));
+		const tx = (await getDbPromise()).transaction(STORE_NAME, "readwrite");
+		await tx.objectStore(STORE_NAME).put(heartbeatObject, computeKey(app));
 		await tx.done;
 	} catch (e) {
-		if (e instanceof FirebaseError) logger$2.warn(e.message);
+		if (e instanceof FirebaseError) logger$1.warn(e.message);
 		else {
-			const idbGetError = ERROR_FACTORY$1.create("idb-set", { originalErrorMessage: e?.message });
-			logger$2.warn(idbGetError.message);
+			const idbGetError = ERROR_FACTORY.create("idb-set", { originalErrorMessage: e?.message });
+			logger$1.warn(idbGetError.message);
 		}
 	}
 }
-function computeKey$1(app) {
+function computeKey(app) {
 	return `${app.name}!${app.options.appId}`;
 }
 /**
@@ -13671,7 +13621,7 @@ var HeartbeatServiceImpl = class {
 			}
 			return this._storage.overwrite(this._heartbeatsCache);
 		} catch (e) {
-			logger$2.warn(e);
+			logger$1.warn(e);
 		}
 	}
 	/**
@@ -13701,7 +13651,7 @@ var HeartbeatServiceImpl = class {
 			}
 			return headerString;
 		} catch (e) {
-			logger$2.warn(e);
+			logger$1.warn(e);
 			return "";
 		}
 	}
@@ -18611,8 +18561,8 @@ function _getWorkerGlobalScope() {
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-var DB_NAME$1 = "firebaseLocalStorageDb";
-var DB_VERSION$1 = 1;
+var DB_NAME = "firebaseLocalStorageDb";
+var DB_VERSION = 1;
 var DB_OBJECTSTORE_NAME = "firebaseLocalStorage";
 var DB_DATA_KEYPATH = "fbase_key";
 /**
@@ -18640,10 +18590,10 @@ function getObjectStore(db, isReadWrite) {
 	return db.transaction([DB_OBJECTSTORE_NAME], isReadWrite ? "readwrite" : "readonly").objectStore(DB_OBJECTSTORE_NAME);
 }
 function _deleteDatabase() {
-	return new DBPromise(indexedDB.deleteDatabase(DB_NAME$1)).toPromise();
+	return new DBPromise(indexedDB.deleteDatabase(DB_NAME)).toPromise();
 }
 function _openDatabase() {
-	const request = indexedDB.open(DB_NAME$1, DB_VERSION$1);
+	const request = indexedDB.open(DB_NAME, DB_VERSION);
 	return new Promise((resolve, reject) => {
 		request.addEventListener("error", () => {
 			reject(request.error);
@@ -20292,8 +20242,8 @@ var TotpSecret = class TotpSecret {
 function _isEmptyString(input) {
 	return typeof input === "undefined" || input?.length === 0;
 }
-var name$3 = "@firebase/auth";
-var version$3 = "1.13.0";
+var name$2 = "@firebase/auth";
+var version$2 = "1.13.0";
 /**
 * @license
 * Copyright 2020 Google LLC
@@ -20401,8 +20351,8 @@ function registerAuth(clientPlatform) {
 	_registerComponent(new Component$1("auth-internal", (container) => {
 		return ((auth) => new AuthInterop(auth))(_castAuth(container.getProvider("auth").getImmediate()));
 	}, "PRIVATE").setInstantiationMode("EXPLICIT"));
-	registerVersion(name$3, version$3, getVersionForPlatform(clientPlatform));
-	registerVersion(name$3, version$3, "esm2020");
+	registerVersion(name$2, version$2, getVersionForPlatform(clientPlatform));
+	registerVersion(name$2, version$2, "esm2020");
 }
 var authIdTokenMaxAge = getExperimentalSetting("authIdTokenMaxAge") || 300;
 var lastPostedIdToken = null;
@@ -35547,8 +35497,8 @@ var FirebaseStorageImpl = class {
 		return this._makeRequest(requestInfo, requestFactory, authToken, appCheckToken).getPromise();
 	}
 };
-var name$2 = "@firebase/storage";
-var version$2 = "0.14.2";
+var name$1 = "@firebase/storage";
+var version$1 = "0.14.2";
 /**
 * @license
 * Copyright 2020 Google LLC
@@ -35602,19 +35552,19 @@ function connectStorageEmulator(storage, host, port, options = {}) {
 *
 * @packageDocumentation
 */
-function factory$1(container, { instanceIdentifier: url }) {
+function factory(container, { instanceIdentifier: url }) {
 	return new FirebaseStorageImpl(container.getProvider("app").getImmediate(), container.getProvider("auth-internal"), container.getProvider("app-check-internal"), url, SDK_VERSION$1);
 }
 function registerStorage() {
-	_registerComponent(new Component$1(STORAGE_TYPE, factory$1, "PUBLIC").setMultipleInstances(true));
-	registerVersion(name$2, version$2, "");
-	registerVersion(name$2, version$2, "esm2020");
+	_registerComponent(new Component$1(STORAGE_TYPE, factory, "PUBLIC").setMultipleInstances(true));
+	registerVersion(name$1, version$1, "");
+	registerVersion(name$1, version$1, "esm2020");
 }
 registerStorage();
 //#endregion
 //#region node_modules/@firebase/database/dist/index.esm.js
-var name$1 = "@firebase/database";
-var version$1 = "1.1.2";
+var name = "@firebase/database";
+var version = "1.1.2";
 /**
 * @license
 * Copyright 2019 Google LLC
@@ -35828,7 +35778,7 @@ var buildLogMessage_ = function(...varArgs) {
 /**
 * Use this for all debug messages in Firebase.
 */
-var logger$1 = null;
+var logger = null;
 /**
 * Flag to check for log availability on first log message
 */
@@ -35842,22 +35792,22 @@ var enableLogging$1 = function(logger_, persistent) {
 	assert(!persistent || logger_ === true || logger_ === false, "Can't turn on custom loggers persistently.");
 	if (logger_ === true) {
 		logClient.logLevel = LogLevel.VERBOSE;
-		logger$1 = logClient.log.bind(logClient);
+		logger = logClient.log.bind(logClient);
 		if (persistent) SessionStorage.set("logging_enabled", true);
-	} else if (typeof logger_ === "function") logger$1 = logger_;
+	} else if (typeof logger_ === "function") logger = logger_;
 	else {
-		logger$1 = null;
+		logger = null;
 		SessionStorage.remove("logging_enabled");
 	}
 };
 var log$1 = function(...varArgs) {
 	if (firstLog_ === true) {
 		firstLog_ = false;
-		if (logger$1 === null && SessionStorage.get("logging_enabled") === true) enableLogging$1(true);
+		if (logger === null && SessionStorage.get("logging_enabled") === true) enableLogging$1(true);
 	}
-	if (logger$1) {
+	if (logger) {
 		const message = buildLogMessage_.apply(null, varArgs);
-		logger$1(message);
+		logger(message);
 	}
 };
 var logWrapper = function(prefix) {
@@ -43718,7 +43668,7 @@ function eventListRaise(eventList) {
 		if (eventData !== null) {
 			eventList.events[i] = null;
 			const eventFn = eventData.getEventRunner();
-			if (logger$1) log$1("event: " + eventData.toString());
+			if (logger) log$1("event: " + eventData.toString());
 			exceptionGuard(eventFn);
 		}
 	}
@@ -45275,8 +45225,8 @@ function registerDatabase(variant) {
 	_registerComponent(new Component$1("database", (container, { instanceIdentifier: url }) => {
 		return repoManagerDatabaseFromApp(container.getProvider("app").getImmediate(), container.getProvider("auth-internal"), container.getProvider("app-check-internal"), url);
 	}, "PUBLIC").setMultipleInstances(true));
-	registerVersion(name$1, version$1, variant);
-	registerVersion(name$1, version$1, "esm2020");
+	registerVersion(name, version, variant);
+	registerVersion(name, version, "esm2020");
 }
 /**
 * @license
@@ -45316,1047 +45266,6 @@ PersistentConnection.prototype.echo = function(data, onEcho) {
 */
 registerDatabase();
 //#endregion
-//#region node_modules/@firebase/app-check/dist/esm/index.esm.js
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-var APP_CHECK_STATES = /* @__PURE__ */ new Map();
-var DEFAULT_STATE = {
-	activated: false,
-	tokenObservers: []
-};
-var DEBUG_STATE = {
-	initialized: false,
-	enabled: false
-};
-/**
-* Gets a reference to the state object.
-*/
-function getStateReference(app) {
-	return APP_CHECK_STATES.get(app) || { ...DEFAULT_STATE };
-}
-/**
-* Set once on initialization. The map should hold the same reference to the
-* same object until this entry is deleted.
-*/
-function setInitialState(app, state) {
-	APP_CHECK_STATES.set(app, state);
-	return APP_CHECK_STATES.get(app);
-}
-function getDebugState() {
-	return DEBUG_STATE;
-}
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-var BASE_ENDPOINT = "https://content-firebaseappcheck.googleapis.com/v1";
-var EXCHANGE_RECAPTCHA_TOKEN_METHOD = "exchangeRecaptchaV3Token";
-var EXCHANGE_DEBUG_TOKEN_METHOD = "exchangeDebugToken";
-var TOKEN_REFRESH_TIME = {
-	/**
-	* The offset time before token natural expiration to run the refresh.
-	* This is currently 5 minutes.
-	*/
-	OFFSET_DURATION: 300 * 1e3,
-	/**
-	* This is the first retrial wait after an error. This is currently
-	* 30 seconds.
-	*/
-	RETRIAL_MIN_WAIT: 30 * 1e3,
-	/**
-	* This is the maximum retrial wait, currently 16 minutes.
-	*/
-	RETRIAL_MAX_WAIT: 960 * 1e3
-};
-/**
-* One day in millis, for certain error code backoffs.
-*/
-var ONE_DAY = 1440 * 60 * 1e3;
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* Port from auth proactiverefresh.js
-*
-*/
-var Refresher = class {
-	constructor(operation, retryPolicy, getWaitDuration, lowerBound, upperBound) {
-		this.operation = operation;
-		this.retryPolicy = retryPolicy;
-		this.getWaitDuration = getWaitDuration;
-		this.lowerBound = lowerBound;
-		this.upperBound = upperBound;
-		this.pending = null;
-		this.nextErrorWaitInterval = lowerBound;
-		if (lowerBound > upperBound) throw new Error("Proactive refresh lower bound greater than upper bound!");
-	}
-	start() {
-		this.nextErrorWaitInterval = this.lowerBound;
-		this.process(true).catch(() => {});
-	}
-	stop() {
-		if (this.pending) {
-			this.pending.reject("cancelled");
-			this.pending = null;
-		}
-	}
-	isRunning() {
-		return !!this.pending;
-	}
-	async process(hasSucceeded) {
-		this.stop();
-		try {
-			this.pending = new Deferred();
-			this.pending.promise.catch((_e) => {});
-			await sleep(this.getNextRun(hasSucceeded));
-			this.pending.resolve();
-			await this.pending.promise;
-			this.pending = new Deferred();
-			this.pending.promise.catch((_e) => {});
-			await this.operation();
-			this.pending.resolve();
-			await this.pending.promise;
-			this.process(true).catch(() => {});
-		} catch (error) {
-			if (this.retryPolicy(error)) this.process(false).catch(() => {});
-			else this.stop();
-		}
-	}
-	getNextRun(hasSucceeded) {
-		if (hasSucceeded) {
-			this.nextErrorWaitInterval = this.lowerBound;
-			return this.getWaitDuration();
-		} else {
-			const currentErrorWaitInterval = this.nextErrorWaitInterval;
-			this.nextErrorWaitInterval *= 2;
-			if (this.nextErrorWaitInterval > this.upperBound) this.nextErrorWaitInterval = this.upperBound;
-			return currentErrorWaitInterval;
-		}
-	}
-};
-function sleep(ms) {
-	return new Promise((resolve) => {
-		setTimeout(resolve, ms);
-	});
-}
-var ERROR_FACTORY = new ErrorFactory("appCheck", "AppCheck", {
-	["already-initialized"]: "You have already called initializeAppCheck() for FirebaseApp {$appName} with different options. To avoid this error, call initializeAppCheck() with the same options as when it was originally called. This will return the already initialized instance.",
-	["use-before-activation"]: "App Check is being used before initializeAppCheck() is called for FirebaseApp {$appName}. Call initializeAppCheck() before instantiating other Firebase services.",
-	["fetch-network-error"]: "Fetch failed to connect to a network. Check Internet connection. Original error: {$originalErrorMessage}.",
-	["fetch-parse-error"]: "Fetch client could not parse response. Original error: {$originalErrorMessage}.",
-	["fetch-status-error"]: "Fetch server returned an HTTP error status. HTTP status: {$httpStatus}.",
-	["storage-open"]: "Error thrown when opening storage. Original error: {$originalErrorMessage}.",
-	["storage-get"]: "Error thrown when reading from storage. Original error: {$originalErrorMessage}.",
-	["storage-set"]: "Error thrown when writing to storage. Original error: {$originalErrorMessage}.",
-	["recaptcha-error"]: "ReCAPTCHA error.",
-	["initial-throttle"]: `{$httpStatus} error. Attempts allowed again after {$time}`,
-	["throttled"]: `Requests throttled due to previous {$httpStatus} error. Attempts allowed again after {$time}`
-});
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-function getRecaptcha(isEnterprise = false) {
-	if (isEnterprise) return self.grecaptcha?.enterprise;
-	return self.grecaptcha;
-}
-function ensureActivated(app) {
-	if (!getStateReference(app).activated) throw ERROR_FACTORY.create("use-before-activation", { appName: app.name });
-}
-function getDurationString(durationInMillis) {
-	const totalSeconds = Math.round(durationInMillis / 1e3);
-	const days = Math.floor(totalSeconds / (3600 * 24));
-	const hours = Math.floor((totalSeconds - days * 3600 * 24) / 3600);
-	const minutes = Math.floor((totalSeconds - days * 3600 * 24 - hours * 3600) / 60);
-	const seconds = totalSeconds - days * 3600 * 24 - hours * 3600 - minutes * 60;
-	let result = "";
-	if (days) result += pad(days) + "d:";
-	if (hours) result += pad(hours) + "h:";
-	result += pad(minutes) + "m:" + pad(seconds) + "s";
-	return result;
-}
-function pad(value) {
-	if (value === 0) return "00";
-	return value >= 10 ? value.toString() : "0" + value;
-}
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-async function exchangeToken({ url, body }, heartbeatServiceProvider) {
-	const headers = { "Content-Type": "application/json" };
-	const heartbeatService = heartbeatServiceProvider.getImmediate({ optional: true });
-	if (heartbeatService) {
-		const heartbeatsHeader = await heartbeatService.getHeartbeatsHeader();
-		if (heartbeatsHeader) headers["X-Firebase-Client"] = heartbeatsHeader;
-	}
-	const options = {
-		method: "POST",
-		body: JSON.stringify(body),
-		headers
-	};
-	let response;
-	try {
-		response = await fetch(url, options);
-	} catch (originalError) {
-		throw ERROR_FACTORY.create("fetch-network-error", { originalErrorMessage: originalError?.message });
-	}
-	if (response.status !== 200) throw ERROR_FACTORY.create("fetch-status-error", { httpStatus: response.status });
-	let responseBody;
-	try {
-		responseBody = await response.json();
-	} catch (originalError) {
-		throw ERROR_FACTORY.create("fetch-parse-error", { originalErrorMessage: originalError?.message });
-	}
-	const match = responseBody.ttl.match(/^([\d.]+)(s)$/);
-	if (!match || !match[2] || isNaN(Number(match[1]))) throw ERROR_FACTORY.create("fetch-parse-error", { originalErrorMessage: `ttl field (timeToLive) is not in standard Protobuf Duration format: ${responseBody.ttl}` });
-	const timeToLiveAsNumber = Number(match[1]) * 1e3;
-	const now = Date.now();
-	return {
-		token: responseBody.token,
-		expireTimeMillis: now + timeToLiveAsNumber,
-		issuedAtTimeMillis: now
-	};
-}
-function getExchangeRecaptchaV3TokenRequest(app, reCAPTCHAToken) {
-	const { projectId, appId, apiKey } = app.options;
-	return {
-		url: `${BASE_ENDPOINT}/projects/${projectId}/apps/${appId}:${EXCHANGE_RECAPTCHA_TOKEN_METHOD}?key=${apiKey}`,
-		body: { "recaptcha_v3_token": reCAPTCHAToken }
-	};
-}
-function getExchangeDebugTokenRequest(app, debugToken) {
-	const { projectId, appId, apiKey } = app.options;
-	return {
-		url: `${BASE_ENDPOINT}/projects/${projectId}/apps/${appId}:${EXCHANGE_DEBUG_TOKEN_METHOD}?key=${apiKey}`,
-		body: { debug_token: debugToken }
-	};
-}
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-var DB_NAME = "firebase-app-check-database";
-var DB_VERSION = 1;
-var STORE_NAME = "firebase-app-check-store";
-var DEBUG_TOKEN_KEY = "debug-token";
-var dbPromise = null;
-function getDBPromise() {
-	if (dbPromise) return dbPromise;
-	dbPromise = new Promise((resolve, reject) => {
-		try {
-			const request = indexedDB.open(DB_NAME, DB_VERSION);
-			request.onsuccess = (event) => {
-				resolve(event.target.result);
-			};
-			request.onerror = (event) => {
-				reject(ERROR_FACTORY.create("storage-open", { originalErrorMessage: event.target.error?.message }));
-			};
-			request.onupgradeneeded = (event) => {
-				const db = event.target.result;
-				switch (event.oldVersion) {
-					case 0: db.createObjectStore(STORE_NAME, { keyPath: "compositeKey" });
-				}
-			};
-		} catch (e) {
-			reject(ERROR_FACTORY.create("storage-open", { originalErrorMessage: e?.message }));
-		}
-	});
-	return dbPromise;
-}
-function readTokenFromIndexedDB(app) {
-	return read(computeKey(app));
-}
-function writeTokenToIndexedDB(app, token) {
-	return write(computeKey(app), token);
-}
-function writeDebugTokenToIndexedDB(token) {
-	return write(DEBUG_TOKEN_KEY, token);
-}
-function readDebugTokenFromIndexedDB() {
-	return read(DEBUG_TOKEN_KEY);
-}
-async function write(key, value) {
-	const transaction = (await getDBPromise()).transaction(STORE_NAME, "readwrite");
-	const request = transaction.objectStore(STORE_NAME).put({
-		compositeKey: key,
-		value
-	});
-	return new Promise((resolve, reject) => {
-		request.onsuccess = (_event) => {
-			resolve();
-		};
-		transaction.onerror = (event) => {
-			reject(ERROR_FACTORY.create("storage-set", { originalErrorMessage: event.target.error?.message }));
-		};
-	});
-}
-async function read(key) {
-	const transaction = (await getDBPromise()).transaction(STORE_NAME, "readonly");
-	const request = transaction.objectStore(STORE_NAME).get(key);
-	return new Promise((resolve, reject) => {
-		request.onsuccess = (event) => {
-			const result = event.target.result;
-			if (result) resolve(result.value);
-			else resolve(void 0);
-		};
-		transaction.onerror = (event) => {
-			reject(ERROR_FACTORY.create("storage-get", { originalErrorMessage: event.target.error?.message }));
-		};
-	});
-}
-function computeKey(app) {
-	return `${app.options.appId}-${app.name}`;
-}
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-var logger = new Logger("@firebase/app-check");
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* Always resolves. In case of an error reading from indexeddb, resolve with undefined
-*/
-async function readTokenFromStorage(app) {
-	if (isIndexedDBAvailable()) {
-		let token = void 0;
-		try {
-			token = await readTokenFromIndexedDB(app);
-		} catch (e) {
-			logger.warn(`Failed to read token from IndexedDB. Error: ${e}`);
-		}
-		return token;
-	}
-}
-/**
-* Always resolves. In case of an error writing to indexeddb, print a warning and resolve the promise
-*/
-function writeTokenToStorage(app, token) {
-	if (isIndexedDBAvailable()) return writeTokenToIndexedDB(app, token).catch((e) => {
-		logger.warn(`Failed to write token to IndexedDB. Error: ${e}`);
-	});
-	return Promise.resolve();
-}
-async function readOrCreateDebugTokenFromStorage() {
-	/**
-	* Theoretically race condition can happen if we read, then write in 2 separate transactions.
-	* But it won't happen here, because this function will be called exactly once.
-	*/
-	let existingDebugToken = void 0;
-	try {
-		existingDebugToken = await readDebugTokenFromIndexedDB();
-	} catch (_e) {}
-	if (!existingDebugToken) {
-		const newToken = crypto.randomUUID();
-		writeDebugTokenToIndexedDB(newToken).catch((e) => logger.warn(`Failed to persist debug token to IndexedDB. Error: ${e}`));
-		return newToken;
-	} else return existingDebugToken;
-}
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-function isDebugMode() {
-	return getDebugState().enabled;
-}
-async function getDebugToken() {
-	const state = getDebugState();
-	if (state.enabled && state.token) return state.token.promise;
-	else throw Error(`
-            Can't get debug token in production mode.
-        `);
-}
-function initializeDebugMode() {
-	const globals = getGlobal();
-	const debugState = getDebugState();
-	debugState.initialized = true;
-	if (typeof globals.FIREBASE_APPCHECK_DEBUG_TOKEN !== "string" && globals.FIREBASE_APPCHECK_DEBUG_TOKEN !== true) return;
-	debugState.enabled = true;
-	const deferredToken = new Deferred();
-	debugState.token = deferredToken;
-	if (typeof globals.FIREBASE_APPCHECK_DEBUG_TOKEN === "string") deferredToken.resolve(globals.FIREBASE_APPCHECK_DEBUG_TOKEN);
-	else deferredToken.resolve(readOrCreateDebugTokenFromStorage());
-}
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-var defaultTokenErrorData = { error: "UNKNOWN_ERROR" };
-/**
-* Stringify and base64 encode token error data.
-*
-* @param tokenError Error data, currently hardcoded.
-*/
-function formatDummyToken(tokenErrorData) {
-	return base64.encodeString(JSON.stringify(tokenErrorData), false);
-}
-/**
-* This function always resolves.
-* The result will contain an error field if there is any error.
-* In case there is an error, the token field in the result will be populated with a dummy value
-*/
-async function getToken$2(appCheck, forceRefresh = false, shouldLogErrors = false) {
-	const app = appCheck.app;
-	ensureActivated(app);
-	const state = getStateReference(app);
-	/**
-	* First check if there is a token in memory from a previous `getToken()` call.
-	*/
-	let token = state.token;
-	let error = void 0;
-	/**
-	* If an invalid token was found in memory, clear token from
-	* memory and unset the local variable `token`.
-	*/
-	if (token && !isValid(token)) {
-		state.token = void 0;
-		token = void 0;
-	}
-	/**
-	* If there is no valid token in memory, try to load token from indexedDB.
-	*/
-	if (!token) {
-		const cachedToken = await state.cachedTokenPromise;
-		if (cachedToken) if (isValid(cachedToken)) token = cachedToken;
-		else await writeTokenToStorage(app, void 0);
-	}
-	if (!forceRefresh && token && isValid(token)) return { token: token.token };
-	let shouldCallListeners = false;
-	/**
-	* DEBUG MODE
-	* If debug mode is set, and there is no cached token, fetch a new App
-	* Check token using the debug token, and return it directly.
-	*/
-	if (isDebugMode()) try {
-		const debugToken = await getDebugToken();
-		if (!state.exchangeTokenPromise) {
-			state.exchangeTokenPromise = exchangeToken(getExchangeDebugTokenRequest(app, debugToken), appCheck.heartbeatServiceProvider).finally(() => {
-				state.exchangeTokenPromise = void 0;
-			});
-			shouldCallListeners = true;
-		}
-		const tokenFromDebugExchange = await state.exchangeTokenPromise;
-		await writeTokenToStorage(app, tokenFromDebugExchange);
-		state.token = tokenFromDebugExchange;
-		return { token: tokenFromDebugExchange.token };
-	} catch (e) {
-		if (e.code === `appCheck/throttled` || e.code === `appCheck/initial-throttle`) logger.warn(e.message);
-		else if (shouldLogErrors) logger.error(e);
-		return makeDummyTokenResult(e);
-	}
-	/**
-	* There are no valid tokens in memory or indexedDB and we are not in
-	* debug mode.
-	* Request a new token from the exchange endpoint.
-	*/
-	try {
-		if (!state.exchangeTokenPromise) {
-			state.exchangeTokenPromise = state.provider.getToken().finally(() => {
-				state.exchangeTokenPromise = void 0;
-			});
-			shouldCallListeners = true;
-		}
-		token = await getStateReference(app).exchangeTokenPromise;
-	} catch (e) {
-		if (e.code === `appCheck/throttled` || e.code === `appCheck/initial-throttle`) logger.warn(e.message);
-		else if (shouldLogErrors) logger.error(e);
-		error = e;
-	}
-	let interopTokenResult;
-	if (!token) interopTokenResult = makeDummyTokenResult(error);
-	else if (error) if (isValid(token)) interopTokenResult = {
-		token: token.token,
-		internalError: error
-	};
-	else interopTokenResult = makeDummyTokenResult(error);
-	else {
-		interopTokenResult = { token: token.token };
-		state.token = token;
-		await writeTokenToStorage(app, token);
-	}
-	if (shouldCallListeners) notifyTokenListeners(app, interopTokenResult);
-	return interopTokenResult;
-}
-/**
-* Internal API for limited use tokens. Skips all FAC state and simply calls
-* the underlying provider.
-*/
-async function getLimitedUseToken$1(appCheck) {
-	const app = appCheck.app;
-	ensureActivated(app);
-	const { provider } = getStateReference(app);
-	if (isDebugMode()) {
-		const { token } = await exchangeToken(getExchangeDebugTokenRequest(app, await getDebugToken()), appCheck.heartbeatServiceProvider);
-		return { token };
-	} else {
-		const { token } = await provider.getToken();
-		return { token };
-	}
-}
-function addTokenListener(appCheck, type, listener, onError) {
-	const { app } = appCheck;
-	const state = getStateReference(app);
-	const tokenObserver = {
-		next: listener,
-		error: onError,
-		type
-	};
-	state.tokenObservers = [...state.tokenObservers, tokenObserver];
-	if (state.token && isValid(state.token)) {
-		const validToken = state.token;
-		Promise.resolve().then(() => {
-			listener({ token: validToken.token });
-			initTokenRefresher(appCheck);
-		}).catch(() => {});
-	}
-	/**
-	* Wait for any cached token promise to resolve before starting the token
-	* refresher. The refresher checks to see if there is an existing token
-	* in state and calls the exchange endpoint if not. We should first let the
-	* IndexedDB check have a chance to populate state if it can.
-	*
-	* Listener call isn't needed here because cachedTokenPromise will call any
-	* listeners that exist when it resolves.
-	*/
-	state.cachedTokenPromise.then(() => initTokenRefresher(appCheck));
-}
-function removeTokenListener(app, listener) {
-	const state = getStateReference(app);
-	const newObservers = state.tokenObservers.filter((tokenObserver) => tokenObserver.next !== listener);
-	if (newObservers.length === 0 && state.tokenRefresher && state.tokenRefresher.isRunning()) state.tokenRefresher.stop();
-	state.tokenObservers = newObservers;
-}
-/**
-* Logic to create and start refresher as needed.
-*/
-function initTokenRefresher(appCheck) {
-	const { app } = appCheck;
-	const state = getStateReference(app);
-	let refresher = state.tokenRefresher;
-	if (!refresher) {
-		refresher = createTokenRefresher(appCheck);
-		state.tokenRefresher = refresher;
-	}
-	if (!refresher.isRunning() && state.isTokenAutoRefreshEnabled) refresher.start();
-}
-function createTokenRefresher(appCheck) {
-	const { app } = appCheck;
-	return new Refresher(async () => {
-		const state = getStateReference(app);
-		let result;
-		if (!state.token) result = await getToken$2(appCheck);
-		else result = await getToken$2(appCheck, true);
-		/**
-		* getToken() always resolves. In case the result has an error field defined, it means
-		* the operation failed, and we should retry.
-		*/
-		if (result.error) throw result.error;
-		/**
-		* A special `internalError` field reflects that there was an error
-		* getting a new token from the exchange endpoint, but there's still a
-		* previous token that's valid for now and this should be passed to 2P/3P
-		* requests for a token. But we want this callback (`this.operation` in
-		* `Refresher`) to throw in order to kick off the Refresher's retry
-		* backoff. (Setting `hasSucceeded` to false.)
-		*/
-		if (result.internalError) throw result.internalError;
-	}, () => {
-		return true;
-	}, () => {
-		const state = getStateReference(app);
-		if (state.token) {
-			let nextRefreshTimeMillis = state.token.issuedAtTimeMillis + (state.token.expireTimeMillis - state.token.issuedAtTimeMillis) * .5 + 300 * 1e3;
-			const latestAllowableRefresh = state.token.expireTimeMillis - 300 * 1e3;
-			nextRefreshTimeMillis = Math.min(nextRefreshTimeMillis, latestAllowableRefresh);
-			return Math.max(0, nextRefreshTimeMillis - Date.now());
-		} else return 0;
-	}, TOKEN_REFRESH_TIME.RETRIAL_MIN_WAIT, TOKEN_REFRESH_TIME.RETRIAL_MAX_WAIT);
-}
-function notifyTokenListeners(app, token) {
-	const observers = getStateReference(app).tokenObservers;
-	for (const observer of observers) try {
-		if (observer.type === "EXTERNAL" && token.error != null) observer.error(token.error);
-		else observer.next(token);
-	} catch (e) {}
-}
-function isValid(token) {
-	return token.expireTimeMillis - Date.now() > 0;
-}
-function makeDummyTokenResult(error) {
-	return {
-		token: formatDummyToken(defaultTokenErrorData),
-		error
-	};
-}
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* AppCheck Service class.
-*/
-var AppCheckService = class {
-	constructor(app, heartbeatServiceProvider) {
-		this.app = app;
-		this.heartbeatServiceProvider = heartbeatServiceProvider;
-	}
-	_delete() {
-		const { tokenObservers } = getStateReference(this.app);
-		for (const tokenObserver of tokenObservers) removeTokenListener(this.app, tokenObserver.next);
-		return Promise.resolve();
-	}
-};
-function factory(app, heartbeatServiceProvider) {
-	return new AppCheckService(app, heartbeatServiceProvider);
-}
-function internalFactory(appCheck) {
-	return {
-		getToken: (forceRefresh) => getToken$2(appCheck, forceRefresh),
-		getLimitedUseToken: () => getLimitedUseToken$1(appCheck),
-		addTokenListener: (listener) => addTokenListener(appCheck, "INTERNAL", listener),
-		removeTokenListener: (listener) => removeTokenListener(appCheck.app, listener)
-	};
-}
-var name = "@firebase/app-check";
-var version = "0.11.2";
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-var RECAPTCHA_URL = "https://www.google.com/recaptcha/api.js";
-function initializeV3(app, siteKey) {
-	const initialized = new Deferred();
-	const state = getStateReference(app);
-	state.reCAPTCHAState = { initialized };
-	const divId = makeDiv(app);
-	const grecaptcha = getRecaptcha(false);
-	if (!grecaptcha) loadReCAPTCHAV3Script(() => {
-		const grecaptcha = getRecaptcha(false);
-		if (!grecaptcha) throw new Error("no recaptcha");
-		queueWidgetRender(app, siteKey, grecaptcha, divId, initialized);
-	});
-	else queueWidgetRender(app, siteKey, grecaptcha, divId, initialized);
-	return initialized.promise;
-}
-/**
-* Add listener to render the widget and resolve the promise when
-* the grecaptcha.ready() event fires.
-*/
-function queueWidgetRender(app, siteKey, grecaptcha, container, initialized) {
-	grecaptcha.ready(() => {
-		renderInvisibleWidget(app, siteKey, grecaptcha, container);
-		initialized.resolve(grecaptcha);
-	});
-}
-/**
-* Add invisible div to page.
-*/
-function makeDiv(app) {
-	const divId = `fire_app_check_${app.name}`;
-	const invisibleDiv = document.createElement("div");
-	invisibleDiv.id = divId;
-	invisibleDiv.style.display = "none";
-	document.body.appendChild(invisibleDiv);
-	return divId;
-}
-async function getToken$1(app) {
-	ensureActivated(app);
-	const recaptcha = await getStateReference(app).reCAPTCHAState.initialized.promise;
-	return new Promise((resolve, _reject) => {
-		const reCAPTCHAState = getStateReference(app).reCAPTCHAState;
-		recaptcha.ready(() => {
-			resolve(recaptcha.execute(reCAPTCHAState.widgetId, { action: "fire_app_check" }));
-		});
-	});
-}
-/**
-*
-* @param app
-* @param container - Id of a HTML element.
-*/
-function renderInvisibleWidget(app, siteKey, grecaptcha, container) {
-	const widgetId = grecaptcha.render(container, {
-		sitekey: siteKey,
-		size: "invisible",
-		callback: () => {
-			getStateReference(app).reCAPTCHAState.succeeded = true;
-		},
-		"error-callback": () => {
-			getStateReference(app).reCAPTCHAState.succeeded = false;
-		}
-	});
-	const state = getStateReference(app);
-	state.reCAPTCHAState = {
-		...state.reCAPTCHAState,
-		widgetId
-	};
-}
-function loadReCAPTCHAV3Script(onload) {
-	const script = document.createElement("script");
-	script.src = RECAPTCHA_URL;
-	script.onload = onload;
-	document.head.appendChild(script);
-}
-/**
-* @license
-* Copyright 2021 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* App Check provider that can obtain a reCAPTCHA V3 token and exchange it
-* for an App Check token.
-*
-* @public
-*/
-var ReCaptchaV3Provider = class ReCaptchaV3Provider {
-	/**
-	* Create a ReCaptchaV3Provider instance.
-	* @param siteKey - ReCAPTCHA V3 siteKey.
-	*/
-	constructor(_siteKey) {
-		this._siteKey = _siteKey;
-		/**
-		* Throttle requests on certain error codes to prevent too many retries
-		* in a short time.
-		*/
-		this._throttleData = null;
-	}
-	/**
-	* Returns an App Check token.
-	* @internal
-	*/
-	async getToken() {
-		throwIfThrottled(this._throttleData);
-		const attestedClaimsToken = await getToken$1(this._app).catch((_e) => {
-			throw ERROR_FACTORY.create("recaptcha-error");
-		});
-		if (!getStateReference(this._app).reCAPTCHAState?.succeeded) throw ERROR_FACTORY.create("recaptcha-error");
-		let result;
-		try {
-			result = await exchangeToken(getExchangeRecaptchaV3TokenRequest(this._app, attestedClaimsToken), this._heartbeatServiceProvider);
-		} catch (e) {
-			if (e.code?.includes("fetch-status-error")) {
-				this._throttleData = setBackoff(Number(e.customData?.httpStatus), this._throttleData);
-				throw ERROR_FACTORY.create("initial-throttle", {
-					time: getDurationString(this._throttleData.allowRequestsAfter - Date.now()),
-					httpStatus: this._throttleData.httpStatus
-				});
-			} else throw e;
-		}
-		this._throttleData = null;
-		return result;
-	}
-	/**
-	* @internal
-	*/
-	initialize(app) {
-		this._app = app;
-		this._heartbeatServiceProvider = _getProvider(app, "heartbeat");
-		initializeV3(app, this._siteKey).catch(() => {});
-	}
-	/**
-	* @internal
-	*/
-	isEqual(otherProvider) {
-		if (otherProvider instanceof ReCaptchaV3Provider) return this._siteKey === otherProvider._siteKey;
-		else return false;
-	}
-};
-/**
-* Set throttle data to block requests until after a certain time
-* depending on the failed request's status code.
-* @param httpStatus - Status code of failed request.
-* @param throttleData - `ThrottleData` object containing previous throttle
-* data state.
-* @returns Data about current throttle state and expiration time.
-*/
-function setBackoff(httpStatus, throttleData) {
-	/**
-	* Block retries for 1 day for the following error codes:
-	*
-	* 404: Likely malformed URL.
-	*
-	* 403:
-	* - Attestation failed
-	* - Wrong API key
-	* - Project deleted
-	*/
-	if (httpStatus === 404 || httpStatus === 403) return {
-		backoffCount: 1,
-		allowRequestsAfter: Date.now() + ONE_DAY,
-		httpStatus
-	};
-	else {
-		/**
-		* For all other error codes, the time when it is ok to retry again
-		* is based on exponential backoff.
-		*/
-		const backoffCount = throttleData ? throttleData.backoffCount : 0;
-		const backoffMillis = calculateBackoffMillis(backoffCount, 1e3, 2);
-		return {
-			backoffCount: backoffCount + 1,
-			allowRequestsAfter: Date.now() + backoffMillis,
-			httpStatus
-		};
-	}
-}
-function throwIfThrottled(throttleData) {
-	if (throttleData) {
-		if (Date.now() - throttleData.allowRequestsAfter <= 0) throw ERROR_FACTORY.create("throttled", {
-			time: getDurationString(throttleData.allowRequestsAfter - Date.now()),
-			httpStatus: throttleData.httpStatus
-		});
-	}
-}
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* Activate App Check for the given app. Can be called only once per app.
-* @param app - the {@link @firebase/app#FirebaseApp} to activate App Check for
-* @param options - App Check initialization options
-* @public
-*/
-function initializeAppCheck(app = getApp(), options) {
-	app = getModularInstance(app);
-	const provider = _getProvider(app, "app-check");
-	if (!getDebugState().initialized) initializeDebugMode();
-	if (isDebugMode()) getDebugToken().then((token) => console.log(`App Check debug token: ${token}. You will need to add it to your app's App Check settings in the Firebase console for it to work.`));
-	if (provider.isInitialized()) {
-		const existingInstance = provider.getImmediate();
-		const initialOptions = provider.getOptions();
-		if (initialOptions.isTokenAutoRefreshEnabled === options.isTokenAutoRefreshEnabled && initialOptions.provider.isEqual(options.provider)) return existingInstance;
-		else throw ERROR_FACTORY.create("already-initialized", { appName: app.name });
-	}
-	const appCheck = provider.initialize({ options });
-	_activate(app, options.provider, options.isTokenAutoRefreshEnabled);
-	if (getStateReference(app).isTokenAutoRefreshEnabled) addTokenListener(appCheck, "INTERNAL", () => {});
-	return appCheck;
-}
-/**
-* Activate App Check
-* @param app - Firebase app to activate App Check for.
-* @param provider - reCAPTCHA v3 provider or
-* custom token provider.
-* @param isTokenAutoRefreshEnabled - If true, the SDK automatically
-* refreshes App Check tokens as needed. If undefined, defaults to the
-* value of `app.automaticDataCollectionEnabled`, which defaults to
-* false and can be set in the app config.
-*/
-function _activate(app, provider, isTokenAutoRefreshEnabled = false) {
-	const state = setInitialState(app, { ...DEFAULT_STATE });
-	state.activated = true;
-	state.provider = provider;
-	state.cachedTokenPromise = readTokenFromStorage(app).then((cachedToken) => {
-		if (cachedToken && isValid(cachedToken)) {
-			state.token = cachedToken;
-			notifyTokenListeners(app, { token: cachedToken.token });
-		}
-		return cachedToken;
-	});
-	state.isTokenAutoRefreshEnabled = isTokenAutoRefreshEnabled && app.automaticDataCollectionEnabled;
-	if (!app.automaticDataCollectionEnabled && isTokenAutoRefreshEnabled) logger.warn("`isTokenAutoRefreshEnabled` is true but `automaticDataCollectionEnabled` was set to false during `initializeApp()`. This blocks automatic token refresh.");
-	state.provider.initialize(app);
-}
-/**
-* The Firebase App Check Web SDK.
-*
-* @remarks
-* Firebase App Check does not work in a Node.js environment using `ReCaptchaV3Provider` or
-* `ReCaptchaEnterpriseProvider`, but can be used in Node.js if you use
-* `CustomProvider` and write your own attestation method.
-*
-* @packageDocumentation
-*/
-var APP_CHECK_NAME = "app-check";
-var APP_CHECK_NAME_INTERNAL = "app-check-internal";
-function registerAppCheck() {
-	_registerComponent(new Component$1(APP_CHECK_NAME, (container) => {
-		return factory(container.getProvider("app").getImmediate(), container.getProvider("heartbeat"));
-	}, "PUBLIC").setInstantiationMode("EXPLICIT").setInstanceCreatedCallback((container, _identifier, _appcheckService) => {
-		container.getProvider(APP_CHECK_NAME_INTERNAL).initialize();
-	}));
-	_registerComponent(new Component$1(APP_CHECK_NAME_INTERNAL, (container) => {
-		return internalFactory(container.getProvider("app-check").getImmediate());
-	}, "PUBLIC").setInstantiationMode("EXPLICIT"));
-	registerVersion(name, version);
-}
-registerAppCheck();
-//#endregion
 //#region src/firebase/config.js
 var app = initializeApp({
 	apiKey: "AIzaSyCzDq5YrWhsbeA0DvmaM5IYV_PmZ4ivHjE",
@@ -46367,10 +45276,6 @@ var app = initializeApp({
 	messagingSenderId: "1077235796363",
 	appId: "1:1077235796363:web:4ea99f463a2805d6a75c64",
 	measurementId: "G-YR0TL5WXDJ"
-});
-if (typeof window !== "undefined" && window.location.hostname !== "localhost") initializeAppCheck(app, {
-	provider: new ReCaptchaV3Provider("6LfOud8sAAAAAGKE0hvOqVr16UN2_tqB5PU3nMrM"),
-	isTokenAutoRefreshEnabled: true
 });
 var auth = getAuth(app);
 var db = getFirestore(app);
