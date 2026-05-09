@@ -340,7 +340,18 @@ function AppContent() {
   if (bannedModalOpen) return <BannedModal open={bannedModalOpen} type={banType} onClose={handleBannedModalClose} />;
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-white"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>;
-  if (!user) return <AuthScreen onLogin={() => {}} onForgotPassword={() => navigateTo('forgotpassword')} />;
+
+  // ✅ تم إصلاح دالة onLogin لتعيين المستخدم بشكل صحيح
+  if (!user) return <AuthScreen onLogin={(loggedInUser) => { 
+    setUser({
+      uid: loggedInUser.uid,
+      email: loggedInUser.email,
+      displayName: loggedInUser.displayName || '',
+      photoURL: loggedInUser.photoURL || '',
+      emailVerified: loggedInUser.emailVerified
+    });
+  }} onForgotPassword={() => navigateTo('forgotpassword')} />;
+
   if (showVerifyEmail) return <VerifyEmailScreen onVerified={() => setShowVerifyEmail(false)} onRetry={() => {}} />;
   if (currentScreen === 'forgotpassword') return <ForgotPasswordScreen onBack={handleBack} />;
   if (currentScreen === 'resetpassword') return <ResetPasswordScreen onBack={handleBack} />;
