@@ -3,32 +3,27 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 const AppLockContext = createContext();
 export const useAppLock = () => useContext(AppLockContext);
 
-function base64ToArrayBuffer(base64) {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes.buffer;
-}
-
-function arrayBufferToBase64(buffer) {
-  const bytes = new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-  return btoa(binary);
-}
-
-export function AppLockProvider({ children, isAuthenticated }) {
-  const [lockEnabled, setLockEnabled] = useState(() => localStorage.getItem('app_lock_biometric') === 'true');
-  const [biometricEnabled, setBiometricEnabled] = useState(() => lockEnabled);
-  const [lockTimer, setLockTimer] = useState(() => localStorage.getItem('app_lock_timer') || 'immediate');
+export function AppLockProvider({ children }) {
+  // حالة القفل
+  const [lockEnabled, setLockEnabled] = useState(() => {
+    const pin = localStorage.getItem('app_lock_pin');
+    return pin !== null && pin.length >= 4;
+  });
   const [isLocked, setIsLocked] = useState(false);
   const [showPrivacyShield, setShowPrivacyShield] = useState(false);
+  const [autoVerify, setAutoVerify] = useState(() =>
+    localStorage.getItem('app_lock_auto_verify') === 'true'
+  );
+  const [lockTimer, setLockTimer] = useState(() =>
+    localStorage.getItem('app_lock_timer') || 'immediate'
+  );
 
   const timerRef = useRef(null);
   const isReturningFromAuth = useRef(false);
 
+  // إدارة دورة حياة القفل
   useEffect(() => {
-    if (!lockEnabled || !isAuthenticated) {
+    if (!lockEnabled) {
       setIsLocked(false);
       setShowPrivacyShield(false);
       return;
@@ -50,78 +45,11 @@ export function AppLockProvider({ children, isAuthenticated }) {
       window.removeEventListener('pagehide', clearSession);
       window.removeEventListener('beforeunload', clearSession);
     };
-  }, [lockEnabled, isAuthenticated]);
+  }, [lockEnabled]);
 
-  const setTimerOption = useCallback((option) => {
-    localStorage.setItem('app_lock_timer', option);
-    setLockTimer(option);
-  }, []);
-
-  const enableBiometric = async () => {
-    try {
-      const credential = await navigator.credentials.create({
-        publicKey: {
-          challenge: new Uint8Array([8, 12, 3, 77, 94, 4, 1]),
-          rp: { name: 'LinkUp App' },
-          user: { id: new Uint8Array(16), name: 'user@linkup.app', displayName: 'LinkUp User' },
-          pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
-          authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
-          timeout: 60000,
-          attestation: 'none',
-        },
-      });
-      if (credential) {
-        const credentialId = arrayBufferToBase64(credential.rawId);
-        localStorage.setItem('app_lock_credential_id', credentialId);
-        localStorage.setItem('app_lock_biometric', 'true');
-        setBiometricEnabled(true);
-        setLockEnabled(true);
-        setIsLocked(false);
-        setShowPrivacyShield(false);
-        return true;
-      }
-    } catch (e) { console.error(e); }
-    return false;
-  };
-
-  const verifyBiometric = async () => {
-    if (!biometricEnabled) return { success: false };
-    const credentialId = localStorage.getItem('app_lock_credential_id');
-    if (!credentialId) return { success: false };
-    try {
-      const assertion = await navigator.credentials.get({
-        publicKey: {
-          challenge: new Uint8Array([9, 34, 5, 66, 12, 4, 8]),
-          allowCredentials: [{ id: base64ToArrayBuffer(credentialId), type: 'public-key' }],
-          timeout: 60000,
-          userVerification: 'required',
-        },
-      });
-      if (assertion) {
-        setIsLocked(false);
-        setShowPrivacyShield(false);
-        if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
-        isReturningFromAuth.current = true;
-        setTimeout(() => { isReturningFromAuth.current = false; }, 500);
-        return { success: true };
-      }
-    } catch (e) { console.error(e); }
-    return { success: false };
-  };
-
-  const disableBiometric = () => {
-    localStorage.removeItem('app_lock_biometric');
-    localStorage.removeItem('app_lock_credential_id');
-    localStorage.removeItem('app_lock_timer');
-    setBiometricEnabled(false);
-    setLockEnabled(false);
-    setIsLocked(false);
-    setShowPrivacyShield(false);
-    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
-  };
-
+  // ضبط المؤقت عند تبديل التطبيق
   useEffect(() => {
-    if (!lockEnabled || !isAuthenticated || isLocked) return;
+    if (!lockEnabled || isLocked) return;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -137,29 +65,75 @@ export function AppLockProvider({ children, isAuthenticated }) {
         }
       } else {
         if (isReturningFromAuth.current) return;
-
-        if (lockTimer === 'immediate') {
-          // يبقى مقفلاً
-        } else {
-          if (timerRef.current) {
-            clearTimeout(timerRef.current);
-            timerRef.current = null;
-            setIsLocked(false);
-            setShowPrivacyShield(false);
-          }
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+          setIsLocked(false);
+          setShowPrivacyShield(false);
         }
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [lockEnabled, isAuthenticated, isLocked, lockTimer]);
+  }, [lockEnabled, isLocked, lockTimer]);
+
+  // ========== دوال PIN الجديدة ==========
+  const setPIN = useCallback((pin) => {
+    if (pin && pin.length >= 4) {
+      localStorage.setItem('app_lock_pin', pin);
+      setLockEnabled(true);
+      setIsLocked(false);
+      setShowPrivacyShield(false);
+      return true;
+    }
+    return false;
+  }, []);
+
+  const verifyPIN = useCallback((pin) => {
+    const stored = localStorage.getItem('app_lock_pin');
+    if (stored === pin) {
+      setIsLocked(false);
+      setShowPrivacyShield(false);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      isReturningFromAuth.current = true;
+      setTimeout(() => { isReturningFromAuth.current = false; }, 500);
+      return true;
+    }
+    return false;
+  }, []);
+
+  const disableLock = useCallback(() => {
+    localStorage.removeItem('app_lock_pin');
+    localStorage.removeItem('app_lock_auto_verify');
+    localStorage.removeItem('app_lock_timer');
+    setLockEnabled(false);
+    setIsLocked(false);
+    setShowPrivacyShield(false);
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const setTimerOption = useCallback((option) => {
+    localStorage.setItem('app_lock_timer', option);
+    setLockTimer(option);
+  }, []);
+
+  const setAutoVerifyOption = useCallback((val) => {
+    localStorage.setItem('app_lock_auto_verify', val);
+    setAutoVerify(val);
+  }, []);
 
   return (
     <AppLockContext.Provider value={{
-      lockEnabled, isLocked, biometricEnabled, lockTimer, showPrivacyShield,
-      enableBiometric, verifyBiometric, disableBiometric,
-      setTimerOption,
+      lockEnabled, isLocked, lockTimer, showPrivacyShield, autoVerify,
+      setPIN, verifyPIN, disableLock,
+      setTimerOption, setAutoVerifyOption,
     }}>
       {children}
     </AppLockContext.Provider>
