@@ -50,11 +50,14 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); setError(''); setSuccess('');
+    e.preventDefault(); 
+    setError(''); 
+    setSuccess('');
 
     if (!email || !password) return setError('يرجى ملء جميع الحقول');
     if (!isLogin && password !== confirmPassword) return setError('كلمتا المرور غير متطابقتين');
     if (!isLogin && password.length < 6) return setError('يجب أن تكون كلمة المرور 6 أحرف على الأقل');
+    
     setLoading(true);
     try {
       const { user } = isLogin 
@@ -83,18 +86,17 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
         onLogin?.(user);
       }
     } catch (err) {
-      console.error(err);
-      const baseError = ['auth/invalid-credential','auth/wrong-password'].includes(err.code) ? 'البريد أو كلمة المرور غير صحيحة' : 
-             err.code === 'auth/user-not-found' ? 'لا يوجد حساب بهذا البريد' : 
-             err.code === 'auth/email-already-in-use' ? 'هذا البريد مسجل مسبقاً' : 
-             err.code === 'auth/weak-password' ? 'كلمة المرور ضعيفة (6 أحرف على الأقل)' : 
-             'حدث خطأ. تحقق من اتصالك وحاول مرة أخرى.';
-      setError(baseError);
-    } finally { setLoading(false); }
+      console.error("تفاصيل الخطأ الكاملة:", err);
+      // 🔥 التعديل الجوهري هنا: عرض رمز الخطأ ورسالته من فايربيس مباشرة للتشخيص 🔥
+      setError(`[${err.code}] - ${err.message}`);
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   const handleGoogleSignIn = async () => {
-    setLoading(true); setError('');
+    setLoading(true); 
+    setError('');
     try {
       const result = await signInWithPopup(auth, new GoogleAuthProvider());
       const user = result.user;
@@ -110,9 +112,10 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
       }
       onLogin?.(user);
     } catch (err) { 
-      console.error(err);
+      console.error("خطأ تسجيل الدخول بجوجل:", err);
       if (err.code !== 'auth/cancelled-popup-request' && err.code !== 'auth/popup-closed-by-user') {
-        setError('فشل تسجيل الدخول عبر جوجل. حاول مرة أخرى.'); 
+        // 🔥 التعديل الجوهري هنا أيضاً 🔥
+        setError(`خطأ جوجل: [${err.code}] - ${err.message}`); 
       }
     } finally { 
       setLoading(false);
@@ -172,7 +175,8 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
 
               {isLogin && <button type="button" onClick={onForgotPassword} className="text-xs text-purple-300 hover:text-purple-100 font-medium text-left transition-all hover:underline active:scale-95 origin-left" disabled={loading}>نسيت كلمة المرور؟</button>}
               
-              {error && <div className="bg-red-500/10 border border-red-400/20 text-red-200 text-sm p-3 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2"><Shield className="w-4 h-4 shrink-0"/>{error}</div>}
+              {/* هنا سيظهر الخطأ التفصيلي باللون الأحمر */}
+              {error && <div className="bg-red-500/10 border border-red-400/20 text-red-200 text-sm p-3 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2" style={{ direction: 'ltr', textAlign: 'left' }}><Shield className="w-4 h-4 shrink-0"/>{error}</div>}
               {success && <div className="bg-emerald-500/10 border border-emerald-400/20 text-emerald-200 text-sm p-3 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2"><CheckCircle2 className="w-4 h-4 shrink-0"/>{success}</div>}
               
               <Button type="submit" disabled={loading} className="w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-500/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group/btn">
