@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Shield, Users, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { auth, db } from '../../firebase/config';
 import {
@@ -43,8 +43,7 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
   const [isLogoPressed, setIsLogoPressed] = useState(false);
   const logoRef = useRef(null);
 
-  // ❌ تم تعطيل حماية التخمين مؤقتاً للتشخيص
-  // (جميع الدوال والمتغيرات التالية معطلة)
+  // ❌ تمت إزالة نظام حماية التخمين بالكامل
 
   const handleLogoClick = (e) => {
     if (!logoRef.current) return;
@@ -66,7 +65,7 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
       const { user } = isLogin 
         ? await signInWithEmailAndPassword(auth, email, password) 
         : await createUserWithEmailAndPassword(auth, email, password);
-
+      
       if (!user.emailVerified) { 
         await sendEmailVerification(user); 
         setSuccess('تم إرسال رابط التحقق لبريدك.'); 
@@ -160,7 +159,7 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
               <button type="button" onClick={() => { setIsLogin(false); setError(''); setSuccess(''); }} className={`relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${!isLogin ? 'text-white' : 'text-gray-400 hover:text-white'}`}>إنشاء حساب</button>
             </div>
 
-            {/* ❌ تم تعطيل رسالة الحظر */}
+            {/* ❌ إزالة رسالة الحظر */}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative group/input">
