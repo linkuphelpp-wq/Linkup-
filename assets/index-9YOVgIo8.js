@@ -9923,6 +9923,381 @@ var require_client = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports = require_react_dom_client_production();
 }));
 //#endregion
+//#region node_modules/react/cjs/react-jsx-runtime.production.js
+/**
+* @license React
+* react-jsx-runtime.production.js
+*
+* Copyright (c) Meta Platforms, Inc. and affiliates.
+*
+* This source code is licensed under the MIT license found in the
+* LICENSE file in the root directory of this source tree.
+*/
+var require_react_jsx_runtime_production = /* @__PURE__ */ __commonJSMin(((exports) => {
+	var REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element"), REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
+	function jsxProd(type, config, maybeKey) {
+		var key = null;
+		void 0 !== maybeKey && (key = "" + maybeKey);
+		void 0 !== config.key && (key = "" + config.key);
+		if ("key" in config) {
+			maybeKey = {};
+			for (var propName in config) "key" !== propName && (maybeKey[propName] = config[propName]);
+		} else maybeKey = config;
+		config = maybeKey.ref;
+		return {
+			$$typeof: REACT_ELEMENT_TYPE,
+			type,
+			key,
+			ref: void 0 !== config ? config : null,
+			props: maybeKey
+		};
+	}
+	exports.Fragment = REACT_FRAGMENT_TYPE;
+	exports.jsx = jsxProd;
+	exports.jsxs = jsxProd;
+}));
+//#endregion
+//#region node_modules/react/jsx-runtime.js
+var require_jsx_runtime = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_react_jsx_runtime_production();
+}));
+//#endregion
+//#region src/context/LanguageContext.jsx
+var import_client = /* @__PURE__ */ __toESM(require_client(), 1);
+var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
+var import_jsx_runtime = require_jsx_runtime();
+var translations = {
+	ar: {
+		settings: {
+			title: "الإعدادات",
+			subtitle: "تحكم كامل في تطبيقك كما تحب",
+			sections: {
+				account: "الحساب",
+				appearance: "المظهر",
+				calls: "المكالمات",
+				privacy: "الخصوصية والأمان",
+				more: "المزيد"
+			},
+			items: {
+				profile: {
+					label: "الملف الشخصي",
+					desc: "تعديل اسمك وصورتك"
+				},
+				fontSize: { label: "حجم الخط" },
+				fontFamily: { label: "نوع الخط" },
+				compactMode: {
+					label: "تصغير الأبعاد",
+					desc: "مناسب للشاشات الصغيرة"
+				},
+				language: {
+					label: "لغة التطبيق",
+					desc: "اختر لغة الواجهة"
+				},
+				muteMic: { label: "كتم الميكروفون تلقائياً" },
+				speaker: { label: "مكبر الصوت افتراضياً" },
+				appLock: {
+					label: "قفل التطبيق",
+					desc: "حماية إضافية برمز سري"
+				},
+				dataManagement: {
+					label: "إدارة البيانات",
+					desc: "التحكم في تخزين بياناتك"
+				},
+				resetApp: {
+					label: "إعادة ضبط التطبيق",
+					desc: "مسح جميع المحادثات والبيانات"
+				},
+				support: {
+					label: "تواصل مع المطور",
+					desc: "ملاحظات، اقتراحات، أو مشاكل"
+				},
+				share: {
+					label: "شارك التطبيق",
+					desc: "دع أصدقاءك ينضمون"
+				},
+				partner: {
+					label: "تكوين شراكة",
+					desc: "انضم كشريك رسمي"
+				},
+				admin: {
+					label: "لوحة الإدارة",
+					desc: "إدارة المستخدمين والمحتوى"
+				}
+			},
+			quickActions: {
+				atheer: "من هو أثير؟",
+				about: "من نحن",
+				privacy: "الخصوصية"
+			},
+			modals: {
+				reset: {
+					title: "تأكيد إعادة الضبط",
+					warning: "هذا الإجراء لا يمكن التراجع عنه. اكتب كلمة \"حذف\" للتأكيد",
+					placeholder: "اكتب كلمة حذف هنا...",
+					cancel: "إلغاء",
+					confirm: "تأكيد الحذف",
+					loading: "جارٍ..."
+				},
+				language: { title: "لغة التطبيق" },
+				fontSize: { title: "حجم الخط" },
+				fontFamily: { title: "نوع الخط" }
+			},
+			sizes: {
+				small: "صغير",
+				medium: "متوسط",
+				large: "كبير",
+				xlarge: "كبير جداً"
+			},
+			fonts: {
+				tajawal: "Tajawal",
+				cairo: "Cairo",
+				rubik: "Rubik",
+				"ibm-plex": "IBM Plex"
+			},
+			languages: {
+				ar: "العربية",
+				en: "English",
+				fr: "Français"
+			}
+		},
+		common: {
+			back: "رجوع",
+			menu: "القائمة",
+			loading: "جارٍ التحميل...",
+			offline: "لا يوجد اتصال بالإنترنت - بعض الميزات غير متاحة"
+		}
+	},
+	en: {
+		settings: {
+			title: "Settings",
+			subtitle: "Full control over your app, your way",
+			sections: {
+				account: "Account",
+				appearance: "Appearance",
+				calls: "Calls",
+				privacy: "Privacy & Security",
+				more: "More"
+			},
+			items: {
+				profile: {
+					label: "Profile",
+					desc: "Edit your name and photo"
+				},
+				fontSize: { label: "Font Size" },
+				fontFamily: { label: "Font Family" },
+				compactMode: {
+					label: "Compact Mode",
+					desc: "Optimized for small screens"
+				},
+				language: {
+					label: "App Language",
+					desc: "Choose interface language"
+				},
+				muteMic: { label: "Mute Mic by Default" },
+				speaker: { label: "Speaker On by Default" },
+				appLock: {
+					label: "App Lock",
+					desc: "Extra protection with PIN"
+				},
+				dataManagement: {
+					label: "Data Management",
+					desc: "Control your data storage"
+				},
+				resetApp: {
+					label: "Reset App",
+					desc: "Delete all chats and data"
+				},
+				support: {
+					label: "Contact Developer",
+					desc: "Feedback, suggestions, or issues"
+				},
+				share: {
+					label: "Share App",
+					desc: "Invite your friends"
+				},
+				partner: {
+					label: "Become a Partner",
+					desc: "Join as an official partner"
+				},
+				admin: {
+					label: "Admin Panel",
+					desc: "Manage users and content"
+				}
+			},
+			quickActions: {
+				atheer: "Who is Atheer?",
+				about: "About Us",
+				privacy: "Privacy"
+			},
+			modals: {
+				reset: {
+					title: "Confirm Reset",
+					warning: "This action cannot be undone. Type \"delete\" to confirm",
+					placeholder: "Type delete here...",
+					cancel: "Cancel",
+					confirm: "Confirm Delete",
+					loading: "Processing..."
+				},
+				language: { title: "App Language" },
+				fontSize: { title: "Font Size" },
+				fontFamily: { title: "Font Family" }
+			},
+			sizes: {
+				small: "Small",
+				medium: "Medium",
+				large: "Large",
+				xlarge: "Extra Large"
+			},
+			fonts: {
+				tajawal: "Tajawal",
+				cairo: "Cairo",
+				rubik: "Rubik",
+				"ibm-plex": "IBM Plex"
+			},
+			languages: {
+				ar: "العربية",
+				en: "English",
+				fr: "Français"
+			}
+		},
+		common: {
+			back: "Back",
+			menu: "Menu",
+			loading: "Loading...",
+			offline: "No internet connection - some features unavailable"
+		}
+	},
+	fr: {
+		settings: {
+			title: "Paramètres",
+			subtitle: "Contrôle total de votre application",
+			sections: {
+				account: "Compte",
+				appearance: "Apparence",
+				calls: "Appels",
+				privacy: "Confidentialité & Sécurité",
+				more: "Plus"
+			},
+			items: {
+				profile: {
+					label: "Profil",
+					desc: "Modifier votre nom et photo"
+				},
+				fontSize: { label: "Taille de police" },
+				fontFamily: { label: "Famille de police" },
+				compactMode: {
+					label: "Mode compact",
+					desc: "Optimisé pour petits écrans"
+				},
+				language: {
+					label: "Langue de l'application",
+					desc: "Choisir la langue d'interface"
+				},
+				muteMic: { label: "Muet par défaut" },
+				speaker: { label: "Haut-parleur par défaut" },
+				appLock: {
+					label: "Verrouillage",
+					desc: "Protection supplémentaire par code"
+				},
+				dataManagement: {
+					label: "Gestion des données",
+					desc: "Contrôler le stockage"
+				},
+				resetApp: {
+					label: "Réinitialiser",
+					desc: "Supprimer toutes les données"
+				},
+				support: {
+					label: "Contacter le développeur",
+					desc: "Retours, suggestions, problèmes"
+				},
+				share: {
+					label: "Partager l'app",
+					desc: "Inviter vos amis"
+				},
+				partner: {
+					label: "Devenir partenaire",
+					desc: "Rejoindre comme partenaire"
+				},
+				admin: {
+					label: "Panneau admin",
+					desc: "Gérer utilisateurs et contenu"
+				}
+			},
+			quickActions: {
+				atheer: "Qui est Atheer ?",
+				about: "À propos",
+				privacy: "Confidentialité"
+			},
+			modals: {
+				reset: {
+					title: "Confirmer la réinitialisation",
+					warning: "Cette action est irréversible. Tapez \"supprimer\" pour confirmer",
+					placeholder: "Tapez supprimer ici...",
+					cancel: "Annuler",
+					confirm: "Confirmer",
+					loading: "En cours..."
+				},
+				language: { title: "Langue de l'application" },
+				fontSize: { title: "Taille de police" },
+				fontFamily: { title: "Famille de police" }
+			},
+			sizes: {
+				small: "Petite",
+				medium: "Moyenne",
+				large: "Grande",
+				xlarge: "Très grande"
+			},
+			fonts: {
+				tajawal: "Tajawal",
+				cairo: "Cairo",
+				rubik: "Rubik",
+				"ibm-plex": "IBM Plex"
+			},
+			languages: {
+				ar: "العربية",
+				en: "English",
+				fr: "Français"
+			}
+		},
+		common: {
+			back: "Retour",
+			menu: "Menu",
+			loading: "Chargement...",
+			offline: "Pas de connexion - certaines fonctionnalités indisponibles"
+		}
+	}
+};
+var LanguageContext = (0, import_react.createContext)();
+var LanguageProvider = ({ children }) => {
+	const [language, setLanguage] = (0, import_react.useState)(() => {
+		return localStorage.getItem("atheer_language") || "ar";
+	});
+	(0, import_react.useEffect)(() => {
+		localStorage.setItem("atheer_language", language);
+		document.documentElement.lang = language;
+		document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+	}, [language]);
+	const t = (key) => {
+		const keys = key.split(".");
+		let value = translations[language];
+		for (const k of keys) {
+			value = value?.[k];
+			if (value === void 0) return key;
+		}
+		return value;
+	};
+	const changeLanguage = (lng) => setLanguage(lng);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LanguageContext.Provider, {
+		value: {
+			language,
+			changeLanguage,
+			t
+		},
+		children
+	});
+};
+//#endregion
 //#region node_modules/lucide-react/dist/esm/shared/src/utils/mergeClasses.mjs
 /**
 * @license lucide-react v1.14.0 - ISC
@@ -9996,7 +10371,12 @@ var hasA11yProp = (props) => {
 };
 //#endregion
 //#region node_modules/lucide-react/dist/esm/context.mjs
-var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
+/**
+* @license lucide-react v1.14.0 - ISC
+*
+* This source code is licensed under the ISC license.
+* See the LICENSE file in the root directory of this source tree.
+*/
 var LucideContext = (0, import_react.createContext)({});
 var useLucideContext = () => (0, import_react.useContext)(LucideContext);
 //#endregion
@@ -10847,48 +11227,7 @@ var Zap = createLucideIcon("zap", [["path", {
 	key: "1xq2db"
 }]]);
 //#endregion
-//#region node_modules/react/cjs/react-jsx-runtime.production.js
-/**
-* @license React
-* react-jsx-runtime.production.js
-*
-* Copyright (c) Meta Platforms, Inc. and affiliates.
-*
-* This source code is licensed under the MIT license found in the
-* LICENSE file in the root directory of this source tree.
-*/
-var require_react_jsx_runtime_production = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element"), REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
-	function jsxProd(type, config, maybeKey) {
-		var key = null;
-		void 0 !== maybeKey && (key = "" + maybeKey);
-		void 0 !== config.key && (key = "" + config.key);
-		if ("key" in config) {
-			maybeKey = {};
-			for (var propName in config) "key" !== propName && (maybeKey[propName] = config[propName]);
-		} else maybeKey = config;
-		config = maybeKey.ref;
-		return {
-			$$typeof: REACT_ELEMENT_TYPE,
-			type,
-			key,
-			ref: void 0 !== config ? config : null,
-			props: maybeKey
-		};
-	}
-	exports.Fragment = REACT_FRAGMENT_TYPE;
-	exports.jsx = jsxProd;
-	exports.jsxs = jsxProd;
-}));
-//#endregion
-//#region node_modules/react/jsx-runtime.js
-var require_jsx_runtime = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_react_jsx_runtime_production();
-}));
-//#endregion
 //#region src/components/common/SplashScreen.jsx
-var import_client = /* @__PURE__ */ __toESM(require_client(), 1);
-var import_jsx_runtime = require_jsx_runtime();
 function SplashScreen({ onFinish }) {
 	const [visible, setVisible] = (0, import_react.useState)(true);
 	const [progress, setProgress] = (0, import_react.useState)(0);
@@ -75872,7 +76211,7 @@ function AppContent() {
 	] });
 }
 function App() {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppContent, {}) });
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LanguageProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppContent, {}) }) });
 }
 //#endregion
 //#region \0vite/preload-helper.js
