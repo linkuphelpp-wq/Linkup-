@@ -62783,12 +62783,12 @@ function AppLockProvider({ children }) {
 		const stored = localStorage.getItem("app_lock_recovery_codes");
 		if (!stored) return false;
 		try {
-			const codes = JSON.parse(stored);
+			let codes = JSON.parse(stored);
 			const index = codes.indexOf(code);
 			if (index !== -1) {
-				codes.splice(index, 1);
+				codes = codes.filter((_, i) => i !== index);
 				localStorage.setItem("app_lock_recovery_codes", JSON.stringify(codes));
-				setRecoveryCodes([...codes]);
+				setRecoveryCodes(codes);
 				setIsLocked(false);
 				setShowPrivacyShield(false);
 				return true;
@@ -62815,7 +62815,7 @@ function AppLockProvider({ children }) {
 		localStorage.setItem("app_lock_auto_verify", val);
 		setAutoVerify(val);
 	}, []);
-	const enableBiometric = async () => {
+	const enableBiometric = (0, import_react.useCallback)(async () => {
 		try {
 			const credential = await navigator.credentials.create({ publicKey: {
 				challenge: new Uint8Array([
@@ -62855,8 +62855,8 @@ function AppLockProvider({ children }) {
 			console.error("فشل تسجيل البصمة:", e);
 		}
 		return false;
-	};
-	const verifyBiometric = async () => {
+	}, []);
+	const verifyBiometric = (0, import_react.useCallback)(async () => {
 		if (!biometricEnabled) return false;
 		const credentialId = localStorage.getItem("app_lock_credential_id");
 		if (!credentialId) return false;
@@ -62886,12 +62886,12 @@ function AppLockProvider({ children }) {
 			console.error("فشل التحقق من البصمة:", e);
 		}
 		return false;
-	};
-	const disableBiometric = () => {
+	}, [biometricEnabled]);
+	const disableBiometric = (0, import_react.useCallback)(() => {
 		localStorage.removeItem("app_lock_biometric");
 		localStorage.removeItem("app_lock_credential_id");
 		setBiometricEnabled(false);
-	};
+	}, []);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockContext.Provider, {
 		value: {
 			lockEnabled,
@@ -63021,7 +63021,7 @@ function AppLockScreen({ onBack }) {
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-xs text-gray-500 mt-1",
-								children: "احفظ هذه الرموز في مكان آمن. كل رمز يُستخدم لمرة واحدة لفتح التطبيق إذا نسيت الرمز."
+								children: "احفظ هذه الرموز في مكان آمن. كل رمز يُستخدم لمرة واحدة."
 							})
 						]
 					}),
@@ -63088,7 +63088,7 @@ function AppLockScreen({ onBack }) {
 										if (val.length <= 20) setNewPin(val);
 									},
 									placeholder: "أدخل الرمز (4 إلى 20 رقماً)",
-									className: "w-full h-14 pr-12 pl-12 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+									className: "w-full h-14 pr-12 pl-12 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 									type: "button",
@@ -63218,7 +63218,9 @@ function AppLockScreen({ onBack }) {
 								children: "استخدم بصمة إصبعك بدلاً من الرمز"
 							})] })]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: () => biometricEnabled ? disableBiometric() : enableBiometric(),
+							onClick: () => biometricEnabled ? disableBiometric() : enableBiometric().then((ok) => {
+								if (!ok) alert("لم نتمكن من تفعيل البصمة");
+							}),
 							className: `w-14 h-8 rounded-full transition-colors relative ${biometricEnabled ? "bg-emerald-600" : "bg-gray-200"}`,
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${biometricEnabled ? "translate-x-6" : ""}` })
 						})]
