@@ -54901,9 +54901,12 @@ getStorage(app);
 var rtdb = getDatabase(app);
 //#endregion
 //#region src/features/auth/AuthScreen.jsx
-var Input$1 = ({ className, ...props }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-	className: `w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all ${className}`,
-	...props
+var Input$1 = ({ icon: Icon, className, ...props }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+	className: "relative group/input",
+	children: [Icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+		className: `w-full h-14 pr-12 pl-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent focus:bg-white transition-all text-base ${className}`,
+		...props
+	})]
 });
 var Button$1 = ({ children, className, disabled, ...props }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 	disabled,
@@ -54921,36 +54924,29 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 	const [loading, setLoading] = (0, import_react.useState)(false);
 	const [error, setError] = (0, import_react.useState)("");
 	const [success, setSuccess] = (0, import_react.useState)("");
-	const [ripples, setRipples] = (0, import_react.useState)([]);
-	const [isLogoPressed, setIsLogoPressed] = (0, import_react.useState)(false);
 	const [exiting, setExiting] = (0, import_react.useState)(false);
-	const logoRef = (0, import_react.useRef)(null);
-	const handleLogoClick = (e) => {
-		if (!logoRef.current) return;
-		const rect = logoRef.current.getBoundingClientRect();
-		const id = Date.now();
-		setRipples((p) => [...p, {
-			x: e.clientX - rect.left,
-			y: e.clientY - rect.top,
-			id
-		}]);
-		setIsLogoPressed(true);
-		setTimeout(() => {
-			setRipples((p) => p.filter((r) => r.id !== id));
-			setIsLogoPressed(false);
-		}, 800);
-	};
+	const [direction, setDirection] = (0, import_react.useState)(0);
 	const getErrorMessage = (err) => {
 		switch (err.code) {
 			case "auth/email-already-in-use": return "الحساب موجود بالفعل";
 			case "auth/invalid-credential":
 			case "auth/wrong-password": return "البريد الإلكتروني أو كلمة المرور غير صحيحة";
 			case "auth/user-not-found": return "لا يوجد حساب بهذا البريد الإلكتروني";
-			case "auth/weak-password": return "كلمة المرور ضعيفة جداً، يجب أن تكون 6 أحرف على الأقل";
-			case "auth/too-many-requests": return "محاولات كثيرة، حاول مرة أخرى لاحقاً";
-			case "auth/invalid-email": return "صيغة البريد الإلكتروني غير صالحة";
-			default: return "حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى";
+			case "auth/weak-password": return "كلمة المرور ضعيفة، 6 أحرف على الأقل";
+			case "auth/too-many-requests": return "محاولات كثيرة، حاول لاحقاً";
+			case "auth/invalid-email": return "بريد إلكتروني غير صالح";
+			default: return "حدث خطأ، حاول مرة أخرى";
 		}
+	};
+	const switchMode = (toLogin) => {
+		if (toLogin === isLogin) return;
+		setDirection(toLogin ? -1 : 1);
+		setIsLogin(toLogin);
+		setError("");
+		setSuccess("");
+		setEmail("");
+		setPassword("");
+		setConfirmPassword("");
 	};
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -54998,9 +54994,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 				}, 3e3);
 			} else {
 				setExiting(true);
-				setTimeout(() => {
-					onLogin?.(user);
-				}, 500);
+				setTimeout(() => onLogin?.(user), 500);
 			}
 		} catch (err) {
 			console.error(err);
@@ -55036,38 +55030,31 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 				createdAt: serverTimestamp$2()
 			});
 			setExiting(true);
-			setTimeout(() => {
-				onLogin?.(user);
-			}, 500);
+			setTimeout(() => onLogin?.(user), 500);
 		} catch (err) {
-			console.error("خطأ تسجيل الدخول بجوجل:", err);
-			if (err.code !== "auth/cancelled-popup-request" && err.code !== "auth/popup-closed-by-user") if (err.code === "auth/account-exists-with-different-credential") setError("هذا البريد مسجل مسبقاً بطريقة دخول مختلفة");
-			else setError("فشل تسجيل الدخول عبر جوجل، حاول مرة أخرى");
+			if (err.code !== "auth/cancelled-popup-request" && err.code !== "auth/popup-closed-by-user") setError(err.code === "auth/account-exists-with-different-credential" ? "البريد مسجل بطريقة مختلفة" : "فشل تسجيل الدخول، حاول مرة أخرى");
 		} finally {
 			setLoading(false);
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden selection:bg-purple-200/50",
+		className: "min-h-screen flex flex-col bg-white relative overflow-hidden selection:bg-purple-100",
 		dir: "rtl",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "absolute inset-0 opacity-30 pointer-events-none",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-1/4 left-1/4 w-96 h-96 bg-purple-200 rounded-full blur-[120px] animate-pulse" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-200 rounded-full blur-[120px] animate-pulse",
-					style: { animationDelay: "2s" }
-				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "relative z-10 flex-1 flex items-center justify-center px-4 py-8 sm:px-6",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: !exiting && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "absolute inset-0 pointer-events-none",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-96 h-96 bg-purple-50 rounded-full blur-[150px] opacity-60" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute bottom-0 left-0 w-80 h-80 bg-blue-50 rounded-full blur-[130px] opacity-50" })]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "relative z-10 flex-1 flex items-center justify-center px-4 py-8 sm:px-6",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, {
+				mode: "wait",
+				children: !exiting && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 					initial: {
 						opacity: 0,
-						scale: .95
+						x: direction * 40
 					},
 					animate: {
 						opacity: 1,
-						scale: 1
+						x: 0
 					},
 					exit: {
 						opacity: 0,
@@ -55080,60 +55067,47 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 					},
 					className: "w-full max-w-md",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-white/80 backdrop-blur-2xl rounded-[2.5rem] p-6 sm:p-8 shadow-xl border border-gray-100 relative overflow-hidden",
+						className: "bg-white rounded-[2.5rem] p-6 sm:p-8 shadow-xl shadow-purple-100/50 border border-gray-100",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-b from-white/50 to-transparent pointer-events-none rounded-[2.5rem]" }),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								ref: logoRef,
-								onClick: handleLogoClick,
-								className: "relative flex flex-col items-center mb-8 cursor-pointer select-none group/logo",
+								className: "text-center mb-8",
 								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute inset-0 bg-gradient-to-r from-purple-400 to-blue-400 rounded-3xl blur-2xl transition-all duration-500 ${isLogoPressed ? "opacity-30 scale-110" : "opacity-0 group-hover/logo:opacity-20 group-hover/logo:scale-105"}` }),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: `relative z-10 w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg transition-all duration-300 ${isLogoPressed ? "scale-90 rotate-3" : "group-hover/logo:scale-105 group-hover/logo:rotate-1"}`,
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 rounded-2xl border border-white/30 group-hover/logo:border-white/50 transition-colors duration-300" }),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-9 h-9 text-white drop-shadow-sm" }),
-											ripples.map((r) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "absolute w-3 h-3 bg-white/60 rounded-full animate-ripple",
-												style: {
-													left: r.x,
-													top: r.y,
-													transform: "translate(-50%, -50%)"
-												}
-											}, r.id))
-										]
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-200",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-8 h-8 text-white" })
 									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
-										className: "mt-4 text-3xl font-black text-gray-800 tracking-tight",
-										children: ["Link", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500",
-											children: "Up"
-										})]
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+										className: "text-2xl font-extrabold text-gray-800",
+										children: isLogin ? "مرحباً بك" : "إنشاء حساب"
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-sm text-gray-500 mt-1",
+										children: isLogin ? "سجل دخولك للمتابعة" : "أنشئ حساباً جديداً للبدء"
 									})
 								]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "relative flex bg-gray-100 rounded-2xl p-1.5 mb-6 border border-gray-200",
 								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 shadow-md transition-all duration-300 ease-out ${!isLogin ? "left-1.5" : "left-[calc(50%+3px)]"}` }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+										className: "absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 shadow-md",
+										animate: { left: isLogin ? "1.5" : "calc(50% + 3px)" },
+										transition: {
+											type: "spring",
+											stiffness: 300,
+											damping: 25
+										},
+										style: { left: isLogin ? "0.375rem" : "calc(50% + 0.187rem)" }
+									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 										type: "button",
-										onClick: () => {
-											setIsLogin(true);
-											setError("");
-											setSuccess("");
-										},
+										onClick: () => switchMode(true),
 										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isLogin ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
 										children: "تسجيل الدخول"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 										type: "button",
-										onClick: () => {
-											setIsLogin(false);
-											setError("");
-											setSuccess("");
-										},
+										onClick: () => switchMode(false),
 										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${!isLogin ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
 										children: "إنشاء حساب"
 									})
@@ -55143,82 +55117,102 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 								onSubmit: handleSubmit,
 								className: "space-y-4",
 								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "relative group/input",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
-											type: "email",
-											value: email,
-											onChange: (e) => setEmail(e.target.value),
-											placeholder: "البريد الإلكتروني",
-											className: "h-14 pr-12",
-											required: true,
-											disabled: loading
-										})]
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
+										icon: Mail,
+										type: "email",
+										value: email,
+										onChange: (e) => setEmail(e.target.value),
+										placeholder: "البريد الإلكتروني",
+										required: true,
+										disabled: loading
 									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "relative group/input",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
-												type: showPassword ? "text" : "password",
-												value: password,
-												onChange: (e) => setPassword(e.target.value),
-												placeholder: "كلمة المرور",
-												className: "h-14 pr-12",
-												required: true,
-												disabled: loading
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-												type: "button",
-												onClick: () => setShowPassword(!showPassword),
-												className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 active:scale-90",
-												disabled: loading,
-												children: showPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
-											})
-										]
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
+										icon: Lock,
+										type: showPassword ? "text" : "password",
+										value: password,
+										onChange: (e) => setPassword(e.target.value),
+										placeholder: "كلمة المرور",
+										required: true,
+										disabled: loading,
+										className: "tracking-widest"
 									}),
-									!isLogin && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "relative group/input",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
-												type: showConfirm ? "text" : "password",
-												value: confirmPassword,
-												onChange: (e) => setConfirmPassword(e.target.value),
-												placeholder: "تأكيد كلمة المرور",
-												className: "h-14 pr-12",
-												required: true,
-												disabled: loading
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-												type: "button",
-												onClick: () => setShowConfirm(!showConfirm),
-												className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 active:scale-90",
-												disabled: loading,
-												children: showConfirm ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
-											})
-										]
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										onClick: () => setShowPassword(!showPassword),
+										className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600",
+										style: {
+											marginTop: "-2.8rem",
+											marginLeft: "0.25rem"
+										},
+										children: showPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
 									}),
+									!isLogin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+										initial: {
+											opacity: 0,
+											height: 0
+										},
+										animate: {
+											opacity: 1,
+											height: "auto"
+										},
+										exit: {
+											opacity: 0,
+											height: 0
+										},
+										className: "space-y-4 overflow-hidden",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "relative",
+											children: [
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+													type: showConfirm ? "text" : "password",
+													value: confirmPassword,
+													onChange: (e) => setConfirmPassword(e.target.value),
+													placeholder: "تأكيد كلمة المرور",
+													required: true,
+													disabled: loading,
+													className: "w-full h-14 pr-12 pl-12 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent focus:bg-white transition-all tracking-widest"
+												}),
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+													type: "button",
+													onClick: () => setShowConfirm(!showConfirm),
+													className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600",
+													children: showConfirm ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
+												})
+											]
+										})
+									}) }),
 									isLogin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 										type: "button",
 										onClick: onForgotPassword,
-										className: "text-xs text-purple-500 hover:text-purple-700 font-medium text-left transition-all hover:underline active:scale-95 origin-left",
+										className: "text-xs text-purple-600 hover:text-purple-800 font-medium text-left transition-all hover:underline",
 										disabled: loading,
 										children: "نسيت كلمة المرور؟"
 									}),
 									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), error]
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "shrink-0",
+												children: "⚠️"
+											}),
+											" ",
+											error
+										]
 									}),
 									success && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4 shrink-0" }), success]
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4 shrink-0" }),
+											" ",
+											success
+										]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
 										type: "submit",
 										disabled: loading,
-										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group/btn",
-										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [isLogin ? "تسجيل الدخول" : "إنشاء حساب", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4 group-hover/btn:translate-x-1 transition-transform" })] })
+										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all flex items-center justify-center gap-2",
+										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [isLogin ? "تسجيل الدخول" : "إنشاء حساب", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4" })] })
 									})
 								]
 							}),
@@ -55237,79 +55231,47 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 								type: "button",
 								onClick: handleGoogleSignIn,
 								disabled: loading,
-								className: "w-full h-14 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 rounded-xl font-bold text-base transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group/google",
+								className: "w-full h-14 bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-3",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
 									className: "w-5 h-5",
 									viewBox: "0 0 24 24",
 									children: [
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-											fill: "currentColor",
+											fill: "#4285F4",
 											d: "M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-											fill: "currentColor",
+											fill: "#34A853",
 											d: "M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-											fill: "currentColor",
+											fill: "#FBBC05",
 											d: "M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
 										}),
 										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
-											fill: "currentColor",
+											fill: "#EA4335",
 											d: "M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
 										})
 									]
 								}), "المتابعة عبر جوجل"]
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-gray-100",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "flex flex-col items-center text-center group/feat cursor-pointer",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "p-2.5 rounded-xl bg-purple-50 text-purple-500 group-hover/feat:bg-purple-100 transition-all duration-300",
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-5 h-5" })
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-[10px] text-gray-500 mt-1.5 font-medium",
-											children: "آمن ومشفر"
-										})]
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "flex flex-col items-center text-center group/feat cursor-pointer",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "p-2.5 rounded-xl bg-blue-50 text-blue-500 group-hover/feat:bg-blue-100 transition-all duration-300",
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-5 h-5" })
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-[10px] text-gray-500 mt-1.5 font-medium",
-											children: "مجتمع تفاعلي"
-										})]
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "flex flex-col items-center text-center group/feat cursor-pointer",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-											className: "p-2.5 rounded-xl bg-indigo-50 text-indigo-500 group-hover/feat:bg-indigo-100 transition-all duration-300",
-											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-5 h-5" })
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "text-[10px] text-gray-500 mt-1.5 font-medium",
-											children: "تجربة عصرية"
-										})]
-									})
-								]
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-center text-sm text-gray-500 mt-6",
+								children: [isLogin ? "ليس لديك حساب؟" : "لديك حساب بالفعل؟", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => switchMode(!isLogin),
+									className: "text-purple-600 hover:text-purple-800 font-bold mr-1 transition-colors",
+									children: isLogin ? "إنشاء حساب" : "تسجيل الدخول"
+								})]
 							})
 						]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-center text-xs text-gray-400 mt-6 font-medium tracking-wide select-none",
+						className: "text-center text-xs text-gray-400 mt-4 select-none",
 						children: "الحقوق محفوظة لدى أثير © ٢٠٢٦"
 					})]
-				}) })
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("style", { children: `
-        @keyframes float{0%,100%{transform:translateY(0) rotate(0);opacity:.3}50%{transform:translateY(-15px) rotate(5deg);opacity:.6}}
-        .animate-float{animation:float linear infinite}
-        @keyframes ripple{0%{transform:translate(-50%,-50%) scale(.5);opacity:.8}100%{transform:translate(-50%,-50%) scale(6);opacity:0}}
-        .animate-ripple{animation:ripple .7s cubic-bezier(0,0,.2,1) forwards}
-      ` })
-		]
+				}, isLogin ? "login" : "signup")
+			})
+		})]
 	});
 }
 //#endregion
