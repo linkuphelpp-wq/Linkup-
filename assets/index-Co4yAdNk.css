@@ -1242,6 +1242,10 @@
     max-width: 240px;
   }
 
+  .max-w-\[260px\] {
+    max-width: 260px;
+  }
+
   .max-w-lg {
     max-width: var(--container-lg);
   }
@@ -3450,11 +3454,6 @@
     letter-spacing: .3em;
   }
 
-  .tracking-\[0\.5em\] {
-    --tw-tracking: .5em;
-    letter-spacing: .5em;
-  }
-
   .tracking-\[0\.15em\] {
     --tw-tracking: .15em;
     letter-spacing: .15em;
@@ -3699,6 +3698,10 @@
 
   .underline-offset-4 {
     text-underline-offset: 4px;
+  }
+
+  .caret-transparent {
+    caret-color: #0000;
   }
 
   .opacity-0 {
@@ -4441,6 +4444,14 @@
     .selection\:bg-purple-500\/30::selection {
       background-color: color-mix(in oklab, var(--color-purple-500) 30%, transparent);
     }
+  }
+
+  .selection\:bg-transparent ::selection {
+    background-color: #0000;
+  }
+
+  .selection\:bg-transparent::selection {
+    background-color: #0000;
   }
 
   .file\:border-0::file-selector-button {
@@ -5997,6 +6008,9 @@ body {
 .max-w-\[240px\] {
   max-width: 240px;
 }
+.max-w-\[260px\] {
+  max-width: 260px;
+}
 .max-w-none {
   max-width: none;
 }
@@ -6330,10 +6344,6 @@ body {
   --tw-tracking: .3em;
   letter-spacing: .3em;
 }
-.tracking-\[0\.5em\] {
-  --tw-tracking: .5em;
-  letter-spacing: .5em;
-}
 .tracking-\[0\.15em\] {
   --tw-tracking: .15em;
   letter-spacing: .15em;
@@ -6358,6 +6368,9 @@ body {
 }
 .underline-offset-4 {
   text-underline-offset: 4px;
+}
+.caret-transparent {
+  caret-color: #0000;
 }
 .opacity-0 {
   opacity: 0;
@@ -6620,6 +6633,12 @@ body {
 }
 .peer-disabled\:opacity-70:is(:where(.peer):disabled ~ *) {
   opacity: .7;
+}
+.selection\:bg-transparent ::selection {
+  background-color: #0000;
+}
+.selection\:bg-transparent::selection {
+  background-color: #0000;
 }
 .file\:border-0::file-selector-button {
   border-style: var(--tw-border-style);
