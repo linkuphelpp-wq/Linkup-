@@ -6,9 +6,9 @@ import {
 } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { X, Send, ArrowLeft, MoreVertical, Trash2 } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
-// ───────── مكون القائمة المنسدلة لإجراءات الرسالة ─────────
-const MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position }) => {
+const MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position, t }) => {
   if (!position) return null;
   return (
     <div className="fixed inset-0 z-50" onClick={onClose}>
@@ -27,14 +27,14 @@ const MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onC
           <svg className="w-4 h-4 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
           </svg>
-          رد
+          {t('chat.reply')}
         </button>
         {isOwn && (
           <button
             onClick={() => { onDeleteForEveryone(message); onClose(); }}
             className="w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600"
           >
-            <Trash2 className="w-4 h-4" /> حذف للكل
+            <Trash2 className="w-4 h-4" /> {t('chat.deleteForAll')}
           </button>
         )}
       </div>
@@ -43,6 +43,7 @@ const MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onC
 };
 
 export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
+  const { t } = useLanguage();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +57,6 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
   const currentUser = auth.currentUser;
   const groupId = group?.id;
 
-  // جلب أسماء الأعضاء
   useEffect(() => {
     if (!group?.members) return;
     Promise.all(group.members.map(async (uid) => {
@@ -65,7 +65,6 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
     })).then(setMembers);
   }, [group]);
 
-  // جلب الرسائل
   useEffect(() => {
     if (!groupId) return;
     const colRef = collection(db, 'groups', groupId, 'messages');
@@ -77,7 +76,6 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
     return () => unsub();
   }, [groupId]);
 
-  // تمرير تلقائي لآخر رسالة
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -99,7 +97,7 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
       });
       setReplyTo(null);
     } catch (err) {
-      toast.error('تعذر إرسال الرسالة');
+      toast.error(t('chat.sendError'));
       setMessage(text);
     }
   };
@@ -114,9 +112,9 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
   const handleDeleteForEveryone = async (msg) => {
     try {
       await updateDoc(doc(db, 'groups', groupId, 'messages', msg.id), { deleted: true });
-      toast.success('تم حذف الرسالة');
+      toast.success(t('chat.messageDeleted'));
     } catch (err) {
-      toast.error('فشل حذف الرسالة');
+      toast.error(t('chat.deleteError'));
     }
   };
 
@@ -124,10 +122,9 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
     setMessages([]);
     setShowClearConfirm(false);
     setShowHeaderMenu(false);
-    toast.success('تم مسح المحادثة محلياً');
+    toast.success(t('chat.chatCleared'));
   };
 
-  // تجميع الرسائل حسب الأيام (تشمل رسائل النظام)
   const groupedMessages = useMemo(() => {
     const groups = [];
     let currentDate = '';
@@ -165,11 +162,10 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
     return d.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
   };
 
-  if (!groupId) return <div className="flex h-screen items-center justify-center">جار التحميل...</div>;
+  if (!groupId) return <div className="flex h-screen items-center justify-center">{t('common.loading')}</div>;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50" dir="rtl">
-      {/* الهيدر المحسّن */}
       <header className="sticky top-0 z-30 px-4 pt-12 pb-3 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -181,8 +177,8 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
                 {group.name?.charAt(0)?.toUpperCase() || 'G'}
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-extrabold text-gray-900 truncate">{group.name || 'المجموعة'}</h2>
-                <p className="text-xs text-gray-500">{group.members?.length || 0} أعضاء</p>
+                <h2 className="text-xl font-extrabold text-gray-900 truncate">{group.name || t('groups.defaultName')}</h2>
+                <p className="text-xs text-gray-500">{group.members?.length || 0} {t('groups.membersCount')}</p>
               </div>
             </div>
           </div>
@@ -199,7 +195,7 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
                   onClick={() => { setShowClearConfirm(true); setShowHeaderMenu(false); }}
                   className="w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600"
                 >
-                  <Trash2 className="w-4 h-4" /> مسح محتوى الدردشة
+                  <Trash2 className="w-4 h-4" /> {t('chat.clearChat')}
                 </button>
               </div>
             )}
@@ -207,27 +203,25 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
         </div>
       </header>
 
-      {/* نافذة تأكيد مسح المحادثة */}
       {showClearConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowClearConfirm(false)}>
           <div className="bg-white rounded-2xl p-6 w-80 text-center shadow-xl" onClick={e => e.stopPropagation()}>
             <Trash2 className="w-10 h-10 text-red-500 mx-auto mb-3" />
-            <h3 className="font-bold text-lg mb-2">تأكيد مسح المحادثة</h3>
-            <p className="text-sm text-gray-500 mb-6">سيتم مسح جميع الرسائل من شاشتك فقط ولا يمكن استعادتها. الرسائل لدى الأطراف الأخرى لن تتأثر.</p>
+            <h3 className="font-bold text-lg mb-2">{t('chat.clearConfirmTitle')}</h3>
+            <p className="text-sm text-gray-500 mb-6">{t('chat.clearConfirmDesc')}</p>
             <div className="flex gap-3">
-              <button onClick={() => setShowClearConfirm(false)} className="flex-1 py-2 rounded-lg border">إلغاء</button>
-              <button onClick={handleClearChat} className="flex-1 py-2 rounded-lg bg-red-600 text-white">مسح</button>
+              <button onClick={() => setShowClearConfirm(false)} className="flex-1 py-2 rounded-lg border">{t('common.cancel')}</button>
+              <button onClick={handleClearChat} className="flex-1 py-2 rounded-lg bg-red-600 text-white">{t('chat.clear')}</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* منطقة الرسائل */}
       <main className="flex-1 overflow-y-auto px-4 py-4 space-y-6" style={{ paddingBottom: '130px' }}>
         {loading ? (
           <div className="flex justify-center py-10"><div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" /></div>
         ) : groupedMessages.length === 0 ? (
-          <div className="flex justify-center py-16 text-gray-400 text-sm">لا توجد رسائل بعد</div>
+          <div className="flex justify-center py-16 text-gray-400 text-sm">{t('chat.noMessages')}</div>
         ) : (
           groupedMessages.map((group, idx) => (
             <div key={idx}>
@@ -235,7 +229,6 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
                 <span className="text-xs bg-white border border-gray-200 text-gray-500 px-3 py-1 rounded-full shadow-sm">{group.date}</span>
               </div>
               {group.messages.map(msg => {
-                // ✅ رسالة النظام (تظهر في المنتصف بدون فقاعة)
                 if (msg.system) {
                   return (
                     <div key={msg.id} className="flex justify-center my-2">
@@ -261,7 +254,7 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
                           <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-700">
                             {msg.senderName?.charAt(0)?.toUpperCase() || '?'}
                           </div>
-                          <span className="text-xs font-medium text-gray-600">{msg.senderName || 'مستخدم'}</span>
+                          <span className="text-xs font-medium text-gray-600">{msg.senderName || t('chat.user')}</span>
                         </div>
                       )}
                       {msg.replyTo && (
@@ -281,7 +274,7 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
                         }}
                       >
                         <p style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontStyle: msg.deleted ? 'italic' : 'normal' }}>
-                          {msg.deleted ? 'تم حذف هذه الرسالة' : msg.text}
+                          {msg.deleted ? t('chat.messageDeleted') : msg.text}
                         </p>
                       </div>
                       <div className={`flex items-center gap-2 mt-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
@@ -297,12 +290,11 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
         <div ref={messagesEndRef} />
       </main>
 
-      {/* شريط الإدخال مع الرد */}
       <footer className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-5 pt-1 bg-white">
         {replyTo && (
           <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-t-xl mx-2 border border-gray-200">
             <div className="flex-1 text-xs text-gray-600 truncate">
-              <span className="font-bold">الرد على {replyTo.senderName}:</span> {replyTo.text}
+              <span className="font-bold">{t('chat.replyTo', { name: replyTo.senderName })}:</span> {replyTo.text}
             </div>
             <button onClick={() => setReplyTo(null)} className="p-1 rounded-full hover:bg-gray-200"><X className="w-4 h-4" /></button>
           </div>
@@ -313,7 +305,7 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="اكتب رسالة..."
+            placeholder={t('chat.placeholder')}
             rows={1}
             className="flex-1 bg-transparent border-0 focus:ring-0 resize-none text-sm text-gray-800 placeholder:text-gray-400 py-2.5 px-1 max-h-32"
             style={{ minHeight: '40px' }}
@@ -330,7 +322,6 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
         </div>
       </footer>
 
-      {/* قائمة إجراءات الرسالة (الضغط المطول) */}
       {actionPopup && (
         <MessageActionsPopup
           message={actionPopup.message}
@@ -339,6 +330,7 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
           onDeleteForEveryone={handleDeleteForEveryone}
           onClose={() => setActionPopup(null)}
           position={actionPopup.position}
+          t={t}
         />
       )}
     </div>

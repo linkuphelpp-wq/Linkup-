@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input';
 import { db, auth } from '../../firebase/config';
 import { collection, query, orderBy, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { toast } from 'sonner';
+import { useLanguage } from '../../context/LanguageContext';
 
-// ───────── الشعار ─────────
 const LinkUpLogo = () => (
   <div className="flex items-center gap-2.5">
     <div className="relative w-9 h-9">
@@ -24,8 +24,7 @@ const LinkUpLogo = () => (
   </div>
 );
 
-// 🎨 بطاقة مجموعة بتصميم احترافي – مع آخر رسالة حية
-const GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0 }) => {
+const GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0, t }) => {
   const [lastMsg, setLastMsg] = useState(null);
   const memberCount = group.members?.length || 0;
   const gradients = [
@@ -59,11 +58,9 @@ const GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0 }) 
       onClick={() => onClick?.()}
       className="relative overflow-hidden rounded-2xl bg-white border border-gray-100/80 shadow-sm hover:shadow-lg transition-all cursor-pointer p-4"
     >
-      {/* طبقة التأثير الخلفي عند التحويم */}
       <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-transparent to-blue-500/0 group-hover:from-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" />
       
       <div className="relative flex items-center gap-4">
-        {/* أيقونة المجموعة بتدرج لوني */}
         <div className="relative shrink-0">
           <div className={`w-14 h-14 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center shadow-md`}>
             <Users className="w-6 h-6 text-white" />
@@ -79,18 +76,16 @@ const GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0 }) 
           )}
         </div>
 
-        {/* معلومات المجموعة */}
         <div className="flex-1 min-w-0 text-right">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-gray-800 truncate">{group.name || 'مجموعة'}</h3>
-            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{memberCount} أعضاء</span>
+            <h3 className="font-bold text-gray-800 truncate">{group.name || t('groups.defaultName')}</h3>
+            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{memberCount} {t('groups.membersCount')}</span>
           </div>
           <p className="text-xs text-gray-500 mt-1 truncate">
-            {lastMsg?.text || 'ابدأ المحادثة'}
+            {lastMsg?.text || t('groups.startChat')}
           </p>
         </div>
 
-        {/* زر المفضلة */}
         <motion.button
           whileHover={{ scale: 1.2 }}
           whileTap={{ scale: 0.8 }}
@@ -104,8 +99,8 @@ const GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0 }) 
   );
 };
 
-// ───────── المكون الرئيسي ─────────
 export default function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
+  const { t } = useLanguage();
   const [groups, setGroups] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [favorites, setFavorites] = useState(() => {
@@ -130,7 +125,6 @@ export default function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup })
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-24 text-right" dir="rtl">
-      {/* الهيدر الزجاجي العصري */}
       <motion.header
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -151,9 +145,9 @@ export default function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup })
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-1">
             <Zap className="w-5 h-5 text-purple-500" />
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">المجموعات</h1>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t('groups.title')}</h1>
           </div>
-          <p className="text-sm text-gray-500">تعاون وتواصل مع فرقك بسهولة</p>
+          <p className="text-sm text-gray-500">{t('groups.subtitle')}</p>
         </div>
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -162,11 +156,10 @@ export default function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup })
           className="relative"
         >
           <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-          <Input placeholder="ابحث عن مجموعة..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-2 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm" />
+          <Input placeholder={t('groups.search')} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-2 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm" />
         </motion.div>
       </motion.header>
 
-      {/* المحتوى الرئيسي */}
       <main className="flex-1 overflow-y-auto px-5 pt-4 space-y-3">
         {filtered.length === 0 ? (
           <motion.div
@@ -178,8 +171,8 @@ export default function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup })
             <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
               <Users className="w-9 h-9 text-purple-600/70" />
             </div>
-            <p className="text-gray-800 font-bold text-lg">لا توجد مجموعات</p>
-            <p className="text-sm text-gray-500 mt-1.5">ابدأ بإنشاء مجموعتك الأولى</p>
+            <p className="text-gray-800 font-bold text-lg">{t('groups.noGroups')}</p>
+            <p className="text-sm text-gray-500 mt-1.5">{t('groups.createFirst')}</p>
           </motion.div>
         ) : (
           filtered.map((g, index) => (
@@ -190,12 +183,12 @@ export default function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup })
               onToggleFavorite={toggleFavorite}
               onClick={() => onOpenGroup?.(g)}
               index={index}
+              t={t}
             />
           ))
         )}
       </main>
 
-      {/* زر إنشاء مجموعة (يظهر فقط إذا لم تكن هناك مجموعات) */}
       <AnimatePresence>
         {groups.length === 0 && (
           <motion.div
@@ -216,12 +209,12 @@ export default function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup })
                   <UserPlus className="w-5 h-5 text-purple-600" />
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-gray-900 text-sm">إنشاء مجموعة جديدة</p>
-                  <p className="text-[10px] text-gray-500">ادعُ أصدقاءك وابدأ النقاش</p>
+                  <p className="font-bold text-gray-900 text-sm">{t('groups.createGroup')}</p>
+                  <p className="text-[10px] text-gray-500">{t('groups.inviteFriends')}</p>
                 </div>
               </div>
               <div className="bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl px-4 py-2 flex items-center gap-1.5 shadow-md shadow-purple-500/20">
-                <span className="text-xs font-bold">إنشاء</span><Plus className="w-4 h-4" />
+                <span className="text-xs font-bold">{t('groups.create')}</span><Plus className="w-4 h-4" />
               </div>
             </motion.button>
           </motion.div>
