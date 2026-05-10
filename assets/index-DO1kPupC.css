@@ -1242,10 +1242,6 @@
     max-width: 240px;
   }
 
-  .max-w-\[260px\] {
-    max-width: 260px;
-  }
-
   .max-w-lg {
     max-width: var(--container-lg);
   }
@@ -3452,6 +3448,11 @@
   .tracking-\[0\.3em\] {
     --tw-tracking: .3em;
     letter-spacing: .3em;
+  }
+
+  .tracking-\[0\.5em\] {
+    --tw-tracking: .5em;
+    letter-spacing: .5em;
   }
 
   .tracking-\[0\.15em\] {
@@ -5996,9 +5997,6 @@ body {
 .max-w-\[240px\] {
   max-width: 240px;
 }
-.max-w-\[260px\] {
-  max-width: 260px;
-}
 .max-w-none {
   max-width: none;
 }
@@ -6331,6 +6329,10 @@ body {
 .tracking-\[0\.3em\] {
   --tw-tracking: .3em;
   letter-spacing: .3em;
+}
+.tracking-\[0\.5em\] {
+  --tw-tracking: .5em;
+  letter-spacing: .5em;
 }
 .tracking-\[0\.15em\] {
   --tw-tracking: .15em;
