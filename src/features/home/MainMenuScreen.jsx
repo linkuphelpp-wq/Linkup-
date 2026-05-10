@@ -3,17 +3,19 @@ import { motion } from 'framer-motion';
 import { Copy, Check, Settings, Users, Eye, EyeOff } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { auth } from '../../firebase/config';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function MainMenuScreen({ onNavigate, username }) {
+  const { t } = useLanguage();
   const user = auth.currentUser;
   const [copied, setCopied] = useState(false);
   const [idVisible, setIdVisible] = useState(true);
 
-  const displayName = user?.displayName || user?.email?.split('@')[0] || 'مستخدم';
-  const userHandle = username || 'غير محدد';
+  const displayName = user?.displayName || user?.email?.split('@')[0] || t('mainMenu.user');
+  const userHandle = username || t('mainMenu.undefined');
 
   const handleCopy = async () => {
-    if (!username || username === 'غير محدد') return;
+    if (!username || username === t('mainMenu.undefined')) return;
     try {
       await navigator.clipboard.writeText(username);
       setCopied(true);
@@ -25,16 +27,16 @@ export default function MainMenuScreen({ onNavigate, username }) {
 
   const quickActions = [
     {
-      label: 'جهات الاتصال',
-      desc: 'إدارة القائمة',
+      label: t('mainMenu.contacts'),
+      desc: t('mainMenu.contactsDesc'),
       icon: Users,
       onClick: () => onNavigate?.('contacts'),
       gradient: 'from-blue-500 to-cyan-500',
       shadowColor: 'shadow-blue-200',
     },
     {
-      label: 'الإعدادات',
-      desc: 'تخصيص التطبيق',
+      label: t('mainMenu.settings'),
+      desc: t('mainMenu.settingsDesc'),
       icon: Settings,
       onClick: () => onNavigate?.('settings'),
       gradient: 'from-purple-500 to-indigo-500',
@@ -44,7 +46,6 @@ export default function MainMenuScreen({ onNavigate, username }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right" dir="rtl">
-      {/* شريط علوي زجاجي رفيع جداً */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -56,10 +57,7 @@ export default function MainMenuScreen({ onNavigate, username }) {
         </h1>
       </motion.div>
 
-      {/* مساحة علوية نظيفة جداً لضمان عدم ملامسة الأيقونة للشريط */}
       <div className="flex-1 flex flex-col items-center pt-12 px-5">
-        
-        {/* الأيقونة بحركة سلسة */}
         <motion.div
           initial={{ scale: 0, rotate: -10 }}
           animate={{ scale: 1, rotate: 0 }}
@@ -74,7 +72,6 @@ export default function MainMenuScreen({ onNavigate, username }) {
           </Avatar>
         </motion.div>
 
-        {/* الاسم فقط، بدون أيقونات جانبية */}
         <motion.h2
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -84,7 +81,6 @@ export default function MainMenuScreen({ onNavigate, username }) {
           {displayName}
         </motion.h2>
 
-        {/* بطاقة المعرف بتصميم الإعدادات النظيف */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -92,13 +88,13 @@ export default function MainMenuScreen({ onNavigate, username }) {
           className="w-full max-w-md bg-white rounded-2xl p-5 shadow-sm border border-gray-100/80 mb-6"
         >
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-gray-800">اسم المستخدم الخاص بك</h3>
+            <h3 className="text-sm font-bold text-gray-800">{t('mainMenu.myUsername')}</h3>
             <button
               onClick={() => setIdVisible(!idVisible)}
               className="text-xs text-gray-500 hover:text-purple-600 font-medium flex items-center gap-1 transition-colors"
             >
               {idVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              {idVisible ? 'إخفاء' : 'إظهار'}
+              {idVisible ? t('mainMenu.hide') : t('mainMenu.show')}
             </button>
           </div>
           
@@ -110,18 +106,17 @@ export default function MainMenuScreen({ onNavigate, username }) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleCopy}
-              disabled={!username || username === 'غير محدد'}
+              disabled={!username || username === t('mainMenu.undefined')}
               className="mr-3 p-3 rounded-xl bg-purple-500 text-white hover:bg-purple-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >
               {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
             </motion.button>
           </div>
           <p className="text-[11px] text-gray-500 mt-3 text-center font-medium">
-            شارك اسم المستخدم (@{username}) مع أصدقائك ليعثروا عليك بسهولة في جهات الاتصال.
+            {t('mainMenu.shareDesc', { username: username || t('mainMenu.undefined') })}
           </p>
         </motion.div>
 
-        {/* أزرار الاختصارات السريعة */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
