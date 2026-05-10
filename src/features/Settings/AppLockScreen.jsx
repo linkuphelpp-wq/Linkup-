@@ -9,7 +9,7 @@ export default function AppLockScreen({ onBack }) {
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [showPin, setShowPin] = useState(false);
-  const [step, setStep] = useState('idle'); // idle | confirming
+  const [step, setStep] = useState('idle');
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
   const [recoveryCodes, setRecoveryCodes] = useState([]);
@@ -84,7 +84,7 @@ export default function AppLockScreen({ onBack }) {
             <div className="text-center mb-4">
               <div className="p-3 rounded-xl bg-amber-50 text-amber-600 inline-block mb-3"><Shield className="w-6 h-6" /></div>
               <h2 className="font-bold text-gray-900">رموز الاسترداد الاحتياطية</h2>
-              <p className="text-xs text-gray-500 mt-1">احفظ هذه الرموز في مكان آمن. كل رمز يُستخدم لمرة واحدة لفتح التطبيق إذا نسيت الرمز.</p>
+              <p className="text-xs text-gray-500 mt-1">احفظ هذه الرموز في مكان آمن. كل رمز يُستخدم لمرة واحدة.</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-3 mb-4 grid grid-cols-2 gap-2">
               {recoveryCodes.map((code, i) => (
@@ -119,7 +119,7 @@ export default function AppLockScreen({ onBack }) {
                       if (val.length <= 20) setNewPin(val);
                     }}
                     placeholder="أدخل الرمز (4 إلى 20 رقماً)"
-                    className="w-full h-14 pr-12 pl-12 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full h-14 pr-12 pl-12 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                   <button type="button" onClick={() => setShowPin(!showPin)} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
                     {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -163,7 +163,6 @@ export default function AppLockScreen({ onBack }) {
               </button>
             </motion.div>
 
-            {/* التحقق التلقائي */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -179,7 +178,6 @@ export default function AppLockScreen({ onBack }) {
               </div>
             </motion.div>
 
-            {/* بصمة الإصبع */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -190,7 +188,7 @@ export default function AppLockScreen({ onBack }) {
                   </div>
                 </div>
                 <button
-                  onClick={() => biometricEnabled ? disableBiometric() : enableBiometric()}
+                  onClick={() => biometricEnabled ? disableBiometric() : enableBiometric().then(ok => { if (!ok) alert('لم نتمكن من تفعيل البصمة'); })}
                   className={`w-14 h-8 rounded-full transition-colors relative ${biometricEnabled ? 'bg-emerald-600' : 'bg-gray-200'}`}
                 >
                   <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${biometricEnabled ? 'translate-x-6' : ''}`} />

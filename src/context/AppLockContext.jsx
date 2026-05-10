@@ -1,9 +1,8 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AppLockContext = createContext();
 export const useAppLock = () => useContext(AppLockContext);
 
-// دوال مساعدة للتحويل بين Base64 و ArrayBuffer
 function base64ToArrayBuffer(base64) {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
@@ -18,7 +17,6 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-// توليد رموز استرداد احتياطية (مرة واحدة)
 function generateRecoveryCodes(count = 6) {
   const codes = [];
   for (let i = 0; i < count; i++) {
@@ -114,19 +112,19 @@ export function AppLockProvider({ children }) {
     return false;
   }, []);
 
+  // ✅ إصلاح: التحقق من رمز الاسترداد
   const unlockWithRecoveryCode = useCallback((code) => {
     const stored = localStorage.getItem('app_lock_recovery_codes');
     if (!stored) return false;
     try {
-      const codes = JSON.parse(stored);
+      let codes = JSON.parse(stored);
       const index = codes.indexOf(code);
       if (index !== -1) {
-        codes.splice(index, 1);
+        codes = codes.filter((_, i) => i !== index); // حذف الرمز المستخدم
         localStorage.setItem('app_lock_recovery_codes', JSON.stringify(codes));
-        setRecoveryCodes([...codes]);
+        setRecoveryCodes(codes);
         setIsLocked(false);
         setShowPrivacyShield(false);
-        // لا نلغي القفل، فقط نفتح الجلسة الحالية
         return true;
       }
     } catch (e) { console.error(e); }
@@ -153,7 +151,7 @@ export function AppLockProvider({ children }) {
   }, []);
 
   // دوال بصمة الإصبع (WebAuthn)
-  const enableBiometric = async () => {
+  const enableBiometric = useCallback(async () => {
     try {
       const credential = await navigator.credentials.create({
         publicKey: {
@@ -175,9 +173,9 @@ export function AppLockProvider({ children }) {
       }
     } catch (e) { console.error('فشل تسجيل البصمة:', e); }
     return false;
-  };
+  }, []);
 
-  const verifyBiometric = async () => {
+  const verifyBiometric = useCallback(async () => {
     if (!biometricEnabled) return false;
     const credentialId = localStorage.getItem('app_lock_credential_id');
     if (!credentialId) return false;
@@ -197,13 +195,13 @@ export function AppLockProvider({ children }) {
       }
     } catch (e) { console.error('فشل التحقق من البصمة:', e); }
     return false;
-  };
+  }, [biometricEnabled]);
 
-  const disableBiometric = () => {
+  const disableBiometric = useCallback(() => {
     localStorage.removeItem('app_lock_biometric');
     localStorage.removeItem('app_lock_credential_id');
     setBiometricEnabled(false);
-  };
+  }, []);
 
   return (
     <AppLockContext.Provider value={{
