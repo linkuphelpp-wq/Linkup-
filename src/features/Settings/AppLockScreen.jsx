@@ -58,6 +58,21 @@ export default function AppLockScreen({ onBack }) {
     }
   };
 
+  const handleBiometricToggle = async () => {
+    if (biometricEnabled) {
+      disableBiometric();
+    } else {
+      const result = await enableBiometric();
+      if (!result.success) {
+        if (result.error === 'not_supported') {
+          alert('جهازك لا يدعم البصمة، أو لم يتم تفعيلها في إعدادات النظام الخاص بجوالك.');
+        } else {
+          alert('تم إلغاء أو فشل تفعيل البصمة. يرجى المحاولة مرة أخرى.');
+        }
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right" dir="rtl">
       <motion.header
@@ -163,17 +178,26 @@ export default function AppLockScreen({ onBack }) {
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-center text-gray-600">أعد إدخال الرمز للتأكيد</p>
-                <input
-                  type={showPin ? 'text' : 'password'}
-                  maxLength={20}
-                  value={confirmPin}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    if (val.length <= 20) setConfirmPin(val);
-                  }}
-                  placeholder="تأكيد الرمز"
-                  className="w-full h-14 px-4 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                />
+                <div className="relative">
+                  <input
+                    type={showPin ? 'text' : 'password'}
+                    maxLength={20}
+                    value={confirmPin}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      if (val.length <= 20) setConfirmPin(val);
+                    }}
+                    placeholder="تأكيد الرمز"
+                    className="w-full h-14 px-4 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  >
+                    {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
                 {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                 <motion.button
                   whileTap={{ scale: 0.97 }}
@@ -252,11 +276,7 @@ export default function AppLockScreen({ onBack }) {
                   </div>
                 </div>
                 <button
-                  onClick={() => {
-                    biometricEnabled
-                      ? disableBiometric()
-                      : enableBiometric().then(ok => { if (!ok) alert('فشل تفعيل البصمة، تأكد من دعم الجهاز'); });
-                  }}
+                  onClick={handleBiometricToggle}
                   className={`w-14 h-8 rounded-full transition-colors relative ${biometricEnabled ? 'bg-emerald-600' : 'bg-gray-200'}`}
                 >
                   <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform duration-300 ${biometricEnabled ? 'translate-x-6' : ''}`} />

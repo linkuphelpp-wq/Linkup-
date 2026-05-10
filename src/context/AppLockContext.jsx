@@ -17,7 +17,7 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
-// ✅ تعديل: رموز استرداد مكونة من 6 أرقام
+// رموز استرداد مكونة من 6 أرقام
 function generateRecoveryCodes(count = 6) {
   const codes = [];
   for (let i = 0; i < count; i++) {
@@ -113,7 +113,7 @@ export function AppLockProvider({ children }) {
     return false;
   }, []);
 
-  // ✅ تعديل: يقبل رمز استرداد مكون من 6 أرقام
+  // يقبل رمز استرداد مكون من 6 أرقام
   const unlockWithRecoveryCode = useCallback((code) => {
     const stored = localStorage.getItem('app_lock_recovery_codes');
     if (!stored) return false;
@@ -151,41 +151,56 @@ export function AppLockProvider({ children }) {
     setAutoVerify(val);
   }, []);
 
-  // دوال بصمة الإصبع
+  // دوال بصمة الإصبع مع الفحص الذكي لدعم النظام
   const enableBiometric = useCallback(async () => {
+    // التحقق من دعم المتصفح والنظام للبصمة الأصلية
+    if (!window.PublicKeyCredential) {
+      return { success: false, error: 'not_supported' };
+    }
+    
     try {
+      const isAvailable = await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+      if (!isAvailable) {
+        return { success: false, error: 'not_supported' };
+      }
+
       const credential = await navigator.credentials.create({
         publicKey: {
           challenge: new Uint8Array([8, 12, 3, 77, 94, 4, 1]),
-          rp: { name: 'LinkUp App' },
-          user: { id: new Uint8Array(16), name: 'user@linkup.app', displayName: 'LinkUp User' },
-          pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+          rp: { name: 'تطبيقنا' },
+          user: { id: new Uint8Array(16), name: 'user@app', displayName: 'المستخدم' },
+          pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
           authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required' },
           timeout: 60000,
           attestation: 'none',
         },
       });
+      
       if (credential) {
         const credentialId = arrayBufferToBase64(credential.rawId);
         localStorage.setItem('app_lock_credential_id', credentialId);
         localStorage.setItem('app_lock_biometric', 'true');
         setBiometricEnabled(true);
-        return true;
+        return { success: true };
       }
-    } catch (e) { console.error('فشل تسجيل البصمة:', e); }
-    return false;
+    } catch (e) { 
+      console.error('فشل تسجيل البصمة:', e);
+      return { success: false, error: e.message };
+    }
+    return { success: false, error: 'unknown' };
   }, []);
 
   const verifyBiometric = useCallback(async () => {
     if (!biometricEnabled) return false;
     const credentialId = localStorage.getItem('app_lock_credential_id');
     if (!credentialId) return false;
+    
     try {
       const assertion = await navigator.credentials.get({
         publicKey: {
           challenge: new Uint8Array([9, 34, 5, 66, 12, 4, 8]),
           allowCredentials: [{ id: base64ToArrayBuffer(credentialId), type: 'public-key' }],
-          timeout: 15000,
+          timeout: 60000,
           userVerification: 'required',
         },
       });
@@ -194,7 +209,9 @@ export function AppLockProvider({ children }) {
         setShowPrivacyShield(false);
         return true;
       }
-    } catch (e) { console.error('فشل التحقق من البصمة:', e); }
+    } catch (e) { 
+      console.error('فشل التحقق من البصمة:', e); 
+    }
     return false;
   }, [biometricEnabled]);
 
