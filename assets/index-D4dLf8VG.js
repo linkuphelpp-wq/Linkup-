@@ -10296,6 +10296,44 @@ var Eye = createLucideIcon("eye", [["path", {
 	r: "3",
 	key: "1v7zrd"
 }]]);
+var FingerprintPattern = createLucideIcon("fingerprint-pattern", [
+	["path", {
+		d: "M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4",
+		key: "1nerag"
+	}],
+	["path", {
+		d: "M14 13.12c0 2.38 0 6.38-1 8.88",
+		key: "o46ks0"
+	}],
+	["path", {
+		d: "M17.29 21.02c.12-.6.43-2.3.5-3.02",
+		key: "ptglia"
+	}],
+	["path", {
+		d: "M2 12a10 10 0 0 1 18-6",
+		key: "ydlgp0"
+	}],
+	["path", {
+		d: "M2 16h.01",
+		key: "1gqxmh"
+	}],
+	["path", {
+		d: "M21.8 16c.2-2 .131-5.354 0-6",
+		key: "drycrb"
+	}],
+	["path", {
+		d: "M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2",
+		key: "1tidbn"
+	}],
+	["path", {
+		d: "M8.65 22c.21-.66.45-1.32.57-2",
+		key: "13wd9y"
+	}],
+	["path", {
+		d: "M9 6.8a6 6 0 0 1 9 5.2v2",
+		key: "1fr1j5"
+	}]
+]);
 var Funnel = createLucideIcon("funnel", [["path", {
 	d: "M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z",
 	key: "sc7q7i"
@@ -62643,19 +62681,48 @@ function DataManagementScreen({ onBack }) {
 //#region src/context/AppLockContext.jsx
 var AppLockContext = (0, import_react.createContext)();
 var useAppLock = () => (0, import_react.useContext)(AppLockContext);
+function base64ToArrayBuffer(base64) {
+	const binary = atob(base64);
+	const bytes = new Uint8Array(binary.length);
+	for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+	return bytes.buffer;
+}
+function arrayBufferToBase64(buffer) {
+	const bytes = new Uint8Array(buffer);
+	let binary = "";
+	for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+	return btoa(binary);
+}
+function generateRecoveryCodes(count = 6) {
+	const codes = [];
+	for (let i = 0; i < count; i++) {
+		let code = "";
+		for (let j = 0; j < 8; j++) code += Math.floor(Math.random() * 10);
+		codes.push(code);
+	}
+	return codes;
+}
 function AppLockProvider({ children }) {
 	const [lockEnabled, setLockEnabled] = (0, import_react.useState)(() => {
 		const pin = localStorage.getItem("app_lock_pin");
 		return pin !== null && pin.length >= 4;
 	});
 	const [pinLength, setPinLength] = (0, import_react.useState)(() => {
-		const len = localStorage.getItem("app_lock_pin_length");
-		return len ? parseInt(len, 10) : 4;
+		const pin = localStorage.getItem("app_lock_pin");
+		return pin ? pin.length : 4;
 	});
+	const [biometricEnabled, setBiometricEnabled] = (0, import_react.useState)(() => localStorage.getItem("app_lock_biometric") === "true");
 	const [isLocked, setIsLocked] = (0, import_react.useState)(false);
 	const [showPrivacyShield, setShowPrivacyShield] = (0, import_react.useState)(false);
 	const [autoVerify, setAutoVerify] = (0, import_react.useState)(() => localStorage.getItem("app_lock_auto_verify") === "true");
-	const isReturningFromAuth = (0, import_react.useRef)(false);
+	const [recoveryCodes, setRecoveryCodes] = (0, import_react.useState)(() => {
+		try {
+			const saved = localStorage.getItem("app_lock_recovery_codes");
+			return saved ? JSON.parse(saved) : [];
+		} catch {
+			return [];
+		}
+	});
 	(0, import_react.useEffect)(() => {
 		if (!lockEnabled) {
 			setIsLocked(false);
@@ -62667,9 +62734,7 @@ function AppLockProvider({ children }) {
 			setShowPrivacyShield(true);
 		}
 		sessionStorage.setItem("app_lock_session", "true");
-		const clearSession = () => {
-			sessionStorage.removeItem("app_lock_session");
-		};
+		const clearSession = () => sessionStorage.removeItem("app_lock_session");
 		window.addEventListener("pagehide", clearSession);
 		window.addEventListener("beforeunload", clearSession);
 		return () => {
@@ -62690,25 +62755,46 @@ function AppLockProvider({ children }) {
 	}, [lockEnabled]);
 	const setPIN = (0, import_react.useCallback)((pin) => {
 		if (pin && pin.length >= 4) {
+			const codes = generateRecoveryCodes();
 			localStorage.setItem("app_lock_pin", pin);
+			localStorage.setItem("app_lock_recovery_codes", JSON.stringify(codes));
 			localStorage.setItem("app_lock_pin_length", pin.length.toString());
 			setLockEnabled(true);
 			setPinLength(pin.length);
+			setIsLocked(false);
+			setShowPrivacyShield(false);
+			setRecoveryCodes(codes);
+			return {
+				success: true,
+				codes
+			};
+		}
+		return { success: false };
+	}, []);
+	const verifyPIN = (0, import_react.useCallback)((pin) => {
+		if (localStorage.getItem("app_lock_pin") === pin) {
 			setIsLocked(false);
 			setShowPrivacyShield(false);
 			return true;
 		}
 		return false;
 	}, []);
-	const verifyPIN = (0, import_react.useCallback)((pin) => {
-		if (localStorage.getItem("app_lock_pin") === pin) {
-			setIsLocked(false);
-			setShowPrivacyShield(false);
-			isReturningFromAuth.current = true;
-			setTimeout(() => {
-				isReturningFromAuth.current = false;
-			}, 500);
-			return true;
+	const unlockWithRecoveryCode = (0, import_react.useCallback)((code) => {
+		const stored = localStorage.getItem("app_lock_recovery_codes");
+		if (!stored) return false;
+		try {
+			const codes = JSON.parse(stored);
+			const index = codes.indexOf(code);
+			if (index !== -1) {
+				codes.splice(index, 1);
+				localStorage.setItem("app_lock_recovery_codes", JSON.stringify(codes));
+				setRecoveryCodes([...codes]);
+				setIsLocked(false);
+				setShowPrivacyShield(false);
+				return true;
+			}
+		} catch (e) {
+			console.error(e);
 		}
 		return false;
 	}, []);
@@ -62716,14 +62802,96 @@ function AppLockProvider({ children }) {
 		localStorage.removeItem("app_lock_pin");
 		localStorage.removeItem("app_lock_pin_length");
 		localStorage.removeItem("app_lock_auto_verify");
+		localStorage.removeItem("app_lock_recovery_codes");
+		localStorage.removeItem("app_lock_biometric");
+		localStorage.removeItem("app_lock_credential_id");
 		setLockEnabled(false);
 		setIsLocked(false);
 		setShowPrivacyShield(false);
+		setRecoveryCodes([]);
+		setBiometricEnabled(false);
 	}, []);
 	const setAutoVerifyOption = (0, import_react.useCallback)((val) => {
 		localStorage.setItem("app_lock_auto_verify", val);
 		setAutoVerify(val);
 	}, []);
+	const enableBiometric = async () => {
+		try {
+			const credential = await navigator.credentials.create({ publicKey: {
+				challenge: new Uint8Array([
+					8,
+					12,
+					3,
+					77,
+					94,
+					4,
+					1
+				]),
+				rp: { name: "LinkUp App" },
+				user: {
+					id: new Uint8Array(16),
+					name: "user@linkup.app",
+					displayName: "LinkUp User"
+				},
+				pubKeyCredParams: [{
+					type: "public-key",
+					alg: -7
+				}],
+				authenticatorSelection: {
+					authenticatorAttachment: "platform",
+					userVerification: "required"
+				},
+				timeout: 6e4,
+				attestation: "none"
+			} });
+			if (credential) {
+				const credentialId = arrayBufferToBase64(credential.rawId);
+				localStorage.setItem("app_lock_credential_id", credentialId);
+				localStorage.setItem("app_lock_biometric", "true");
+				setBiometricEnabled(true);
+				return true;
+			}
+		} catch (e) {
+			console.error("فشل تسجيل البصمة:", e);
+		}
+		return false;
+	};
+	const verifyBiometric = async () => {
+		if (!biometricEnabled) return false;
+		const credentialId = localStorage.getItem("app_lock_credential_id");
+		if (!credentialId) return false;
+		try {
+			if (await navigator.credentials.get({ publicKey: {
+				challenge: new Uint8Array([
+					9,
+					34,
+					5,
+					66,
+					12,
+					4,
+					8
+				]),
+				allowCredentials: [{
+					id: base64ToArrayBuffer(credentialId),
+					type: "public-key"
+				}],
+				timeout: 15e3,
+				userVerification: "required"
+			} })) {
+				setIsLocked(false);
+				setShowPrivacyShield(false);
+				return true;
+			}
+		} catch (e) {
+			console.error("فشل التحقق من البصمة:", e);
+		}
+		return false;
+	};
+	const disableBiometric = () => {
+		localStorage.removeItem("app_lock_biometric");
+		localStorage.removeItem("app_lock_credential_id");
+		setBiometricEnabled(false);
+	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AppLockContext.Provider, {
 		value: {
 			lockEnabled,
@@ -62731,10 +62899,16 @@ function AppLockProvider({ children }) {
 			showPrivacyShield,
 			autoVerify,
 			pinLength,
+			recoveryCodes,
+			biometricEnabled,
 			setPIN,
 			verifyPIN,
 			disableLock,
-			setAutoVerifyOption
+			setAutoVerifyOption,
+			unlockWithRecoveryCode,
+			enableBiometric,
+			verifyBiometric,
+			disableBiometric
 		},
 		children
 	});
@@ -62742,15 +62916,20 @@ function AppLockProvider({ children }) {
 //#endregion
 //#region src/features/Settings/AppLockScreen.jsx
 function AppLockScreen({ onBack }) {
-	const { lockEnabled, autoVerify, setPIN, disableLock, setAutoVerifyOption } = useAppLock();
+	const { lockEnabled, autoVerify, setPIN, disableLock, setAutoVerifyOption, enableBiometric, disableBiometric, biometricEnabled } = useAppLock();
 	const [newPin, setNewPin] = (0, import_react.useState)("");
 	const [confirmPin, setConfirmPin] = (0, import_react.useState)("");
 	const [showPin, setShowPin] = (0, import_react.useState)(false);
 	const [step, setStep] = (0, import_react.useState)("idle");
 	const [saved, setSaved] = (0, import_react.useState)(false);
 	const [error, setError] = (0, import_react.useState)("");
+	const [recoveryCodes, setRecoveryCodes] = (0, import_react.useState)([]);
+	const [showRecoveryCodes, setShowRecoveryCodes] = (0, import_react.useState)(false);
 	const handleCreate = () => {
-		if (newPin.length < 4) return;
+		if (newPin.length < 4 || newPin.length > 20) {
+			setError("الرمز يجب أن يكون بين 4 و 20 رقم");
+			return;
+		}
 		setStep("confirming");
 		setError("");
 	};
@@ -62760,11 +62939,18 @@ function AppLockScreen({ onBack }) {
 			setConfirmPin("");
 			return;
 		}
-		setPIN(newPin);
+		const result = setPIN(newPin);
+		if (result.success) {
+			setRecoveryCodes(result.codes);
+			setShowRecoveryCodes(true);
+			setStep("idle");
+			setNewPin("");
+			setConfirmPin("");
+		}
+	};
+	const handleCopyCodes = () => {
+		navigator.clipboard.writeText(recoveryCodes.join("\n"));
 		setSaved(true);
-		setStep("idle");
-		setNewPin("");
-		setConfirmPin("");
 		setTimeout(() => setSaved(false), 2e3);
 	};
 	const handleDisable = () => {
@@ -62774,6 +62960,8 @@ function AppLockScreen({ onBack }) {
 			setConfirmPin("");
 			setStep("idle");
 			setError("");
+			setShowRecoveryCodes(false);
+			setRecoveryCodes([]);
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -62805,11 +62993,60 @@ function AppLockScreen({ onBack }) {
 				})]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "text-sm text-gray-500 mt-1",
-				children: "حماية برمز PIN (بدون بصمة)"
+				children: "PIN وبصمة ورموز استرداد"
 			})]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
 			className: "px-4 py-6 space-y-6 max-w-lg mx-auto",
-			children: [!lockEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+			children: [showRecoveryCodes ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+				initial: {
+					opacity: 0,
+					y: 20
+				},
+				animate: {
+					opacity: 1,
+					y: 0
+				},
+				className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "text-center mb-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "p-3 rounded-xl bg-amber-50 text-amber-600 inline-block mb-3",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-6 h-6" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+								className: "font-bold text-gray-900",
+								children: "رموز الاسترداد الاحتياطية"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-500 mt-1",
+								children: "احفظ هذه الرموز في مكان آمن. كل رمز يُستخدم لمرة واحدة لفتح التطبيق إذا نسيت الرمز."
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "bg-gray-50 rounded-xl p-3 mb-4 grid grid-cols-2 gap-2",
+						children: recoveryCodes.map((code, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "bg-white border border-gray-200 rounded-lg p-2 text-center font-mono text-sm tracking-widest",
+							children: code
+						}, i))
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: handleCopyCodes,
+						className: "w-full h-12 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-all active:scale-[0.98] mb-2",
+						children: "نسخ جميع الرموز"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => {
+							setShowRecoveryCodes(false);
+							setRecoveryCodes([]);
+						},
+						className: "w-full h-10 text-sm text-gray-500 hover:text-purple-600 transition-colors",
+						children: "تم، لقد حفظتها"
+					})
+				]
+			}) : !lockEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				initial: {
 					opacity: 0,
 					y: 20
@@ -62832,39 +63069,46 @@ function AppLockScreen({ onBack }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-xs text-gray-500 mt-1",
-							children: "أدخل 4 إلى 6 أرقام"
+							children: "أدخل 4 إلى 20 رقماً"
 						})
 					]
 				}), step === "idle" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "space-y-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "relative",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-								type: showPin ? "text" : "password",
-								maxLength: 6,
-								value: newPin,
-								onChange: (e) => {
-									const val = e.target.value.replace(/\D/g, "");
-									if (val.length <= 6) setNewPin(val);
-								},
-								placeholder: "أدخل الرمز (4 أرقام على الأقل)",
-								className: "w-full h-14 pr-12 pl-12 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								type: "button",
-								onClick: () => setShowPin(!showPin),
-								className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1",
-								children: showPin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
-							})
-						]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: handleCreate,
-						disabled: newPin.length < 4,
-						className: "w-full h-12 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-300 text-white rounded-xl font-bold transition-all active:scale-[0.98]",
-						children: "متابعة"
-					})]
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: showPin ? "text" : "password",
+									maxLength: 20,
+									value: newPin,
+									onChange: (e) => {
+										const val = e.target.value.replace(/\D/g, "");
+										if (val.length <= 20) setNewPin(val);
+									},
+									placeholder: "أدخل الرمز (4 إلى 20 رقماً)",
+									className: "w-full h-14 pr-12 pl-12 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									type: "button",
+									onClick: () => setShowPin(!showPin),
+									className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1",
+									children: showPin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
+								})
+							]
+						}),
+						error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-red-500 text-sm text-center",
+							children: error
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: handleCreate,
+							disabled: newPin.length < 4,
+							className: "w-full h-12 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-300 text-white rounded-xl font-bold transition-all active:scale-[0.98]",
+							children: "متابعة"
+						})
+					]
 				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "space-y-4",
 					children: [
@@ -62874,14 +63118,14 @@ function AppLockScreen({ onBack }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							type: showPin ? "text" : "password",
-							maxLength: 6,
+							maxLength: 20,
 							value: confirmPin,
 							onChange: (e) => {
 								const val = e.target.value.replace(/\D/g, "");
-								if (val.length <= 6) setConfirmPin(val);
+								if (val.length <= 20) setConfirmPin(val);
 							},
 							placeholder: "تأكيد الرمز",
-							className: "w-full h-14 px-12 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+							className: "w-full h-14 px-4 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500"
 						}),
 						error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-red-500 text-sm text-center",
@@ -62895,58 +63139,92 @@ function AppLockScreen({ onBack }) {
 						})
 					]
 				})]
-			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-				initial: {
-					opacity: 0,
-					y: 20
-				},
-				animate: {
-					opacity: 1,
-					y: 0
-				},
-				className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between mb-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "font-bold text-gray-900",
-						children: "القفل مفعّل"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-3 h-3 bg-emerald-500 rounded-full animate-pulse" })]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					onClick: handleDisable,
-					className: "w-full h-12 bg-red-500 hover:bg-red-400 text-white rounded-xl font-bold transition-all active:scale-[0.98]",
-					children: "إلغاء القفل"
-				})]
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-				initial: {
-					opacity: 0,
-					y: 20
-				},
-				animate: {
-					opacity: 1,
-					y: 0
-				},
-				className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-between",
+			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+					initial: {
+						opacity: 0,
+						y: 20
+					},
+					animate: {
+						opacity: 1,
+						y: 0
+					},
+					className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-4",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "p-3 rounded-xl bg-blue-50 text-blue-600",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-6 h-6" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "flex items-center justify-between mb-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "font-bold text-gray-900",
-							children: "التحقق التلقائي"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-gray-500 mt-1",
-							children: "دخول فوري عند إدخال كامل الرمز"
-						})] })]
+							children: "القفل مفعّل"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-3 h-3 bg-emerald-500 rounded-full animate-pulse" })]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => setAutoVerifyOption(!autoVerify),
-						className: `w-14 h-8 rounded-full transition-colors relative ${autoVerify ? "bg-blue-600" : "bg-gray-200"}`,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${autoVerify ? "translate-x-6" : ""}` })
+						onClick: handleDisable,
+						className: "w-full h-12 bg-red-500 hover:bg-red-400 text-white rounded-xl font-bold transition-all active:scale-[0.98]",
+						children: "إلغاء القفل"
 					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					initial: {
+						opacity: 0,
+						y: 20
+					},
+					animate: {
+						opacity: 1,
+						y: 0
+					},
+					className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-4",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "p-3 rounded-xl bg-blue-50 text-blue-600",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-6 h-6" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900",
+								children: "التحقق التلقائي"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-500 mt-1",
+								children: "دخول فوري عند اكتمال الرمز"
+							})] })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => setAutoVerifyOption(!autoVerify),
+							className: `w-14 h-8 rounded-full transition-colors relative ${autoVerify ? "bg-blue-600" : "bg-gray-200"}`,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${autoVerify ? "translate-x-6" : ""}` })
+						})]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					initial: {
+						opacity: 0,
+						y: 20
+					},
+					animate: {
+						opacity: 1,
+						y: 0
+					},
+					className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-4",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "p-3 rounded-xl bg-emerald-50 text-emerald-600",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-6 h-6" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900",
+								children: "فتح القفل بالبصمة"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-gray-500 mt-1",
+								children: "استخدم بصمة إصبعك بدلاً من الرمز"
+							})] })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => biometricEnabled ? disableBiometric() : enableBiometric(),
+							className: `w-14 h-8 rounded-full transition-colors relative ${biometricEnabled ? "bg-emerald-600" : "bg-gray-200"}`,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${biometricEnabled ? "translate-x-6" : ""}` })
+						})]
+					})
 				})
-			})] }), saved && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+			] }), saved && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				initial: {
 					opacity: 0,
 					y: 20
@@ -62958,7 +63236,7 @@ function AppLockScreen({ onBack }) {
 				className: "bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 text-emerald-700",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: "text-sm font-bold",
-					children: "تم الحفظ بنجاح"
+					children: "تم النسخ بنجاح"
 				})]
 			})]
 		})]
