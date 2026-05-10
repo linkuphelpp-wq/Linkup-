@@ -10269,6 +10269,11 @@ var translations = {
 	}
 };
 var LanguageContext = (0, import_react.createContext)();
+var useLanguage = () => {
+	const context = (0, import_react.useContext)(LanguageContext);
+	if (!context) throw new Error("useLanguage must be used within LanguageProvider");
+	return context;
+};
 var LanguageProvider = ({ children }) => {
 	const [language, setLanguage] = (0, import_react.useState)(() => {
 		return localStorage.getItem("atheer_language") || "ar";
@@ -10704,6 +10709,22 @@ var Funnel = createLucideIcon("funnel", [["path", {
 	d: "M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z",
 	key: "sc7q7i"
 }]]);
+var Globe = createLucideIcon("globe", [
+	["circle", {
+		cx: "12",
+		cy: "12",
+		r: "10",
+		key: "1mglay"
+	}],
+	["path", {
+		d: "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20",
+		key: "13o1zl"
+	}],
+	["path", {
+		d: "M2 12h20",
+		key: "9i4pu4"
+	}]
+]);
 var House = createLucideIcon("house", [["path", {
 	d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8",
 	key: "5wwlr5"
@@ -60457,19 +60478,25 @@ var Section = ({ title, children, delay = 0, icon: Icon }) => /* @__PURE__ */ (0
 	className: "space-y-4",
 	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "flex items-center gap-3 px-1 mb-2",
-		children: [Icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-			className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
-			children: title
-		})]
+		children: [
+			Icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5 text-purple-500" }),
+			"      ",
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+				className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
+				children: title
+			})
+		]
 	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "space-y-3",
 		children
 	})]
 });
 function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile, onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker, fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner, onBack }) {
+	const { language, changeLanguage, t } = useLanguage();
 	const [showFontModal, setShowFontModal] = (0, import_react.useState)(false);
 	const [showSizeModal, setShowSizeModal] = (0, import_react.useState)(false);
 	const [showResetModal, setShowResetModal] = (0, import_react.useState)(false);
+	const [showLanguageModal, setShowLanguageModal] = (0, import_react.useState)(false);
 	const [resetText, setResetText] = (0, import_react.useState)("");
 	const [resetLoading, setResetLoading] = (0, import_react.useState)(false);
 	const [compactMode, setCompactMode] = (0, import_react.useState)(() => localStorage.getItem("compactMode") === "true");
@@ -60481,46 +60508,63 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 	const sizes = [
 		{
 			v: "small",
-			l: "صغير"
+			l: t("settings.sizes.small")
 		},
 		{
 			v: "medium",
-			l: "متوسط"
+			l: t("settings.sizes.medium")
 		},
 		{
 			v: "large",
-			l: "كبير"
+			l: t("settings.sizes.large")
 		},
 		{
 			v: "xlarge",
-			l: "كبير جداً"
+			l: t("settings.sizes.xlarge")
 		}
 	];
 	const fonts = [
 		{
 			v: "tajawal",
 			l: "Tajawal",
-			desc: "الافتراضي"
+			desc: t("settings.fonts.tajawal")
 		},
 		{
 			v: "cairo",
 			l: "Cairo",
-			desc: "واضح"
+			desc: t("settings.fonts.cairo")
 		},
 		{
 			v: "rubik",
 			l: "Rubik",
-			desc: "ناعم"
+			desc: t("settings.fonts.rubik")
 		},
 		{
 			v: "ibm-plex",
 			l: "IBM Plex",
-			desc: "مميز",
+			desc: t("settings.fonts.ibm-plex"),
 			featured: true
 		}
 	];
+	const languages = [
+		{
+			v: "ar",
+			l: t("settings.languages.ar"),
+			flag: "🇸🇦"
+		},
+		{
+			v: "en",
+			l: t("settings.languages.en"),
+			flag: "🇬🇧"
+		},
+		{
+			v: "fr",
+			l: t("settings.languages.fr"),
+			flag: "🇫🇷"
+		}
+	];
 	const handleResetApp = async () => {
-		if (resetText.trim() !== "حذف") return;
+		if (resetText.trim() !== t("common.delete")) return;
 		setResetLoading(true);
 		try {
 			if (!auth?.currentUser?.uid || !db) throw new Error("فشل المصادقة");
@@ -60553,50 +60597,57 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				className: "sticky top-0 z-20 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-14 pb-4 text-center shadow-sm",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 					className: "text-2xl font-black text-gray-800 tracking-tight",
-					children: "الإعدادات"
+					children: t("settings.title")
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-sm text-gray-500 mt-1",
-					children: "تحكم كامل في تطبيقك كما تحب"
+					children: t("settings.subtitle")
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "px-4 py-6 space-y-8 max-w-lg mx-auto",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Section, {
-						title: "الحساب",
+						title: t("settings.sections.account"),
 						delay: .1,
 						icon: User$1,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 							icon: User$1,
-							label: "الملف الشخصي",
-							desc: "تعديل اسمك وصورتك",
+							label: t("settings.items.profile.label"),
+							desc: t("settings.items.profile.desc"),
 							onClick: onOpenProfile,
 							color: "purple"
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
-						title: "المظهر",
+						title: t("settings.sections.appearance"),
 						delay: .2,
 						icon: Palette,
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: Globe,
+								label: t("settings.items.language.label"),
+								desc: t("settings.items.language.desc"),
+								onClick: () => setShowLanguageModal(true),
+								color: "blue"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Palette,
-								label: "حجم الخط",
+								label: t("settings.items.fontSize.label"),
 								desc: sizes.find((s) => s.v === fontSize)?.l,
 								onClick: () => setShowSizeModal(true),
 								color: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Palette,
-								label: "نوع الخط",
+								label: t("settings.items.fontFamily.label"),
 								desc: fonts.find((f) => f.v === fontFamily)?.l,
 								onClick: () => setShowFontModal(true),
 								color: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: TabletSmartphone,
-								label: "تصغير الأبعاد",
-								desc: "مناسب للشاشات الصغيرة",
+								label: t("settings.items.compactMode.label"),
+								desc: t("settings.items.compactMode.desc"),
 								toggle: true,
 								isToggled: compactMode,
 								onToggle: () => setCompactMode(!compactMode),
@@ -60605,69 +60656,73 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
-						title: "المكالمات",
+						title: t("settings.sections.calls"),
 						delay: .3,
 						icon: Mic,
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-							icon: Mic,
-							label: "كتم الميكروفون تلقائياً",
-							toggle: true,
-							isToggled: muteMicOnJoin,
-							onToggle: onToggleMuteMic,
-							color: "orange"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-							icon: Speaker,
-							label: "مكبر الصوت افتراضياً",
-							toggle: true,
-							isToggled: speakerDefault,
-							onToggle: onToggleSpeaker,
-							color: "orange"
-						})]
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: Mic,
+								label: t("settings.items.muteMic.label"),
+								toggle: true,
+								isToggled: muteMicOnJoin,
+								onToggle: onToggleMuteMic,
+								color: "orange"
+							}),
+							"          ",
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+								icon: Speaker,
+								label: t("settings.items.speaker.label"),
+								toggle: true,
+								isToggled: speakerDefault,
+								onToggle: onToggleSpeaker,
+								color: "orange"
+							})
+						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
-						title: "الخصوصية والأمان",
+						title: t("settings.sections.privacy"),
 						delay: .4,
 						icon: Lock,
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Lock,
-								label: "قفل التطبيق",
-								desc: "حماية إضافية برمز سري",
+								label: t("settings.items.appLock.label"),
+								desc: t("settings.items.appLock.desc"),
 								onClick: onOpenAppLock,
 								color: "pink"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Shield,
-								label: "إدارة البيانات",
-								desc: "التحكم في تخزين بياناتك",
+								label: t("settings.items.dataManagement.label"),
+								desc: t("settings.items.dataManagement.desc"),
 								onClick: onOpenDataManagement,
 								color: "pink"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: RefreshCw,
-								label: "إعادة ضبط التطبيق",
-								desc: "مسح جميع المحادثات والبيانات",
+								label: t("settings.items.resetApp.label"),
+								desc: t("settings.items.resetApp.desc"),
 								onClick: () => setShowResetModal(true),
 								color: "pink"
 							})
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
-						title: "المزيد",
+						title: t("settings.sections.more"),
 						delay: .5,
 						icon: Sparkles,
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: MessageCircle,
-								label: "تواصل مع المطور",
-								desc: "ملاحظات، اقتراحات، أو مشاكل",
+								label: t("settings.items.support.label"),
+								desc: t("settings.items.support.desc"),
 								onClick: onOpenSupport,
 								color: "purple"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Share2,
-								label: "شارك التطبيق",
-								desc: "دع أصدقاءك ينضمون",
+								label: t("settings.items.share.label"),
+								desc: t("settings.items.share.desc"),
 								onClick: () => navigator.share?.({
 									title: "LinkUp",
 									url: window.location.origin
@@ -60676,15 +60731,15 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Sparkles,
-								label: "تكوين شراكة",
-								desc: "انضم كشريك رسمي",
+								label: t("settings.items.partner.label"),
+								desc: t("settings.items.partner.desc"),
 								onClick: onOpenPartner,
 								color: "green"
 							}),
 							isAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Shield,
-								label: "لوحة الإدارة",
-								desc: "إدارة المستخدمين والمحتوى",
+								label: t("settings.items.admin.label"),
+								desc: t("settings.items.admin.desc"),
 								onClick: onOpenAdmin,
 								color: "orange"
 							})
@@ -60708,17 +60763,17 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 						className: "grid grid-cols-3 gap-3 mt-4",
 						children: [
 							{
-								label: "من هو أثير؟",
+								label: t("settings.quickActions.atheer"),
 								onClick: onOpenAtheer,
 								gradient: "from-purple-500 to-indigo-500"
 							},
 							{
-								label: "من نحن",
+								label: t("settings.quickActions.about"),
 								onClick: onOpenAbout,
 								gradient: "from-blue-500 to-cyan-500"
 							},
 							{
-								label: "الخصوصية",
+								label: t("settings.quickActions.privacy"),
 								onClick: onOpenPrivacy,
 								gradient: "from-gray-500 to-gray-600"
 							}
@@ -60742,14 +60797,14 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				className: "fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-gray-200/60 px-5 py-2 flex items-center justify-between shadow-lg",
 				style: { paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" },
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 						onClick: onBack,
 						className: "p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-6 h-6 text-gray-700" })
+						children: ["          ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-6 h-6 text-gray-700" })]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 						className: "text-sm font-medium text-gray-500",
-						children: "القائمة"
+						children: t("common.menu")
 					}),
 					isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: onOpenAdmin,
@@ -60759,9 +60814,41 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
+				open: showLanguageModal,
+				onClose: () => setShowLanguageModal(false),
+				title: t("settings.modals.language.title"),
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "space-y-2",
+					children: languages.map((lang) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+						whileHover: {
+							scale: 1.02,
+							backgroundColor: "#f5f3ff"
+						},
+						whileTap: { scale: .97 },
+						onClick: () => {
+							changeLanguage(lang.v);
+							setShowLanguageModal(false);
+						},
+						className: `w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all ${language === lang.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300 shadow-md" : "bg-gray-50 text-gray-700 hover:bg-purple-50"}`,
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "flex items-center gap-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-2xl",
+								children: lang.flag
+							}), lang.l]
+						}), language === lang.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+							initial: { scale: 0 },
+							animate: { scale: 1 },
+							className: "bg-purple-500 text-white rounded-full p-1",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })
+						})]
+					}, lang.v))
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
 				open: showSizeModal,
 				onClose: () => setShowSizeModal(false),
-				title: "حجم الخط",
+				title: t("settings.modals.fontSize.title"),
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "space-y-2",
 					children: sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
@@ -60787,7 +60874,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
 				open: showFontModal,
 				onClose: () => setShowFontModal(false),
-				title: "نوع الخط",
+				title: t("settings.modals.fontFamily.title"),
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "space-y-2",
 					children: fonts.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
@@ -60816,7 +60903,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
 				open: showResetModal,
 				onClose: () => setShowResetModal(false),
-				title: "تأكيد إعادة الضبط",
+				title: t("settings.modals.reset.title"),
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "space-y-5",
 					children: [
@@ -60825,22 +60912,15 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "w-16 h-16 rounded-full bg-red-100 flex items-center justify-center",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-8 h-8 text-red-600" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-sm text-gray-600 text-center leading-relaxed",
-								children: [
-									"هذا الإجراء لا يمكن التراجع عنه. اكتب كلمة ",
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded",
-										children: "\"حذف\""
-									}),
-									" للتأكيد"
-								]
+								children: t("settings.modals.reset.warning")
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							value: resetText,
 							onChange: (e) => setResetText(e.target.value),
-							placeholder: "اكتب كلمة حذف هنا...",
+							placeholder: t("settings.modals.reset.placeholder"),
 							className: "w-full h-12 px-4 rounded-xl bg-gray-50 border-2 border-gray-200 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200 text-center text-lg font-medium",
 							autoFocus: true
 						}),
@@ -60850,13 +60930,13 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 								whileTap: { scale: .95 },
 								onClick: () => setShowResetModal(false),
 								className: "flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all",
-								children: "إلغاء"
+								children: t("settings.modals.reset.cancel")
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-								whileTap: resetText.trim() === "حذف" ? { scale: .9 } : {},
+								whileTap: resetText.trim() === t("common.delete") ? { scale: .9 } : {},
 								onClick: handleResetApp,
-								disabled: resetText.trim() !== "حذف" || resetLoading,
+								disabled: resetText.trim() !== t("common.delete") || resetLoading,
 								className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-red-200 transition-all",
-								children: resetLoading ? "جارٍ..." : "تأكيد الحذف"
+								children: resetLoading ? t("settings.modals.reset.loading") : t("settings.modals.reset.confirm")
 							})]
 						})
 					]
