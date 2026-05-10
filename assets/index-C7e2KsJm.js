@@ -62985,74 +62985,77 @@ function AppLockScreen({ onBack }) {
 		}
 	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-[#F8F9FA] pb-32 text-right font-sans",
+		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right",
 		dir: "rtl",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.header, {
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.header, {
 			initial: {
 				opacity: 0,
-				y: -20
+				y: -30
 			},
 			animate: {
 				opacity: 1,
 				y: 0
 			},
-			className: "sticky top-0 z-20 bg-[#F8F9FA]/90 backdrop-blur-xl px-5 pt-12 pb-6 text-center",
-			style: { paddingTop: "calc(1.5rem + env(safe-area-inset-top))" },
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "sticky top-0 z-20 bg-white/80 backdrop-blur-2xl border-b border-gray-200/60 px-5 pt-12 pb-4 text-center shadow-sm",
+			style: { paddingTop: "calc(1rem + env(safe-area-inset-top))" },
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center gap-3",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 					onClick: onBack,
-					className: "w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center active:scale-95 transition-all text-gray-600 hover:text-gray-900 shadow-sm",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5" })
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center active:scale-95",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-2",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-						className: "text-xl font-semibold text-gray-800",
-						children: "إعدادات الأمان"
-					})
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-6 h-6 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+						className: "text-2xl font-black text-gray-900",
+						children: "قفل التطبيق"
+					})]
 				})]
-			})
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-sm text-gray-500 mt-1",
+				children: "PIN · بصمة · استرداد احتياطي"
+			})]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-			className: "px-4 space-y-5 max-w-md mx-auto",
+			className: "px-4 py-6 space-y-6 max-w-lg mx-auto",
 			children: [showRecoveryCodes ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				initial: {
 					opacity: 0,
-					y: 10
+					y: 20
 				},
 				animate: {
 					opacity: 1,
 					y: 0
 				},
-				className: "bg-white rounded-2xl p-6 border border-gray-100 shadow-sm",
+				className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "text-center mb-5",
+						className: "text-center mb-4",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mx-auto mb-3",
+								className: "p-3 rounded-xl bg-amber-50 text-amber-600 inline-block mb-3",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-6 h-6" })
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-								className: "font-semibold text-gray-800",
+								className: "font-bold text-gray-900",
 								children: "رموز الاسترداد الاحتياطية"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-sm text-gray-500 mt-2 leading-relaxed",
+								className: "text-xs text-gray-500 mt-1",
 								children: "احفظ هذه الرموز في مكان آمن. كل رمز يُستخدم لمرة واحدة لفتح التطبيق إذا نسيت الـ PIN."
 							})
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "bg-[#F8F9FA] rounded-xl p-4 mb-5 grid grid-cols-2 gap-3",
+						className: "bg-gray-50 rounded-xl p-3 mb-4 grid grid-cols-2 gap-2",
 						children: recoveryCodes.map((code, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "bg-white border border-gray-100 rounded-lg p-3 text-center font-mono text-sm tracking-widest text-gray-700 shadow-sm select-all",
+							className: "bg-white border border-gray-200 rounded-lg p-2 text-center font-mono text-sm tracking-widest select-all",
 							children: code
 						}, i))
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
-						whileTap: { scale: .98 },
+						whileTap: { scale: .97 },
 						onClick: handleCopyCodes,
-						className: "w-full h-12 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl font-medium transition-colors flex items-center justify-center gap-2",
+						className: "w-full h-12 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" }), " نسخ جميع الرموز"]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -63060,34 +63063,34 @@ function AppLockScreen({ onBack }) {
 							setShowRecoveryCodes(false);
 							setRecoveryCodes([]);
 						},
-						className: "w-full h-12 text-sm text-gray-500 hover:text-gray-800 transition-colors mt-2 font-medium",
+						className: "w-full h-10 text-sm text-gray-500 hover:text-purple-600 transition-colors mt-2",
 						children: "تم، لقد حفظتها"
 					})
 				]
 			}) : !lockEnabled ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				initial: {
 					opacity: 0,
-					y: 10
+					y: 20
 				},
 				animate: {
 					opacity: 1,
 					y: 0
 				},
-				className: "bg-white rounded-2xl p-6 border border-gray-100 shadow-sm",
+				className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "text-center mb-6",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-12 h-12 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center mx-auto mb-3 border border-gray-100",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-5 h-5" })
+							className: "p-3 rounded-xl bg-purple-50 text-purple-600 inline-block mb-3",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-6 h-6" })
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "font-semibold text-gray-800",
-							children: "رمز مرور جديد"
+							className: "font-bold text-gray-900",
+							children: "إنشاء رمز PIN جديد"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-gray-400 mt-1",
-							children: "أدخل 4 أرقام على الأقل"
+							className: "text-xs text-gray-500 mt-1",
+							children: "أدخل 4 إلى 20 رقماً"
 						})
 					]
 				}), step === "idle" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -63096,7 +63099,7 @@ function AppLockScreen({ onBack }) {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "relative",
 							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 									type: showPin ? "text" : "password",
 									maxLength: 20,
@@ -63105,26 +63108,26 @@ function AppLockScreen({ onBack }) {
 										const val = e.target.value.replace(/\D/g, "");
 										if (val.length <= 20) setNewPin(val);
 									},
-									placeholder: "أدخل الرمز",
-									className: "w-full h-14 pr-12 pl-12 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all text-gray-700 placeholder-gray-400"
+									placeholder: "أدخل الرمز (4 إلى 20 رقماً)",
+									className: "w-full h-14 pr-12 pl-12 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 									type: "button",
 									onClick: () => setShowPin(!showPin),
-									className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 transition-colors",
+									className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1",
 									children: showPin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-4 h-4" })
 								})
 							]
 						}),
 						error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-red-400 text-sm text-center",
+							className: "text-red-500 text-sm text-center",
 							children: error
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-							whileTap: { scale: .98 },
+							whileTap: { scale: .97 },
 							onClick: handleCreate,
 							disabled: newPin.length < 4,
-							className: "w-full h-12 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-100 disabled:text-gray-400 text-white rounded-xl font-medium transition-colors",
+							className: "w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-bold transition-all shadow-md shadow-purple-100",
 							children: "متابعة"
 						})
 					]
@@ -63132,7 +63135,7 @@ function AppLockScreen({ onBack }) {
 					className: "space-y-4",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-sm text-center text-gray-500",
+							className: "text-sm text-center text-gray-600",
 							children: "أعد إدخال الرمز للتأكيد"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -63146,7 +63149,7 @@ function AppLockScreen({ onBack }) {
 									if (val.length <= 20) setConfirmPin(val);
 								},
 								placeholder: "تأكيد الرمز",
-								className: "w-full h-14 px-4 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300 transition-all text-gray-700"
+								className: "w-full h-14 px-4 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "button",
 								onClick: () => setShowPin(!showPin),
@@ -63155,109 +63158,108 @@ function AppLockScreen({ onBack }) {
 							})]
 						}),
 						error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-red-400 text-sm text-center",
+							className: "text-red-500 text-sm text-center",
 							children: error
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-							whileTap: { scale: .98 },
+							whileTap: { scale: .97 },
 							onClick: handleConfirm,
 							disabled: confirmPin.length < 4,
-							className: "w-full h-12 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-100 disabled:text-gray-400 text-white rounded-xl font-medium transition-colors",
-							children: "حفظ وتفعيل"
+							className: "w-full h-12 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-bold transition-all shadow-md shadow-emerald-100",
+							children: "حفظ الرمز"
 						})
 					]
 				})]
-			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "space-y-3",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-						initial: {
-							opacity: 0,
-							y: 10
-						},
-						animate: {
-							opacity: 1,
-							y: 0
-						},
-						className: "bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center justify-between",
+			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+					initial: {
+						opacity: 0,
+						y: 20
+					},
+					animate: {
+						opacity: 1,
+						y: 0
+					},
+					className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between mb-4",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-5 h-5" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "font-semibold text-gray-800",
-								children: "القفل مفعل"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-gray-400 mt-0.5",
-								children: "التطبيق محمي برمز مرور"
-							})] })]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: handleDisable,
-							className: "px-4 py-2 text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors",
-							children: "إلغاء"
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-						initial: {
-							opacity: 0,
-							y: 10
-						},
-						animate: {
-							opacity: 1,
-							y: 0
-						},
-						transition: { delay: .05 },
-						className: "bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center justify-between",
+							className: "flex items-center gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-3 h-3 bg-emerald-500 rounded-full animate-pulse" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "font-bold text-gray-900",
+								children: "القفل مفعّل"
+							})]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-5 h-5 text-emerald-500" })]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						whileTap: { scale: .97 },
+						onClick: handleDisable,
+						className: "w-full h-12 bg-red-500 hover:bg-red-400 text-white rounded-xl font-bold transition-all shadow-md shadow-red-100",
+						children: "إلغاء القفل"
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					initial: {
+						opacity: 0,
+						y: 20
+					},
+					animate: {
+						opacity: 1,
+						y: 0
+					},
+					className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3",
+							className: "flex items-center gap-4",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-10 h-10 rounded-full bg-gray-50 text-gray-600 flex items-center justify-center border border-gray-100",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-5 h-5" })
+								className: "p-3 rounded-xl bg-blue-50 text-blue-600",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-6 h-6" })
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "font-semibold text-gray-800",
+								className: "font-bold text-gray-900",
 								children: "التحقق التلقائي"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-gray-400 mt-0.5",
-								children: "دخول فوري بدون زر تأكيد"
+								className: "text-xs text-gray-500 mt-1",
+								children: "دخول فوري عند اكتمال الرمز"
 							})] })]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							onClick: () => setAutoVerifyOption(!autoVerify),
-							className: `w-12 h-7 rounded-full transition-colors relative ${autoVerify ? "bg-blue-500" : "bg-gray-200"}`,
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${autoVerify ? "translate-x-5" : ""}` })
+							className: `w-14 h-8 rounded-full transition-colors relative ${autoVerify ? "bg-blue-600" : "bg-gray-200"}`,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform duration-300 ${autoVerify ? "translate-x-6" : ""}` })
 						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-						initial: {
-							opacity: 0,
-							y: 10
-						},
-						animate: {
-							opacity: 1,
-							y: 0
-						},
-						transition: { delay: .1 },
-						className: "bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex items-center justify-between",
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					initial: {
+						opacity: 0,
+						y: 20
+					},
+					animate: {
+						opacity: 1,
+						y: 0
+					},
+					className: "bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center justify-between",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3",
+							className: "flex items-center gap-4",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-10 h-10 rounded-full bg-gray-50 text-gray-600 flex items-center justify-center border border-gray-100",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-5 h-5" })
+								className: "p-3 rounded-xl bg-emerald-50 text-emerald-600",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-6 h-6" })
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "font-semibold text-gray-800",
-								children: "البصمة"
+								className: "font-bold text-gray-900",
+								children: "فتح القفل بالبصمة"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs text-gray-400 mt-0.5",
-								children: "فتح التطبيق بالبصمة"
+								className: "text-xs text-gray-500 mt-1",
+								children: "استخدم بصمة إصبعك بدلاً من الرمز"
 							})] })]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							onClick: handleBiometricToggle,
-							className: `w-12 h-7 rounded-full transition-colors relative ${biometricEnabled ? "bg-blue-500" : "bg-gray-200"}`,
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300 ${biometricEnabled ? "translate-x-5" : ""}` })
+							className: `w-14 h-8 rounded-full transition-colors relative ${biometricEnabled ? "bg-emerald-600" : "bg-gray-200"}`,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform duration-300 ${biometricEnabled ? "translate-x-6" : ""}` })
 						})]
 					})
-				]
-			}), saved && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+				})
+			] }), saved && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				initial: {
 					opacity: 0,
 					y: 20
@@ -63266,10 +63268,10 @@ function AppLockScreen({ onBack }) {
 					opacity: 1,
 					y: 0
 				},
-				className: "bg-gray-800 text-white rounded-xl p-4 flex items-center justify-center gap-2 shadow-lg fixed bottom-8 left-4 right-4 max-w-sm mx-auto z-50",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-4 h-4 text-green-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-sm font-medium",
-					children: "تم نسخ الرموز للحافظة"
+				className: "bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 text-emerald-700",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-sm font-bold",
+					children: "تم نسخ الرموز بنجاح"
 				})]
 			})]
 		})]
