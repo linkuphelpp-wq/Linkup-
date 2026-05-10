@@ -59949,7 +59949,7 @@ var ProfileRow = ({ icon: Icon, label, value, onClick, danger, color = "purple" 
 		]
 	});
 };
-var NameChangeModal = ({ open, onClose, currentName, onSave }) => {
+var NameChangeModal = ({ open, onClose, currentName, onSave, t }) => {
 	const [newName, setNewName] = (0, import_react.useState)(currentName || "");
 	const handleSave = () => {
 		if (newName.trim()) {
@@ -59992,7 +59992,7 @@ var NameChangeModal = ({ open, onClose, currentName, onSave }) => {
 					className: "flex items-center gap-2",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 						className: "text-xl font-bold text-gray-900",
-						children: "تغيير الاسم"
+						children: t("profile.edit")
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 					onClick: onClose,
@@ -60003,11 +60003,11 @@ var NameChangeModal = ({ open, onClose, currentName, onSave }) => {
 				className: "space-y-5",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 					className: "text-sm font-bold text-gray-700 mb-2 block",
-					children: "الاسم الجديد"
+					children: t("profile.displayName")
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
 					value: newName,
 					onChange: (e) => setNewName(e.target.value),
-					placeholder: "أدخل اسمك الجديد",
+					placeholder: t("profile.displayName"),
 					className: "h-12 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200 text-lg",
 					autoFocus: true
 				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -60016,13 +60016,13 @@ var NameChangeModal = ({ open, onClose, currentName, onSave }) => {
 						whileTap: { scale: .95 },
 						onClick: onClose,
 						className: "flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all",
-						children: "إلغاء"
+						children: t("common.cancel")
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
 						whileTap: newName.trim() ? { scale: .95 } : {},
 						onClick: handleSave,
 						disabled: !newName.trim(),
 						className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white font-bold shadow-md shadow-purple-500/20 transition-all disabled:opacity-50",
-						children: "حفظ"
+						children: t("common.save")
 					})]
 				})]
 			})]
@@ -60030,6 +60030,7 @@ var NameChangeModal = ({ open, onClose, currentName, onSave }) => {
 	}) });
 };
 function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onResetPassword, onSwitchAccount }) {
+	const { t } = useLanguage();
 	const [showDelete, setShowDelete] = (0, import_react.useState)(false);
 	const [deleting, setDeleting] = (0, import_react.useState)(false);
 	const [error, setError] = (0, import_react.useState)("");
@@ -60075,11 +60076,11 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 					className: "flex items-center justify-center gap-2 mb-1",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-6 h-6 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 						className: "text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
-						children: "الملف الشخصي"
+						children: t("profile.title")
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-sm text-gray-500",
-					children: "معلومات حسابك وإعداداته"
+					children: t("profile.edit")
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -60156,7 +60157,7 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 										className: "text-sm text-gray-500 mt-1 font-medium",
-										children: ["@", username || "غير محدد"]
+										children: ["@", username || t("profile.username")]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 										initial: { scale: 0 },
@@ -60182,7 +60183,8 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 												className: "w-2 h-2 rounded-full bg-emerald-500"
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-3.5 h-3.5" }),
-											" حساب نشط"
+											" ",
+											t("profile.activeAccount") || "حساب نشط"
 										]
 									})
 								]
@@ -60210,26 +60212,26 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 								className: "flex items-center gap-2 px-1 mb-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User$1, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 									className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
-									children: "المعلومات الأساسية"
+									children: t("profile.basicInfo") || "المعلومات الأساسية"
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
 								icon: User$1,
-								label: "الاسم المعروض",
+								label: t("profile.displayName"),
 								value: displayName,
 								onClick: () => setShowNameModal(true),
 								color: "purple"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
 								icon: Mail,
-								label: "البريد الإلكتروني",
+								label: t("profile.email"),
 								value: email,
 								onClick: onChangeEmail,
 								color: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
 								icon: Lock,
-								label: "كلمة المرور",
+								label: t("profile.changePassword"),
 								value: "••••••••",
 								onClick: onResetPassword,
 								color: "green"
@@ -60257,18 +60259,18 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 								className: "flex items-center gap-2 px-1 mb-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 									className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
-									children: "إدارة الحساب"
+									children: t("profile.accountManagement") || "إدارة الحساب"
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
 								icon: Smartphone,
-								label: "الدخول بحساب آخر",
+								label: t("profile.switchAccount"),
 								onClick: onSwitchAccount,
 								color: "orange"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
 								icon: LogOut,
-								label: "تسجيل الخروج",
+								label: t("profile.logout"),
 								onClick: onLogout,
 								color: "red"
 							})
@@ -60298,7 +60300,11 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 								whileTap: { scale: .97 },
 								onClick: () => setShowDelete(true),
 								className: "w-full flex items-center justify-center gap-3 py-4 text-red-500 font-bold text-sm bg-white border border-red-100 rounded-2xl hover:bg-red-50 transition-all shadow-sm",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-5 h-5" }), " حذف الحساب نهائياً"]
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-5 h-5" }),
+									" ",
+									t("profile.deleteAccount")
+								]
 							}, "show") : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 								initial: {
 									opacity: 0,
@@ -60320,10 +60326,10 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "text-red-800 font-bold text-lg mb-1",
-										children: "هل أنت متأكد؟"
+										children: t("profile.deleteWarning")
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "text-sm text-gray-500",
-										children: "هذا الإجراء لا يمكن التراجع عنه."
+										children: t("profile.deleteIrreversible") || "هذا الإجراء لا يمكن التراجع عنه."
 									})] }),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "flex gap-3",
@@ -60331,13 +60337,13 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 											whileTap: { scale: .95 },
 											onClick: () => setShowDelete(false),
 											className: "flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all",
-											children: "إلغاء"
+											children: t("common.cancel")
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
 											whileTap: { scale: .9 },
 											onClick: handleDelete,
 											disabled: deleting,
 											className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold shadow-md shadow-red-200 disabled:opacity-50 transition-all",
-											children: deleting ? "جارٍ..." : "تأكيد الحذف"
+											children: deleting ? t("common.loading") : t("common.confirm")
 										})]
 									}),
 									error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.p, {
@@ -60356,7 +60362,8 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 				open: showNameModal,
 				onClose: () => setShowNameModal(false),
 				currentName: displayName,
-				onSave: (name) => onUpdateProfile?.({ displayName: name })
+				onSave: (name) => onUpdateProfile?.({ displayName: name }),
+				t
 			})
 		]
 	});
