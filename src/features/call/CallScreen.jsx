@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { PhoneOff, Mic, MicOff, Video, VideoOff, Camera, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function CallScreen({
   open,
@@ -22,6 +23,7 @@ export default function CallScreen({
   isVideoEnabled,
   getRemotePeerId,
 }) {
+  const { t } = useLanguage();
   const [micEnabled, setMicEnabled] = useState(!muteMicOnJoin);
   const [videoEnabled, setVideoEnabled] = useState(callType === 'video');
   const [callTimer, setCallTimer] = useState(0);
@@ -30,7 +32,6 @@ export default function CallScreen({
   const timerRef = useRef(null);
   const appliedMuteRef = useRef(false);
 
-  // بدء المكالمة عند الفتح (للمكالمات الصادرة فقط)
   useEffect(() => {
     if (open && contact?.uid) {
       setVideoEnabled(callType === 'video');
@@ -38,8 +39,8 @@ export default function CallScreen({
 
       getRemotePeerId(contact.uid).then((pid) => {
         if (!pid) {
-          toast.error('المستخدم غير متصل حاليًا', {
-            description: 'لا يمكن إجراء المكالمة الآن، حاول لاحقًا',
+          toast.error(t('calls.userOffline'), {
+            description: t('calls.userOfflineDesc'),
           });
           onClose();
           return;
@@ -57,7 +58,6 @@ export default function CallScreen({
     }
   }, [open, contact?.uid, callType, startCall, getRemotePeerId, onClose]);
 
-  // كتم الميكروفون تلقائياً
   useEffect(() => {
     if (muteMicOnJoin && localStream && !appliedMuteRef.current) {
       const audioTrack = localStream.getAudioTracks()[0];
@@ -69,27 +69,24 @@ export default function CallScreen({
     }
   }, [localStream, muteMicOnJoin]);
 
-  // ربط الفيديو المحلي
   useEffect(() => {
     if (localVideoRef.current && localStream) {
       localVideoRef.current.srcObject = localStream;
     }
   }, [localStream]);
 
-  // ربط الفيديو البعيد
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
       remoteVideoRef.current.srcObject = remoteStream;
     }
   }, [remoteStream]);
 
-  // مؤقت المكالمة
   useEffect(() => {
-    if (callStatus?.includes('متصل')) {
+    if (callStatus?.includes(t('calls.connected'))) {
       timerRef.current = setInterval(() => setCallTimer((p) => p + 1), 1000);
     } else {
       clearInterval(timerRef.current);
-      if (callStatus?.includes('انتهت') || callStatus?.includes('فشل')) setCallTimer(0);
+      if (callStatus?.includes(t('calls.ended')) || callStatus?.includes(t('calls.failed'))) setCallTimer(0);
     }
     return () => clearInterval(timerRef.current);
   }, [callStatus]);
@@ -124,15 +121,13 @@ export default function CallScreen({
   };
 
   const displayName =
-    remoteUserData?.displayName || contact?.displayName || contact?.username || 'مستخدم';
-  const isVideoCall = callType === 'video';
-  const isConnected = callStatus?.includes('متصل');
+    remoteUserData?.displayName || contact?.displayName || contact?.username || t('calls.user');
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleEndCall()}>
       <DialogContent className="w-full h-full max-w-none max-h-none p-0 m-0 border-none bg-black flex items-center justify-center">
         <div className="relative w-full h-full max-w-md mx-auto bg-gray-900 overflow-hidden">
-          {isVideoCall && remoteStream && (
+          {callType === 'video' && remoteStream && (
             <video
               ref={remoteVideoRef}
               autoPlay
@@ -140,7 +135,7 @@ export default function CallScreen({
               className="absolute inset-0 w-full h-full object-cover"
             />
           )}
-          {(!isVideoCall || !remoteStream) && (
+          {(!(callType === 'video') || !remoteStream) && (
             <div className="absolute inset-0 flex flex-col items-center justify-center px-6">
               <p className="text-sm text-gray-400 mb-4 bg-white/10 px-4 py-1 rounded-full">
                 {callStatus}
@@ -154,13 +149,13 @@ export default function CallScreen({
               {contact?.username && (
                 <p className="text-sm text-gray-400">@{contact.username}</p>
               )}
-              {isConnected && (
+              {callStatus?.includes(t('calls.connected')) && (
                 <p className="text-2xl font-mono text-white mt-2">{formatTime(callTimer)}</p>
               )}
             </div>
           )}
 
-          {isVideoCall && localStream && (
+          {callType === 'video' && localStream && (
             <div className="absolute top-4 right-4 w-28 h-40 rounded-xl overflow-hidden border-2 border-white/30 shadow-lg z-10 bg-black">
               <video
                 ref={localVideoRef}
@@ -177,7 +172,7 @@ export default function CallScreen({
             </div>
           )}
 
-          {isVideoCall && isConnected && (
+          {callType === 'video' && callStatus?.includes(t('calls.connected')) && (
             <div className="absolute top-4 left-4 z-10 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full">
               <p className="text-white text-sm font-mono">{formatTime(callTimer)}</p>
             </div>
@@ -185,7 +180,7 @@ export default function CallScreen({
 
           <div
             className={`absolute bottom-0 left-0 right-0 px-6 py-4 flex items-center justify-center gap-4 ${
-              isVideoCall ? 'bg-gradient-to-t from-black/80 to-transparent' : 'bg-gray-900'
+              callType === 'video' ? 'bg-gradient-to-t from-black/80 to-transparent' : 'bg-gray-900'
             }`}
           >
             <Button
@@ -206,7 +201,7 @@ export default function CallScreen({
             >
               <PhoneOff className="h-7 w-7" />
             </Button>
-            {isVideoCall && (
+            {callType === 'video' && (
               <>
                 <Button
                   variant="outline"

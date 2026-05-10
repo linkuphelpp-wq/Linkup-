@@ -1,0 +1,305 @@
+{
+  "common": {
+    "back": "Back",
+    "menu": "Menu",
+    "loading": "Loading...",
+    "offline": "No internet - some features unavailable",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "edit": "Edit",
+    "search": "Search",
+    "send": "Send",
+    "typing": "typing...",
+    "online": "Online",
+    "offline_status": "Offline",
+    "lastSeen": "Last seen",
+    "now": "Now",
+    "ago": "ago",
+    "minutes": "min",
+    "hours": "hrs",
+    "days": "days",
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Full control over your app, your way",
+    "sections": {
+      "account": "Account",
+      "appearance": "Appearance",
+      "calls": "Calls",
+      "privacy": "Privacy & Security",
+      "more": "More"
+    },
+    "items": {
+      "profile": {
+        "label": "Profile",
+        "desc": "Edit your name and photo"
+      },
+      "fontSize": {
+        "label": "Font Size"
+      },
+      "fontFamily": {
+        "label": "Font Family"
+      },
+      "compactMode": {
+        "label": "Compact Mode",
+        "desc": "Optimized for small screens"
+      },      "language": {
+        "label": "App Language",
+        "desc": "Choose interface language"
+      },
+      "muteMic": {
+        "label": "Mute Mic by Default"
+      },
+      "speaker": {
+        "label": "Speaker On by Default"
+      },
+      "appLock": {
+        "label": "App Lock",
+        "desc": "Extra protection with PIN"
+      },
+      "dataManagement": {
+        "label": "Data Management",
+        "desc": "Control your data storage"
+      },
+      "resetApp": {
+        "label": "Reset App",
+        "desc": "Delete all chats and data"
+      },
+      "support": {
+        "label": "Contact Developer",
+        "desc": "Feedback, suggestions, or issues"
+      },
+      "share": {
+        "label": "Share App",
+        "desc": "Invite your friends"
+      },
+      "partner": {
+        "label": "Become a Partner",
+        "desc": "Join as an official partner"
+      },
+      "admin": {
+        "label": "Admin Panel",
+        "desc": "Manage users and content"
+      }
+    },
+    "quickActions": {
+      "atheer": "Who is Atheer?",
+      "about": "About Us",
+      "privacy": "Privacy"
+    },
+    "modals": {
+      "reset": {
+        "title": "Confirm Reset",
+        "warning": "This action cannot be undone. Type \"delete\" to confirm",
+        "placeholder": "Type delete here...",
+        "cancel": "Cancel",        "confirm": "Confirm Delete",
+        "loading": "Processing..."
+      },
+      "language": {
+        "title": "App Language"
+      },
+      "fontSize": {
+        "title": "Font Size"
+      },
+      "fontFamily": {
+        "title": "Font Family"
+      }
+    },
+    "sizes": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "xlarge": "Extra Large"
+    },
+    "fonts": {
+      "tajawal": "Tajawal",
+      "cairo": "Cairo",
+      "rubik": "Rubik",
+      "ibm-plex": "IBM Plex"
+    },
+    "languages": {
+      "ar": "العربية",
+      "en": "English",
+      "fr": "Français"
+    }
+  },
+  "auth": {
+    "title": "Welcome to Atheer",
+    "subtitle": "Connect freely and securely",
+    "email": "Email",
+    "password": "Password",
+    "login": "Sign In",
+    "signup": "Create Account",
+    "forgot": "Forgot Password?",
+    "noAccount": "No account?",
+    "hasAccount": "Already have an account?",
+    "verify": "Verify Your Email",
+    "verifyDesc": "We sent a verification link to your email",
+    "resend": "Resend",
+    "reset": "Reset Password",
+    "resetDesc": "Enter your email to receive a reset link",
+    "back": "Back to Sign In",
+    "error": {
+      "invalid": "Invalid email or password",
+      "required": "This field is required",      "email": "Please enter a valid email",
+      "password": "Password must be at least 6 characters"
+    }
+  },
+  "mainMenu": {
+    "title": "Main Menu",
+    "welcome": "Welcome",
+    "startChat": "Start Chat",
+    "createGroup": "Create Group",
+    "quickActions": "Quick Actions"
+  },
+  "profile": {
+    "title": "Profile",
+    "edit": "Edit Profile",
+    "username": "Username",
+    "displayName": "Display Name",
+    "email": "Email",
+    "changeEmail": "Change Email",
+    "changePassword": "Change Password",
+    "logout": "Sign Out",
+    "switchAccount": "Switch Account",
+    "deleteAccount": "Delete Account",
+    "deleteWarning": "All your data will be permanently deleted"
+  },
+  "contacts": {
+    "title": "Contacts",
+    "search": "Search for a user...",
+    "noResults": "No results found",
+    "add": "Add Contact",
+    "username": "Username",
+    "usernameDesc": "Search by username to add a friend",
+    "addFriend": "Add Friend",
+    "myUsername": "Your username: ",
+    "share": "Share your username"
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "Type your message...",
+    "voice": "Voice message",
+    "image": "Image",
+    "file": "File",
+    "delete": "Delete message",
+    "reply": "Reply",
+    "forward": "Forward",
+    "copy": "Copy",
+    "reactions": {
+      "like": "Like",
+      "love": "Love",
+      "laugh": "Laugh",
+      "wow": "Wow",      "sad": "Sad",
+      "angry": "Angry"
+    }
+  },
+  "groups": {
+    "title": "Groups",
+    "create": "Create Group",
+    "name": "Group Name",
+    "description": "Description",
+    "members": "Members",
+    "addMembers": "Add Members",
+    "invite": "Invite",
+    "leave": "Leave",
+    "delete": "Delete Group",
+    "admin": "You are admin"
+  },
+  "calls": {
+    "incoming": "Incoming Call",
+    "outgoing": "Calling...",
+    "connected": "Connected",
+    "ended": "Call Ended",
+    "audio": "Audio Call",
+    "video": "Video Call",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "camera": "Camera",
+    "hangup": "End",
+    "switch": "Switch"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No new notifications",
+    "markRead": "Mark as read",
+    "clear": "Clear all"
+  },
+  "atheer": {
+    "title": "Who is Atheer?",
+    "desc": "Atheer is a free and secure communication project...",
+    "learnMore": "Learn More"
+  },
+  "about": {
+    "title": "About Us",
+    "version": "Version",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
+  "privacy": {
+    "title": "Privacy Policy"
+  },
+  "terms": {    "title": "Terms of Service"
+  },
+  "support": {
+    "title": "Contact Developer",
+    "message": "Your message",
+    "send": "Send",
+    "sent": "Sent!"
+  },
+  "onboarding": {
+    "welcome": "Welcome to Atheer",
+    "step1": {
+      "title": "Connect Freely",
+      "desc": "Secure encrypted messaging"
+    },
+    "step2": {
+      "title": "Clear Calls",
+      "desc": "High quality audio & video"
+    },
+    "step3": {
+      "title": "Full Privacy",
+      "desc": "Control your data"
+    },
+    "getStarted": "Get Started"
+  },
+  "modals": {
+    "welcome": {
+      "title": "Welcome!",
+      "desc": "Atheer is a secure communication app",
+      "learn": "Learn More",
+      "close": "Got it"
+    },
+    "username": {
+      "title": "Choose a Username",
+      "desc": "Friends will use this to find you",
+      "placeholder": "Username",
+      "save": "Save",
+      "taken": "Username taken",
+      "available": "Available!"
+    },
+    "banned": {
+      "title": "Account Banned",
+      "desc": "Your account was banned for violating terms",
+      "appeal": "Appeal",
+      "close": "Exit"
+    },
+    "warning": {
+      "title": "Warning",
+      "close": "Got it"
+    },
+    "incomingCall": {      "accept": "Accept",
+      "reject": "Reject"
+    },
+    "install": {
+      "title": "Install App",
+      "desc": "For the best experience, install Atheer",
+      "install": "Install",
+      "later": "Later"
+    }
+  }
+}

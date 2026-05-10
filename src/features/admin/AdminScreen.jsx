@@ -5,15 +5,15 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   Search, Trash2, CheckCircle, XCircle, AlertTriangle, Download, Bell, Key,
-  Users, Shield, Zap, UserPlus, ArrowLeft, Copy, Check, Sparkles, RefreshCw
+  Users, Shield, Zap, UserPlus, ArrowLeft, Copy, Check, Sparkles
 } from 'lucide-react';
 import { db, auth } from '../../firebase/config';
 import {
   collection, query, getDocs, onSnapshot, doc, updateDoc, deleteDoc,
   writeBatch, orderBy, limit, addDoc, serverTimestamp, setDoc, where
 } from 'firebase/firestore';
+import { useLanguage } from '../../context/LanguageContext';
 
-// ───────── بطاقة إحصائية ─────────
 const StatCard = ({ icon: Icon, label, value, color, trend, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -38,19 +38,19 @@ const StatCard = ({ icon: Icon, label, value, color, trend, delay = 0 }) => (
   </motion.div>
 );
 
-// ───────── شارة الحالة ─────────
-const StatusBadge = ({ status }) => (
+const StatusBadge = ({ status, t }) => (
   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
     status === 'banned'
       ? 'bg-red-50 text-red-600 border-red-100'
       : 'bg-emerald-50 text-emerald-600 border-emerald-100'
   }`}>
     <span className={`w-1.5 h-1.5 rounded-full ${status === 'banned' ? 'bg-red-500' : 'bg-emerald-500 animate-pulse'}`} />
-    {status === 'banned' ? 'محظور' : 'نشط'}
+    {status === 'banned' ? t('admin.banned') : t('admin.active')}
   </span>
 );
 
 export default function AdminScreen({ onBack }) {
+  const { t } = useLanguage();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -119,14 +119,14 @@ export default function AdminScreen({ onBack }) {
     try {
       await updateDoc(doc(db, 'users', userId), { status: newStatus });
       await logAction(newStatus === 'banned' ? 'ban_user' : 'unban_user', userId);
-      showToast(newStatus === 'banned' ? 'تم حظر المستخدم' : 'تم فك الحظر');
+      showToast(newStatus === 'banned' ? t('admin.banSuccess') : t('admin.unbanSuccess'));
       refreshUsers();
-    } catch (e) { showToast('فشل في تحديث الحالة', 'error'); }
+    } catch (e) { showToast(t('admin.updateFailed'), 'error'); }
     finally { setActionLoading(null); }
   };
 
   const deleteUser = async (userId, username) => {
-    if (!confirm(`حذف نهائي لـ ${username || userId}؟ لا يمكن التراجع.`)) return;
+    if (!confirm(t('admin.confirmDelete', { username: username || userId }))) return;
     setActionLoading(userId);
     try {
       const batch = writeBatch(db);
@@ -137,9 +137,9 @@ export default function AdminScreen({ onBack }) {
       chatsSnap.forEach(chatDoc => batch.delete(doc(db, 'chats', chatDoc.id)));
       await batch.commit();
       await logAction('delete_user', userId, `username: ${username}`);
-      showToast('تم الحذف بنجاح');
+      showToast(t('admin.deleteSuccess'));
       refreshUsers();
-    } catch (e) { showToast('خطأ في الحذف', 'error'); }
+    } catch (e) { showToast(t('admin.deleteFailed'), 'error'); }
     finally { setActionLoading(null); }
   };
 
@@ -149,9 +149,9 @@ export default function AdminScreen({ onBack }) {
     try {
       await updateDoc(doc(db, 'users', userId), { warning: { message: warningText.trim(), timestamp: new Date() } });
       await logAction('warn_user', userId, warningText.trim());
-      showToast('تم إرسال التحذير');
+      showToast(t('admin.warningSent'));
       setShowWarning(null); setWarningText(''); refreshUsers();
-    } catch (e) { showToast('فشل الإرسال', 'error'); }
+    } catch (e) { showToast(t('admin.updateFailed'), 'error'); }
     finally { setActionLoading(null); }
   };
 
@@ -161,9 +161,9 @@ export default function AdminScreen({ onBack }) {
     try {
       await addDoc(collection(db, 'notifications'), { message: broadcastText.trim(), timestamp: serverTimestamp() });
       await logAction('broadcast', null, broadcastText.trim());
-      showToast('تم إرسال الإشعار العام');
+      showToast(t('admin.broadcastSent'));
       setBroadcastText(''); setShowBroadcast(false);
-    } catch (e) { showToast('فشل الإرسال', 'error'); }
+    } catch (e) { showToast(t('admin.updateFailed'), 'error'); }
     finally { setActionLoading(null); }
   };
 
@@ -195,10 +195,10 @@ export default function AdminScreen({ onBack }) {
       });
       setGeneratedKey(key);
       await copyToClipboard(key);
-      showToast(`✅ تم إنشاء ونسخ المفتاح: ${key}`);
+      showToast(t('admin.keyGenerated', { key }));
     } catch (e) {
       console.error('generateKey error', e);
-      showToast('فشل إنشاء المفتاح', 'error');
+      showToast(t('admin.keyFailed'), 'error');
     } finally {
       setActionLoading(null);
     }
@@ -210,7 +210,7 @@ export default function AdminScreen({ onBack }) {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
     link.download = `users_${new Date().toISOString().split('T')[0]}.csv`; link.click();
-    showToast('تم التصدير');
+    showToast(t('admin.exported'));
   };
 
   const filteredUsers = (users || []).filter(u =>
@@ -220,7 +220,6 @@ export default function AdminScreen({ onBack }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-24 text-right" dir="rtl">
-      {/* الهيدر الزجاجي */}
       <motion.header
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -236,9 +235,9 @@ export default function AdminScreen({ onBack }) {
               <div>
                 <div className="flex items-center gap-2">
                   <Shield className="w-6 h-6 text-purple-500" />
-                  <h1 className="text-2xl font-black text-gray-900 tracking-tight">لوحة الإدارة</h1>
+                  <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t('admin.title')}</h1>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">مراقبة وتحكم كامل</p>
+                <p className="text-sm text-gray-500 mt-1">{t('admin.subtitle')}</p>
               </div>
             </div>
 
@@ -250,7 +249,7 @@ export default function AdminScreen({ onBack }) {
                 disabled={actionLoading === 'key'}
                 className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-xs px-4 py-2 shadow-md shadow-emerald-500/20 transition-all active:scale-95 shrink-0 flex items-center gap-1.5 font-bold"
               >
-                <Key className="w-3.5 h-3.5" /> مفتاح دعوة
+                <Key className="w-3.5 h-3.5" /> {t('admin.inviteKey')}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -258,7 +257,7 @@ export default function AdminScreen({ onBack }) {
                 onClick={() => setShowBroadcast(true)}
                 className="rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs px-4 py-2 transition-all active:scale-95 shrink-0 flex items-center gap-1.5 font-bold"
               >
-                <Bell className="w-3.5 h-3.5" /> إشعار عام
+                <Bell className="w-3.5 h-3.5" /> {t('admin.broadcast')}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -266,24 +265,21 @@ export default function AdminScreen({ onBack }) {
                 onClick={exportCSV}
                 className="rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs px-4 py-2 transition-all active:scale-95 shrink-0 flex items-center gap-1.5 font-bold"
               >
-                <Download className="w-3.5 h-3.5" /> تصدير CSV
+                <Download className="w-3.5 h-3.5" /> {t('admin.exportCSV')}
               </motion.button>
             </div>
           </div>
         </div>
       </motion.header>
 
-      {/* المحتوى الرئيسي */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-8 space-y-8">
-        {/* البطاقات الإحصائية */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard icon={Users} label="إجمالي المستخدمين" value={stats.total} color="from-blue-500 to-cyan-500" delay={0.1} />
-          <StatCard icon={Zap} label="نشط الآن" value={stats.active} color="from-emerald-500 to-teal-500" trend={`${stats.total ? Math.round((stats.active / stats.total) * 100) : 0}%`} delay={0.2} />
-          <StatCard icon={Shield} label="محظورين" value={stats.banned} color="from-red-500 to-rose-500" delay={0.3} />
-          <StatCard icon={UserPlus} label="انضموا اليوم" value={stats.newToday} color="from-purple-500 to-indigo-500" delay={0.4} />
+          <StatCard icon={Users} label={t('admin.totalUsers')} value={stats.total} color="from-blue-500 to-cyan-500" delay={0.1} />
+          <StatCard icon={Zap} label={t('admin.activeNow')} value={stats.active} color="from-emerald-500 to-teal-500" trend={`${stats.total ? Math.round((stats.active / stats.total) * 100) : 0}%`} delay={0.2} />
+          <StatCard icon={Shield} label={t('admin.bannedUsers')} value={stats.banned} color="from-red-500 to-rose-500" delay={0.3} />
+          <StatCard icon={UserPlus} label={t('admin.joinedToday')} value={stats.newToday} color="from-purple-500 to-indigo-500" delay={0.4} />
         </div>
 
-        {/* شريط البحث */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -293,18 +289,17 @@ export default function AdminScreen({ onBack }) {
           <div className="relative flex-1 w-full group">
             <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-purple-500 transition-colors" />
             <Input
-              placeholder="بحث بالبريد أو المعرف..."
+              placeholder={t('admin.searchPlaceholder')}
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               className="pr-12 h-12 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200 focus:bg-white transition-all text-sm"
             />
           </div>
           <span className="text-xs text-gray-500 font-medium bg-gray-100 px-3 py-1.5 rounded-full shrink-0">
-            عرض {filteredUsers.length} / {stats.total}
+            {t('admin.showing', { count: filteredUsers.length, total: stats.total })}
           </span>
         </motion.div>
 
-        {/* قائمة المستخدمين */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -314,7 +309,7 @@ export default function AdminScreen({ onBack }) {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 space-y-3">
               <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm text-gray-500 font-medium">جاري تحميل البيانات...</p>
+              <p className="text-sm text-gray-500 font-medium">{t('common.loading')}</p>
             </div>
           ) : filteredUsers.length === 0 ? (
             <motion.div
@@ -323,8 +318,8 @@ export default function AdminScreen({ onBack }) {
               className="text-center py-16 text-gray-400"
             >
               <Users className="w-16 h-16 mx-auto mb-3 opacity-40" />
-              <p className="font-medium text-lg">لا يوجد نتائج مطابقة</p>
-              <p className="text-sm mt-1">جرب مصطلح بحث آخر</p>
+              <p className="font-medium text-lg">{t('admin.noResults')}</p>
+              <p className="text-sm mt-1">{t('admin.noResultsDesc')}</p>
             </motion.div>
           ) : (
             <div className="divide-y divide-gray-50">
@@ -349,10 +344,10 @@ export default function AdminScreen({ onBack }) {
                           {u.email}
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5 font-mono">
-                          @{u.username || 'غير محدد'}
+                          @{u.username || t('admin.unknown')}
                         </p>
                       </div>
-                      <StatusBadge status={u.status} />
+                      <StatusBadge status={u.status} t={t} />
                     </div>
 
                     <div className="flex items-center gap-2 justify-end">
@@ -366,7 +361,7 @@ export default function AdminScreen({ onBack }) {
                             autoFocus
                             value={warningText}
                             onChange={e => setWarningText(e.target.value)}
-                            placeholder="نص التحذير..."
+                            placeholder={t('admin.warningPlaceholder')}
                             className="h-8 text-xs rounded-lg bg-gray-50 border-gray-200"
                           />
                           <Button
@@ -375,7 +370,7 @@ export default function AdminScreen({ onBack }) {
                             disabled={!warningText.trim()}
                             className="h-8 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold"
                           >
-                            إرسال
+                            {t('common.send')}
                           </Button>
                           <Button
                             size="sm"
@@ -393,7 +388,7 @@ export default function AdminScreen({ onBack }) {
                             whileTap={{ scale: 0.9 }}
                             onClick={() => { setShowWarning(u.id); setWarningText(''); }}
                             className="p-2.5 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-all"
-                            title="تحذير"
+                            title={t('admin.warn')}
                           >
                             <AlertTriangle className="w-4 h-4" />
                           </motion.button>
@@ -406,7 +401,7 @@ export default function AdminScreen({ onBack }) {
                                 ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
                                 : 'bg-red-50 text-red-600 hover:bg-red-100'
                             }`}
-                            title={u.status === 'banned' ? 'فك الحظر' : 'حظر'}
+                            title={u.status === 'banned' ? t('admin.unban') : t('admin.ban')}
                           >
                             {u.status === 'banned' ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                           </motion.button>
@@ -415,7 +410,7 @@ export default function AdminScreen({ onBack }) {
                             whileTap={{ scale: 0.9 }}
                             onClick={() => deleteUser(u.id, u.username)}
                             className="p-2.5 rounded-xl bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all"
-                            title="حذف"
+                            title={t('admin.delete')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </motion.button>
@@ -430,7 +425,6 @@ export default function AdminScreen({ onBack }) {
         </motion.div>
       </main>
 
-      {/* مودال الإشعار العام */}
       <AnimatePresence>
         {showBroadcast && (
           <motion.div
@@ -451,7 +445,7 @@ export default function AdminScreen({ onBack }) {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Bell className="w-5 h-5 text-purple-500" />
-                  <h3 className="text-lg font-bold text-gray-900">إشعار عام</h3>
+                  <h3 className="text-lg font-bold text-gray-900">{t('admin.broadcast')}</h3>
                 </div>
                 <button
                   onClick={() => setShowBroadcast(false)}
@@ -463,7 +457,7 @@ export default function AdminScreen({ onBack }) {
               <textarea
                 value={broadcastText}
                 onChange={e => setBroadcastText(e.target.value)}
-                placeholder="اكتب رسالة الإشعار..."
+                placeholder={t('admin.broadcastPlaceholder')}
                 rows={4}
                 className="w-full rounded-xl bg-gray-50 border border-gray-200 p-3 text-sm focus:ring-2 focus:ring-purple-200 focus:border-transparent outline-none resize-none mb-4 transition-all"
               />
@@ -473,7 +467,7 @@ export default function AdminScreen({ onBack }) {
                   onClick={() => setShowBroadcast(false)}
                   className="flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all"
                 >
-                  إلغاء
+                  {t('common.cancel')}
                 </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.95 }}
@@ -481,7 +475,7 @@ export default function AdminScreen({ onBack }) {
                   disabled={!broadcastText.trim() || actionLoading === 'broadcast'}
                   className="flex-1 h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white font-bold shadow-md shadow-purple-500/20 transition-all disabled:opacity-50"
                 >
-                  {actionLoading === 'broadcast' ? 'جارٍ...' : 'إرسال للجميع'}
+                  {actionLoading === 'broadcast' ? t('common.loading') : t('admin.sendToAll')}
                 </motion.button>
               </div>
             </motion.div>
@@ -489,7 +483,6 @@ export default function AdminScreen({ onBack }) {
         )}
       </AnimatePresence>
 
-      {/* شريط مفتاح الدعوة */}
       <AnimatePresence>
         {generatedKey && (
           <motion.div
@@ -500,14 +493,14 @@ export default function AdminScreen({ onBack }) {
           >
             <Key className="w-5 h-5 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs opacity-80 mb-0.5">مفتاح الدعوة</p>
+              <p className="text-xs opacity-80 mb-0.5">{t('admin.inviteKey')}</p>
               <p className="font-mono font-bold text-sm truncate">{generatedKey}</p>
             </div>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => copyToClipboard(generatedKey)}
               className="p-2 hover:bg-white/20 rounded-lg transition-colors shrink-0"
-              title={copied ? 'تم النسخ' : 'نسخ مجدداً'}
+              title={copied ? t('common.copied') : t('common.copyAgain')}
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             </motion.button>
@@ -522,7 +515,6 @@ export default function AdminScreen({ onBack }) {
         )}
       </AnimatePresence>
 
-      {/* إشعار التوست */}
       <AnimatePresence>
         {toast.show && (
           <motion.div
