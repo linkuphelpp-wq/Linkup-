@@ -17,11 +17,12 @@ function arrayBufferToBase64(buffer) {
   return btoa(binary);
 }
 
+// ✅ تعديل: رموز استرداد مكونة من 6 أرقام
 function generateRecoveryCodes(count = 6) {
   const codes = [];
   for (let i = 0; i < count; i++) {
     let code = '';
-    for (let j = 0; j < 8; j++) code += Math.floor(Math.random() * 10);
+    for (let j = 0; j < 6; j++) code += Math.floor(Math.random() * 10);
     codes.push(code);
   }
   return codes;
@@ -112,7 +113,7 @@ export function AppLockProvider({ children }) {
     return false;
   }, []);
 
-  // ✅ إصلاح: التحقق من رمز الاسترداد
+  // ✅ تعديل: يقبل رمز استرداد مكون من 6 أرقام
   const unlockWithRecoveryCode = useCallback((code) => {
     const stored = localStorage.getItem('app_lock_recovery_codes');
     if (!stored) return false;
@@ -120,7 +121,7 @@ export function AppLockProvider({ children }) {
       let codes = JSON.parse(stored);
       const index = codes.indexOf(code);
       if (index !== -1) {
-        codes = codes.filter((_, i) => i !== index); // حذف الرمز المستخدم
+        codes = codes.filter((_, i) => i !== index);
         localStorage.setItem('app_lock_recovery_codes', JSON.stringify(codes));
         setRecoveryCodes(codes);
         setIsLocked(false);
@@ -150,7 +151,7 @@ export function AppLockProvider({ children }) {
     setAutoVerify(val);
   }, []);
 
-  // دوال بصمة الإصبع (WebAuthn)
+  // دوال بصمة الإصبع
   const enableBiometric = useCallback(async () => {
     try {
       const credential = await navigator.credentials.create({

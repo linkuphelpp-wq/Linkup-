@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Lock, Shield, Zap, CheckCircle, Eye, EyeOff, Fingerprint } from 'lucide-react';
+import { ArrowLeft, Lock, Shield, Zap, CheckCircle, Eye, EyeOff, Fingerprint, Copy } from 'lucide-react';
 import { useAppLock } from '../../context/AppLockContext';
 
 export default function AppLockScreen({ onBack }) {
@@ -71,37 +71,58 @@ export default function AppLockScreen({ onBack }) {
             <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
           <div className="flex items-center gap-2">
-            <Lock className="w-6 h-6 text-purple-500" />
+            <Shield className="w-6 h-6 text-purple-500" />
             <h1 className="text-2xl font-black text-gray-900">قفل التطبيق</h1>
           </div>
         </div>
-        <p className="text-sm text-gray-500 mt-1">PIN وبصمة ورموز استرداد</p>
+        <p className="text-sm text-gray-500 mt-1">PIN · بصمة · استرداد احتياطي</p>
       </motion.header>
 
       <main className="px-4 py-6 space-y-6 max-w-lg mx-auto">
         {showRecoveryCodes ? (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm"
+          >
             <div className="text-center mb-4">
-              <div className="p-3 rounded-xl bg-amber-50 text-amber-600 inline-block mb-3"><Shield className="w-6 h-6" /></div>
+              <div className="p-3 rounded-xl bg-amber-50 text-amber-600 inline-block mb-3">
+                <Shield className="w-6 h-6" />
+              </div>
               <h2 className="font-bold text-gray-900">رموز الاسترداد الاحتياطية</h2>
-              <p className="text-xs text-gray-500 mt-1">احفظ هذه الرموز في مكان آمن. كل رمز يُستخدم لمرة واحدة.</p>
+              <p className="text-xs text-gray-500 mt-1">احفظ هذه الرموز في مكان آمن. كل رمز يُستخدم لمرة واحدة لفتح التطبيق إذا نسيت الـ PIN.</p>
             </div>
             <div className="bg-gray-50 rounded-xl p-3 mb-4 grid grid-cols-2 gap-2">
               {recoveryCodes.map((code, i) => (
-                <div key={i} className="bg-white border border-gray-200 rounded-lg p-2 text-center font-mono text-sm tracking-widest">{code}</div>
+                <div key={i} className="bg-white border border-gray-200 rounded-lg p-2 text-center font-mono text-sm tracking-widest select-all">
+                  {code}
+                </div>
               ))}
             </div>
-            <button onClick={handleCopyCodes} className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-all active:scale-[0.98] mb-2">
-              نسخ جميع الرموز
-            </button>
-            <button onClick={() => { setShowRecoveryCodes(false); setRecoveryCodes([]); }} className="w-full h-10 text-sm text-gray-500 hover:text-purple-600 transition-colors">
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={handleCopyCodes}
+              className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+            >
+              <Copy className="w-4 h-4" /> نسخ جميع الرموز
+            </motion.button>
+            <button
+              onClick={() => { setShowRecoveryCodes(false); setRecoveryCodes([]); }}
+              className="w-full h-10 text-sm text-gray-500 hover:text-purple-600 transition-colors mt-2"
+            >
               تم، لقد حفظتها
             </button>
           </motion.div>
         ) : !lockEnabled ? (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm"
+          >
             <div className="text-center mb-6">
-              <div className="p-3 rounded-xl bg-purple-50 text-purple-600 inline-block mb-3"><Shield className="w-6 h-6" /></div>
+              <div className="p-3 rounded-xl bg-purple-50 text-purple-600 inline-block mb-3">
+                <Lock className="w-6 h-6" />
+              </div>
               <p className="font-bold text-gray-900">إنشاء رمز PIN جديد</p>
               <p className="text-xs text-gray-500 mt-1">أدخل 4 إلى 20 رقماً</p>
             </div>
@@ -119,16 +140,25 @@ export default function AppLockScreen({ onBack }) {
                       if (val.length <= 20) setNewPin(val);
                     }}
                     placeholder="أدخل الرمز (4 إلى 20 رقماً)"
-                    className="w-full h-14 pr-12 pl-12 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full h-14 pr-12 pl-12 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   />
-                  <button type="button" onClick={() => setShowPin(!showPin)} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  >
                     {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
                 {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-                <button onClick={handleCreate} disabled={newPin.length < 4} className="w-full h-12 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-300 text-white rounded-xl font-bold transition-all active:scale-[0.98]">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleCreate}
+                  disabled={newPin.length < 4}
+                  className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-bold transition-all shadow-md shadow-purple-100"
+                >
                   متابعة
-                </button>
+                </motion.button>
               </div>
             ) : (
               <div className="space-y-4">
@@ -142,66 +172,109 @@ export default function AppLockScreen({ onBack }) {
                     if (val.length <= 20) setConfirmPin(val);
                   }}
                   placeholder="تأكيد الرمز"
-                  className="w-full h-14 px-4 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full h-14 px-4 rounded-xl border border-gray-200 bg-gray-50 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 />
                 {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-                <button onClick={handleConfirm} disabled={confirmPin.length < 4} className="w-full h-12 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-300 text-white rounded-xl font-bold transition-all active:scale-[0.98]">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleConfirm}
+                  disabled={confirmPin.length < 4}
+                  className="w-full h-12 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:from-gray-300 disabled:to-gray-300 text-white rounded-xl font-bold transition-all shadow-md shadow-emerald-100"
+                >
                   حفظ الرمز
-                </button>
+                </motion.button>
               </div>
             )}
           </motion.div>
         ) : (
           <>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm">
+            {/* الحالة النشطة للقفل */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm"
+            >
               <div className="flex items-center justify-between mb-4">
-                <span className="font-bold text-gray-900">القفل مفعّل</span>
-                <span className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
+                  <span className="font-bold text-gray-900">القفل مفعّل</span>
+                </div>
+                <Shield className="w-5 h-5 text-emerald-500" />
               </div>
-              <button onClick={handleDisable} className="w-full h-12 bg-red-500 hover:bg-red-400 text-white rounded-xl font-bold transition-all active:scale-[0.98]">
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={handleDisable}
+                className="w-full h-12 bg-red-500 hover:bg-red-400 text-white rounded-xl font-bold transition-all shadow-md shadow-red-100"
+              >
                 إلغاء القفل
-              </button>
+              </motion.button>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm">
+            {/* التحقق التلقائي */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-blue-50 text-blue-600"><Zap className="w-6 h-6" /></div>
+                  <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
+                    <Zap className="w-6 h-6" />
+                  </div>
                   <div>
                     <p className="font-bold text-gray-900">التحقق التلقائي</p>
                     <p className="text-xs text-gray-500 mt-1">دخول فوري عند اكتمال الرمز</p>
                   </div>
                 </div>
-                <button onClick={() => setAutoVerifyOption(!autoVerify)} className={`w-14 h-8 rounded-full transition-colors relative ${autoVerify ? 'bg-blue-600' : 'bg-gray-200'}`}>
-                  <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${autoVerify ? 'translate-x-6' : ''}`} />
+                <button
+                  onClick={() => setAutoVerifyOption(!autoVerify)}
+                  className={`w-14 h-8 rounded-full transition-colors relative ${autoVerify ? 'bg-blue-600' : 'bg-gray-200'}`}
+                >
+                  <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform duration-300 ${autoVerify ? 'translate-x-6' : ''}`} />
                 </button>
               </div>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm">
+            {/* بصمة الإصبع */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl p-5 border border-gray-100/80 shadow-sm"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600"><Fingerprint className="w-6 h-6" /></div>
+                  <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600">
+                    <Fingerprint className="w-6 h-6" />
+                  </div>
                   <div>
                     <p className="font-bold text-gray-900">فتح القفل بالبصمة</p>
                     <p className="text-xs text-gray-500 mt-1">استخدم بصمة إصبعك بدلاً من الرمز</p>
                   </div>
                 </div>
                 <button
-                  onClick={() => biometricEnabled ? disableBiometric() : enableBiometric().then(ok => { if (!ok) alert('لم نتمكن من تفعيل البصمة'); })}
+                  onClick={() => {
+                    biometricEnabled
+                      ? disableBiometric()
+                      : enableBiometric().then(ok => { if (!ok) alert('فشل تفعيل البصمة، تأكد من دعم الجهاز'); });
+                  }}
                   className={`w-14 h-8 rounded-full transition-colors relative ${biometricEnabled ? 'bg-emerald-600' : 'bg-gray-200'}`}
                 >
-                  <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${biometricEnabled ? 'translate-x-6' : ''}`} />
+                  <span className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow transition-transform duration-300 ${biometricEnabled ? 'translate-x-6' : ''}`} />
                 </button>
               </div>
             </motion.div>
           </>
         )}
 
+        {/* رسالة الحفظ المؤقت */}
         {saved && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 text-emerald-700">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 text-emerald-700"
+          >
             <CheckCircle className="w-5 h-5" />
-            <span className="text-sm font-bold">تم النسخ بنجاح</span>
+            <span className="text-sm font-bold">تم نسخ الرموز بنجاح</span>
           </motion.div>
         )}
       </main>
