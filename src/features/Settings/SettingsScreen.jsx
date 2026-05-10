@@ -47,7 +47,8 @@ const SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onTog
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
             />
-          </button>        ) : (
+          </button>
+        ) : (
           <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" />
         )}
       </div>
@@ -96,7 +97,8 @@ const Section = ({ title, children, delay = 0, icon: Icon }) => (
     className="space-y-4"
   >
     <div className="flex items-center gap-3 px-1 mb-2">
-      {Icon && <Icon className="w-5 h-5 text-purple-500" />}      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">{title}</h3>
+      {Icon && <Icon className="w-5 h-5 text-purple-500" />}
+      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">{title}</h3>
     </div>
     <div className="space-y-3">{children}</div>
   </motion.section>
@@ -108,12 +110,12 @@ export default function SettingsScreen({
   onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker,
   fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner, onBack
 }) {
-  const { language, changeLanguage, t } = useLanguage(); // ✅ جديد: استخدام LanguageContext
+  const { language, changeLanguage, t } = useLanguage();
   
   const [showFontModal, setShowFontModal] = useState(false);
   const [showSizeModal, setShowSizeModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
-  const [showLanguageModal, setShowLanguageModal] = useState(false); // ✅ جديد: حالة مودال اللغة
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [resetText, setResetText] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
   const [compactMode, setCompactMode] = useState(() => localStorage.getItem('compactMode') === 'true');
@@ -141,11 +143,11 @@ export default function SettingsScreen({
     { v: 'ibm-plex', l: 'IBM Plex', desc: t('settings.fonts.ibm-plex'), featured: true }
   ];
 
-  // ✅ جديد: خيارات اللغات
+  // ✅ خيارات اللغات (بدون الفرنسية)
   const languages = [
     { v: 'ar', l: t('settings.languages.ar'), flag: '🇸🇦' },
-    { v: 'en', l: t('settings.languages.en'), flag: '🇬🇧' },
-    { v: 'fr', l: t('settings.languages.fr'), flag: '🇫🇷' }  ];
+    { v: 'en', l: t('settings.languages.en'), flag: '🇬🇧' }
+  ];
 
   const handleResetApp = async () => {
     if (resetText.trim() !== t('common.delete')) return;
@@ -169,7 +171,6 @@ export default function SettingsScreen({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right" dir="rtl">
-      {/* هيدر الإعدادات الرئيسي (الذي سيبقى) */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -179,14 +180,12 @@ export default function SettingsScreen({
         <p className="text-sm text-gray-500 mt-1">{t('settings.subtitle')}</p>
       </motion.div>
 
-      {/* المحتوى الرئيسي */}
       <div className="px-4 py-6 space-y-8 max-w-lg mx-auto">
         <Section title={t('settings.sections.account')} delay={0.1} icon={User}>
           <SettingRow icon={User} label={t('settings.items.profile.label')} desc={t('settings.items.profile.desc')} onClick={onOpenProfile} color="purple" />
         </Section>
 
         <Section title={t('settings.sections.appearance')} delay={0.2} icon={Palette}>
-          {/* ✅ جديد: إعداد اللغة */}
           <SettingRow icon={Globe} label={t('settings.items.language.label')} desc={t('settings.items.language.desc')} onClick={() => setShowLanguageModal(true)} color="blue" />
           <SettingRow icon={Palette} label={t('settings.items.fontSize.label')} desc={sizes.find(s => s.v === fontSize)?.l} onClick={() => setShowSizeModal(true)} color="blue" />
           <SettingRow icon={Palette} label={t('settings.items.fontFamily.label')} desc={fonts.find(f => f.v === fontFamily)?.l} onClick={() => setShowFontModal(true)} color="blue" />
@@ -194,7 +193,8 @@ export default function SettingsScreen({
         </Section>
 
         <Section title={t('settings.sections.calls')} delay={0.3} icon={Mic}>
-          <SettingRow icon={Mic} label={t('settings.items.muteMic.label')} toggle isToggled={muteMicOnJoin} onToggle={onToggleMuteMic} color="orange" />          <SettingRow icon={Speaker} label={t('settings.items.speaker.label')} toggle isToggled={speakerDefault} onToggle={onToggleSpeaker} color="orange" />
+          <SettingRow icon={Mic} label={t('settings.items.muteMic.label')} toggle isToggled={muteMicOnJoin} onToggle={onToggleMuteMic} color="orange" />
+          <SettingRow icon={Speaker} label={t('settings.items.speaker.label')} toggle isToggled={speakerDefault} onToggle={onToggleSpeaker} color="orange" />
         </Section>
 
         <Section title={t('settings.sections.privacy')} delay={0.4} icon={Lock}>
@@ -210,7 +210,6 @@ export default function SettingsScreen({
           {isAdmin && <SettingRow icon={Shield} label={t('settings.items.admin.label')} desc={t('settings.items.admin.desc')} onClick={onOpenAdmin} color="orange" />}
         </Section>
 
-        {/* بطاقات الإجراءات السريعة */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -236,14 +235,14 @@ export default function SettingsScreen({
         </motion.div>
       </div>
 
-      {/* شريط سفلي ثابت */}
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-gray-200/60 px-5 py-2 flex items-center justify-between shadow-lg"
         style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
       >
         <button
           onClick={onBack}
           className="p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all"
-        >          <ArrowLeft className="w-6 h-6 text-gray-700" />
+        >
+          <ArrowLeft className="w-6 h-6 text-gray-700" />
         </button>
 
         <span className="text-sm font-medium text-gray-500">{t('common.menu')}</span>
@@ -260,7 +259,6 @@ export default function SettingsScreen({
         )}
       </div>
 
-      {/* ✅ جديد: مودال اختيار اللغة */}
       <SimpleModal open={showLanguageModal} onClose={() => setShowLanguageModal(false)} title={t('settings.modals.language.title')}>
         <div className="space-y-2">
           {languages.map(lang => (
@@ -289,10 +287,10 @@ export default function SettingsScreen({
         </div>
       </SimpleModal>
 
-      {/* النوافذ المنبثقة الأخرى (Fonts, Sizes, Reset) */}
       <SimpleModal open={showSizeModal} onClose={() => setShowSizeModal(false)} title={t('settings.modals.fontSize.title')}>
         <div className="space-y-2">
-          {sizes.map(s => (            <motion.button
+          {sizes.map(s => (
+            <motion.button
               key={s.v}
               whileHover={{ scale: 1.02, backgroundColor: '#f5f3ff' }}
               whileTap={{ scale: 0.97 }}
@@ -341,6 +339,7 @@ export default function SettingsScreen({
           ))}
         </div>
       </SimpleModal>
+      
       <SimpleModal open={showResetModal} onClose={() => setShowResetModal(false)} title={t('settings.modals.reset.title')}>
         <div className="space-y-5">
           <div className="flex flex-col items-center gap-3">
