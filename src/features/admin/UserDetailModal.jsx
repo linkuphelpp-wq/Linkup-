@@ -1,19 +1,22 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Mail, User, Calendar, Clock, Shield, Users, MessageCircle, X, Sparkles } from 'lucide-react';
+import { Mail, User, Calendar, Clock, Shield, Users, X, Sparkles } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function UserDetailModal({ user, onClose }) {
+  const { t } = useLanguage();
+
   if (!user) return null;
 
   const isBanned = user.status === 'banned';
 
   const details = [
-    { icon: Mail, label: 'البريد الإلكتروني', value: user.email },
-    { icon: User, label: 'المعرف', value: `@${user.username || '—'}` },
-    { icon: Calendar, label: 'تاريخ الانضمام', value: user.createdAt?.toDate?.()?.toLocaleDateString('ar-SA') || '—' },
-    { icon: Clock, label: 'آخر ظهور', value: user.lastSeen?.toDate?.()?.toLocaleString('ar-SA') || '—' },
-    { icon: Shield, label: 'حالة الحساب', value: isBanned ? 'محظور' : 'نشط', color: isBanned ? 'text-red-600' : 'text-emerald-600' },
-    { icon: Users, label: 'جهات الاتصال', value: user.contacts?.length || 0 },
+    { icon: Mail, label: t('admin.email'), value: user.email },
+    { icon: User, label: t('admin.username'), value: `@${user.username || t('admin.unknown')}` },
+    { icon: Calendar, label: t('admin.joinDate'), value: user.createdAt?.toDate?.()?.toLocaleDateString('ar-SA') || '—' },
+    { icon: Clock, label: t('admin.lastSeen'), value: user.lastSeen?.toDate?.()?.toLocaleString('ar-SA') || '—' },
+    { icon: Shield, label: t('admin.accountStatus'), value: isBanned ? t('admin.banned') : t('admin.active'), color: isBanned ? 'text-red-600' : 'text-emerald-600' },
+    { icon: Users, label: t('admin.contacts'), value: user.contacts?.length || 0 },
   ];
 
   return (
@@ -33,15 +36,13 @@ export default function UserDetailModal({ user, onClose }) {
           className="bg-white rounded-3xl p-0 w-full max-w-sm shadow-2xl border border-gray-100 overflow-hidden"
           onClick={e => e.stopPropagation()}
         >
-          {/* شريط الحالة العلوي */}
           <div className={`h-1.5 w-full ${isBanned ? 'bg-gradient-to-r from-red-400 to-red-500' : 'bg-gradient-to-r from-emerald-400 to-teal-500'}`} />
           
           <div className="p-6">
-            {/* رأس النافذة */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-purple-500" />
-                <h2 className="text-xl font-bold text-gray-900">تفاصيل المستخدم</h2>
+                <h2 className="text-xl font-bold text-gray-900">{t('admin.userDetails')}</h2>
               </div>
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -53,7 +54,6 @@ export default function UserDetailModal({ user, onClose }) {
               </motion.button>
             </div>
 
-            {/* الصورة الرمزية */}
             <div className="flex flex-col items-center mb-6">
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
@@ -76,7 +76,6 @@ export default function UserDetailModal({ user, onClose }) {
                 {user.displayName || user.email?.split('@')[0]}
               </motion.p>
               
-              {/* شارة الحالة */}
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -86,11 +85,10 @@ export default function UserDetailModal({ user, onClose }) {
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${isBanned ? 'bg-red-500' : 'bg-emerald-500 animate-pulse'}`} />
-                {isBanned ? 'محظور' : 'نشط'}
+                {isBanned ? t('admin.banned') : t('admin.active')}
               </motion.span>
             </div>
 
-            {/* قائمة التفاصيل */}
             <div className="space-y-2">
               {details.map((item, index) => (
                 <motion.div
@@ -100,7 +98,7 @@ export default function UserDetailModal({ user, onClose }) {
                   transition={{ delay: 0.15 + index * 0.05 }}
                   className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-sm transition-all"
                 >
-                  <div className={`p-2 rounded-lg ${isBanned && item.label === 'حالة الحساب' ? 'bg-red-100 text-red-600' : 'bg-purple-50 text-purple-600'}`}>
+                  <div className={`p-2 rounded-lg ${isBanned && item.label === t('admin.accountStatus') ? 'bg-red-100 text-red-600' : 'bg-purple-50 text-purple-600'}`}>
                     <item.icon className="w-4 h-4" />
                   </div>
                   <div className="flex-1 text-right min-w-0">
@@ -113,14 +111,13 @@ export default function UserDetailModal({ user, onClose }) {
               ))}
             </div>
 
-            {/* زر الإغلاق */}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               onClick={onClose}
               className="w-full mt-4 h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white font-bold shadow-md shadow-purple-500/20 hover:shadow-lg transition-all"
             >
-              إغلاق
+              {t('common.close')}
             </motion.button>
           </div>
         </motion.div>
