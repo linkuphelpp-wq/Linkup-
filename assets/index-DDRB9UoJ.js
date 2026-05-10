@@ -69221,13 +69221,14 @@ function CreateGroupScreen({ onBack }) {
 //#endregion
 //#region src/features/home/MainMenuScreen.jsx
 function MainMenuScreen({ onNavigate, username }) {
+	const { t } = useLanguage();
 	const user = auth.currentUser;
 	const [copied, setCopied] = (0, import_react.useState)(false);
 	const [idVisible, setIdVisible] = (0, import_react.useState)(true);
-	const displayName = user?.displayName || user?.email?.split("@")[0] || "مستخدم";
-	const userHandle = username || "غير محدد";
+	const displayName = user?.displayName || user?.email?.split("@")[0] || t("mainMenu.user");
+	const userHandle = username || t("mainMenu.undefined");
 	const handleCopy = async () => {
-		if (!username || username === "غير محدد") return;
+		if (!username || username === t("mainMenu.undefined")) return;
 		try {
 			await navigator.clipboard.writeText(username);
 			setCopied(true);
@@ -69237,15 +69238,15 @@ function MainMenuScreen({ onNavigate, username }) {
 		}
 	};
 	const quickActions = [{
-		label: "جهات الاتصال",
-		desc: "إدارة القائمة",
+		label: t("mainMenu.contacts"),
+		desc: t("mainMenu.contactsDesc"),
 		icon: Users,
 		onClick: () => onNavigate?.("contacts"),
 		gradient: "from-blue-500 to-cyan-500",
 		shadowColor: "shadow-blue-200"
 	}, {
-		label: "الإعدادات",
-		desc: "تخصيص التطبيق",
+		label: t("mainMenu.settings"),
+		desc: t("mainMenu.settingsDesc"),
 		icon: Settings,
 		onClick: () => onNavigate?.("settings"),
 		gradient: "from-purple-500 to-indigo-500",
@@ -69333,11 +69334,11 @@ function MainMenuScreen({ onNavigate, username }) {
 							className: "flex items-center justify-between mb-3",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 								className: "text-sm font-bold text-gray-800",
-								children: "اسم المستخدم الخاص بك"
+								children: t("mainMenu.myUsername")
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								onClick: () => setIdVisible(!idVisible),
 								className: "text-xs text-gray-500 hover:text-purple-600 font-medium flex items-center gap-1 transition-colors",
-								children: [idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" }), idVisible ? "إخفاء" : "إظهار"]
+								children: [idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" }), idVisible ? t("mainMenu.hide") : t("mainMenu.show")]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -69349,18 +69350,14 @@ function MainMenuScreen({ onNavigate, username }) {
 								whileHover: { scale: 1.05 },
 								whileTap: { scale: .9 },
 								onClick: handleCopy,
-								disabled: !username || username === "غير محدد",
+								disabled: !username || username === t("mainMenu.undefined"),
 								className: "mr-3 p-3 rounded-xl bg-purple-500 text-white hover:bg-purple-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md",
 								children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-5 h-5" })
 							})]
 						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-[11px] text-gray-500 mt-3 text-center font-medium",
-							children: [
-								"شارك اسم المستخدم (@",
-								username,
-								") مع أصدقائك ليعثروا عليك بسهولة في جهات الاتصال."
-							]
+							children: t("mainMenu.shareDesc", { username: username || t("mainMenu.undefined") })
 						})
 					]
 				}),
