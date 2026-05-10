@@ -62303,7 +62303,6 @@ function ContactsScreen({ onCall, onChat }) {
 //#endregion
 //#region src/features/atheer/AtheerScreen.jsx
 function AtheerScreen({ onBack }) {
-	const { t } = useLanguage();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen bg-slate-50 relative overflow-hidden",
 		dir: "rtl",
@@ -62329,7 +62328,7 @@ function AtheerScreen({ onBack }) {
 						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 						className: "text-xl font-black text-gray-900 tracking-tight",
-						children: t("atheer.title")
+						children: "من هو أثير؟"
 					})]
 				})
 			}),
@@ -62347,18 +62346,41 @@ function AtheerScreen({ onBack }) {
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 									className: "text-2xl font-black mb-2",
-									children: t("atheer.name")
+									children: "أثير المطور"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 									className: "text-purple-200 text-sm leading-relaxed",
-									children: t("atheer.desc")
+									children: "مؤسس LinkUp | صانع التجارب الرقمية الهادئة"
 								})
 							]
 						})]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "bg-white/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-lg border border-white/60 space-y-5 text-gray-700 leading-loose text-justify text-sm md:text-base",
-						children: t("atheer.content", { returnObjects: true })?.map((paragraph, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: paragraph }, index))
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "اسمي أثير، وهذا التطبيق بين يديك اسمه Linkup، وما يجمع بين الاسمين ليس مجرد فكرة عابرة أو مشروع تجاري، بل قصة كاملة بدأت من سؤال واحد ظل يلح عليّ كلما فتحت هاتفي: لماذا كل شيء في هذا العالم الرقمي إما يسرق وقتي أو يسرق بياناتي أو يطلب مني مالًا مقابل لحظة هدوء؟" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "أنا لا أمثل شركة، ولا خلفي مستثمرون، ولا يوجد مكتب فاخر يحمل لوحة باسمي، كل ما في الأمر أنني شخص قرر أن يصنع مساحته الخاصة بهدوء، مساحة لا يشوهها إعلان مقتحم ولا يثقلها اشتراك شهري ولا يعكر صفوها شعور دائم بأن هناك من يتنصت، مساحة أضع فيها توقيعي الشخصي بكل ثقة وأقول لك: هذا صنعته لك، خذه، ولا ترد لي شيئًا." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Linkup هو الابن الروحي لهذه الفلسفة، تطبيق ولد من رحم القناعة وليس من رحم السوق، لم أصنعه لأن هناك فجوة تجارية يجب ملؤها، بل صنعته لأنني ببساطة أردت أن أتصل بمن أحب دون أن أشعر أنني سلعة، أردت أن أسمع صوت أمي دون أن تقاطعنا نافذة منبثقة، أردت أن أضحك مع صديق قديم دون أن أعرف أن حديثنا حُلل لاستهدافنا بإعلان لاحق، وحين بحثت عن أداة تمنحني هذا النقاء لم أجدها، فقررت أن أصنعها بنفسي." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "bg-purple-50 border-r-4 border-purple-400 p-4 rounded-r-xl my-4",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-purple-900 font-medium italic",
+									children: "لهذا حين ترى اسم أثير على أي تطبيق، فأنت لا ترى علامة تجارية، بل ترى وعدًا شخصيًا من إنسان يعرف أن سمعته مرهونة بكل سطر برمجي يكتبه، وعد بأن هذا المكان الرقمي الصغير سيبقى نظيفًا، حرًا، وآمنًا، ليس لأن القانون يلزمني بذلك، بل لأن ضميري يفعل."
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "في Linkup لا يوجد سوى ما تحتاجه فعلًا: صوت نقي يصل كأن المتحدث جالس بجانبك، صورة واضحة تنقل ملامح الوجوه دون تشويش، مساحة صغيرة للكتابة السريعة أثناء المكالمة تمرر فيها فكرة أو رابطًا وكأنك تهمس في أذن الطرف الآخر، وكل هذا يحدث خلف جدار سميك من الخصوصية الكاملة التي لا يستطيع أحد اختراقها، حتى أنا شخصيًا أقف خارج هذا الجدار ولا أملك مفاتيحه." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "لا إعلانات تعطل تجربتك، لا اشتراكات تخفي خلفها الميزات الحقيقية، كل ما في التطبيق مفتوح لك من اللحظة الأولى وإلى الأبد، لأنني ببساطة لا أرى أن جودة الصوت أو وضوح الصورة ينبغي أن يكونا ترفًا يدفع المرء مقابله، هما حق أساسي مثل الهواء النقي الذي يجب ألا يباع." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "في زمن صار فيه المستخدم مجرد رقم في تقرير أرباح ربع سنوية، Linkup هو محاولتي المتواضعة لإعادة تعريف العلاقة بين الإنسان وتطبيقه، علاقة لا تقوم على الاستغلال بل على الثقة، لا تقوم على المراقبة بل على الاحترام، لا تقوم على الأخذ بل على العطاء." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "لست هنا لأبيعك شيئًا، ولا لأقنعك أن تطبيقي أفضل تطبيق في العالم، فأنا أعرف أنه ليس كذلك، لكن ما أعرفه يقينًا أن هذا التطبيق صُنع لك وليس ضدي، صُنع ليخدمك أنت لا ليخدمني أنا، صُنع وفي قلبه مبدأ واحد بسيط: أنت إنسان تستحق أن تتواصل بكرامة." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900 mt-4",
+								children: "مرحبًا بك في Linkup، أهلاً بك في مساحة تحمل اسمي وتوقيعي وضميري، هنا لا يوجد مستخدمون ولا عملاء، يوجد فقط بشر مثلي ومثلك يريدون أن يتحدثوا بحرية وأمان، وأنا أعدك أن هذه المساحة ستبقى كما هي دائمًا، هادئة، نظيفة، وصادقة، تمامًا كما وعدتك أول مرة."
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "mt-4 pt-4 border-t border-gray-200 text-gray-500 italic",
+								children: "هذا أنا، وهذا تطبيقي، وهذه دعوة مفتوحة لك لتكون جزءًا من عالم أثير الرقمي، حيث البساطة فلسفة، والخصوصية عهد، والتواصل بين الناس عودة إلى الجوهر الأول: صوت إنسان يصل إلى إنسان آخر، دون ضجيج ودون مقابل."
+							})
+						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "grid grid-cols-1 md:grid-cols-2 gap-4 pt-4",
@@ -62389,10 +62411,10 @@ function AtheerScreen({ onBack }) {
 									className: "flex-1",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "font-bold text-gray-900",
-										children: t("atheer.contactEmail")
+										children: "تواصل عبر البريد"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "text-xs text-gray-500 mt-0.5",
-										children: t("atheer.contactEmailDesc")
+										children: "رد سريع ومباشر"
 									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
@@ -62425,10 +62447,10 @@ function AtheerScreen({ onBack }) {
 									className: "flex-1",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "font-bold text-gray-900",
-										children: t("atheer.contactWhatsapp")
+										children: "تواصل عبر واتساب"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "text-xs text-gray-500 mt-0.5",
-										children: t("atheer.contactWhatsappDesc")
+										children: "محادثة فورية وآمنة"
 									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
@@ -62452,7 +62474,6 @@ function AtheerScreen({ onBack }) {
 //#endregion
 //#region src/features/about/AboutScreen.jsx
 function AboutScreen({ onBack }) {
-	const { t } = useLanguage();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen bg-slate-50 relative overflow-hidden",
 		dir: "rtl",
@@ -62478,7 +62499,7 @@ function AboutScreen({ onBack }) {
 						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 						className: "text-xl font-black text-gray-900 tracking-tight",
-						children: t("about.title")
+						children: "من نحن"
 					})]
 				})
 			}),
@@ -62490,9 +62511,9 @@ function AboutScreen({ onBack }) {
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "relative z-10",
 							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "inline-block px-3 py-1 bg-white/20 backdrop-blur rounded-full text-[10px] font-bold tracking-wide mb-4 border border-white/10",
-									children: [t("about.version"), " 1.0.0 | تحديث مستمر"]
+									children: "الإصدار 1.0.0 | تحديث مستمر"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 									className: "text-3xl font-black tracking-tight mb-3",
@@ -62500,14 +62521,34 @@ function AboutScreen({ onBack }) {
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 									className: "text-indigo-100 leading-relaxed text-sm",
-									children: t("about.tagline")
+									children: "منصة تواصل عصرية صُممت لمن يقدر الخصوصية والسرعة والبساطة."
 								})
 							]
 						})]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "bg-white/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-lg border border-white/60 space-y-5 text-gray-700 leading-loose text-justify text-sm md:text-base",
-						children: t("about.content", { returnObjects: true })?.map((paragraph, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: paragraph }, index))
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "نحن لسنا شركة، ولستَ تقرأ الآن كتيبًا تعريفيًا كتبه قسم التسويق، نحن مجرد فكرة خرجت من رأس شخص واحد هو أنا، أثير، ووجدت طريقها إلى هاتفك تحت اسم Linkup، اسم اخترته بعناية لأنه ببساطة ما نفعله: نوصلك بمن تحب، لا أكثر ولا أقل، دون تعقيد ودون مقابل ودون أن نجعل من أنفسنا حاجزًا بينك وبين صوت من تنتظره." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "حين تقرأ \"نحن\" في هذا النص فأنت لا تقرأ عن فريق عمل ضخم ولا عن هيكل تنظيمي ولا عن مجلس إدارة، أنا أثير وحدي، وخلفي قناعة واحدة ظلت ترافقني في كل مشروع أصنعه: التكنولوجيا يجب أن تخدم الإنسان لا أن تستعبده، أنا هنا لأنني أرفض فكرة أن كل نقرة على الهاتف يجب أن يتبعها إعلان، وأن كل دقيقة اتصال يجب أن تُدفع، وأن كل خصوصية يجب أن تُباع، هذا الرفض هو نقطة البداية." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "bg-blue-50 border-r-4 border-blue-400 p-4 rounded-r-xl my-4",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-blue-900 font-medium italic",
+									children: "Linkup خرج إلى النور ليكون مساحة اتصال نقية، لا تعقيد فيها ولا تشويش، تفتح التطبيق فتجده بسيطًا لدرجة أنك لا تحتاج إلى شرح، تضغط على اسم من تحب فيتصل، تتحدث بصوت واضح كأن الشخص في الغرفة المجاورة."
+								})
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "ترى وجهه بنقاء يجعلك تنسى أن بينكما شاشات ومسافات وكيلومترات من كابلات الإنترنت، تكتب له ملاحظة سريعة أثناء المكالمة وهو يقرؤها في لحظتها، وكل هذا يحدث في ممر آمن تمامًا، لا أحد يستمع، لا أحد يتطفل، لا أحد يحلل كلامكما ليبيعكما شيئًا لاحقًا، حتى أنا شخصيًا لا أستطيع الوصول إلى ما يدور بينكما لأن التطبيق صُمم أصلًا ليكون حصينًا حتى من صانعه." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "نحن لا نجمع بياناتك لنبيعها لأننا ببساطة لا نجمعها من الأساس، لا نعرف ماذا تقول، لا نعرف مع من تتكلم، لا نعرف كم مرة اتصلت بوالدتك هذا الأسبوع، كل ما نعرفه هو بريدك الإلكتروني الذي تعطينا إياه طواعية لا لنرسل لك إعلانات بل لنحفظ لك مفتاح حسابك إذا ضاع هاتفك أو تغير، وحتى هذا البريد لن يصلك منه شيء منا، لا نشرات ولا عروض ولا رسائل تذكير، إنه مجرد حبل نجاة صغير تمسك به أنت وحدك إذا احتجته يومًا، لا أكثر." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "في Linkup لا توجد خطط اشتراك تخفي الميزات الحقيقية خلف جدار دفع، كل ما في التطبيق متاح لك الآن، وغدًا، وإلى الأبد، الصوت عالي الجودة ليس ترفًا تشتريه، الفيديو النقي ليس ميزة بريميوم، الأمان الكامل ليس حكرًا على من يدفع أكثر، هذه كلها حقوق أساسية لأي إنسان يريد أن يتواصل بكرامة، وأنا أؤمن أن بيع هذه الحقوق هو نوع من الظلم الذي لا أريد أن أكون جزءًا منه." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "ما يفرقنا عن غيرنا ليس خاصية سحرية، بل ما لا يوجد لدينا، ليس لدينا إعلانات، ليس لدينا متتبعات، ليس لدينا طرف ثالث ينتظر بياناتك، ليس لدينا رغبة في احتكار وقتك أو انتباهك، كل ما لدينا هو أداة اتصال نظيفة تؤدي وظيفتها وتختفي، تمنحك ما تحتاج بالضبط دون أن تطلب منك شيئًا." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "Linkup هو الجزء الجديد من عائلة أثير الرقمية، إلى جانب مشاريع أخرى قادمة، ألعاب ألغاز هادئة، أدوات تفاعلية بسيطة، كلها تحمل الاسم نفسه والوعد نفسه، لأن فلسفتي لا تتغير بتغير نوع التطبيق، أنا أصنع مساحات للناس وليس أدوات للربح، أمنحك ما أصنعه بيدي وأثق أنه سينفعك، ولا أنتظر منك مقابلاً." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: "هذه الصفحة ليست طويلة لأن لدي الكثير لأخفيه، بل لأن لدي مبادئ أريدك أن تفهمها جيدًا قبل أن تضغط على أيقونة التطبيق لأول مرة، أريدك أن تعرف أن خلف هذه الأيقونة إنسانًا حقيقيًا يهمه رأيك وتجربتك، إنسانًا يقرأ رسائلك بنفسه على بريد الدعم، إنسانًا لا يعدك بالكمال لكنه يعدك بالصدق." }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "font-bold text-gray-900 mt-4 pt-4 border-t border-gray-200",
+								children: "مرحبًا بك في Linkup، مرحبًا بك في المساحة التي تحمل توقيع أثير، حيث البساطة أسلوب حياة، والتواصل بلا ثمن، والخصوصية ليست خيارًا بل أساس، وحيث ما زال بالإمكان أن تجد تطبيقًا يصنع لك لا لي."
+							})
+						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "grid grid-cols-1 md:grid-cols-2 gap-4 pt-4",
@@ -62538,10 +62579,10 @@ function AboutScreen({ onBack }) {
 									className: "flex-1",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "font-bold text-gray-900",
-										children: t("about.contactEmail")
+										children: "تواصل عبر البريد"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "text-xs text-gray-500 mt-0.5",
-										children: t("about.contactEmailDesc")
+										children: "رد سريع ومباشر"
 									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
@@ -62574,10 +62615,10 @@ function AboutScreen({ onBack }) {
 									className: "flex-1",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "font-bold text-gray-900",
-										children: t("about.contactWhatsapp")
+										children: "تواصل عبر واتساب"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "text-xs text-gray-500 mt-0.5",
-										children: t("about.contactWhatsappDesc")
+										children: "محادثة فورية وآمنة"
 									})]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
@@ -66270,7 +66311,6 @@ DialogDescription.displayName = Description.displayName;
 //#endregion
 //#region src/features/call/CallScreen.jsx
 function CallScreen({ open, onClose, contact, muteMicOnJoin, callType = "audio", callStatus, localStream, remoteStream, remoteUserData, startCall, stopCall, switchCamera, toggleVideo, isVideoEnabled, getRemotePeerId }) {
-	const { t } = useLanguage();
 	const [micEnabled, setMicEnabled] = (0, import_react.useState)(!muteMicOnJoin);
 	const [videoEnabled, setVideoEnabled] = (0, import_react.useState)(callType === "video");
 	const [callTimer, setCallTimer] = (0, import_react.useState)(0);
@@ -66284,7 +66324,7 @@ function CallScreen({ open, onClose, contact, muteMicOnJoin, callType = "audio",
 			appliedMuteRef.current = false;
 			getRemotePeerId(contact.uid).then((pid) => {
 				if (!pid) {
-					ue.error(t("calls.userOffline"), { description: t("calls.userOfflineDesc") });
+					ue.error("المستخدم غير متصل حاليًا", { description: "لا يمكن إجراء المكالمة الآن، حاول لاحقًا" });
 					onClose();
 					return;
 				}
@@ -66320,10 +66360,10 @@ function CallScreen({ open, onClose, contact, muteMicOnJoin, callType = "audio",
 		if (remoteVideoRef.current && remoteStream) remoteVideoRef.current.srcObject = remoteStream;
 	}, [remoteStream]);
 	(0, import_react.useEffect)(() => {
-		if (callStatus?.includes(t("calls.connected"))) timerRef.current = setInterval(() => setCallTimer((p) => p + 1), 1e3);
+		if (callStatus?.includes("متصل")) timerRef.current = setInterval(() => setCallTimer((p) => p + 1), 1e3);
 		else {
 			clearInterval(timerRef.current);
-			if (callStatus?.includes(t("calls.ended")) || callStatus?.includes(t("calls.failed"))) setCallTimer(0);
+			if (callStatus?.includes("انتهت") || callStatus?.includes("فشل")) setCallTimer(0);
 		}
 		return () => clearInterval(timerRef.current);
 	}, [callStatus]);
@@ -66349,7 +66389,9 @@ function CallScreen({ open, onClose, contact, muteMicOnJoin, callType = "audio",
 	const formatTime = (s) => {
 		return `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
 	};
-	const displayName = remoteUserData?.displayName || contact?.displayName || contact?.username || t("calls.user");
+	const displayName = remoteUserData?.displayName || contact?.displayName || contact?.username || "مستخدم";
+	const isVideoCall = callType === "video";
+	const isConnected = callStatus?.includes("متصل");
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Dialog, {
 		open,
 		onOpenChange: (isOpen) => !isOpen && handleEndCall(),
@@ -66358,13 +66400,13 @@ function CallScreen({ open, onClose, contact, muteMicOnJoin, callType = "audio",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "relative w-full h-full max-w-md mx-auto bg-gray-900 overflow-hidden",
 				children: [
-					callType === "video" && remoteStream && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
+					isVideoCall && remoteStream && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
 						ref: remoteVideoRef,
 						autoPlay: true,
 						playsInline: true,
 						className: "absolute inset-0 w-full h-full object-cover"
 					}),
-					(!(callType === "video") || !remoteStream) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					(!isVideoCall || !remoteStream) && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "absolute inset-0 flex flex-col items-center justify-center px-6",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
@@ -66386,13 +66428,13 @@ function CallScreen({ open, onClose, contact, muteMicOnJoin, callType = "audio",
 								className: "text-sm text-gray-400",
 								children: ["@", contact.username]
 							}),
-							callStatus?.includes(t("calls.connected")) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							isConnected && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-2xl font-mono text-white mt-2",
 								children: formatTime(callTimer)
 							})
 						]
 					}),
-					callType === "video" && localStream && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					isVideoCall && localStream && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "absolute top-4 right-4 w-28 h-40 rounded-xl overflow-hidden border-2 border-white/30 shadow-lg z-10 bg-black",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("video", {
 							ref: localVideoRef,
@@ -66405,7 +66447,7 @@ function CallScreen({ open, onClose, contact, muteMicOnJoin, callType = "audio",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(VideoOff, { className: "h-6 w-6 text-white" })
 						})]
 					}),
-					callType === "video" && callStatus?.includes(t("calls.connected")) && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					isVideoCall && isConnected && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "absolute top-4 left-4 z-10 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-white text-sm font-mono",
@@ -66413,7 +66455,7 @@ function CallScreen({ open, onClose, contact, muteMicOnJoin, callType = "audio",
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: `absolute bottom-0 left-0 right-0 px-6 py-4 flex items-center justify-center gap-4 ${callType === "video" ? "bg-gradient-to-t from-black/80 to-transparent" : "bg-gray-900"}`,
+						className: `absolute bottom-0 left-0 right-0 px-6 py-4 flex items-center justify-center gap-4 ${isVideoCall ? "bg-gradient-to-t from-black/80 to-transparent" : "bg-gray-900"}`,
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 								variant: "outline",
@@ -66429,7 +66471,7 @@ function CallScreen({ open, onClose, contact, muteMicOnJoin, callType = "audio",
 								className: "h-16 w-16 rounded-full bg-red-600 hover:bg-red-700 border-4 border-red-400/50 shadow-[0_0_25px_rgba(239,68,68,0.5)]",
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PhoneOff, { className: "h-7 w-7" })
 							}),
-							callType === "video" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
+							isVideoCall && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 								variant: "outline",
 								size: "icon",
 								onClick: handleToggleVideo,
@@ -66815,12 +66857,11 @@ var StatCard = ({ icon: Icon, label, value, color, trend, delay = 0 }) => /* @__
 		})
 	]
 });
-var StatusBadge = ({ status, t }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+var StatusBadge = ({ status }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 	className: `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${status === "banned" ? "bg-red-50 text-red-600 border-red-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"}`,
-	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-1.5 h-1.5 rounded-full ${status === "banned" ? "bg-red-500" : "bg-emerald-500 animate-pulse"}` }), status === "banned" ? t("admin.banned") : t("admin.active")]
+	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-1.5 h-1.5 rounded-full ${status === "banned" ? "bg-red-500" : "bg-emerald-500 animate-pulse"}` }), status === "banned" ? "محظور" : "نشط"]
 });
 function AdminScreen({ onBack }) {
-	const { t } = useLanguage();
 	const [users, setUsers] = (0, import_react.useState)([]);
 	const [loading, setLoading] = (0, import_react.useState)(true);
 	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
@@ -66910,16 +66951,16 @@ function AdminScreen({ onBack }) {
 		try {
 			await updateDoc(doc(db, "users", userId), { status: newStatus });
 			await logAction(newStatus === "banned" ? "ban_user" : "unban_user", userId);
-			showToast(newStatus === "banned" ? t("admin.banSuccess") : t("admin.unbanSuccess"));
+			showToast(newStatus === "banned" ? "تم حظر المستخدم" : "تم فك الحظر");
 			refreshUsers();
 		} catch (e) {
-			showToast(t("admin.updateFailed"), "error");
+			showToast("فشل في تحديث الحالة", "error");
 		} finally {
 			setActionLoading(null);
 		}
 	};
 	const deleteUser = async (userId, username) => {
-		if (!confirm(t("admin.confirmDelete", { username: username || userId }))) return;
+		if (!confirm(`حذف نهائي لـ ${username || userId}؟ لا يمكن التراجع.`)) return;
 		setActionLoading(userId);
 		try {
 			const batch = writeBatch(db);
@@ -66928,10 +66969,10 @@ function AdminScreen({ onBack }) {
 			(await getDocs(query(collection(db, "chats"), where("participants", "array-contains", userId)))).forEach((chatDoc) => batch.delete(doc(db, "chats", chatDoc.id)));
 			await batch.commit();
 			await logAction("delete_user", userId, `username: ${username}`);
-			showToast(t("admin.deleteSuccess"));
+			showToast("تم الحذف بنجاح");
 			refreshUsers();
 		} catch (e) {
-			showToast(t("admin.deleteFailed"), "error");
+			showToast("خطأ في الحذف", "error");
 		} finally {
 			setActionLoading(null);
 		}
@@ -66945,12 +66986,12 @@ function AdminScreen({ onBack }) {
 				timestamp: /* @__PURE__ */ new Date()
 			} });
 			await logAction("warn_user", userId, warningText.trim());
-			showToast(t("admin.warningSent"));
+			showToast("تم إرسال التحذير");
 			setShowWarning(null);
 			setWarningText("");
 			refreshUsers();
 		} catch (e) {
-			showToast(t("admin.updateFailed"), "error");
+			showToast("فشل الإرسال", "error");
 		} finally {
 			setActionLoading(null);
 		}
@@ -66964,11 +67005,11 @@ function AdminScreen({ onBack }) {
 				timestamp: serverTimestamp$2()
 			});
 			await logAction("broadcast", null, broadcastText.trim());
-			showToast(t("admin.broadcastSent"));
+			showToast("تم إرسال الإشعار العام");
 			setBroadcastText("");
 			setShowBroadcast(false);
 		} catch (e) {
-			showToast(t("admin.updateFailed"), "error");
+			showToast("فشل الإرسال", "error");
 		} finally {
 			setActionLoading(null);
 		}
@@ -67000,10 +67041,10 @@ function AdminScreen({ onBack }) {
 			});
 			setGeneratedKey(key);
 			await copyToClipboard(key);
-			showToast(t("admin.keyGenerated", { key }));
+			showToast(`✅ تم إنشاء ونسخ المفتاح: ${key}`);
 		} catch (e) {
 			console.error("generateKey error", e);
-			showToast(t("admin.keyFailed"), "error");
+			showToast("فشل إنشاء المفتاح", "error");
 		} finally {
 			setActionLoading(null);
 		}
@@ -67018,7 +67059,7 @@ function AdminScreen({ onBack }) {
 		link.href = URL.createObjectURL(blob);
 		link.download = `users_${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.csv`;
 		link.click();
-		showToast(t("admin.exported"));
+		showToast("تم التصدير");
 	};
 	const filteredUsers = (users || []).filter((u) => u.email?.toLowerCase().includes(searchTerm.toLowerCase()) || u.username?.toLowerCase().includes(searchTerm.toLowerCase()));
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -67050,11 +67091,11 @@ function AdminScreen({ onBack }) {
 								className: "flex items-center gap-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-6 h-6 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 									className: "text-2xl font-black text-gray-900 tracking-tight",
-									children: t("admin.title")
+									children: "لوحة الإدارة"
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-sm text-gray-500 mt-1",
-								children: t("admin.subtitle")
+								children: "مراقبة وتحكم كامل"
 							})] })]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center gap-2 flex-wrap",
@@ -67065,33 +67106,21 @@ function AdminScreen({ onBack }) {
 									onClick: generateInviteKey,
 									disabled: actionLoading === "key",
 									className: "rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-xs px-4 py-2 shadow-md shadow-emerald-500/20 transition-all active:scale-95 shrink-0 flex items-center gap-1.5 font-bold",
-									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Key, { className: "w-3.5 h-3.5" }),
-										" ",
-										t("admin.inviteKey")
-									]
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Key, { className: "w-3.5 h-3.5" }), " مفتاح دعوة"]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
 									whileHover: { scale: 1.05 },
 									whileTap: { scale: .95 },
 									onClick: () => setShowBroadcast(true),
 									className: "rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs px-4 py-2 transition-all active:scale-95 shrink-0 flex items-center gap-1.5 font-bold",
-									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-3.5 h-3.5" }),
-										" ",
-										t("admin.broadcast")
-									]
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-3.5 h-3.5" }), " إشعار عام"]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
 									whileHover: { scale: 1.05 },
 									whileTap: { scale: .95 },
 									onClick: exportCSV,
 									className: "rounded-xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 text-xs px-4 py-2 transition-all active:scale-95 shrink-0 flex items-center gap-1.5 font-bold",
-									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, { className: "w-3.5 h-3.5" }),
-										" ",
-										t("admin.exportCSV")
-									]
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Download, { className: "w-3.5 h-3.5" }), " تصدير CSV"]
 								})
 							]
 						})]
@@ -67106,14 +67135,14 @@ function AdminScreen({ onBack }) {
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
 								icon: Users,
-								label: t("admin.totalUsers"),
+								label: "إجمالي المستخدمين",
 								value: stats.total,
 								color: "from-blue-500 to-cyan-500",
 								delay: .1
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
 								icon: Zap,
-								label: t("admin.activeNow"),
+								label: "نشط الآن",
 								value: stats.active,
 								color: "from-emerald-500 to-teal-500",
 								trend: `${stats.total ? Math.round(stats.active / stats.total * 100) : 0}%`,
@@ -67121,14 +67150,14 @@ function AdminScreen({ onBack }) {
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
 								icon: Shield,
-								label: t("admin.bannedUsers"),
+								label: "محظورين",
 								value: stats.banned,
 								color: "from-red-500 to-rose-500",
 								delay: .3
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatCard, {
 								icon: UserPlus,
-								label: t("admin.joinedToday"),
+								label: "انضموا اليوم",
 								value: stats.newToday,
 								color: "from-purple-500 to-indigo-500",
 								delay: .4
@@ -67154,17 +67183,19 @@ function AdminScreen({ onBack }) {
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "relative flex-1 w-full group",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-								placeholder: t("admin.searchPlaceholder"),
+								placeholder: "بحث بالبريد أو المعرف...",
 								value: searchTerm,
 								onChange: (e) => setSearchTerm(e.target.value),
 								className: "pr-12 h-12 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200 focus:bg-white transition-all text-sm"
 							})]
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 							className: "text-xs text-gray-500 font-medium bg-gray-100 px-3 py-1.5 rounded-full shrink-0",
-							children: t("admin.showing", {
-								count: filteredUsers.length,
-								total: stats.total
-							})
+							children: [
+								"عرض ",
+								filteredUsers.length,
+								" / ",
+								stats.total
+							]
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
@@ -67187,7 +67218,7 @@ function AdminScreen({ onBack }) {
 							className: "flex flex-col items-center justify-center py-16 space-y-3",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-sm text-gray-500 font-medium",
-								children: t("common.loading")
+								children: "جاري تحميل البيانات..."
 							})]
 						}) : filteredUsers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 							initial: {
@@ -67203,11 +67234,11 @@ function AdminScreen({ onBack }) {
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-16 h-16 mx-auto mb-3 opacity-40" }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 									className: "font-medium text-lg",
-									children: t("admin.noResults")
+									children: "لا يوجد نتائج مطابقة"
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 									className: "text-sm mt-1",
-									children: t("admin.noResultsDesc")
+									children: "جرب مصطلح بحث آخر"
 								})
 							]
 						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -67243,13 +67274,10 @@ function AdminScreen({ onBack }) {
 													children: u.email
 												}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 													className: "text-xs text-gray-500 mt-0.5 font-mono",
-													children: ["@", u.username || t("admin.unknown")]
+													children: ["@", u.username || "غير محدد"]
 												})]
 											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, {
-												status: u.status,
-												t
-											})
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusBadge, { status: u.status })
 										]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 										className: "flex items-center gap-2 justify-end",
@@ -67268,7 +67296,7 @@ function AdminScreen({ onBack }) {
 													autoFocus: true,
 													value: warningText,
 													onChange: (e) => setWarningText(e.target.value),
-													placeholder: t("admin.warningPlaceholder"),
+													placeholder: "نص التحذير...",
 													className: "h-8 text-xs rounded-lg bg-gray-50 border-gray-200"
 												}),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
@@ -67276,7 +67304,7 @@ function AdminScreen({ onBack }) {
 													onClick: () => sendWarning(u.id),
 													disabled: !warningText.trim(),
 													className: "h-8 px-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold",
-													children: t("common.send")
+													children: "إرسال"
 												}),
 												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button, {
 													size: "sm",
@@ -67295,7 +67323,7 @@ function AdminScreen({ onBack }) {
 													setWarningText("");
 												},
 												className: "p-2.5 rounded-xl bg-amber-50 text-amber-600 hover:bg-amber-100 transition-all",
-												title: t("admin.warn"),
+												title: "تحذير",
 												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-4 h-4" })
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
@@ -67303,7 +67331,7 @@ function AdminScreen({ onBack }) {
 												whileTap: { scale: .9 },
 												onClick: () => toggleBan(u.id, u.status),
 												className: `p-2.5 rounded-xl transition-all ${u.status === "banned" ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100" : "bg-red-50 text-red-600 hover:bg-red-100"}`,
-												title: u.status === "banned" ? t("admin.unban") : t("admin.ban"),
+												title: u.status === "banned" ? "فك الحظر" : "حظر",
 												children: u.status === "banned" ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheckBig, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleX, { className: "w-4 h-4" })
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
@@ -67311,7 +67339,7 @@ function AdminScreen({ onBack }) {
 												whileTap: { scale: .9 },
 												onClick: () => deleteUser(u.id, u.username),
 												className: "p-2.5 rounded-xl bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all",
-												title: t("admin.delete"),
+												title: "حذف",
 												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" })
 											})
 										] })
@@ -67358,7 +67386,7 @@ function AdminScreen({ onBack }) {
 								className: "flex items-center gap-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Bell, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 									className: "text-lg font-bold text-gray-900",
-									children: t("admin.broadcast")
+									children: "إشعار عام"
 								})]
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => setShowBroadcast(false),
@@ -67372,7 +67400,7 @@ function AdminScreen({ onBack }) {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
 							value: broadcastText,
 							onChange: (e) => setBroadcastText(e.target.value),
-							placeholder: t("admin.broadcastPlaceholder"),
+							placeholder: "اكتب رسالة الإشعار...",
 							rows: 4,
 							className: "w-full rounded-xl bg-gray-50 border border-gray-200 p-3 text-sm focus:ring-2 focus:ring-purple-200 focus:border-transparent outline-none resize-none mb-4 transition-all"
 						}),
@@ -67382,13 +67410,13 @@ function AdminScreen({ onBack }) {
 								whileTap: { scale: .95 },
 								onClick: () => setShowBroadcast(false),
 								className: "flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all",
-								children: t("common.cancel")
+								children: "إلغاء"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
 								whileTap: { scale: .95 },
 								onClick: sendBroadcast,
 								disabled: !broadcastText.trim() || actionLoading === "broadcast",
 								className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white font-bold shadow-md shadow-purple-500/20 transition-all disabled:opacity-50",
-								children: actionLoading === "broadcast" ? t("common.loading") : t("admin.sendToAll")
+								children: actionLoading === "broadcast" ? "جارٍ..." : "إرسال للجميع"
 							})]
 						})
 					]
@@ -67414,7 +67442,7 @@ function AdminScreen({ onBack }) {
 						className: "flex-1 min-w-0",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-xs opacity-80 mb-0.5",
-							children: t("admin.inviteKey")
+							children: "مفتاح الدعوة"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "font-mono font-bold text-sm truncate",
 							children: generatedKey
@@ -67424,7 +67452,7 @@ function AdminScreen({ onBack }) {
 						whileTap: { scale: .9 },
 						onClick: () => copyToClipboard(generatedKey),
 						className: "p-2 hover:bg-white/20 rounded-lg transition-colors shrink-0",
-						title: copied ? t("common.copied") : t("common.copyAgain"),
+						title: copied ? "تم النسخ" : "نسخ مجدداً",
 						children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" })
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
