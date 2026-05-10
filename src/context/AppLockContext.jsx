@@ -86,6 +86,12 @@ export function AppLockProvider({ children }) {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [lockEnabled]);
 
+  // دالة فتح التطبيق الفعلية (تُستدعى بعد انتهاء الأنيميشن)
+  const unlockApp = useCallback(() => {
+    setIsLocked(false);
+    setShowPrivacyShield(false);
+  }, []);
+
   // دوال PIN
   const setPIN = useCallback((pin) => {
     if (pin && pin.length >= 4) {
@@ -105,12 +111,7 @@ export function AppLockProvider({ children }) {
 
   const verifyPIN = useCallback((pin) => {
     const stored = localStorage.getItem('app_lock_pin');
-    if (stored === pin) {
-      setIsLocked(false);
-      setShowPrivacyShield(false);
-      return true;
-    }
-    return false;
+    return stored === pin;
   }, []);
 
   // يقبل رمز استرداد مكون من 6 أرقام
@@ -124,8 +125,6 @@ export function AppLockProvider({ children }) {
         codes = codes.filter((_, i) => i !== index);
         localStorage.setItem('app_lock_recovery_codes', JSON.stringify(codes));
         setRecoveryCodes(codes);
-        setIsLocked(false);
-        setShowPrivacyShield(false);
         return true;
       }
     } catch (e) { console.error(e); }
@@ -151,9 +150,8 @@ export function AppLockProvider({ children }) {
     setAutoVerify(val);
   }, []);
 
-  // دوال بصمة الإصبع مع الفحص الذكي لدعم النظام
+  // دوال بصمة الإصبع
   const enableBiometric = useCallback(async () => {
-    // التحقق من دعم المتصفح والنظام للبصمة الأصلية
     if (!window.PublicKeyCredential) {
       return { success: false, error: 'not_supported' };
     }
@@ -205,8 +203,6 @@ export function AppLockProvider({ children }) {
         },
       });
       if (assertion) {
-        setIsLocked(false);
-        setShowPrivacyShield(false);
         return true;
       }
     } catch (e) { 
@@ -224,7 +220,7 @@ export function AppLockProvider({ children }) {
   return (
     <AppLockContext.Provider value={{
       lockEnabled, isLocked, showPrivacyShield, autoVerify, pinLength, recoveryCodes, biometricEnabled,
-      setPIN, verifyPIN, disableLock, setAutoVerifyOption, unlockWithRecoveryCode,
+      setPIN, verifyPIN, disableLock, setAutoVerifyOption, unlockWithRecoveryCode, unlockApp,
       enableBiometric, verifyBiometric, disableBiometric,
     }}>
       {children}
