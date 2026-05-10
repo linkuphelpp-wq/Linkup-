@@ -45313,6 +45313,18 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 			setIsLogoPressed(false);
 		}, 800);
 	};
+	const getErrorMessage = (err) => {
+		switch (err.code) {
+			case "auth/email-already-in-use": return "الحساب موجود بالفعل";
+			case "auth/invalid-credential":
+			case "auth/wrong-password": return "البريد الإلكتروني أو كلمة المرور غير صحيحة";
+			case "auth/user-not-found": return "لا يوجد حساب بهذا البريد الإلكتروني";
+			case "auth/weak-password": return "كلمة المرور ضعيفة جداً، يجب أن تكون 6 أحرف على الأقل";
+			case "auth/too-many-requests": return "محاولات كثيرة، حاول مرة أخرى لاحقاً";
+			case "auth/invalid-email": return "صيغة البريد الإلكتروني غير صالحة";
+			default: return "حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى";
+		}
+	};
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setError("");
@@ -45359,8 +45371,8 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 				}, 3e3);
 			} else onLogin?.(user);
 		} catch (err) {
-			console.error("تفاصيل الخطأ الكاملة:", err);
-			setError(`[${err.code}] - ${err.message}`);
+			console.error(err);
+			setError(getErrorMessage(err));
 		} finally {
 			setLoading(false);
 		}
@@ -45394,7 +45406,8 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 			onLogin?.(user);
 		} catch (err) {
 			console.error("خطأ تسجيل الدخول بجوجل:", err);
-			if (err.code !== "auth/cancelled-popup-request" && err.code !== "auth/popup-closed-by-user") setError(`خطأ جوجل: [${err.code}] - ${err.message}`);
+			if (err.code !== "auth/cancelled-popup-request" && err.code !== "auth/popup-closed-by-user") if (err.code === "auth/account-exists-with-different-credential") setError("هذا البريد مسجل مسبقاً بطريقة دخول مختلفة");
+			else setError("فشل تسجيل الدخول عبر جوجل، حاول مرة أخرى");
 		} finally {
 			setLoading(false);
 		}
@@ -45558,10 +45571,6 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 									}),
 									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "bg-red-500/10 border border-red-400/20 text-red-200 text-sm p-3 rounded-xl flex items-center gap-2 animate-in fade-in slide-in-from-top-2",
-										style: {
-											direction: "ltr",
-											textAlign: "left"
-										},
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), error]
 									}),
 									success && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
