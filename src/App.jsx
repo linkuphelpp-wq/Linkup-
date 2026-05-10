@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { LanguageProvider } from './context/LanguageContext';
 import SplashScreen from './components/common/SplashScreen';
 import AuthScreen from './features/auth/AuthScreen';
 import VerifyEmailScreen from './features/auth/VerifyEmailScreen';
@@ -46,8 +47,7 @@ import {
   doc, setDoc, getDoc, onSnapshot, deleteDoc,
   collection, query, where, getDocs, writeBatch, serverTimestamp,
 } from 'firebase/firestore';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { Home, UsersRound, User, Settings, Shield, Bell, ArrowLeft, Contact2 } from 'lucide-react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';import { Home, UsersRound, User, Settings, Shield, Bell, ArrowLeft, Contact2 } from 'lucide-react';
 import { Toaster } from 'sonner';
 import './styles/App.css';
 
@@ -96,8 +96,7 @@ function AppContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [callOpen, setCallOpen] = useState(false);
-  const [remoteContact, setRemoteContact] = useState(null);
+  const [callOpen, setCallOpen] = useState(false);  const [remoteContact, setRemoteContact] = useState(null);
   const [callType, setCallType] = useState('audio');
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
@@ -146,8 +145,7 @@ function AppContent() {
 
   useEffect(() => {
     if (!user?.uid) { setIsAdmin(false); return; }
-    const unsub = onSnapshot(doc(db, 'users', user.uid), (snap) => setIsAdmin(snap.exists() ? snap.data().isAdmin === true : false));
-    return () => unsub();
+    const unsub = onSnapshot(doc(db, 'users', user.uid), (snap) => setIsAdmin(snap.exists() ? snap.data().isAdmin === true : false));    return () => unsub();
   }, [user?.uid]);
 
   const processQueue = useCallback((queue) => {
@@ -196,8 +194,7 @@ function AppContent() {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
       try {
-        if (!fbUser) {
-          setUser(null); setMyUsername(''); setProfileLoaded(false); setUsernameResolved(false); setShowUsernameModal(false); setLoading(false); setShowSplash(false); return;
+        if (!fbUser) {          setUser(null); setMyUsername(''); setProfileLoaded(false); setUsernameResolved(false); setShowUsernameModal(false); setLoading(false); setShowSplash(false); return;
         }
         setUser({ uid: fbUser.uid, email: fbUser.email, displayName: fbUser.displayName || '', photoURL: fbUser.photoURL || '', emailVerified: fbUser.emailVerified });
         setShowSplash(false); setLoading(true);
@@ -246,8 +243,7 @@ function AppContent() {
       else { if (bannedModalOpen && banType === 'banned') setBannedModalOpen(false); if (pendingBan) setPendingBan(false); }
       if (!data.username || data.username.trim() === '') { if (myUsername !== '') { setMyUsername(''); localStorage.removeItem('my_username'); setShowUsernameModal(true); setUsernameResolved(false); } }
       else { if (data.username !== myUsername) { setMyUsername(data.username); localStorage.setItem('my_username', data.username); setShowUsernameModal(false); setUsernameResolved(true); } }
-    });
-    return () => unsub();
+    });    return () => unsub();
   }, [user?.uid, profileLoaded, pendingBan, bannedModalOpen, banType, myUsername]);
 
   const handleFirstClick = useCallback(() => {
@@ -296,8 +292,7 @@ function AppContent() {
       if (currentUsername) { await deleteDoc(doc(db, 'usernames', currentUsername.toLowerCase())).catch(() => {}); }
       const chatsQuery = query(collection(db, 'chats'), where('participants', 'array-contains', uid)); const chatsSnap = await getDocs(chatsQuery); const batch = writeBatch(db);
       chatsSnap.forEach((chatDoc) => batch.delete(doc(db, 'chats', chatDoc.id))); await batch.commit();
-      await deleteDoc(doc(db, 'users', uid)).catch(() => {}); await deleteDoc(doc(db, 'peers', uid)).catch(() => {});
-    } catch (err) { console.error(err); }
+      await deleteDoc(doc(db, 'users', uid)).catch(() => {}); await deleteDoc(doc(db, 'peers', uid)).catch(() => {});    } catch (err) { console.error(err); }
     finally { localStorage.clear(); sessionStorage.clear(); setMyUsername(''); setUsernameResolved(false); await signOut(auth); setUser(null); setLoading(false); }
   };
 
@@ -346,8 +341,7 @@ function AppContent() {
     setUser({
       uid: loggedInUser.uid,
       email: loggedInUser.email,
-      displayName: loggedInUser.displayName || '',
-      photoURL: loggedInUser.photoURL || '',
+      displayName: loggedInUser.displayName || '',      photoURL: loggedInUser.photoURL || '',
       emailVerified: loggedInUser.emailVerified
     });
   }} onForgotPassword={() => navigateTo('forgotpassword')} />;
@@ -396,8 +390,7 @@ function AppContent() {
           onOpenAdmin={() => navigateTo('admin')} onOpenPartner={() => navigateTo('partner')} onBack={handleBack}
         />
       );
-    if (currentScreen === 'contacts') return <ContactsScreen onBack={handleBack} onChat={handleOpenChat} onCall={handleOpenCall} myUsername={myUsername} />;
-    if (currentScreen === 'chat') return <ChatScreen contact={currentChatContact} onBack={handleBack} onCall={handleOpenCall} />;
+    if (currentScreen === 'contacts') return <ContactsScreen onBack={handleBack} onChat={handleOpenChat} onCall={handleOpenCall} myUsername={myUsername} />;    if (currentScreen === 'chat') return <ChatScreen contact={currentChatContact} onBack={handleBack} onCall={handleOpenCall} />;
     if (currentScreen === 'atheer') return <AtheerScreen onBack={handleBack} />;
     if (currentScreen === 'about') return <AboutScreen onBack={handleBack} />;
     if (currentScreen === 'privacy') return <PrivacyPolicyScreen onBack={handleBack} />;
@@ -446,8 +439,7 @@ function AppContent() {
 
         <main className="flex-1 relative">{renderContent()}</main>
 
-        {!hideBottomNav && (
-          <BottomNav
+        {!hideBottomNav && (          <BottomNav
             currentScreen={currentScreen}
             onNavigate={navigateTo}
             isAdmin={isAdmin}
@@ -475,9 +467,11 @@ function AppContent() {
 // ───────── المكون الرئيسي ─────────
 function App() {
   return (
-    <AppLockProvider>
-      <AppContent />
-    </AppLockProvider>
+    <LanguageProvider>
+      <AppLockProvider>
+        <AppContent />
+      </AppLockProvider>
+    </LanguageProvider>
   );
 }
 
