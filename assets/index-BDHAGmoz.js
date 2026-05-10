@@ -10221,20 +10221,6 @@ var Database$1 = createLucideIcon("database", [
 		key: "mv7ke4"
 	}]
 ]);
-var Delete = createLucideIcon("delete", [
-	["path", {
-		d: "M10 5a2 2 0 0 0-1.344.519l-6.328 5.74a1 1 0 0 0 0 1.481l6.328 5.741A2 2 0 0 0 10 19h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z",
-		key: "1yo7s0"
-	}],
-	["path", {
-		d: "m12 9 6 6",
-		key: "anjzzh"
-	}],
-	["path", {
-		d: "m18 9-6 6",
-		key: "1fp51s"
-	}]
-]);
 var Download = createLucideIcon("download", [
 	["path", {
 		d: "M12 15V3",
@@ -70475,36 +70461,52 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 function PinLockScreen() {
 	const [pin, setPin] = (0, import_react.useState)("");
 	const [error, setError] = (0, import_react.useState)(false);
-	const { verifyPIN, autoVerify, pinLength } = useAppLock();
-	const handleVerify = (0, import_react.useCallback)((currentPin) => {
-		if (currentPin.length >= 4) {
-			if (!verifyPIN(currentPin)) {
-				setError(true);
-				setPin("");
-				setTimeout(() => setError(false), 800);
-			}
-		}
-	}, [verifyPIN]);
+	const [success, setSuccess] = (0, import_react.useState)(false);
+	const [showRecovery, setShowRecovery] = (0, import_react.useState)(false);
+	const [recoveryCode, setRecoveryCode] = (0, import_react.useState)("");
+	const [recoveryError, setRecoveryError] = (0, import_react.useState)(false);
+	const { verifyPIN, autoVerify, pinLength, unlockWithRecoveryCode, verifyBiometric, biometricEnabled } = useAppLock();
+	(0, import_react.useEffect)(() => {
+		if (biometricEnabled) verifyBiometric();
+	}, [biometricEnabled, verifyBiometric]);
 	(0, import_react.useEffect)(() => {
 		if (autoVerify && pin.length === pinLength) handleVerify(pin);
 	}, [
 		pin,
 		autoVerify,
-		pinLength,
-		handleVerify
+		pinLength
 	]);
-	const handleKeyPress = (value) => {
-		if (error) return;
-		if (value === "delete") setPin((prev) => prev.slice(0, -1));
-		else if (value === "confirm") handleVerify(pin);
-		else if (pin.length < 6) setPin((prev) => prev + value);
+	const handleVerify = (0, import_react.useCallback)((currentPin) => {
+		if (currentPin.length >= 4) if (!verifyPIN(currentPin)) {
+			setError(true);
+			setTimeout(() => setError(false), 800);
+			setPin("");
+		} else {
+			setSuccess(true);
+			setTimeout(() => setSuccess(false), 400);
+		}
+	}, [verifyPIN]);
+	const handleBiometric = async () => {
+		if (!biometricEnabled) return;
+		if (!await verifyBiometric()) {
+			setError(true);
+			setTimeout(() => setError(false), 800);
+		}
+	};
+	const handleRecoverySubmit = () => {
+		if (recoveryCode.length !== 6) return;
+		if (!unlockWithRecoveryCode(recoveryCode)) {
+			setRecoveryError(true);
+			setTimeout(() => setRecoveryError(false), 800);
+			setRecoveryCode("");
+		}
 	};
 	const showConfirmButton = !autoVerify && pin.length >= 4;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-[9999] bg-white flex items-center justify-center",
 		dir: "rtl",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "w-full max-w-xs px-6 flex flex-col items-center gap-8",
+			className: "w-full max-w-xs px-6 flex flex-col items-center gap-6",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 					initial: { scale: 0 },
@@ -70516,18 +70518,25 @@ function PinLockScreen() {
 					},
 					className: "relative",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-						animate: error ? { x: [
+						animate: error || recoveryError ? { x: [
 							0,
-							-10,
-							10,
-							-10,
-							10,
+							-12,
+							12,
+							-12,
+							12,
 							0
 						] } : {},
-						transition: { duration: .5 },
-						className: `w-20 h-20 rounded-2xl flex items-center justify-center shadow-2xl ${error ? "bg-red-500" : "bg-gradient-to-br from-purple-600 to-blue-600"}`,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-9 h-9 text-white" })
+						transition: { duration: .6 },
+						className: `w-24 h-24 rounded-3xl flex items-center justify-center shadow-2xl ${error || recoveryError ? "bg-red-500" : success ? "bg-emerald-500" : "bg-gradient-to-br from-purple-600 to-blue-600"}`,
+						children: success ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-12 h-12 text-white" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "w-12 h-12 text-white" })
 					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+					whileTap: { scale: .9 },
+					onClick: handleBiometric,
+					disabled: !biometricEnabled,
+					className: `relative w-full max-w-[200px] h-14 rounded-2xl flex items-center justify-center gap-3 font-bold text-base shadow-lg transition-all ${biometricEnabled ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-400 hover:to-teal-400" : "bg-gray-100 text-gray-400 cursor-not-allowed"}`,
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-7 h-7" }), "فتح بالبصمة"]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 					initial: {
@@ -70539,69 +70548,72 @@ function PinLockScreen() {
 						y: 0
 					},
 					className: "text-center",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+						className: "text-xl font-black text-gray-900",
+						children: showRecovery ? "رمز الاسترداد" : success ? "تم!" : "أدخل رمز الأمان"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: `text-sm mt-1 font-medium ${error || recoveryError ? "text-red-500" : success ? "text-emerald-500" : "text-gray-500"}`,
+						children: recoveryError ? "رمز الاسترداد غير صحيح" : success ? "فتح التطبيق..." : error ? "الرمز غير صحيح" : showRecovery ? "أدخل رمز الاسترداد الاحتياطي (6 أرقام)" : `أدخل رمز PIN (${pinLength} أرقام)`
+					})]
+				}),
+				showRecovery ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "w-full space-y-4",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-							className: "text-xl font-black text-gray-900",
-							children: "أدخل رمز الأمان"
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							type: "text",
+							inputMode: "numeric",
+							maxLength: 6,
+							value: recoveryCode,
+							onChange: (e) => {
+								const val = e.target.value.replace(/\D/g, "");
+								if (val.length <= 6) setRecoveryCode(val);
+							},
+							placeholder: "الرمز الاحتياطي (6 أرقام)",
+							className: `w-full h-14 px-4 rounded-xl border-2 text-center text-transparent caret-transparent selection:bg-transparent placeholder:text-gray-400 focus:outline-none transition-colors ${recoveryError ? "border-red-300 bg-red-50" : "border-gray-200 bg-gray-50 focus:border-purple-500"}`,
+							autoFocus: true
 						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: `text-sm mt-2 ${error ? "text-red-500 font-bold" : "text-gray-500"}`,
-							children: error ? "الرمز غير صحيح، حاول مرة أخرى" : "أدخل رمز PIN للاستمرار"
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+							whileTap: { scale: .97 },
+							onClick: handleRecoverySubmit,
+							disabled: recoveryCode.length !== 6,
+							className: "w-full h-12 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-300 text-white rounded-xl font-bold transition-all",
+							children: "فتح التطبيق"
 						}),
-						showConfirmButton && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-gray-400 mt-1",
-							children: "اضغط ✓ للمتابعة"
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => {
+								setShowRecovery(false);
+								setRecoveryCode("");
+								setRecoveryError(false);
+							},
+							className: "w-full h-10 text-sm text-gray-500 hover:text-purple-600 transition-colors",
+							children: "العودة"
 						})
 					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "flex gap-3 justify-center",
-					children: [
-						1,
-						2,
-						3,
-						4,
-						5,
-						6
-					].map((i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${i <= pin.length ? error ? "bg-red-500 border-red-500 scale-110" : "bg-purple-600 border-purple-600 scale-110" : "border-gray-300 bg-transparent"}` }, i))
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "grid grid-cols-3 gap-3 w-full max-w-[240px]",
-					children: [
-						"1",
-						"2",
-						"3",
-						"4",
-						"5",
-						"6",
-						"7",
-						"8",
-						"9",
-						"confirm",
-						"0",
-						"delete"
-					].map((key) => {
-						if (key === "confirm") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-							whileTap: { scale: .9 },
-							onClick: () => handleKeyPress("confirm"),
-							disabled: !showConfirmButton,
-							className: `h-12 rounded-xl flex items-center justify-center transition-all ${showConfirmButton ? "bg-emerald-500 hover:bg-emerald-400 text-white active:scale-90" : "bg-gray-100 text-gray-300 cursor-not-allowed"}`,
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-5 h-5" })
-						}, key);
-						if (key === "delete") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-							whileTap: { scale: .9 },
-							onClick: () => handleKeyPress("delete"),
-							className: "h-12 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center active:scale-90 transition-all",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Delete, { className: "w-5 h-5 text-gray-600" })
-						}, key);
-						return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-							whileTap: { scale: .9 },
-							onClick: () => handleKeyPress(key),
-							className: "h-12 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-900 font-bold text-lg flex items-center justify-center active:scale-90 transition-all",
-							children: key
-						}, key);
+				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+						type: "text",
+						inputMode: "numeric",
+						value: pin,
+						onChange: (e) => {
+							const val = e.target.value.replace(/\D/g, "");
+							if (val.length <= pinLength) setPin(val);
+						},
+						placeholder: `أدخل الرمز (${pinLength} أرقام)`,
+						className: "w-full h-14 px-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-center text-transparent caret-transparent selection:bg-transparent placeholder:text-gray-400 focus:outline-none focus:border-purple-500 transition-colors",
+						autoFocus: true
+					}),
+					showConfirmButton && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						whileTap: { scale: .97 },
+						onClick: () => handleVerify(pin),
+						className: "w-full h-12 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl font-bold transition-all shadow-md",
+						children: "تأكيد الرمز"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => setShowRecovery(true),
+						className: "text-sm text-gray-400 hover:text-purple-600 transition-colors",
+						children: "هل نسيت الرمز؟"
 					})
-				})
+				] })
 			]
 		})
 	});
