@@ -68688,7 +68688,7 @@ var LinkUpLogo = () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		})]
 	})]
 });
-var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0 }) => {
+var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0, t }) => {
 	const [lastMsg, setLastMsg] = (0, import_react.useState)(null);
 	const memberCount = group.members?.length || 0;
 	const gradients = [
@@ -68748,14 +68748,18 @@ var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0 }) =>
 						className: "flex items-center justify-between",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "font-bold text-gray-800 truncate",
-							children: group.name || "مجموعة"
+							children: group.name || t("groups.defaultName")
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 							className: "text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full",
-							children: [memberCount, " أعضاء"]
+							children: [
+								memberCount,
+								" ",
+								t("groups.membersCount")
+							]
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 						className: "text-xs text-gray-500 mt-1 truncate",
-						children: lastMsg?.text || "ابدأ المحادثة"
+						children: lastMsg?.text || t("groups.startChat")
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
@@ -68773,6 +68777,7 @@ var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0 }) =>
 	});
 };
 function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
+	const { t } = useLanguage();
 	const [groups, setGroups] = (0, import_react.useState)([]);
 	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
 	const [favorites, setFavorites] = (0, import_react.useState)(() => {
@@ -68830,11 +68835,11 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 							className: "flex items-center gap-2 mb-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 								className: "text-2xl font-black text-gray-900 tracking-tight",
-								children: "المجموعات"
+								children: t("groups.title")
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-sm text-gray-500",
-							children: "تعاون وتواصل مع فرقك بسهولة"
+							children: t("groups.subtitle")
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
@@ -68849,7 +68854,7 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 						transition: { delay: .1 },
 						className: "relative",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							placeholder: "ابحث عن مجموعة...",
+							placeholder: t("groups.search"),
 							value: searchTerm,
 							onChange: (e) => setSearchTerm(e.target.value),
 							className: "w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-2 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm"
@@ -68882,11 +68887,11 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-gray-800 font-bold text-lg",
-							children: "لا توجد مجموعات"
+							children: t("groups.noGroups")
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-sm text-gray-500 mt-1.5",
-							children: "ابدأ بإنشاء مجموعتك الأولى"
+							children: t("groups.createFirst")
 						})
 					]
 				}) : filtered.map((g, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GroupCard, {
@@ -68894,7 +68899,8 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 					isFavorite: favorites.includes(g.id),
 					onToggleFavorite: toggleFavorite,
 					onClick: () => onOpenGroup?.(g),
-					index
+					index,
+					t
 				}, g.id))
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: groups.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
@@ -68934,17 +68940,17 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 							className: "text-right",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "font-bold text-gray-900 text-sm",
-								children: "إنشاء مجموعة جديدة"
+								children: t("groups.createGroup")
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-[10px] text-gray-500",
-								children: "ادعُ أصدقاءك وابدأ النقاش"
+								children: t("groups.inviteFriends")
 							})]
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl px-4 py-2 flex items-center gap-1.5 shadow-md shadow-purple-500/20",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-xs font-bold",
-							children: "إنشاء"
+							children: t("groups.create")
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-4 h-4" })]
 					})]
 				})
@@ -68955,6 +68961,7 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 //#endregion
 //#region src/features/groups/CreateGroupScreen.jsx
 function CreateGroupScreen({ onBack }) {
+	const { t } = useLanguage();
 	const [name, setName] = (0, import_react.useState)("");
 	const [description, setDescription] = (0, import_react.useState)("");
 	const [isPrivate, setIsPrivate] = (0, import_react.useState)(false);
@@ -68981,9 +68988,9 @@ function CreateGroupScreen({ onBack }) {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setError("");
-		if (!name.trim()) return setError("يرجى كتابة اسم المجموعة");
+		if (!name.trim()) return setError(t("groups.nameRequired"));
 		if (!currentUser) {
-			setError("يجب تسجيل الدخول أولاً.");
+			setError(t("auth.required"));
 			return;
 		}
 		setLoading(true);
@@ -69015,7 +69022,7 @@ function CreateGroupScreen({ onBack }) {
 			setTimeout(() => onBack?.(), 1500);
 		} catch (err) {
 			console.error(err);
-			setError("حدث خطأ أثناء الإنشاء. حاول مرة أخرى.");
+			setError(t("groups.createError"));
 		} finally {
 			setLoading(false);
 		}
@@ -69042,7 +69049,7 @@ function CreateGroupScreen({ onBack }) {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 						className: "text-xl font-black text-gray-900 tracking-tight",
-						children: "إنشاء مجموعة"
+						children: t("groups.createGroup")
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
 				]
@@ -69065,11 +69072,11 @@ function CreateGroupScreen({ onBack }) {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 						className: "text-xl font-bold text-gray-900 mb-2",
-						children: "تم إنشاء المجموعة بنجاح!"
+						children: t("groups.created")
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 						className: "text-sm text-gray-500",
-						children: "جاري العودة إلى القائمة..."
+						children: t("groups.redirecting")
 					})
 				]
 			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
@@ -69080,24 +69087,33 @@ function CreateGroupScreen({ onBack }) {
 						className: "bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-5",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
 							className: "text-sm font-bold text-gray-700 mb-2 block",
-							children: ["اسم المجموعة ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-red-500",
-								children: "*"
-							})]
+							children: [
+								t("groups.name"),
+								" ",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-red-500",
+									children: "*"
+								})
+							]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							type: "text",
 							value: name,
 							onChange: (e) => setName(e.target.value),
-							placeholder: "مثال: فريق التطوير",
+							placeholder: t("groups.namePlaceholder"),
 							className: "w-full h-12 px-4 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-transparent transition-all",
 							maxLength: 50
-						})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+						})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
 							className: "text-sm font-bold text-gray-700 mb-2 block",
-							children: "الوصف (اختياري)"
+							children: [
+								t("groups.description"),
+								" (",
+								t("common.optional"),
+								")"
+							]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
 							value: description,
 							onChange: (e) => setDescription(e.target.value),
-							placeholder: "اكتب وصفاً مختصراً للمجموعة...",
+							placeholder: t("groups.descPlaceholder"),
 							rows: 3,
 							className: "w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-transparent transition-all resize-none",
 							maxLength: 200
@@ -69107,15 +69123,15 @@ function CreateGroupScreen({ onBack }) {
 						className: "bg-white rounded-3xl p-5 border border-gray-100 shadow-sm",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "text-sm font-bold text-gray-900 mb-4",
-							children: "إعدادات الخصوصية"
+							children: t("groups.privacySettings")
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center justify-between p-4 bg-gray-50 rounded-xl",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "font-bold text-gray-900 text-sm",
-								children: "مجموعة خاصة"
+								children: t("groups.privateGroup")
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-xs text-gray-500 mt-0.5",
-								children: "الدعوة مطلوبة للانضمام"
+								children: t("groups.privateGroupDesc")
 							})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "button",
 								onClick: () => setIsPrivate(!isPrivate),
@@ -69126,16 +69142,12 @@ function CreateGroupScreen({ onBack }) {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "bg-white rounded-3xl p-5 border border-gray-100 shadow-sm",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "text-sm font-bold text-gray-900 mb-4",
-							children: [
-								"إضافة أعضاء (",
-								selectedContacts.length,
-								")"
-							]
+							children: t("groups.addMembersTitle", { count: selectedContacts.length })
 						}), contacts.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-xs text-gray-400 text-center py-4",
-							children: "لا توجد جهات اتصال مضافة بعد"
+							children: t("groups.noContacts")
 						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "space-y-2 max-h-60 overflow-y-auto",
 							children: contacts.map((contact) => {
@@ -69150,7 +69162,7 @@ function CreateGroupScreen({ onBack }) {
 											children: isSelected && "✓"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 											className: "text-sm font-medium text-gray-900",
-											children: contact.displayName || contact.email || "مستخدم"
+											children: contact.displayName || contact.email || t("common.user")
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 											className: "text-[10px] text-gray-500",
 											children: ["@", contact.username || contact.contactId?.slice(0, 8)]
@@ -69211,7 +69223,7 @@ function CreateGroupScreen({ onBack }) {
 							stroke: "currentColor",
 							strokeWidth: "2",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M12 5v14M5 12h14" })
-						}), "إنشاء المجموعة"] })
+						}), t("groups.createGroup")] })
 					})
 				]
 			})
@@ -70048,7 +70060,7 @@ function InstallGuide({ onDismiss, deferredPrompt, isInstalled }) {
 }
 //#endregion
 //#region src/features/groups/GroupChatScreen.jsx
-var MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position }) => {
+var MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position, t }) => {
 	if (!position) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-50",
@@ -70073,19 +70085,24 @@ var MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClo
 					stroke: "currentColor",
 					strokeWidth: "2",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: "9 17 4 12 9 7" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M20 18v-2a4 4 0 0 0-4-4H4" })]
-				}), "رد"]
+				}), t("chat.reply")]
 			}), isOwn && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 				onClick: () => {
 					onDeleteForEveryone(message);
 					onClose();
 				},
 				className: "w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }), " حذف للكل"]
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }),
+					" ",
+					t("chat.deleteForAll")
+				]
 			})]
 		})
 	});
 };
 function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
+	const { t } = useLanguage();
 	const [message, setMessage] = (0, import_react.useState)("");
 	const [messages, setMessages] = (0, import_react.useState)([]);
 	const [loading, setLoading] = (0, import_react.useState)(true);
@@ -70145,7 +70162,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 			});
 			setReplyTo(null);
 		} catch (err) {
-			ue.error("تعذر إرسال الرسالة");
+			ue.error(t("chat.sendError"));
 			setMessage(text);
 		}
 	};
@@ -70158,16 +70175,16 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 	const handleDeleteForEveryone = async (msg) => {
 		try {
 			await updateDoc(doc(db, "groups", groupId, "messages", msg.id), { deleted: true });
-			ue.success("تم حذف الرسالة");
+			ue.success(t("chat.messageDeleted"));
 		} catch (err) {
-			ue.error("فشل حذف الرسالة");
+			ue.error(t("chat.deleteError"));
 		}
 	};
 	const handleClearChat = () => {
 		setMessages([]);
 		setShowClearConfirm(false);
 		setShowHeaderMenu(false);
-		ue.success("تم مسح المحادثة محلياً");
+		ue.success(t("chat.chatCleared"));
 	};
 	const groupedMessages = (0, import_react.useMemo)(() => {
 		const groups = [];
@@ -70214,7 +70231,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 	};
 	if (!groupId) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "flex h-screen items-center justify-center",
-		children: "جار التحميل..."
+		children: t("common.loading")
 	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen flex flex-col bg-gray-50",
@@ -70240,10 +70257,14 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 								className: "flex-1 min-w-0",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 									className: "text-xl font-extrabold text-gray-900 truncate",
-									children: group.name || "المجموعة"
+									children: group.name || t("groups.defaultName")
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 									className: "text-xs text-gray-500",
-									children: [group.members?.length || 0, " أعضاء"]
+									children: [
+										group.members?.length || 0,
+										" ",
+										t("groups.membersCount")
+									]
 								})]
 							})]
 						})]
@@ -70262,7 +70283,11 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 									setShowHeaderMenu(false);
 								},
 								className: "w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }), " مسح محتوى الدردشة"]
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }),
+									" ",
+									t("chat.clearChat")
+								]
 							})
 						})]
 					})]
@@ -70278,22 +70303,22 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-10 h-10 text-red-500 mx-auto mb-3" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "font-bold text-lg mb-2",
-							children: "تأكيد مسح المحادثة"
+							children: t("chat.clearConfirmTitle")
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-sm text-gray-500 mb-6",
-							children: "سيتم مسح جميع الرسائل من شاشتك فقط ولا يمكن استعادتها. الرسائل لدى الأطراف الأخرى لن تتأثر."
+							children: t("chat.clearConfirmDesc")
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex gap-3",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => setShowClearConfirm(false),
 								className: "flex-1 py-2 rounded-lg border",
-								children: "إلغاء"
+								children: t("common.cancel")
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: handleClearChat,
 								className: "flex-1 py-2 rounded-lg bg-red-600 text-white",
-								children: "مسح"
+								children: t("chat.clear")
 							})]
 						})
 					]
@@ -70307,7 +70332,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" })
 				}) : groupedMessages.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "flex justify-center py-16 text-gray-400 text-sm",
-					children: "لا توجد رسائل بعد"
+					children: t("chat.noMessages")
 				}) : groupedMessages.map((group, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "flex justify-center mb-4",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
@@ -70341,7 +70366,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 										children: msg.senderName?.charAt(0)?.toUpperCase() || "?"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 										className: "text-xs font-medium text-gray-600",
-										children: msg.senderName || "مستخدم"
+										children: msg.senderName || t("chat.user")
 									})]
 								}),
 								msg.replyTo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -70370,7 +70395,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 											wordBreak: "break-word",
 											fontStyle: msg.deleted ? "italic" : "normal"
 										},
-										children: msg.deleted ? "تم حذف هذه الرسالة" : msg.text
+										children: msg.deleted ? t("chat.messageDeleted") : msg.text
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -70394,11 +70419,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 								className: "font-bold",
-								children: [
-									"الرد على ",
-									replyTo.senderName,
-									":"
-								]
+								children: [t("chat.replyTo", { name: replyTo.senderName }), ":"]
 							}),
 							" ",
 							replyTo.text
@@ -70415,7 +70436,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 						value: message,
 						onChange: (e) => setMessage(e.target.value),
 						onKeyDown: handleKeyDown,
-						placeholder: "اكتب رسالة...",
+						placeholder: t("chat.placeholder"),
 						rows: 1,
 						className: "flex-1 bg-transparent border-0 focus:ring-0 resize-none text-sm text-gray-800 placeholder:text-gray-400 py-2.5 px-1 max-h-32",
 						style: { minHeight: "40px" }
@@ -70435,7 +70456,8 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 				onReply: setReplyTo,
 				onDeleteForEveryone: handleDeleteForEveryone,
 				onClose: () => setActionPopup(null),
-				position: actionPopup.position
+				position: actionPopup.position,
+				t
 			})
 		]
 	});
@@ -70539,6 +70561,7 @@ function ContactInfoModal({ open, member, onClose, onOpenChat }) {
 //#endregion
 //#region src/features/groups/GroupInfoScreen.jsx
 function GroupInfoScreen({ group, onBack, onOpenChat }) {
+	const { t } = useLanguage();
 	const [membersData, setMembersData] = (0, import_react.useState)([]);
 	const [groupData, setGroupData] = (0, import_react.useState)(group);
 	const [showEditName, setShowEditName] = (0, import_react.useState)(false);
@@ -70585,18 +70608,18 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 				[field]: value
 			});
 			let systemText = "";
-			if (field === "name") systemText = `غيّر اسم المجموعة إلى "${value}"`;
-			if (field === "description") systemText = `غيّر وصف المجموعة`;
+			if (field === "name") systemText = t("groups.nameChanged", { name: value });
+			if (field === "description") systemText = t("groups.descChanged");
 			await addDoc(collection(db, "groups", group.id, "messages"), {
 				senderId: currentUser.uid,
-				senderName: "النظام",
+				senderName: t("groups.system"),
 				text: systemText,
 				timestamp: serverTimestamp$2(),
 				system: true
 			});
-			ue.success("تم التحديث");
+			ue.success(t("common.updated"));
 		} catch (err) {
-			ue.error("فشل التحديث");
+			ue.error(t("common.updateFailed"));
 		}
 	};
 	const handleToggleAdmin = async (uid) => {
@@ -70609,17 +70632,17 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 					...groupData,
 					admins: admins.filter((a) => a !== uid)
 				});
-				ue.success("تم إزالة الصلاحية");
+				ue.success(t("groups.adminRemoved"));
 			} else {
 				await updateDoc(doc(db, "groups", group.id), { admins: arrayUnion(uid) });
 				setGroupData({
 					...groupData,
 					admins: [...admins, uid]
 				});
-				ue.success("تم تعيينه كمشرف");
+				ue.success(t("groups.adminAdded"));
 			}
 		} catch (err) {
-			ue.error("فشل التغيير");
+			ue.error(t("common.updateFailed"));
 		}
 	};
 	const handleRemoveMember = async (uid) => {
@@ -70631,22 +70654,22 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 				...groupData,
 				members: updatedMembers
 			});
-			const removedName = membersData.find((m) => m.uid === uid)?.name || "عضو";
+			const removedName = membersData.find((m) => m.uid === uid)?.name || t("groups.member");
 			await addDoc(collection(db, "groups", group.id, "messages"), {
 				senderId: currentUser.uid,
-				senderName: "النظام",
-				text: `أزال ${removedName}`,
+				senderName: t("groups.system"),
+				text: t("groups.removedMember", { name: removedName }),
 				timestamp: serverTimestamp$2(),
 				system: true
 			});
-			ue.success("تم الإزالة");
+			ue.success(t("groups.removed"));
 		} catch (err) {
-			ue.error("فشل الإزالة");
+			ue.error(t("common.updateFailed"));
 		}
 	};
 	const handleAddMember = async (contact) => {
 		if (groupData.members.includes(contact.uid)) {
-			ue.error("العضو موجود بالفعل");
+			ue.error(t("groups.alreadyMember"));
 			return;
 		}
 		try {
@@ -70657,14 +70680,14 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 			});
 			await addDoc(collection(db, "groups", group.id, "messages"), {
 				senderId: currentUser.uid,
-				senderName: "النظام",
-				text: `أضاف ${contact.displayName || contact.username}`,
+				senderName: t("groups.system"),
+				text: t("groups.addedMember", { name: contact.displayName || contact.username }),
 				timestamp: serverTimestamp$2(),
 				system: true
 			});
-			ue.success("تمت الإضافة");
+			ue.success(t("groups.added"));
 		} catch (err) {
-			ue.error("فشل الإضافة");
+			ue.error(t("common.updateFailed"));
 		}
 	};
 	(0, import_react.useEffect)(() => {
@@ -70699,7 +70722,7 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 						className: "text-xl font-extrabold text-gray-900",
-						children: "معلومات المجموعة"
+						children: t("groups.groupInfo")
 					})]
 				})
 			}),
@@ -70733,31 +70756,27 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 							className: "flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-6 h-6 text-purple-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "text-xs font-medium",
-								children: "إضافة"
+								children: t("groups.add")
 							})]
 						}), isAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							onClick: () => setShowEditName(true),
 							className: "flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-6 h-6 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "text-xs font-medium",
-								children: "تعديل الاسم"
+								children: t("groups.editName")
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							onClick: () => setShowEditDesc(true),
 							className: "flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-6 h-6 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "text-xs font-medium",
-								children: "تعديل الوصف"
+								children: t("groups.editDesc")
 							})]
 						})] })]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 						className: "text-sm font-bold text-gray-500 mb-3",
-						children: [
-							"الأعضاء (",
-							membersData.length,
-							")"
-						]
+						children: t("groups.membersTitle", { count: membersData.length })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "space-y-2",
 						children: membersData.map((member) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -70795,16 +70814,24 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4" }),
 											" ",
-											groupData.admins?.includes(member.uid) ? "إزالة مشرف" : "تعيين كمشرف"
+											groupData.admins?.includes(member.uid) ? t("groups.removeAdmin") : t("groups.makeAdmin")
 										]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										onClick: () => handleRemoveMember(member.uid),
 										className: "w-full text-right px-4 py-2 hover:bg-red-50 flex items-center gap-2 text-sm text-red-600",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }), " إزالة"]
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }),
+											" ",
+											t("groups.remove")
+										]
 									})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										onClick: () => openContactInfo(member),
 										className: "w-full text-right px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-sm",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4" }), " معلومات"]
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4" }),
+											" ",
+											t("groups.info")
+										]
 									})]
 								})]
 							})]
@@ -70821,7 +70848,7 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "font-bold mb-4",
-							children: "تعديل اسم المجموعة"
+							children: t("groups.editName")
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							value: newName,
@@ -70833,14 +70860,14 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => setShowEditName(false),
 								className: "flex-1 py-2 rounded-lg border",
-								children: "إلغاء"
+								children: t("common.cancel")
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => {
 									updateGroupField("name", newName);
 									setShowEditName(false);
 								},
 								className: "flex-1 py-2 rounded-lg bg-purple-600 text-white",
-								children: "حفظ"
+								children: t("common.save")
 							})]
 						})
 					]
@@ -70855,7 +70882,7 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "font-bold mb-4",
-							children: "تعديل الوصف"
+							children: t("groups.editDesc")
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							value: newDesc,
@@ -70867,14 +70894,14 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => setShowEditDesc(false),
 								className: "flex-1 py-2 rounded-lg border",
-								children: "إلغاء"
+								children: t("common.cancel")
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => {
 									updateGroupField("description", newDesc);
 									setShowEditDesc(false);
 								},
 								className: "flex-1 py-2 rounded-lg bg-purple-600 text-white",
-								children: "حفظ"
+								children: t("common.save")
 							})]
 						})
 					]
@@ -70889,20 +70916,20 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "font-bold mb-4",
-							children: "إضافة أعضاء"
+							children: t("groups.addMembers")
 						}),
 						contacts.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center justify-between py-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: c.displayName || c.username }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => handleAddMember(c),
 								className: "text-purple-600 text-sm font-medium",
-								children: "إضافة"
+								children: t("groups.add")
 							})]
 						}, c.uid)),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							onClick: () => setShowAddMembers(false),
 							className: "mt-4 w-full py-2 rounded-lg border",
-							children: "إغلاق"
+							children: t("common.close")
 						})
 					]
 				})
