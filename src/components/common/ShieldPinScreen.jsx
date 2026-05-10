@@ -12,13 +12,14 @@ export default function ShieldPinScreen() {
   const [recoveryError, setRecoveryError] = useState(false);
   const { verifyPIN, autoVerify, pinLength, unlockWithRecoveryCode, verifyBiometric, biometricEnabled } = useAppLock();
 
-  // محاولة بصمة تلقائية عند فتح الشاشة (يمكنها فتح التطبيق بمفردها)
+  // محاولة بصمة تلقائية عند فتح الشاشة (إن كانت مفعلة)
   useEffect(() => {
     if (biometricEnabled) {
       verifyBiometric();
     }
   }, [biometricEnabled, verifyBiometric]);
 
+  // التحقق التلقائي عند اكتمال الرمز
   useEffect(() => {
     if (autoVerify && pin.length === pinLength) {
       handleVerify(pin);
@@ -39,6 +40,15 @@ export default function ShieldPinScreen() {
     }
   }, [verifyPIN]);
 
+  const handleBiometric = async () => {
+    if (!biometricEnabled) return;
+    const ok = await verifyBiometric();
+    if (!ok) {
+      setError(true);
+      setTimeout(() => setError(false), 800);
+    }
+  };
+
   const handleKeyPress = (value) => {
     if (error || success || showRecovery) return;
     if (value === 'delete') {
@@ -46,9 +56,7 @@ export default function ShieldPinScreen() {
     } else if (value === 'confirm') {
       handleVerify(pin);
     } else if (value === 'fingerprint') {
-      verifyBiometric().then(ok => {
-        if (!ok) { setError(true); setTimeout(() => setError(false), 800); }
-      });
+      handleBiometric();
     } else if (pin.length < 20) {
       setPin(prev => prev + value);
     }
@@ -64,12 +72,13 @@ export default function ShieldPinScreen() {
     }
   };
 
+  // زر التأكيد يظهر فقط إذا كان التحقق التلقائي غير مفعّل والرمز يحتوي على 4 خانات على الأقل
   const showConfirmButton = !autoVerify && pin.length >= 4;
 
   return (
     <div className="fixed inset-0 z-[9999] bg-white flex items-center justify-center" dir="rtl">
-      <div className="w-full max-w-xs px-6 flex flex-col items-center gap-8">
-        {/* أيقونة القفل المركزية */}
+      <div className="w-full max-w-xs px-6 flex flex-col items-center gap-6">
+        {/* أيقونة القفل */}
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -87,26 +96,41 @@ export default function ShieldPinScreen() {
           </motion.div>
         </motion.div>
 
-        {/* العنوان والرسالة */}
+        {/* زر البصمة المستقل */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={handleBiometric}
+          disabled={!biometricEnabled}
+          className={`relative w-full max-w-[200px] h-14 rounded-2xl flex items-center justify-center gap-3 font-bold text-base shadow-lg transition-all ${
+            biometricEnabled
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-400 hover:to-teal-400'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          <Fingerprint className="w-7 h-7" />
+          فتح بالبصمة
+        </motion.button>
+
+        {/* العنوان والتعليمات */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <h1 className="text-2xl font-black text-gray-900">
+          <h1 className="text-xl font-black text-gray-900">
             {showRecovery ? 'رمز الاسترداد' : success ? 'تم!' : 'أدخل رمز الأمان'}
           </h1>
-          <p className={`text-sm mt-2 font-medium ${error || recoveryError ? 'text-red-500' : success ? 'text-emerald-500' : 'text-gray-500'}`}>
+          <p className={`text-sm mt-1 font-medium ${error || recoveryError ? 'text-red-500' : success ? 'text-emerald-500' : 'text-gray-500'}`}>
             {recoveryError ? 'رمز الاسترداد غير صحيح' :
              success ? 'فتح التطبيق...' :
-             error ? 'الرمز غير صحيح، حاول مرة أخرى' :
-             showRecovery ? 'أدخل رمز الاسترداد الاحتياطي' :
+             error ? 'الرمز غير صحيح' :
+             showRecovery ? 'أدخل رمز الاسترداد الاحتياطي (6 أرقام)' :
              'أدخل رمز PIN (أربعة أرقام على الأقل)'}
           </p>
         </motion.div>
 
         {showRecovery ? (
-          // واجهة رمز الاسترداد (6 أرقام)
+          /* واجهة الاسترداد */
           <div className="w-full space-y-4">
             <input
               type="password"
@@ -135,51 +159,30 @@ export default function ShieldPinScreen() {
               onClick={() => { setShowRecovery(false); setRecoveryCode(''); setRecoveryError(false); }}
               className="w-full h-10 text-sm text-gray-500 hover:text-purple-600 transition-colors"
             >
-              العودة لإدخال الرمز
+              العودة
             </button>
           </div>
         ) : (
           <>
-            {/* حقل إدخال PIN المخفي */}
-            <div className="w-full relative">
-              <input
-                type="password"
-                inputMode="numeric"
-                maxLength={pinLength}
-                value={pin}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '');
-                  if (val.length <= pinLength) setPin(val);
-                }}
-                className="w-full h-14 px-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-center text-3xl tracking-[0.5em] focus:outline-none focus:border-purple-500 transition-colors"
-                placeholder="●●●●"
-                autoFocus
-              />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-3xl text-gray-400 select-none">
-                {pin.length === 0 ? '●●●●' : '●'.repeat(pin.length)}
-              </div>
-            </div>
+            {/* حقل إدخال PIN المخفي (نوع Password) */}
+            <input
+              type="password"
+              inputMode="numeric"
+              maxLength={pinLength}
+              value={pin}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                if (val.length <= pinLength) setPin(val);
+              }}
+              placeholder={`●●●● (${pinLength} أرقام)`}
+              className="w-full h-14 px-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-center text-2xl tracking-widest focus:outline-none focus:border-purple-500 transition-colors"
+              autoFocus
+            />
 
-            {/* لوحة المفاتيح الرقمية */}
+            {/* لوحة المفاتيح الرقمية (اختيارية، تبقى للراحة) */}
             <div className="grid grid-cols-3 gap-4 w-full max-w-[260px]">
-              {['1','2','3','4','5','6','7','8','9','fingerprint','0','delete'].map((key) => {
-                if (key === 'fingerprint') {
-                  return (
-                    <motion.button
-                      key={key}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => handleKeyPress('fingerprint')}
-                      disabled={!biometricEnabled}
-                      className={`h-14 rounded-2xl flex items-center justify-center transition-all ${
-                        biometricEnabled
-                          ? 'bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-200'
-                          : 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                      }`}
-                    >
-                      <Fingerprint className="w-7 h-7" />
-                    </motion.button>
-                  );
-                }
+              {['1','2','3','4','5','6','7','8','9','','0','delete'].map((key) => {
+                if (key === '') return <div key="empty" />;
                 if (key === 'delete') {
                   return (
                     <motion.button
@@ -189,23 +192,6 @@ export default function ShieldPinScreen() {
                       className="h-14 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all"
                     >
                       <Delete className="w-6 h-6 text-gray-600" />
-                    </motion.button>
-                  );
-                }
-                if (key === 'confirm') {
-                  return (
-                    <motion.button
-                      key={key}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => handleKeyPress('confirm')}
-                      disabled={!showConfirmButton}
-                      className={`h-14 rounded-2xl flex items-center justify-center transition-all ${
-                        showConfirmButton
-                          ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-200'
-                          : 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                      }`}
-                    >
-                      <Check className="w-7 h-7" />
                     </motion.button>
                   );
                 }
@@ -222,7 +208,18 @@ export default function ShieldPinScreen() {
               })}
             </div>
 
-            {/* زر نسيان الرمز */}
+            {/* زر التأكيد اليدوي */}
+            {showConfirmButton && (
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handleVerify(pin)}
+                className="w-full h-12 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl font-bold transition-all shadow-md"
+              >
+                تأكيد الرمز
+              </motion.button>
+            )}
+
+            {/* رابط نسيان الرمز */}
             <button
               onClick={() => setShowRecovery(true)}
               className="text-sm text-gray-400 hover:text-purple-600 transition-colors"
