@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Check, Fingerprint } from 'lucide-react';
+import { Lock, Delete, Check, Fingerprint } from 'lucide-react';
 import { useAppLock } from '../../context/AppLockContext';
 
 export default function ShieldPinScreen() {
@@ -12,14 +12,14 @@ export default function ShieldPinScreen() {
   const [recoveryError, setRecoveryError] = useState(false);
   const { verifyPIN, autoVerify, pinLength, unlockWithRecoveryCode, verifyBiometric, biometricEnabled } = useAppLock();
 
-  // محاولة بصمة تلقائية عند الفتح (إن كانت مفعلة)
+  // محاولة بصمة تلقائية عند فتح الشاشة (إن كانت مفعلة)
   useEffect(() => {
     if (biometricEnabled) {
       verifyBiometric();
     }
   }, [biometricEnabled, verifyBiometric]);
 
-  // التحقق التلقائي عند اكتمال الرمز (إذا كان مفعّلاً)
+  // التحقق التلقائي عند اكتمال الرمز
   useEffect(() => {
     if (autoVerify && pin.length === pinLength) {
       handleVerify(pin);
@@ -49,6 +49,19 @@ export default function ShieldPinScreen() {
     }
   };
 
+  const handleKeyPress = (value) => {
+    if (error || success || showRecovery) return;
+    if (value === 'delete') {
+      setPin(prev => prev.slice(0, -1));
+    } else if (value === 'confirm') {
+      handleVerify(pin);
+    } else if (value === 'fingerprint') {
+      handleBiometric();
+    } else if (pin.length < 20) {
+      setPin(prev => prev + value);
+    }
+  };
+
   const handleRecoverySubmit = () => {
     if (recoveryCode.length !== 6) return;
     const ok = unlockWithRecoveryCode(recoveryCode);
@@ -59,7 +72,7 @@ export default function ShieldPinScreen() {
     }
   };
 
-  // زر التأكيد يظهر فقط إذا كان التحقق التلقائي غير مفعّل والرمز به 4 خانات على الأقل
+  // زر التأكيد يظهر فقط إذا كان التحقق التلقائي غير مفعّل والرمز يحتوي على 4 خانات على الأقل
   const showConfirmButton = !autoVerify && pin.length >= 4;
 
   return (
@@ -112,7 +125,7 @@ export default function ShieldPinScreen() {
              success ? 'فتح التطبيق...' :
              error ? 'الرمز غير صحيح' :
              showRecovery ? 'أدخل رمز الاسترداد الاحتياطي (6 أرقام)' :
-             `أدخل رمز PIN (${pinLength} أرقام)`}
+             'أدخل رمز PIN (أربعة أرقام على الأقل)'}
           </p>
         </motion.div>
 
@@ -120,7 +133,7 @@ export default function ShieldPinScreen() {
           /* واجهة الاسترداد */
           <div className="w-full space-y-4">
             <input
-              type="password"
+              type="text"
               inputMode="numeric"
               maxLength={6}
               value={recoveryCode}
@@ -129,7 +142,7 @@ export default function ShieldPinScreen() {
                 if (val.length <= 6) setRecoveryCode(val);
               }}
               placeholder="الرمز الاحتياطي (6 أرقام)"
-              className={`w-full h-14 px-4 rounded-xl border-2 text-center text-2xl tracking-widest focus:outline-none transition-colors ${
+              className={`w-full h-14 px-4 rounded-xl border-2 text-center text-transparent caret-transparent selection:bg-transparent placeholder:text-gray-400 focus:outline-none transition-colors ${
                 recoveryError ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50 focus:border-purple-500'
               }`}
               autoFocus
@@ -151,21 +164,51 @@ export default function ShieldPinScreen() {
           </div>
         ) : (
           <>
-            {/* حقل إدخال PIN المخفي فقط (بدون دوائر وبدون لوحة مفاتيح) */}
+            {/* حقل إدخال PIN مخفي النص والمؤشر */}
             <input
-              type="password"
+              type="text"
               inputMode="numeric"
+              maxLength={pinLength}
               value={pin}
               onChange={(e) => {
                 const val = e.target.value.replace(/\D/g, '');
                 if (val.length <= pinLength) setPin(val);
               }}
-              placeholder={`●●●● (${pinLength} أرقام)`}
-              className="w-full h-14 px-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-center text-2xl tracking-[0.5em] focus:outline-none focus:border-purple-500 transition-colors"
+              placeholder={`أدخل الرمز (${pinLength} أرقام)`}
+              className="w-full h-14 px-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-center text-transparent caret-transparent selection:bg-transparent placeholder:text-gray-400 focus:outline-none focus:border-purple-500 transition-colors"
               autoFocus
             />
 
-            {/* زر التأكيد اليدوي (اختياري) */}
+            {/* لوحة المفاتيح الرقمية (اختيارية، تبقى للراحة) */}
+            <div className="grid grid-cols-3 gap-4 w-full max-w-[260px]">
+              {['1','2','3','4','5','6','7','8','9','','0','delete'].map((key) => {
+                if (key === '') return <div key="empty" />;
+                if (key === 'delete') {
+                  return (
+                    <motion.button
+                      key={key}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleKeyPress('delete')}
+                      className="h-14 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all"
+                    >
+                      <Delete className="w-6 h-6 text-gray-600" />
+                    </motion.button>
+                  );
+                }
+                return (
+                  <motion.button
+                    key={key}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleKeyPress(key)}
+                    className="h-14 rounded-2xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-900 font-bold text-2xl flex items-center justify-center shadow-sm transition-all"
+                  >
+                    {key}
+                  </motion.button>
+                );
+              })}
+            </div>
+
+            {/* زر التأكيد اليدوي */}
             {showConfirmButton && (
               <motion.button
                 whileTap={{ scale: 0.97 }}
