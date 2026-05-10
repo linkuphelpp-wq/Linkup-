@@ -60478,14 +60478,10 @@ var Section = ({ title, children, delay = 0, icon: Icon }) => /* @__PURE__ */ (0
 	className: "space-y-4",
 	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "flex items-center gap-3 px-1 mb-2",
-		children: [
-			Icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5 text-purple-500" }),
-			"      ",
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-				className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
-				children: title
-			})
-		]
+		children: [Icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+			className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
+			children: title
+		})]
 	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "space-y-3",
 		children
@@ -60546,23 +60542,15 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 			featured: true
 		}
 	];
-	const languages = [
-		{
-			v: "ar",
-			l: t("settings.languages.ar"),
-			flag: "🇸🇦"
-		},
-		{
-			v: "en",
-			l: t("settings.languages.en"),
-			flag: "🇬🇧"
-		},
-		{
-			v: "fr",
-			l: t("settings.languages.fr"),
-			flag: "🇫🇷"
-		}
-	];
+	const languages = [{
+		v: "ar",
+		l: t("settings.languages.ar"),
+		flag: "🇸🇦"
+	}, {
+		v: "en",
+		l: t("settings.languages.en"),
+		flag: "🇬🇧"
+	}];
 	const handleResetApp = async () => {
 		if (resetText.trim() !== t("common.delete")) return;
 		setResetLoading(true);
@@ -60659,25 +60647,21 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 						title: t("settings.sections.calls"),
 						delay: .3,
 						icon: Mic,
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Mic,
-								label: t("settings.items.muteMic.label"),
-								toggle: true,
-								isToggled: muteMicOnJoin,
-								onToggle: onToggleMuteMic,
-								color: "orange"
-							}),
-							"          ",
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Speaker,
-								label: t("settings.items.speaker.label"),
-								toggle: true,
-								isToggled: speakerDefault,
-								onToggle: onToggleSpeaker,
-								color: "orange"
-							})
-						]
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+							icon: Mic,
+							label: t("settings.items.muteMic.label"),
+							toggle: true,
+							isToggled: muteMicOnJoin,
+							onToggle: onToggleMuteMic,
+							color: "orange"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
+							icon: Speaker,
+							label: t("settings.items.speaker.label"),
+							toggle: true,
+							isToggled: speakerDefault,
+							onToggle: onToggleSpeaker,
+							color: "orange"
+						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
 						title: t("settings.sections.privacy"),
@@ -60797,10 +60781,10 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				className: "fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-gray-200/60 px-5 py-2 flex items-center justify-between shadow-lg",
 				style: { paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" },
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: onBack,
 						className: "p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all",
-						children: ["          ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-6 h-6 text-gray-700" })]
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-6 h-6 text-gray-700" })
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 						className: "text-sm font-medium text-gray-500",
