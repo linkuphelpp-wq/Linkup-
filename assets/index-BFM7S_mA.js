@@ -69352,14 +69352,19 @@ function MainMenuScreen({ onNavigate, username }) {
 									children: "اسم المستخدم الخاص بك"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
 									onClick: () => setIdVisible(!idVisible),
-									whileTap: { scale: .85 },
-									className: "relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none overflow-hidden",
+									whileTap: { scale: .9 },
+									className: "relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none",
 									style: { backgroundColor: idVisible ? "#8b5cf6" : "#e5e7eb" },
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-										className: "absolute top-[2px] w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center",
-										style: { right: "2px" },
-										animate: { x: idVisible ? -20 : 0 },
-										initial: false,
+										className: "absolute top-[2px] bottom-[2px] w-5 bg-white rounded-full shadow-md flex items-center justify-center",
+										style: {
+											insetInlineStart: idVisible ? "auto" : "2px",
+											insetInlineEnd: idVisible ? "2px" : "auto"
+										},
+										animate: {
+											insetInlineStart: idVisible ? "auto" : "2px",
+											insetInlineEnd: idVisible ? "2px" : "auto"
+										},
 										transition: {
 											type: "spring",
 											stiffness: 500,
