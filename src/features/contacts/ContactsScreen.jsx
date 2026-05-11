@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Users, Video, Phone, MessageCircle, Filter, Sparkles,
   Trash2, Star, UserPlus, X, Check, AlertCircle, Pencil,
-  ChevronDown, ChevronUp, Zap
+  ChevronDown, ChevronUp, Zap, Info
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
   doc, addDoc, serverTimestamp, getDoc, updateDoc
 } from 'firebase/firestore';
 import { toast } from 'sonner';
+import ContactInfoModal from '../../components/common/ContactInfoModal';
 
 // ───────── الشعار ─────────
 const LinkUpLogo = () => (
@@ -49,7 +50,7 @@ const getSafeName = (contact) => {
 };
 
 // ───────── بطاقة جهة الاتصال (معدّلة بتأثيرات حركية) ─────────
-const ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0, index = 0 }) => {
+const ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0, index = 0, onOpenProfile }) => {
   const [status, setStatus] = useState('offline');
   const [expanded, setExpanded] = useState(false);
 
@@ -206,6 +207,15 @@ const ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFa
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => { setExpanded(false); onOpenProfile?.(contact); }}
+                className="flex flex-col items-center gap-1 text-indigo-500 hover:bg-indigo-50 p-2 rounded-xl transition-colors"
+              >
+                <Info className="w-5 h-5" />
+                <span className="text-xs font-medium">ملف</span>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => { setExpanded(false); onDelete?.(contact); }}
                 className="flex flex-col items-center gap-1 text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors"
               >
@@ -327,6 +337,7 @@ export default function ContactsScreen({ onCall, onChat }) {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editTarget, setEditTarget] = useState(null);
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [selectedProfile, setSelectedProfile] = useState(null);
 
   const currentUser = auth.currentUser;
 
@@ -459,6 +470,15 @@ export default function ContactsScreen({ onCall, onChat }) {
     }
   };
 
+  const handleOpenProfile = (contact) => {
+    setSelectedProfile({
+      uid: contact.uid,
+      name: getSafeName(contact),
+      username: contact.username,
+      displayName: contact.displayName || contact.localDisplayName,
+    });
+  };
+
   const filteredContacts = useMemo(() => {
     let list = contacts;
     if (activeFilter === 'favorites') list = list.filter(c => favorites.includes(c.uid || c.username));
@@ -516,6 +536,15 @@ export default function ContactsScreen({ onCall, onChat }) {
 
       <DeleteConfirmModal open={!!deleteTarget} contact={deleteTarget} onConfirm={confirmDelete} onClose={() => setDeleteTarget(null)} />
       <EditNameModal open={!!editTarget} contact={editTarget} onSave={handleEditSave} onClose={() => setEditTarget(null)} />
+
+      {/* مودال الملف الشخصي */}
+      <ContactInfoModal
+        open={!!selectedProfile}
+        member={selectedProfile}
+        onClose={() => setSelectedProfile(null)}
+        onOpenChat={(member) => { setSelectedProfile(null); onChat?.(member); }}
+        onCall={onCall}
+      />
 
       {/* الهيدر الزجاجي العصري */}
       <motion.header
@@ -617,6 +646,7 @@ export default function ContactsScreen({ onCall, onChat }) {
                 onEdit={setEditTarget}
                 unreadCount={unreadCounts[contact.uid] || 0}
                 index={index}
+                onOpenProfile={handleOpenProfile}
               />
             ))}
           </div>
