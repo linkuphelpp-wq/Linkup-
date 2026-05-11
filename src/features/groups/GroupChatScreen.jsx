@@ -6,6 +6,7 @@ import {
 } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { X, Send, ArrowLeft, MoreVertical, Trash2 } from 'lucide-react';
+import ContactInfoModal from '../../components/common/ContactInfoModal';
 
 const MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position }) => {
   if (!position) return null;
@@ -19,20 +20,12 @@ const MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onC
         }}
         onClick={e => e.stopPropagation()}
       >
-        <button
-          onClick={() => { onReply(message); onClose(); }}
-          className="w-full text-right px-4 py-3 hover:bg-purple-50 flex items-center gap-3 text-sm"
-        >
-          <svg className="w-4 h-4 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
-          </svg>
+        <button onClick={() => { onReply(message); onClose(); }} className="w-full text-right px-4 py-3 hover:bg-purple-50 flex items-center gap-3 text-sm">
+          <svg className="w-4 h-4 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
           رد
         </button>
         {isOwn && (
-          <button
-            onClick={() => { onDeleteForEveryone(message); onClose(); }}
-            className="w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600"
-          >
+          <button onClick={() => { onDeleteForEveryone(message); onClose(); }} className="w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600">
             <Trash2 className="w-4 h-4" /> حذف للكل
           </button>
         )}
@@ -48,6 +41,7 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
   const [members, setMembers] = useState([]);
   const [replyTo, setReplyTo] = useState(null);
   const [actionPopup, setActionPopup] = useState(null);
+  const [selectedProfileUser, setSelectedProfileUser] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
@@ -74,11 +68,14 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
     return () => unsub();
   }, [groupId]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   const senderName = (uid) => members.find(m => m.uid === uid)?.name || uid;
+
+  const handleOpenProfile = (uid) => {
+    const member = members.find(m => m.uid === uid);
+    if (member) setSelectedProfileUser({ uid, name: member.name, username: '' });
+  };
 
   const handleSend = async () => {
     if (!message.trim()) return;
@@ -94,26 +91,18 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
         replyTo: replyTo ? { id: replyTo.id, text: replyTo.text, senderName: replyTo.senderName } : null,
       });
       setReplyTo(null);
-    } catch (err) {
-      toast.error('تعذر إرسال الرسالة');
-      setMessage(text);
-    }
+    } catch (err) { toast.error('تعذر إرسال الرسالة'); setMessage(text); }
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
   const handleDeleteForEveryone = async (msg) => {
     try {
       await updateDoc(doc(db, 'groups', groupId, 'messages', msg.id), { deleted: true });
       toast.success('تم حذف الرسالة');
-    } catch (err) {
-      toast.error('فشل حذف الرسالة');
-    }
+    } catch (err) { toast.error('فشل حذف الرسالة'); }
   };
 
   const handleClearChat = () => {
@@ -127,23 +116,14 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
     const groups = [];
     let currentDate = '';
     let currentGroup = [];
-
     messages.forEach(msg => {
       const date = msg.timestamp?.toDate?.() || new Date(msg.timestamp);
-      const dateStr = date.toLocaleDateString('ar-SA', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric'
-      });
-
+      const dateStr = date.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' });
       if (dateStr !== currentDate) {
         if (currentGroup.length > 0) groups.push({ date: currentDate, messages: currentGroup });
         currentDate = dateStr;
         currentGroup = [msg];
-      } else {
-        currentGroup.push(msg);
-      }
+      } else currentGroup.push(msg);
     });
     if (currentGroup.length > 0) groups.push({ date: currentDate, messages: currentGroup });
     return groups;
@@ -185,14 +165,8 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
               <MoreVertical className="w-5 h-5 text-gray-700" />
             </button>
             {showHeaderMenu && (
-              <div
-                className="absolute left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150"
-                onClick={() => setShowHeaderMenu(false)}
-              >
-                <button
-                  onClick={() => { setShowClearConfirm(true); setShowHeaderMenu(false); }}
-                  className="w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600"
-                >
+              <div className="absolute left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-40 animate-in fade-in slide-in-from-top-2 duration-150" onClick={() => setShowHeaderMenu(false)}>
+                <button onClick={() => { setShowClearConfirm(true); setShowHeaderMenu(false); }} className="w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600">
                   <Trash2 className="w-4 h-4" /> مسح محتوى الدردشة
                 </button>
               </div>
@@ -230,13 +204,10 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
                 if (msg.system) {
                   return (
                     <div key={msg.id} className="flex justify-center my-2">
-                      <span className="text-xs bg-gray-200/70 text-gray-500 px-3 py-1 rounded-full">
-                        {msg.text}
-                      </span>
+                      <span className="text-xs bg-gray-200/70 text-gray-500 px-3 py-1 rounded-full">{msg.text}</span>
                     </div>
                   );
                 }
-
                 const isMe = msg.senderId === currentUser.uid;
                 return (
                   <div
@@ -249,7 +220,10 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
                     <div className={`max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
                       {!isMe && (
                         <div className="flex items-center gap-2 mb-1 mr-2">
-                          <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-700">
+                          <div
+                            className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-700 cursor-pointer hover:scale-110 transition-transform"
+                            onClick={() => handleOpenProfile(msg.senderId)}
+                          >
                             {msg.senderName?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                           <span className="text-xs font-medium text-gray-600">{msg.senderName || 'مستخدم'}</span>
@@ -261,16 +235,14 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
                           <p className="text-gray-500 truncate">{msg.replyTo.text}</p>
                         </div>
                       )}
-                      <div
-                        style={{
-                          backgroundColor: msg.deleted ? '#F3F4F6' : (isMe ? '#6D28D9' : '#FFFFFF'),
-                          color: msg.deleted ? '#9CA3AF' : (isMe ? '#FFFFFF' : '#111827'),
-                          borderRadius: isMe ? '1rem 1rem 0 1rem' : '1rem 1rem 1rem 0',
-                          padding: '0.75rem 1rem',
-                          boxShadow: msg.deleted ? 'none' : (isMe ? '0 4px 12px rgba(109, 40, 217, 0.25)' : '0 2px 8px rgba(0,0,0,0.05)'),
-                          border: msg.deleted ? '1px dashed #E5E7EB' : (!isMe ? '1px solid #E5E7EB' : 'none'),
-                        }}
-                      >
+                      <div style={{
+                        backgroundColor: msg.deleted ? '#F3F4F6' : (isMe ? '#6D28D9' : '#FFFFFF'),
+                        color: msg.deleted ? '#9CA3AF' : (isMe ? '#FFFFFF' : '#111827'),
+                        borderRadius: isMe ? '1rem 1rem 0 1rem' : '1rem 1rem 1rem 0',
+                        padding: '0.75rem 1rem',
+                        boxShadow: msg.deleted ? 'none' : (isMe ? '0 4px 12px rgba(109, 40, 217, 0.25)' : '0 2px 8px rgba(0,0,0,0.05)'),
+                        border: msg.deleted ? '1px dashed #E5E7EB' : (!isMe ? '1px solid #E5E7EB' : 'none'),
+                      }}>
                         <p style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontStyle: msg.deleted ? 'italic' : 'normal' }}>
                           {msg.deleted ? 'تم حذف هذه الرسالة' : msg.text}
                         </p>
@@ -319,6 +291,13 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
           )}
         </div>
       </footer>
+
+      <ContactInfoModal
+        open={!!selectedProfileUser}
+        member={selectedProfileUser}
+        onClose={() => setSelectedProfileUser(null)}
+        onOpenChat={() => {}}
+      />
 
       {actionPopup && (
         <MessageActionsPopup

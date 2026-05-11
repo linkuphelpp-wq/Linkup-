@@ -32,13 +32,7 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
         const lastSeen = data.lastSeen?.toDate?.() || (data.lastSeen ? new Date(data.lastSeen) : null);
         const now = new Date();
         const diffSec = lastSeen ? (now - lastSeen) / 1000 : 999;
-        return {
-          uid,
-          name: data.displayName || uid,
-          username: data.username || '',
-          photoURL: data.photoURL || '',
-          status: (status === 'online' && diffSec < 60) ? 'online' : 'offline',
-        };
+        return { uid, name: data.displayName || uid, username: data.username || '', photoURL: data.photoURL || '', status: (status === 'online' && diffSec < 60) ? 'online' : 'offline' };
       }
       return { uid, name: uid, username: '', photoURL: '', status: 'offline' };
     })).then(setMembersData);
@@ -47,18 +41,9 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
   const updateGroupField = async (field, value) => {
     try {
       await updateDoc(doc(db, 'groups', group.id), { [field]: value });
-      const updated = { ...groupData, [field]: value };
-      setGroupData(updated);
-      let systemText = '';
-      if (field === 'name') systemText = `غيّر اسم المجموعة إلى "${value}"`;
-      if (field === 'description') systemText = 'غيّر وصف المجموعة';
-      await addDoc(collection(db, 'groups', group.id, 'messages'), {
-        senderId: currentUser.uid,
-        senderName: 'النظام',
-        text: systemText,
-        timestamp: serverTimestamp(),
-        system: true,
-      });
+      setGroupData(prev => ({ ...prev, [field]: value }));
+      const systemText = field === 'name' ? `غيّر اسم المجموعة إلى "${value}"` : 'غيّر وصف المجموعة';
+      await addDoc(collection(db, 'groups', group.id, 'messages'), { senderId: currentUser.uid, senderName: 'النظام', text: systemText, timestamp: serverTimestamp(), system: true });
       toast.success('تم التحديث');
     } catch (err) { toast.error('فشل التحديث'); }
   };
@@ -69,11 +54,11 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
     try {
       if (admins.includes(uid)) {
         await updateDoc(doc(db, 'groups', group.id), { admins: arrayRemove(uid) });
-        setGroupData({ ...groupData, admins: admins.filter(a => a !== uid) });
+        setGroupData(prev => ({ ...prev, admins: admins.filter(a => a !== uid) }));
         toast.success('تم إزالة الصلاحية');
       } else {
         await updateDoc(doc(db, 'groups', group.id), { admins: arrayUnion(uid) });
-        setGroupData({ ...groupData, admins: [...admins, uid] });
+        setGroupData(prev => ({ ...prev, admins: [...admins, uid] }));
         toast.success('تم تعيينه كمشرف');
       }
     } catch (err) { toast.error('فشل التغيير'); }
@@ -83,35 +68,19 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
     if (!isAdmin) return;
     try {
       await updateDoc(doc(db, 'groups', group.id), { members: arrayRemove(uid) });
-      const updatedMembers = groupData.members.filter(m => m !== uid);
-      setGroupData({ ...groupData, members: updatedMembers });
+      setGroupData(prev => ({ ...prev, members: prev.members.filter(m => m !== uid) }));
       const removedName = membersData.find(m => m.uid === uid)?.name || 'عضو';
-      await addDoc(collection(db, 'groups', group.id, 'messages'), {
-        senderId: currentUser.uid,
-        senderName: 'النظام',
-        text: `أزال ${removedName}`,
-        timestamp: serverTimestamp(),
-        system: true,
-      });
+      await addDoc(collection(db, 'groups', group.id, 'messages'), { senderId: currentUser.uid, senderName: 'النظام', text: `أزال ${removedName}`, timestamp: serverTimestamp(), system: true });
       toast.success('تم الإزالة');
     } catch (err) { toast.error('فشل الإزالة'); }
   };
 
   const handleAddMember = async (contact) => {
-    if (groupData.members.includes(contact.uid)) {
-      toast.error('العضو موجود بالفعل');
-      return;
-    }
+    if (groupData.members.includes(contact.uid)) { toast.error('العضو موجود بالفعل'); return; }
     try {
       await updateDoc(doc(db, 'groups', group.id), { members: arrayUnion(contact.uid) });
-      setGroupData({ ...groupData, members: [...groupData.members, contact.uid] });
-      await addDoc(collection(db, 'groups', group.id, 'messages'), {
-        senderId: currentUser.uid,
-        senderName: 'النظام',
-        text: `أضاف ${contact.displayName || contact.username}`,
-        timestamp: serverTimestamp(),
-        system: true,
-      });
+      setGroupData(prev => ({ ...prev, members: [...prev.members, contact.uid] }));
+      await addDoc(collection(db, 'groups', group.id, 'messages'), { senderId: currentUser.uid, senderName: 'النظام', text: `أضاف ${contact.displayName || contact.username}`, timestamp: serverTimestamp(), system: true });
       toast.success('تمت الإضافة');
     } catch (err) { toast.error('فشل الإضافة'); }
   };
@@ -121,12 +90,7 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
     const fetchContacts = async () => {
       const q = query(collection(db, 'contacts'), where('participants', 'array-contains', currentUser.uid));
       const snap = await getDocs(q);
-      const list = snap.docs.map(d => {
-        const data = d.data();
-        const otherUid = data.participants.find(p => p !== currentUser.uid);
-        return { uid: otherUid, displayName: data.displayName || '', username: data.username || '' };
-      });
-      setContacts(list);
+      setContacts(snap.docs.map(d => { const data = d.data(); const otherUid = data.participants.find(p => p !== currentUser.uid); return { uid: otherUid, displayName: data.displayName || '', username: data.username || '' }; }));
     };
     fetchContacts();
   }, [showAddMembers]);
@@ -150,9 +114,7 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
       <main className="flex-1 overflow-y-auto px-5 py-6 space-y-8">
         <div className="flex flex-col items-center">
           <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg mb-4">
-            <span className="text-4xl font-bold text-white">
-              {groupData.name?.charAt(0)?.toUpperCase() || 'G'}
-            </span>
+            <span className="text-4xl font-bold text-white">{groupData.name?.charAt(0)?.toUpperCase() || 'G'}</span>
           </div>
           <h2 className="text-2xl font-black text-gray-900">{groupData.name}</h2>
           {groupData.description && <p className="text-sm text-gray-500 mt-1">{groupData.description}</p>}
@@ -160,18 +122,15 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
 
         <div className="grid grid-cols-3 gap-4">
           <button onClick={() => setShowAddMembers(true)} className="flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100">
-            <UserPlus className="w-6 h-6 text-purple-600" />
-            <span className="text-xs font-medium">إضافة</span>
+            <UserPlus className="w-6 h-6 text-purple-600" /><span className="text-xs font-medium">إضافة</span>
           </button>
           {isAdmin && (
             <>
               <button onClick={() => setShowEditName(true)} className="flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100">
-                <Pencil className="w-6 h-6 text-blue-600" />
-                <span className="text-xs font-medium">تعديل الاسم</span>
+                <Pencil className="w-6 h-6 text-blue-600" /><span className="text-xs font-medium">تعديل الاسم</span>
               </button>
               <button onClick={() => setShowEditDesc(true)} className="flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100">
-                <Pencil className="w-6 h-6 text-emerald-600" />
-                <span className="text-xs font-medium">تعديل الوصف</span>
+                <Pencil className="w-6 h-6 text-emerald-600" /><span className="text-xs font-medium">تعديل الوصف</span>
               </button>
             </>
           )}
@@ -182,7 +141,7 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
           <div className="space-y-2">
             {membersData.map(member => (
               <div key={member.uid} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 cursor-pointer" onClick={() => openContactInfo(member)}>
                   <div className="relative">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-indigo-400 flex items-center justify-center text-white font-bold">
                       {member.name.charAt(0)?.toUpperCase()}
@@ -195,13 +154,7 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
                   </div>
                 </div>
                 <div className="relative">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      document.getElementById(`menu-${member.uid}`)?.classList.toggle('hidden');
-                    }}
-                    className="p-2 rounded-full hover:bg-gray-200"
-                  >
+                  <button onClick={(e) => { e.stopPropagation(); document.getElementById(`menu-${member.uid}`)?.classList.toggle('hidden'); }} className="p-2 rounded-full hover:bg-gray-200">
                     <MoreVertical className="w-4 h-4" />
                   </button>
                   <div id={`menu-${member.uid}`} className="hidden absolute left-0 bg-white shadow-lg rounded-xl border py-2 w-48 z-50 mt-2">
@@ -238,7 +191,6 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
           </div>
         </div>
       )}
-
       {showEditDesc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowEditDesc(false)}>
           <div className="bg-white rounded-2xl p-6 w-80" onClick={e => e.stopPropagation()}>
@@ -251,7 +203,6 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
           </div>
         </div>
       )}
-
       {showAddMembers && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowAddMembers(false)}>
           <div className="bg-white rounded-2xl p-6 w-80 max-h-96 overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -267,17 +218,16 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
         </div>
       )}
 
-      {contactInfoModalOpen && selectedMemberForInfo && (
-        <ContactInfoModal
-          open={contactInfoModalOpen}
-          member={selectedMemberForInfo}
-          onClose={() => setContactInfoModalOpen(false)}
-          onOpenChat={(member) => {
-            setContactInfoModalOpen(false);
-            onOpenChat?.(member);
-          }}
-        />
-      )}
+      <ContactInfoModal
+        open={contactInfoModalOpen}
+        member={selectedMemberForInfo}
+        onClose={() => { setContactInfoModalOpen(false); setSelectedMemberForInfo(null); }}
+        onOpenChat={(member) => {
+          setContactInfoModalOpen(false);
+          setSelectedMemberForInfo(null);
+          onOpenChat?.(member);
+        }}
+      />
     </div>
   );
 }

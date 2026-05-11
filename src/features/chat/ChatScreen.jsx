@@ -2,9 +2,9 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { db, auth } from '../../firebase/config';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { toast } from 'sonner';
-import { ArrowLeft, Send, Trash2 } from 'lucide-react';
+import { ArrowLeft, Send, Trash2, Info } from 'lucide-react';
+import ContactInfoModal from '../../components/common/ContactInfoModal';
 
-// ───────── مكون القائمة المنسدلة لإجراءات الرسالة ─────────
 const MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position }) => {
   if (!position) return null;
   return (
@@ -17,20 +17,12 @@ const MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onC
         }}
         onClick={e => e.stopPropagation()}
       >
-        <button
-          onClick={() => { onReply(message); onClose(); }}
-          className="w-full text-right px-4 py-3 hover:bg-purple-50 flex items-center gap-3 text-sm"
-        >
-          <svg className="w-4 h-4 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>
-          </svg>
+        <button onClick={() => { onReply(message); onClose(); }} className="w-full text-right px-4 py-3 hover:bg-purple-50 flex items-center gap-3 text-sm">
+          <svg className="w-4 h-4 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
           رد
         </button>
         {isOwn && (
-          <button
-            onClick={() => { onDeleteForEveryone(message); onClose(); }}
-            className="w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600"
-          >
+          <button onClick={() => { onDeleteForEveryone(message); onClose(); }} className="w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600">
             <Trash2 className="w-4 h-4" /> حذف للكل
           </button>
         )}
@@ -45,6 +37,7 @@ export default function ChatScreen({ contact, onBack, onCall }) {
   const [loading, setLoading] = useState(true);
   const [replyTo, setReplyTo] = useState(null);
   const [actionPopup, setActionPopup] = useState(null);
+  const [showProfile, setShowProfile] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const currentUser = auth.currentUser;
@@ -55,11 +48,11 @@ export default function ChatScreen({ contact, onBack, onCall }) {
     if (!chatId) return;
     const messagesRef = collection(db, 'chats', chatId, 'messages');
     const q = query(messagesRef, orderBy('timestamp', 'asc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsub = onSnapshot(q, (snapshot) => {
       setMessages(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
       setLoading(false);
     }, (err) => { console.error(err); setLoading(false); });
-    return () => unsubscribe();
+    return () => unsub();
   }, [chatId]);
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
@@ -104,9 +97,7 @@ export default function ChatScreen({ contact, onBack, onCall }) {
         if (currentGroup.length > 0) groups.push({ date: currentDate, messages: currentGroup });
         currentDate = dateStr;
         currentGroup = [msg];
-      } else {
-        currentGroup.push(msg);
-      }
+      } else currentGroup.push(msg);
     });
     if (currentGroup.length > 0) groups.push({ date: currentDate, messages: currentGroup });
     return groups;
@@ -126,22 +117,26 @@ export default function ChatScreen({ contact, onBack, onCall }) {
     return 'مستخدم';
   };
 
+  const displayName = getSafeName();
+
   if (!chatId) return <div className="flex items-center justify-center h-screen bg-slate-50 text-gray-500">جارٍ تهيئة المحادثة...</div>;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50" dir="rtl">
-      {/* هيدر المحادثة */}
       <header className="sticky top-0 z-30 px-4 pt-12 pb-3 bg-white border-b border-gray-200">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="w-10 h-10 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div
+            className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+            onClick={() => setShowProfile(true)}
+          >
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-              {getSafeName().charAt(0)?.toUpperCase() || '?'}
+              {displayName.charAt(0)?.toUpperCase() || '?'}
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="font-bold text-gray-900 truncate">@{getSafeName()}</h2>
+              <h2 className="font-bold text-gray-900 truncate">@{displayName}</h2>
               <p className="text-xs text-gray-500">{contact.status === 'online' ? 'متصل الآن' : 'غير متصل'}</p>
             </div>
           </div>
@@ -153,7 +148,6 @@ export default function ChatScreen({ contact, onBack, onCall }) {
         </div>
       </header>
 
-      {/* رسائل */}
       <main className="flex-1 overflow-y-auto px-4 py-4 space-y-6" style={{ paddingBottom: '120px' }}>
         {loading ? (
           <div className="flex justify-center py-10"><div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" /></div>
@@ -207,7 +201,6 @@ export default function ChatScreen({ contact, onBack, onCall }) {
         <div ref={messagesEndRef} />
       </main>
 
-      {/* شريط الإدخال مع الرد */}
       <footer className="fixed bottom-0 left-0 right-0 z-30 px-4 pb-5 pt-1 bg-white">
         {replyTo && (
           <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-t-xl mx-2 border border-gray-200">
@@ -239,7 +232,14 @@ export default function ChatScreen({ contact, onBack, onCall }) {
         </div>
       </footer>
 
-      {/* قائمة إجراءات الرسالة */}
+      <ContactInfoModal
+        open={showProfile}
+        member={{ uid: contact?.uid, name: displayName, username: contact?.username, displayName: contact?.displayName }}
+        onClose={() => setShowProfile(false)}
+        onOpenChat={() => {}}
+        onCall={onCall}
+      />
+
       {actionPopup && (
         <MessageActionsPopup
           message={actionPopup.message}
