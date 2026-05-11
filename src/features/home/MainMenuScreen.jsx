@@ -161,18 +161,23 @@ export default function MainMenuScreen({ onNavigate, username }) {
               اسم المستخدم الخاص بك
             </motion.h3>
 
-            {/* Toggle Switch مُصلح — يستخدم translateX بدلاً من right/left */}
+            {/* Toggle Switch مُصلح — يستخدم inset بدلاً من right/left */}
             <motion.button
               onClick={() => setIdVisible(!idVisible)}
-              whileTap={{ scale: 0.85 }}
-              className="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none overflow-hidden"
+              whileTap={{ scale: 0.9 }}
+              className="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none"
               style={{ backgroundColor: idVisible ? '#8b5cf6' : '#e5e7eb' }}
             >
               <motion.div
-                className="absolute top-[2px] w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center"
-                style={{ right: '2px' }}
-                animate={{ x: idVisible ? -20 : 0 }}
-                initial={false}
+                className="absolute top-[2px] bottom-[2px] w-5 bg-white rounded-full shadow-md flex items-center justify-center"
+                style={{ 
+                  insetInlineStart: idVisible ? 'auto' : '2px',
+                  insetInlineEnd: idVisible ? '2px' : 'auto',
+                }}
+                animate={{ 
+                  insetInlineStart: idVisible ? 'auto' : '2px',
+                  insetInlineEnd: idVisible ? '2px' : 'auto',
+                }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               >
                 <AnimatePresence mode="wait">
