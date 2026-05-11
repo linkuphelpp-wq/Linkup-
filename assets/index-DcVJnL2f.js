@@ -10269,11 +10269,6 @@ var translations = {
 	}
 };
 var LanguageContext = (0, import_react.createContext)();
-var useLanguage = () => {
-	const context = (0, import_react.useContext)(LanguageContext);
-	if (!context) throw new Error("useLanguage must be used within LanguageProvider");
-	return context;
-};
 var LanguageProvider = ({ children }) => {
 	const [language, setLanguage] = (0, import_react.useState)(() => {
 		return localStorage.getItem("atheer_language") || "ar";
@@ -59949,7 +59944,7 @@ var ProfileRow = ({ icon: Icon, label, value, onClick, danger, color = "purple" 
 		]
 	});
 };
-var NameChangeModal = ({ open, onClose, currentName, onSave, t }) => {
+var NameChangeModal = ({ open, onClose, currentName, onSave }) => {
 	const [newName, setNewName] = (0, import_react.useState)(currentName || "");
 	const handleSave = () => {
 		if (newName.trim()) {
@@ -59992,7 +59987,7 @@ var NameChangeModal = ({ open, onClose, currentName, onSave, t }) => {
 					className: "flex items-center gap-2",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 						className: "text-xl font-bold text-gray-900",
-						children: t("profile.edit")
+						children: "تغيير الاسم"
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 					onClick: onClose,
@@ -60003,11 +59998,11 @@ var NameChangeModal = ({ open, onClose, currentName, onSave, t }) => {
 				className: "space-y-5",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 					className: "text-sm font-bold text-gray-700 mb-2 block",
-					children: t("profile.displayName")
+					children: "الاسم الجديد"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
 					value: newName,
 					onChange: (e) => setNewName(e.target.value),
-					placeholder: t("profile.displayName"),
+					placeholder: "أدخل اسمك الجديد",
 					className: "h-12 rounded-xl bg-gray-50 border-gray-200 focus-visible:ring-purple-200 text-lg",
 					autoFocus: true
 				})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -60016,13 +60011,13 @@ var NameChangeModal = ({ open, onClose, currentName, onSave, t }) => {
 						whileTap: { scale: .95 },
 						onClick: onClose,
 						className: "flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all",
-						children: t("common.cancel")
+						children: "إلغاء"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
 						whileTap: newName.trim() ? { scale: .95 } : {},
 						onClick: handleSave,
 						disabled: !newName.trim(),
 						className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white font-bold shadow-md shadow-purple-500/20 transition-all disabled:opacity-50",
-						children: t("common.save")
+						children: "حفظ"
 					})]
 				})]
 			})]
@@ -60030,7 +60025,6 @@ var NameChangeModal = ({ open, onClose, currentName, onSave, t }) => {
 	}) });
 };
 function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onResetPassword, onSwitchAccount }) {
-	const { t } = useLanguage();
 	const [showDelete, setShowDelete] = (0, import_react.useState)(false);
 	const [deleting, setDeleting] = (0, import_react.useState)(false);
 	const [error, setError] = (0, import_react.useState)("");
@@ -60076,11 +60070,11 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 					className: "flex items-center justify-center gap-2 mb-1",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-6 h-6 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 						className: "text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-500",
-						children: t("profile.title")
+						children: "الملف الشخصي"
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-sm text-gray-500",
-					children: t("profile.edit")
+					children: "معلومات حسابك وإعداداته"
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -60157,7 +60151,7 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 										className: "text-sm text-gray-500 mt-1 font-medium",
-										children: ["@", username || t("profile.username")]
+										children: ["@", username || "غير محدد"]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 										initial: { scale: 0 },
@@ -60183,8 +60177,7 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 												className: "w-2 h-2 rounded-full bg-emerald-500"
 											}),
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-3.5 h-3.5" }),
-											" ",
-											t("profile.activeAccount") || "حساب نشط"
+											" حساب نشط"
 										]
 									})
 								]
@@ -60200,38 +60193,33 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 							opacity: 1,
 							y: 0
 						},
-						transition: {
-							delay: .2,
-							type: "spring",
-							stiffness: 200,
-							damping: 20
-						},
+						transition: { delay: .2 },
 						className: "space-y-3",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-2 px-1 mb-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(User$1, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 									className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
-									children: t("profile.basicInfo") || "المعلومات الأساسية"
+									children: "المعلومات الأساسية"
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
 								icon: User$1,
-								label: t("profile.displayName"),
+								label: "الاسم المعروض",
 								value: displayName,
 								onClick: () => setShowNameModal(true),
 								color: "purple"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
 								icon: Mail,
-								label: t("profile.email"),
+								label: "البريد الإلكتروني",
 								value: email,
 								onClick: onChangeEmail,
 								color: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
 								icon: Lock,
-								label: t("profile.changePassword"),
+								label: "كلمة المرور",
 								value: "••••••••",
 								onClick: onResetPassword,
 								color: "green"
@@ -60247,30 +60235,25 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 							opacity: 1,
 							y: 0
 						},
-						transition: {
-							delay: .25,
-							type: "spring",
-							stiffness: 200,
-							damping: 20
-						},
+						transition: { delay: .25 },
 						className: "space-y-3",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-2 px-1 mb-2",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 									className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
-									children: t("profile.accountManagement") || "إدارة الحساب"
+									children: "إدارة الحساب"
 								})]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
 								icon: Smartphone,
-								label: t("profile.switchAccount"),
+								label: "الدخول بحساب آخر",
 								onClick: onSwitchAccount,
 								color: "orange"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ProfileRow, {
 								icon: LogOut,
-								label: t("profile.logout"),
+								label: "تسجيل الخروج",
 								onClick: onLogout,
 								color: "red"
 							})
@@ -60285,12 +60268,7 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 							opacity: 1,
 							y: 0
 						},
-						transition: {
-							delay: .3,
-							type: "spring",
-							stiffness: 200,
-							damping: 20
-						},
+						transition: { delay: .3 },
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, {
 							mode: "wait",
 							children: !showDelete ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
@@ -60300,11 +60278,7 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 								whileTap: { scale: .97 },
 								onClick: () => setShowDelete(true),
 								className: "w-full flex items-center justify-center gap-3 py-4 text-red-500 font-bold text-sm bg-white border border-red-100 rounded-2xl hover:bg-red-50 transition-all shadow-sm",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-5 h-5" }),
-									" ",
-									t("profile.deleteAccount")
-								]
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-5 h-5" }), " حذف الحساب نهائياً"]
 							}, "show") : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 								initial: {
 									opacity: 0,
@@ -60326,10 +60300,10 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "text-red-800 font-bold text-lg mb-1",
-										children: t("profile.deleteWarning")
+										children: "هل أنت متأكد؟"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 										className: "text-sm text-gray-500",
-										children: t("profile.deleteIrreversible") || "هذا الإجراء لا يمكن التراجع عنه."
+										children: "هذا الإجراء لا يمكن التراجع عنه."
 									})] }),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "flex gap-3",
@@ -60337,13 +60311,13 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 											whileTap: { scale: .95 },
 											onClick: () => setShowDelete(false),
 											className: "flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all",
-											children: t("common.cancel")
+											children: "إلغاء"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
 											whileTap: { scale: .9 },
 											onClick: handleDelete,
 											disabled: deleting,
 											className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold shadow-md shadow-red-200 disabled:opacity-50 transition-all",
-											children: deleting ? t("common.loading") : t("common.confirm")
+											children: deleting ? "جارٍ..." : "تأكيد الحذف"
 										})]
 									}),
 									error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.p, {
@@ -60362,8 +60336,7 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 				open: showNameModal,
 				onClose: () => setShowNameModal(false),
 				currentName: displayName,
-				onSave: (name) => onUpdateProfile?.({ displayName: name }),
-				t
+				onSave: (name) => onUpdateProfile?.({ displayName: name })
 			})
 		]
 	});
@@ -60378,7 +60351,7 @@ var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggl
 		orange: "from-orange-500 to-red-500 bg-orange-50 text-orange-600",
 		pink: "from-pink-500 to-rose-500 bg-pink-50 text-pink-600"
 	};
-	const [gradientFrom, gradientTo, bgColor, textColor] = (colorsMap[color] || colorsMap.purple).split(" ");
+	const [gradientFrom, gradientTo] = (colorsMap[color] || colorsMap.purple).split(" ");
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 		whileHover: {
 			y: -3,
@@ -60495,7 +60468,6 @@ var Section = ({ title, children, delay = 0, icon: Icon }) => /* @__PURE__ */ (0
 	})]
 });
 function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile, onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker, fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner, onBack }) {
-	const { language, changeLanguage, t } = useLanguage();
 	const [showFontModal, setShowFontModal] = (0, import_react.useState)(false);
 	const [showSizeModal, setShowSizeModal] = (0, import_react.useState)(false);
 	const [showResetModal, setShowResetModal] = (0, import_react.useState)(false);
@@ -60511,55 +60483,55 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 	const sizes = [
 		{
 			v: "small",
-			l: t("settings.sizes.small")
+			l: "صغير"
 		},
 		{
 			v: "medium",
-			l: t("settings.sizes.medium")
+			l: "متوسط"
 		},
 		{
 			v: "large",
-			l: t("settings.sizes.large")
+			l: "كبير"
 		},
 		{
 			v: "xlarge",
-			l: t("settings.sizes.xlarge")
+			l: "كبير جداً"
 		}
 	];
 	const fonts = [
 		{
 			v: "tajawal",
 			l: "Tajawal",
-			desc: t("settings.fonts.tajawal")
+			desc: "الخط الافتراضي الأنيق"
 		},
 		{
 			v: "cairo",
 			l: "Cairo",
-			desc: t("settings.fonts.cairo")
+			desc: "خط عصري وواضح"
 		},
 		{
 			v: "rubik",
 			l: "Rubik",
-			desc: t("settings.fonts.rubik")
+			desc: "خط سميك ومقروء"
 		},
 		{
 			v: "ibm-plex",
 			l: "IBM Plex",
-			desc: t("settings.fonts.ibm-plex"),
+			desc: "خط احترافي",
 			featured: true
 		}
 	];
 	const languages = [{
 		v: "ar",
-		l: t("settings.languages.ar"),
+		l: "العربية",
 		flag: "🇸🇦"
 	}, {
 		v: "en",
-		l: t("settings.languages.en"),
+		l: "English",
 		flag: "🇬🇧"
 	}];
 	const handleResetApp = async () => {
-		if (resetText.trim() !== t("common.delete")) return;
+		if (resetText.trim() !== "حذف") return;
 		setResetLoading(true);
 		try {
 			if (!auth?.currentUser?.uid || !db) throw new Error("فشل المصادقة");
@@ -60592,57 +60564,57 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				className: "sticky top-0 z-20 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-14 pb-4 text-center shadow-sm",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 					className: "text-2xl font-black text-gray-800 tracking-tight",
-					children: t("settings.title")
+					children: "الإعدادات"
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 					className: "text-sm text-gray-500 mt-1",
-					children: t("settings.subtitle")
+					children: "تحكم كامل في تطبيقك كما تحب"
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "px-4 py-6 space-y-8 max-w-lg mx-auto",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Section, {
-						title: t("settings.sections.account"),
+						title: "الحساب",
 						delay: .1,
 						icon: User$1,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 							icon: User$1,
-							label: t("settings.items.profile.label"),
-							desc: t("settings.items.profile.desc"),
+							label: "الملف الشخصي",
+							desc: "تعديل اسمك وصورتك",
 							onClick: onOpenProfile,
 							color: "purple"
 						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
-						title: t("settings.sections.appearance"),
+						title: "المظهر",
 						delay: .2,
 						icon: Palette,
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Globe,
-								label: t("settings.items.language.label"),
-								desc: t("settings.items.language.desc"),
+								label: "لغة التطبيق",
+								desc: "اختر لغة الواجهة",
 								onClick: () => setShowLanguageModal(true),
 								color: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Palette,
-								label: t("settings.items.fontSize.label"),
+								label: "حجم الخط",
 								desc: sizes.find((s) => s.v === fontSize)?.l,
 								onClick: () => setShowSizeModal(true),
 								color: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Palette,
-								label: t("settings.items.fontFamily.label"),
+								label: "نوع الخط",
 								desc: fonts.find((f) => f.v === fontFamily)?.l,
 								onClick: () => setShowFontModal(true),
 								color: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: TabletSmartphone,
-								label: t("settings.items.compactMode.label"),
-								desc: t("settings.items.compactMode.desc"),
+								label: "تصغير الأبعاد",
+								desc: "مناسب للشاشات الصغيرة",
 								toggle: true,
 								isToggled: compactMode,
 								onToggle: () => setCompactMode(!compactMode),
@@ -60651,19 +60623,19 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
-						title: t("settings.sections.calls"),
+						title: "المكالمات",
 						delay: .3,
 						icon: Mic,
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 							icon: Mic,
-							label: t("settings.items.muteMic.label"),
+							label: "كتم الميكروفون تلقائياً",
 							toggle: true,
 							isToggled: muteMicOnJoin,
 							onToggle: onToggleMuteMic,
 							color: "orange"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 							icon: Speaker,
-							label: t("settings.items.speaker.label"),
+							label: "مكبر الصوت افتراضياً",
 							toggle: true,
 							isToggled: speakerDefault,
 							onToggle: onToggleSpeaker,
@@ -60671,49 +60643,49 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
-						title: t("settings.sections.privacy"),
+						title: "الخصوصية والأمان",
 						delay: .4,
 						icon: Lock,
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Lock,
-								label: t("settings.items.appLock.label"),
-								desc: t("settings.items.appLock.desc"),
+								label: "قفل التطبيق",
+								desc: "حماية إضافية برمز سري",
 								onClick: onOpenAppLock,
 								color: "pink"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Shield,
-								label: t("settings.items.dataManagement.label"),
-								desc: t("settings.items.dataManagement.desc"),
+								label: "إدارة البيانات",
+								desc: "التحكم في تخزين بياناتك",
 								onClick: onOpenDataManagement,
 								color: "pink"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: RefreshCw,
-								label: t("settings.items.resetApp.label"),
-								desc: t("settings.items.resetApp.desc"),
+								label: "إعادة ضبط التطبيق",
+								desc: "مسح جميع المحادثات والبيانات",
 								onClick: () => setShowResetModal(true),
 								color: "pink"
 							})
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
-						title: t("settings.sections.more"),
+						title: "المزيد",
 						delay: .5,
 						icon: Sparkles,
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: MessageCircle,
-								label: t("settings.items.support.label"),
-								desc: t("settings.items.support.desc"),
+								label: "تواصل مع المطور",
+								desc: "ملاحظات، اقتراحات، أو مشاكل",
 								onClick: onOpenSupport,
 								color: "purple"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Share2,
-								label: t("settings.items.share.label"),
-								desc: t("settings.items.share.desc"),
+								label: "شارك التطبيق",
+								desc: "دع أصدقاءك ينضمون",
 								onClick: () => navigator.share?.({
 									title: "LinkUp",
 									url: window.location.origin
@@ -60722,15 +60694,15 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Sparkles,
-								label: t("settings.items.partner.label"),
-								desc: t("settings.items.partner.desc"),
+								label: "تكوين شراكة",
+								desc: "انضم كشريك رسمي",
 								onClick: onOpenPartner,
 								color: "green"
 							}),
 							isAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Shield,
-								label: t("settings.items.admin.label"),
-								desc: t("settings.items.admin.desc"),
+								label: "لوحة الإدارة",
+								desc: "إدارة المستخدمين والمحتوى",
 								onClick: onOpenAdmin,
 								color: "orange"
 							})
@@ -60754,17 +60726,17 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 						className: "grid grid-cols-3 gap-3 mt-4",
 						children: [
 							{
-								label: t("settings.quickActions.atheer"),
+								label: "من هو أثير؟",
 								onClick: onOpenAtheer,
 								gradient: "from-purple-500 to-indigo-500"
 							},
 							{
-								label: t("settings.quickActions.about"),
+								label: "من نحن",
 								onClick: onOpenAbout,
 								gradient: "from-blue-500 to-cyan-500"
 							},
 							{
-								label: t("settings.quickActions.privacy"),
+								label: "الخصوصية",
 								onClick: onOpenPrivacy,
 								gradient: "from-gray-500 to-gray-600"
 							}
@@ -60795,7 +60767,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 						className: "text-sm font-medium text-gray-500",
-						children: t("common.menu")
+						children: "القائمة"
 					}),
 					isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: onOpenAdmin,
@@ -60807,39 +60779,33 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
 				open: showLanguageModal,
 				onClose: () => setShowLanguageModal(false),
-				title: t("settings.modals.language.title"),
+				title: "لغة التطبيق",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "space-y-2",
-					children: languages.map((lang) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+					children: languages.map((lang) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
 						whileHover: {
 							scale: 1.02,
 							backgroundColor: "#f5f3ff"
 						},
 						whileTap: { scale: .97 },
 						onClick: () => {
-							changeLanguage(lang.v);
 							setShowLanguageModal(false);
 						},
-						className: `w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all ${language === lang.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300 shadow-md" : "bg-gray-50 text-gray-700 hover:bg-purple-50"}`,
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all bg-gray-50 text-gray-700 hover:bg-purple-50",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 							className: "flex items-center gap-3",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "text-2xl",
 								children: lang.flag
 							}), lang.l]
-						}), language === lang.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-							initial: { scale: 0 },
-							animate: { scale: 1 },
-							className: "bg-purple-500 text-white rounded-full p-1",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })
-						})]
+						})
 					}, lang.v))
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
 				open: showSizeModal,
 				onClose: () => setShowSizeModal(false),
-				title: t("settings.modals.fontSize.title"),
+				title: "حجم الخط",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "space-y-2",
 					children: sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
@@ -60865,7 +60831,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
 				open: showFontModal,
 				onClose: () => setShowFontModal(false),
-				title: t("settings.modals.fontFamily.title"),
+				title: "نوع الخط",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "space-y-2",
 					children: fonts.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
@@ -60894,7 +60860,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
 				open: showResetModal,
 				onClose: () => setShowResetModal(false),
-				title: t("settings.modals.reset.title"),
+				title: "تأكيد إعادة الضبط",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "space-y-5",
 					children: [
@@ -60905,13 +60871,13 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-8 h-8 text-red-600" })
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-sm text-gray-600 text-center leading-relaxed",
-								children: t("settings.modals.reset.warning")
+								children: "هذا الإجراء لا يمكن التراجع عنه. اكتب كلمة \"حذف\" للتأكيد"
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							value: resetText,
 							onChange: (e) => setResetText(e.target.value),
-							placeholder: t("settings.modals.reset.placeholder"),
+							placeholder: "اكتب كلمة حذف هنا...",
 							className: "w-full h-12 px-4 rounded-xl bg-gray-50 border-2 border-gray-200 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200 text-center text-lg font-medium",
 							autoFocus: true
 						}),
@@ -60921,13 +60887,13 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 								whileTap: { scale: .95 },
 								onClick: () => setShowResetModal(false),
 								className: "flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all",
-								children: t("settings.modals.reset.cancel")
+								children: "إلغاء"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-								whileTap: resetText.trim() === t("common.delete") ? { scale: .9 } : {},
+								whileTap: resetText.trim() === "حذف" ? { scale: .9 } : {},
 								onClick: handleResetApp,
-								disabled: resetText.trim() !== t("common.delete") || resetLoading,
+								disabled: resetText.trim() !== "حذف" || resetLoading,
 								className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-red-200 transition-all",
-								children: resetLoading ? t("settings.modals.reset.loading") : t("settings.modals.reset.confirm")
+								children: resetLoading ? "جارٍ..." : "تأكيد الحذف"
 							})]
 						})
 					]
@@ -68688,7 +68654,7 @@ var LinkUpLogo = () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		})]
 	})]
 });
-var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0, t }) => {
+var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0 }) => {
 	const [lastMsg, setLastMsg] = (0, import_react.useState)(null);
 	const memberCount = group.members?.length || 0;
 	const gradients = [
@@ -68748,18 +68714,14 @@ var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0, t })
 						className: "flex items-center justify-between",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "font-bold text-gray-800 truncate",
-							children: group.name || t("groups.defaultName")
+							children: group.name || "مجموعة"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 							className: "text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full",
-							children: [
-								memberCount,
-								" ",
-								t("groups.membersCount")
-							]
+							children: [memberCount, " أعضاء"]
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 						className: "text-xs text-gray-500 mt-1 truncate",
-						children: lastMsg?.text || t("groups.startChat")
+						children: lastMsg?.text || "ابدأ المحادثة"
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
@@ -68777,7 +68739,6 @@ var GroupCard = ({ group, isFavorite, onToggleFavorite, onClick, index = 0, t })
 	});
 };
 function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
-	const { t } = useLanguage();
 	const [groups, setGroups] = (0, import_react.useState)([]);
 	const [searchTerm, setSearchTerm] = (0, import_react.useState)("");
 	const [favorites, setFavorites] = (0, import_react.useState)(() => {
@@ -68835,11 +68796,11 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 							className: "flex items-center gap-2 mb-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 								className: "text-2xl font-black text-gray-900 tracking-tight",
-								children: t("groups.title")
+								children: "المجموعات"
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-sm text-gray-500",
-							children: t("groups.subtitle")
+							children: "تعاون وتواصل مع فرقك بسهولة"
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
@@ -68854,7 +68815,7 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 						transition: { delay: .1 },
 						className: "relative",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
-							placeholder: t("groups.search"),
+							placeholder: "ابحث عن مجموعة...",
 							value: searchTerm,
 							onChange: (e) => setSearchTerm(e.target.value),
 							className: "w-full h-12 pr-12 pl-4 rounded-2xl bg-white border-gray-200 focus-visible:ring-2 focus-visible:ring-purple-500/40 text-sm placeholder:text-gray-400 shadow-sm"
@@ -68887,11 +68848,11 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-gray-800 font-bold text-lg",
-							children: t("groups.noGroups")
+							children: "لا توجد مجموعات"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-sm text-gray-500 mt-1.5",
-							children: t("groups.createFirst")
+							children: "ابدأ بإنشاء مجموعتك الأولى"
 						})
 					]
 				}) : filtered.map((g, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GroupCard, {
@@ -68899,8 +68860,7 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 					isFavorite: favorites.includes(g.id),
 					onToggleFavorite: toggleFavorite,
 					onClick: () => onOpenGroup?.(g),
-					index,
-					t
+					index
 				}, g.id))
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: groups.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
@@ -68940,17 +68900,17 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 							className: "text-right",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "font-bold text-gray-900 text-sm",
-								children: t("groups.createGroup")
+								children: "إنشاء مجموعة جديدة"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-[10px] text-gray-500",
-								children: t("groups.inviteFriends")
+								children: "ادعُ أصدقاءك وابدأ النقاش"
 							})]
 						})]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl px-4 py-2 flex items-center gap-1.5 shadow-md shadow-purple-500/20",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "text-xs font-bold",
-							children: t("groups.create")
+							children: "إنشاء"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Plus, { className: "w-4 h-4" })]
 					})]
 				})
@@ -68961,7 +68921,6 @@ function GroupsScreen({ onBack, onOpenCreateGroup, onOpenGroup }) {
 //#endregion
 //#region src/features/groups/CreateGroupScreen.jsx
 function CreateGroupScreen({ onBack }) {
-	const { t } = useLanguage();
 	const [name, setName] = (0, import_react.useState)("");
 	const [description, setDescription] = (0, import_react.useState)("");
 	const [isPrivate, setIsPrivate] = (0, import_react.useState)(false);
@@ -68988,9 +68947,9 @@ function CreateGroupScreen({ onBack }) {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setError("");
-		if (!name.trim()) return setError(t("groups.nameRequired"));
+		if (!name.trim()) return setError("يرجى كتابة اسم المجموعة");
 		if (!currentUser) {
-			setError(t("auth.required"));
+			setError("يجب تسجيل الدخول أولاً.");
 			return;
 		}
 		setLoading(true);
@@ -69022,7 +68981,7 @@ function CreateGroupScreen({ onBack }) {
 			setTimeout(() => onBack?.(), 1500);
 		} catch (err) {
 			console.error(err);
-			setError(t("groups.createError"));
+			setError("حدث خطأ أثناء الإنشاء. حاول مرة أخرى.");
 		} finally {
 			setLoading(false);
 		}
@@ -69049,7 +69008,7 @@ function CreateGroupScreen({ onBack }) {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 						className: "text-xl font-black text-gray-900 tracking-tight",
-						children: t("groups.createGroup")
+						children: "إنشاء مجموعة"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
 				]
@@ -69072,11 +69031,11 @@ function CreateGroupScreen({ onBack }) {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 						className: "text-xl font-bold text-gray-900 mb-2",
-						children: t("groups.created")
+						children: "تم إنشاء المجموعة بنجاح!"
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 						className: "text-sm text-gray-500",
-						children: t("groups.redirecting")
+						children: "جاري العودة إلى القائمة..."
 					})
 				]
 			}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
@@ -69087,33 +69046,24 @@ function CreateGroupScreen({ onBack }) {
 						className: "bg-white rounded-3xl p-6 border border-gray-100 shadow-sm space-y-5",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
 							className: "text-sm font-bold text-gray-700 mb-2 block",
-							children: [
-								t("groups.name"),
-								" ",
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-red-500",
-									children: "*"
-								})
-							]
+							children: ["اسم المجموعة ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-red-500",
+								children: "*"
+							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							type: "text",
 							value: name,
 							onChange: (e) => setName(e.target.value),
-							placeholder: t("groups.namePlaceholder"),
+							placeholder: "مثال: فريق التطوير",
 							className: "w-full h-12 px-4 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-transparent transition-all",
 							maxLength: 50
-						})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+						})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 							className: "text-sm font-bold text-gray-700 mb-2 block",
-							children: [
-								t("groups.description"),
-								" (",
-								t("common.optional"),
-								")"
-							]
+							children: "الوصف (اختياري)"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
 							value: description,
 							onChange: (e) => setDescription(e.target.value),
-							placeholder: t("groups.descPlaceholder"),
+							placeholder: "اكتب وصفاً مختصراً للمجموعة...",
 							rows: 3,
 							className: "w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-transparent transition-all resize-none",
 							maxLength: 200
@@ -69123,15 +69073,15 @@ function CreateGroupScreen({ onBack }) {
 						className: "bg-white rounded-3xl p-5 border border-gray-100 shadow-sm",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "text-sm font-bold text-gray-900 mb-4",
-							children: t("groups.privacySettings")
+							children: "إعدادات الخصوصية"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center justify-between p-4 bg-gray-50 rounded-xl",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "font-bold text-gray-900 text-sm",
-								children: t("groups.privateGroup")
+								children: "مجموعة خاصة"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 								className: "text-xs text-gray-500 mt-0.5",
-								children: t("groups.privateGroupDesc")
+								children: "الدعوة مطلوبة للانضمام"
 							})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "button",
 								onClick: () => setIsPrivate(!isPrivate),
@@ -69142,12 +69092,16 @@ function CreateGroupScreen({ onBack }) {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "bg-white rounded-3xl p-5 border border-gray-100 shadow-sm",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
 							className: "text-sm font-bold text-gray-900 mb-4",
-							children: t("groups.addMembersTitle", { count: selectedContacts.length })
+							children: [
+								"إضافة أعضاء (",
+								selectedContacts.length,
+								")"
+							]
 						}), contacts.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-xs text-gray-400 text-center py-4",
-							children: t("groups.noContacts")
+							children: "لا توجد جهات اتصال مضافة بعد"
 						}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 							className: "space-y-2 max-h-60 overflow-y-auto",
 							children: contacts.map((contact) => {
@@ -69162,7 +69116,7 @@ function CreateGroupScreen({ onBack }) {
 											children: isSelected && "✓"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 											className: "text-sm font-medium text-gray-900",
-											children: contact.displayName || contact.email || t("common.user")
+											children: contact.displayName || contact.email || "مستخدم"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 											className: "text-[10px] text-gray-500",
 											children: ["@", contact.username || contact.contactId?.slice(0, 8)]
@@ -69223,7 +69177,7 @@ function CreateGroupScreen({ onBack }) {
 							stroke: "currentColor",
 							strokeWidth: "2",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M12 5v14M5 12h14" })
-						}), t("groups.createGroup")] })
+						}), "إنشاء المجموعة"] })
 					})
 				]
 			})
@@ -69233,14 +69187,13 @@ function CreateGroupScreen({ onBack }) {
 //#endregion
 //#region src/features/home/MainMenuScreen.jsx
 function MainMenuScreen({ onNavigate, username }) {
-	const { t } = useLanguage();
 	const user = auth.currentUser;
 	const [copied, setCopied] = (0, import_react.useState)(false);
 	const [idVisible, setIdVisible] = (0, import_react.useState)(true);
-	const displayName = user?.displayName || user?.email?.split("@")[0] || t("mainMenu.user");
-	const userHandle = username || t("mainMenu.undefined");
+	const displayName = user?.displayName || user?.email?.split("@")[0] || "مستخدم";
+	const userHandle = username || "غير محدد";
 	const handleCopy = async () => {
-		if (!username || username === t("mainMenu.undefined")) return;
+		if (!username || username === "غير محدد") return;
 		try {
 			await navigator.clipboard.writeText(username);
 			setCopied(true);
@@ -69250,15 +69203,15 @@ function MainMenuScreen({ onNavigate, username }) {
 		}
 	};
 	const quickActions = [{
-		label: t("mainMenu.contacts"),
-		desc: t("mainMenu.contactsDesc"),
+		label: "جهات الاتصال",
+		desc: "إدارة القائمة",
 		icon: Users,
 		onClick: () => onNavigate?.("contacts"),
 		gradient: "from-blue-500 to-cyan-500",
 		shadowColor: "shadow-blue-200"
 	}, {
-		label: t("mainMenu.settings"),
-		desc: t("mainMenu.settingsDesc"),
+		label: "الإعدادات",
+		desc: "تخصيص التطبيق",
 		icon: Settings,
 		onClick: () => onNavigate?.("settings"),
 		gradient: "from-purple-500 to-indigo-500",
@@ -69346,11 +69299,11 @@ function MainMenuScreen({ onNavigate, username }) {
 							className: "flex items-center justify-between mb-3",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 								className: "text-sm font-bold text-gray-800",
-								children: t("mainMenu.myUsername")
+								children: "اسم المستخدم الخاص بك"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								onClick: () => setIdVisible(!idVisible),
 								className: "text-xs text-gray-500 hover:text-purple-600 font-medium flex items-center gap-1 transition-colors",
-								children: [idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" }), idVisible ? t("mainMenu.hide") : t("mainMenu.show")]
+								children: [idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" }), idVisible ? "إخفاء" : "إظهار"]
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -69362,14 +69315,18 @@ function MainMenuScreen({ onNavigate, username }) {
 								whileHover: { scale: 1.05 },
 								whileTap: { scale: .9 },
 								onClick: handleCopy,
-								disabled: !username || username === t("mainMenu.undefined"),
+								disabled: !username || username === "غير محدد",
 								className: "mr-3 p-3 rounded-xl bg-purple-500 text-white hover:bg-purple-600 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md",
 								children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-5 h-5" })
 							})]
 						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 							className: "text-[11px] text-gray-500 mt-3 text-center font-medium",
-							children: t("mainMenu.shareDesc", { username: username || t("mainMenu.undefined") })
+							children: [
+								"شارك اسم المستخدم (@",
+								username,
+								") مع أصدقائك ليعثروا عليك بسهولة في جهات الاتصال."
+							]
 						})
 					]
 				}),
@@ -70060,7 +70017,7 @@ function InstallGuide({ onDismiss, deferredPrompt, isInstalled }) {
 }
 //#endregion
 //#region src/features/groups/GroupChatScreen.jsx
-var MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position, t }) => {
+var MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position }) => {
 	if (!position) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "fixed inset-0 z-50",
@@ -70085,24 +70042,19 @@ var MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClo
 					stroke: "currentColor",
 					strokeWidth: "2",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: "9 17 4 12 9 7" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M20 18v-2a4 4 0 0 0-4-4H4" })]
-				}), t("chat.reply")]
+				}), "رد"]
 			}), isOwn && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 				onClick: () => {
 					onDeleteForEveryone(message);
 					onClose();
 				},
 				className: "w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }),
-					" ",
-					t("chat.deleteForAll")
-				]
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }), " حذف للكل"]
 			})]
 		})
 	});
 };
 function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
-	const { t } = useLanguage();
 	const [message, setMessage] = (0, import_react.useState)("");
 	const [messages, setMessages] = (0, import_react.useState)([]);
 	const [loading, setLoading] = (0, import_react.useState)(true);
@@ -70162,7 +70114,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 			});
 			setReplyTo(null);
 		} catch (err) {
-			ue.error(t("chat.sendError"));
+			ue.error("تعذر إرسال الرسالة");
 			setMessage(text);
 		}
 	};
@@ -70175,16 +70127,16 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 	const handleDeleteForEveryone = async (msg) => {
 		try {
 			await updateDoc(doc(db, "groups", groupId, "messages", msg.id), { deleted: true });
-			ue.success(t("chat.messageDeleted"));
+			ue.success("تم حذف الرسالة");
 		} catch (err) {
-			ue.error(t("chat.deleteError"));
+			ue.error("فشل حذف الرسالة");
 		}
 	};
 	const handleClearChat = () => {
 		setMessages([]);
 		setShowClearConfirm(false);
 		setShowHeaderMenu(false);
-		ue.success(t("chat.chatCleared"));
+		ue.success("تم مسح المحادثة محلياً");
 	};
 	const groupedMessages = (0, import_react.useMemo)(() => {
 		const groups = [];
@@ -70231,7 +70183,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 	};
 	if (!groupId) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "flex h-screen items-center justify-center",
-		children: t("common.loading")
+		children: "جار التحميل..."
 	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen flex flex-col bg-gray-50",
@@ -70257,14 +70209,10 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 								className: "flex-1 min-w-0",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
 									className: "text-xl font-extrabold text-gray-900 truncate",
-									children: group.name || t("groups.defaultName")
+									children: group.name || "المجموعة"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 									className: "text-xs text-gray-500",
-									children: [
-										group.members?.length || 0,
-										" ",
-										t("groups.membersCount")
-									]
+									children: [group.members?.length || 0, " أعضاء"]
 								})]
 							})]
 						})]
@@ -70283,11 +70231,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 									setShowHeaderMenu(false);
 								},
 								className: "w-full text-right px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-sm text-red-600",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }),
-									" ",
-									t("chat.clearChat")
-								]
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }), " مسح محتوى الدردشة"]
 							})
 						})]
 					})]
@@ -70303,22 +70247,22 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-10 h-10 text-red-500 mx-auto mb-3" }),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "font-bold text-lg mb-2",
-							children: t("chat.clearConfirmTitle")
+							children: "تأكيد مسح المحادثة"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-sm text-gray-500 mb-6",
-							children: t("chat.clearConfirmDesc")
+							children: "سيتم مسح جميع الرسائل من شاشتك فقط ولا يمكن استعادتها. الرسائل لدى الأطراف الأخرى لن تتأثر."
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex gap-3",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => setShowClearConfirm(false),
 								className: "flex-1 py-2 rounded-lg border",
-								children: t("common.cancel")
+								children: "إلغاء"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: handleClearChat,
 								className: "flex-1 py-2 rounded-lg bg-red-600 text-white",
-								children: t("chat.clear")
+								children: "مسح"
 							})]
 						})
 					]
@@ -70332,7 +70276,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" })
 				}) : groupedMessages.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "flex justify-center py-16 text-gray-400 text-sm",
-					children: t("chat.noMessages")
+					children: "لا توجد رسائل بعد"
 				}) : groupedMessages.map((group, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "flex justify-center mb-4",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
@@ -70366,7 +70310,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 										children: msg.senderName?.charAt(0)?.toUpperCase() || "?"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 										className: "text-xs font-medium text-gray-600",
-										children: msg.senderName || t("chat.user")
+										children: msg.senderName || "مستخدم"
 									})]
 								}),
 								msg.replyTo && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -70395,7 +70339,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 											wordBreak: "break-word",
 											fontStyle: msg.deleted ? "italic" : "normal"
 										},
-										children: msg.deleted ? t("chat.messageDeleted") : msg.text
+										children: msg.deleted ? "تم حذف هذه الرسالة" : msg.text
 									})
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -70419,7 +70363,11 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 								className: "font-bold",
-								children: [t("chat.replyTo", { name: replyTo.senderName }), ":"]
+								children: [
+									"الرد على ",
+									replyTo.senderName,
+									":"
+								]
 							}),
 							" ",
 							replyTo.text
@@ -70436,7 +70384,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 						value: message,
 						onChange: (e) => setMessage(e.target.value),
 						onKeyDown: handleKeyDown,
-						placeholder: t("chat.placeholder"),
+						placeholder: "اكتب رسالة...",
 						rows: 1,
 						className: "flex-1 bg-transparent border-0 focus:ring-0 resize-none text-sm text-gray-800 placeholder:text-gray-400 py-2.5 px-1 max-h-32",
 						style: { minHeight: "40px" }
@@ -70456,8 +70404,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 				onReply: setReplyTo,
 				onDeleteForEveryone: handleDeleteForEveryone,
 				onClose: () => setActionPopup(null),
-				position: actionPopup.position,
-				t
+				position: actionPopup.position
 			})
 		]
 	});
@@ -70561,7 +70508,6 @@ function ContactInfoModal({ open, member, onClose, onOpenChat }) {
 //#endregion
 //#region src/features/groups/GroupInfoScreen.jsx
 function GroupInfoScreen({ group, onBack, onOpenChat }) {
-	const { t } = useLanguage();
 	const [membersData, setMembersData] = (0, import_react.useState)([]);
 	const [groupData, setGroupData] = (0, import_react.useState)(group);
 	const [showEditName, setShowEditName] = (0, import_react.useState)(false);
@@ -70608,18 +70554,18 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 				[field]: value
 			});
 			let systemText = "";
-			if (field === "name") systemText = t("groups.nameChanged", { name: value });
-			if (field === "description") systemText = t("groups.descChanged");
+			if (field === "name") systemText = `غيّر اسم المجموعة إلى "${value}"`;
+			if (field === "description") systemText = "غيّر وصف المجموعة";
 			await addDoc(collection(db, "groups", group.id, "messages"), {
 				senderId: currentUser.uid,
-				senderName: t("groups.system"),
+				senderName: "النظام",
 				text: systemText,
 				timestamp: serverTimestamp$2(),
 				system: true
 			});
-			ue.success(t("common.updated"));
+			ue.success("تم التحديث");
 		} catch (err) {
-			ue.error(t("common.updateFailed"));
+			ue.error("فشل التحديث");
 		}
 	};
 	const handleToggleAdmin = async (uid) => {
@@ -70632,17 +70578,17 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 					...groupData,
 					admins: admins.filter((a) => a !== uid)
 				});
-				ue.success(t("groups.adminRemoved"));
+				ue.success("تم إزالة الصلاحية");
 			} else {
 				await updateDoc(doc(db, "groups", group.id), { admins: arrayUnion(uid) });
 				setGroupData({
 					...groupData,
 					admins: [...admins, uid]
 				});
-				ue.success(t("groups.adminAdded"));
+				ue.success("تم تعيينه كمشرف");
 			}
 		} catch (err) {
-			ue.error(t("common.updateFailed"));
+			ue.error("فشل التغيير");
 		}
 	};
 	const handleRemoveMember = async (uid) => {
@@ -70654,22 +70600,22 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 				...groupData,
 				members: updatedMembers
 			});
-			const removedName = membersData.find((m) => m.uid === uid)?.name || t("groups.member");
+			const removedName = membersData.find((m) => m.uid === uid)?.name || "عضو";
 			await addDoc(collection(db, "groups", group.id, "messages"), {
 				senderId: currentUser.uid,
-				senderName: t("groups.system"),
-				text: t("groups.removedMember", { name: removedName }),
+				senderName: "النظام",
+				text: `أزال ${removedName}`,
 				timestamp: serverTimestamp$2(),
 				system: true
 			});
-			ue.success(t("groups.removed"));
+			ue.success("تم الإزالة");
 		} catch (err) {
-			ue.error(t("common.updateFailed"));
+			ue.error("فشل الإزالة");
 		}
 	};
 	const handleAddMember = async (contact) => {
 		if (groupData.members.includes(contact.uid)) {
-			ue.error(t("groups.alreadyMember"));
+			ue.error("العضو موجود بالفعل");
 			return;
 		}
 		try {
@@ -70680,14 +70626,14 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 			});
 			await addDoc(collection(db, "groups", group.id, "messages"), {
 				senderId: currentUser.uid,
-				senderName: t("groups.system"),
-				text: t("groups.addedMember", { name: contact.displayName || contact.username }),
+				senderName: "النظام",
+				text: `أضاف ${contact.displayName || contact.username}`,
 				timestamp: serverTimestamp$2(),
 				system: true
 			});
-			ue.success(t("groups.added"));
+			ue.success("تمت الإضافة");
 		} catch (err) {
-			ue.error(t("common.updateFailed"));
+			ue.error("فشل الإضافة");
 		}
 	};
 	(0, import_react.useEffect)(() => {
@@ -70722,7 +70668,7 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
 						className: "text-xl font-extrabold text-gray-900",
-						children: t("groups.groupInfo")
+						children: "معلومات المجموعة"
 					})]
 				})
 			}),
@@ -70756,27 +70702,31 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 							className: "flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-6 h-6 text-purple-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "text-xs font-medium",
-								children: t("groups.add")
+								children: "إضافة"
 							})]
 						}), isAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							onClick: () => setShowEditName(true),
 							className: "flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-6 h-6 text-blue-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "text-xs font-medium",
-								children: t("groups.editName")
+								children: "تعديل الاسم"
 							})]
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							onClick: () => setShowEditDesc(true),
 							className: "flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-6 h-6 text-emerald-600" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "text-xs font-medium",
-								children: t("groups.editDesc")
+								children: "تعديل الوصف"
 							})]
 						})] })]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
 						className: "text-sm font-bold text-gray-500 mb-3",
-						children: t("groups.membersTitle", { count: membersData.length })
+						children: [
+							"الأعضاء (",
+							membersData.length,
+							")"
+						]
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "space-y-2",
 						children: membersData.map((member) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -70814,24 +70764,16 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4" }),
 											" ",
-											groupData.admins?.includes(member.uid) ? t("groups.removeAdmin") : t("groups.makeAdmin")
+											groupData.admins?.includes(member.uid) ? "إزالة مشرف" : "تعيين كمشرف"
 										]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										onClick: () => handleRemoveMember(member.uid),
 										className: "w-full text-right px-4 py-2 hover:bg-red-50 flex items-center gap-2 text-sm text-red-600",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }),
-											" ",
-											t("groups.remove")
-										]
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }), " إزالة"]
 									})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										onClick: () => openContactInfo(member),
 										className: "w-full text-right px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-sm",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4" }),
-											" ",
-											t("groups.info")
-										]
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4" }), " معلومات"]
 									})]
 								})]
 							})]
@@ -70848,7 +70790,7 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "font-bold mb-4",
-							children: t("groups.editName")
+							children: "تعديل اسم المجموعة"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							value: newName,
@@ -70860,14 +70802,14 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => setShowEditName(false),
 								className: "flex-1 py-2 rounded-lg border",
-								children: t("common.cancel")
+								children: "إلغاء"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => {
 									updateGroupField("name", newName);
 									setShowEditName(false);
 								},
 								className: "flex-1 py-2 rounded-lg bg-purple-600 text-white",
-								children: t("common.save")
+								children: "حفظ"
 							})]
 						})
 					]
@@ -70882,7 +70824,7 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "font-bold mb-4",
-							children: t("groups.editDesc")
+							children: "تعديل الوصف"
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 							value: newDesc,
@@ -70894,14 +70836,14 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => setShowEditDesc(false),
 								className: "flex-1 py-2 rounded-lg border",
-								children: t("common.cancel")
+								children: "إلغاء"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => {
 									updateGroupField("description", newDesc);
 									setShowEditDesc(false);
 								},
 								className: "flex-1 py-2 rounded-lg bg-purple-600 text-white",
-								children: t("common.save")
+								children: "حفظ"
 							})]
 						})
 					]
@@ -70916,20 +70858,20 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 							className: "font-bold mb-4",
-							children: t("groups.addMembers")
+							children: "إضافة أعضاء"
 						}),
 						contacts.map((c) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center justify-between py-2",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: c.displayName || c.username }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => handleAddMember(c),
 								className: "text-purple-600 text-sm font-medium",
-								children: t("groups.add")
+								children: "إضافة"
 							})]
 						}, c.uid)),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							onClick: () => setShowAddMembers(false),
 							className: "mt-4 w-full py-2 rounded-lg border",
-							children: t("common.close")
+							children: "إغلاق"
 						})
 					]
 				})
