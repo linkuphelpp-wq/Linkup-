@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+
+code = '''import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield, Palette, Mic, Speaker, Lock, RefreshCw,
   MessageCircle, Share2, Sparkles, Check, Crown,
   AlertTriangle, X, TabletSmartphone, User, ChevronRight, ArrowLeft, Globe,
-  Moon, Sun, Zap, ChevronDown, Fingerprint, Database, HelpCircle,
-  ExternalLink, Volume2, Type, LayoutGrid, ShieldCheck, Trash2
+  Zap, Type, ShieldCheck, Trash2, Volume2, HelpCircle
 } from 'lucide-react';
 import { db, auth } from '../../firebase/config';
 import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/firestore';
@@ -14,101 +14,54 @@ import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/fir
    DESIGN SYSTEM - Light Mode Focused
    ================================================================ */
 
-const tokens = {
-  // Primary Palette - Sophisticated Purple/Indigo
-  primary: {
-    50: '#f5f3ff',
-    100: '#ede9fe',
-    200: '#ddd6fe',
-    300: '#c4b5fd',
-    400: '#a78bfa',
-    500: '#8b5cf6',
-    600: '#7c3aed',
-    700: '#6d28d9',
-    800: '#5b21b6',
-    900: '#4c1d95',
-  },
-  // Neutral Scale - Warm Gray for better readability
-  gray: {
-    25: '#fcfcfc',
-    50: '#fafaf9',
-    100: '#f5f5f4',
-    200: '#e7e5e4',
-    300: '#d6d3d1',
-    400: '#a8a29e',
-    500: '#78716c',
-    600: '#57534e',
-    700: '#44403c',
-    800: '#292524',
-    900: '#1c1917',
-  },
-  // Semantic Colors
-  success: { light: '#ecfdf5', DEFAULT: '#10b981', dark: '#047857' },
-  warning: { light: '#fffbeb', DEFAULT: '#f59e0b', dark: '#b45309' },
-  danger: { light: '#fef2f2', DEFAULT: '#ef4444', dark: '#b91c1c' },
-  info: { light: '#eff6ff', DEFAULT: '#3b82f6', dark: '#1d4ed8' },
-};
-
 const colorThemes = {
   purple: {
     gradient: 'from-violet-500 to-purple-600',
-    bg: 'bg-violet-50',
-    text: 'text-violet-700',
-    border: 'border-violet-200',
     iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600',
-    hoverBg: 'hover:bg-violet-50',
-    ring: 'focus:ring-violet-200',
-    shadow: 'shadow-violet-200/50',
+    activeBg: 'bg-violet-600',
+    text: 'text-violet-700',
+    lightBg: 'bg-violet-50',
+    border: 'border-violet-200',
   },
   blue: {
     gradient: 'from-blue-500 to-indigo-600',
-    bg: 'bg-blue-50',
-    text: 'text-blue-700',
-    border: 'border-blue-200',
     iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600',
-    hoverBg: 'hover:bg-blue-50',
-    ring: 'focus:ring-blue-200',
-    shadow: 'shadow-blue-200/50',
+    activeBg: 'bg-blue-600',
+    text: 'text-blue-700',
+    lightBg: 'bg-blue-50',
+    border: 'border-blue-200',
   },
   emerald: {
     gradient: 'from-emerald-500 to-teal-600',
-    bg: 'bg-emerald-50',
-    text: 'text-emerald-700',
-    border: 'border-emerald-200',
     iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-600',
-    hoverBg: 'hover:bg-emerald-50',
-    ring: 'focus:ring-emerald-200',
-    shadow: 'shadow-emerald-200/50',
+    activeBg: 'bg-emerald-600',
+    text: 'text-emerald-700',
+    lightBg: 'bg-emerald-50',
+    border: 'border-emerald-200',
   },
   amber: {
     gradient: 'from-amber-500 to-orange-600',
-    bg: 'bg-amber-50',
-    text: 'text-amber-700',
-    border: 'border-amber-200',
     iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600',
-    hoverBg: 'hover:bg-amber-50',
-    ring: 'focus:ring-amber-200',
-    shadow: 'shadow-amber-200/50',
+    activeBg: 'bg-amber-600',
+    text: 'text-amber-700',
+    lightBg: 'bg-amber-50',
+    border: 'border-amber-200',
   },
   rose: {
     gradient: 'from-rose-500 to-pink-600',
-    bg: 'bg-rose-50',
-    text: 'text-rose-700',
-    border: 'border-rose-200',
     iconBg: 'bg-gradient-to-br from-rose-500 to-pink-600',
-    hoverBg: 'hover:bg-rose-50',
-    ring: 'focus:ring-rose-200',
-    shadow: 'shadow-rose-200/50',
+    activeBg: 'bg-rose-600',
+    text: 'text-rose-700',
+    lightBg: 'bg-rose-50',
+    border: 'border-rose-200',
   },
   slate: {
     gradient: 'from-slate-500 to-slate-700',
-    bg: 'bg-slate-50',
-    text: 'text-slate-700',
-    border: 'border-slate-200',
     iconBg: 'bg-gradient-to-br from-slate-500 to-slate-700',
-    hoverBg: 'hover:bg-slate-50',
-    ring: 'focus:ring-slate-200',
-    shadow: 'shadow-slate-200/50',
+    activeBg: 'bg-slate-600',
+    text: 'text-slate-700',
+    lightBg: 'bg-slate-50',
+    border: 'border-slate-200',
   },
 };
 
@@ -120,35 +73,35 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.06, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.05, delayChildren: 0.1 }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 16, scale: 0.97 },
+  hidden: { opacity: 0, y: 14, scale: 0.98 },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { type: 'spring', stiffness: 400, damping: 28 }
+    transition: { type: 'spring', stiffness: 450, damping: 28 }
   }
 };
 
 const modalOverlayVariants = {
-  hidden: { opacity: 0, backdropFilter: 'blur(0px)' },
-  visible: { opacity: 1, backdropFilter: 'blur(12px)' },
-  exit: { opacity: 0, backdropFilter: 'blur(0px)' }
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 }
 };
 
 const modalContentVariants = {
-  hidden: { opacity: 0, scale: 0.92, y: 40 },
+  hidden: { opacity: 0, scale: 0.94, y: 30 },
   visible: {
     opacity: 1,
     scale: 1,
     y: 0,
     transition: { type: 'spring', stiffness: 450, damping: 32 }
   },
-  exit: { opacity: 0, scale: 0.92, y: 40, transition: { duration: 0.2 } }
+  exit: { opacity: 0, scale: 0.94, y: 30, transition: { duration: 0.18 } }
 };
 
 /* ================================================================
@@ -157,21 +110,50 @@ const modalContentVariants = {
 
 const IconWrapper = ({ icon: Icon, theme = 'purple', size = 'md' }) => {
   const sizeClasses = {
-    sm: 'w-8 h-8',
+    sm: 'w-9 h-9',
     md: 'w-10 h-10',
-    lg: 'w-12 h-12',
+    lg: 'w-11 h-11',
   };
   const iconSizes = {
-    sm: 'w-4 h-4',
+    sm: 'w-[18px] h-[18px]',
     md: 'w-5 h-5',
     lg: 'w-6 h-6',
   };
   const themeSet = colorThemes[theme] || colorThemes.purple;
 
   return (
-    <div className={`${sizeClasses[size]} ${themeSet.iconBg} rounded-xl flex items-center justify-center text-white shadow-lg shadow-${theme}-500/20 shrink-0`}>
+    <div className={`${sizeClasses[size]} ${themeSet.iconBg} rounded-xl flex items-center justify-center text-white shadow-md shrink-0`}>
       <Icon className={iconSizes[size]} strokeWidth={2} />
     </div>
+  );
+};
+
+/*
+  TOGGLE SWITCH - FIXED
+  العرض الكلي: 48px (w-12)
+  الدائرة: 22px × 22px
+  عند الإغلاق: x = 3px ← الهامش الأيسر 3px، الهامش الأيمن = 48 - 3 - 22 = 23px ✓
+  عند الفتح: x = 23px ← الهامش الأيسر 23px، الهامش الأيمن = 48 - 23 - 22 = 3px ✓
+  overflow-hidden مضاف لضمان عدم تجاوز الحدود
+*/
+const ToggleSwitch = ({ isToggled, onToggle, theme = 'purple', disabled = false }) => {
+  const themeSet = colorThemes[theme] || colorThemes.purple;
+
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); onToggle?.(); }}
+      disabled={disabled}
+      className={`relative w-12 h-7 rounded-full transition-colors duration-300 shrink-0 overflow-hidden ${
+        isToggled ? themeSet.activeBg : 'bg-stone-300'
+      } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+      aria-label={isToggled ? 'تفعيل' : 'إيقاف'}
+    >
+      <motion.span
+        animate={{ x: isToggled ? 23 : 3 }}
+        transition={{ type: 'spring', stiffness: 550, damping: 28 }}
+        className="absolute top-[3px] w-[22px] h-[22px] bg-white rounded-full shadow-sm block"
+      />
+    </button>
   );
 };
 
@@ -187,62 +169,21 @@ const SettingRow = ({
   badge,
   disabled = false,
 }) => {
-  const themeSet = colorThemes[theme] || colorThemes.purple;
-
-  if (toggle) {
-    return (
-      <motion.div
-        variants={itemVariants}
-        whileHover={disabled ? {} : { y: -2, boxShadow: '0 8px 30px -10px rgba(0,0,0,0.08)' }}
-        whileTap={disabled ? {} : { scale: 0.98 }}
-        className={`group relative overflow-hidden rounded-2xl bg-white border border-stone-200/80 cursor-pointer transition-all duration-300 p-4 ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-stone-300 shadow-sm hover:shadow-md'}`}
-      >
-        <div className="relative flex items-center gap-4">
-          <IconWrapper icon={Icon} theme={theme} />
-          <div className="flex-1 min-w-0 text-right">
-            <div className="flex items-center gap-2 justify-end">
-              <p className="text-[15px] font-bold text-stone-800">{label}</p>
-              {badge && (
-                <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">
-                  {badge}
-                </span>
-              )}
-            </div>
-            {desc && <p className="text-[13px] text-stone-500 mt-0.5 leading-relaxed">{desc}</p>}
-          </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); onToggle?.(); }}
-            disabled={disabled}
-            className={`relative w-[52px] h-7 rounded-full transition-all duration-300 shrink-0 ${
-              isToggled
-                ? `${themeSet.iconBg} shadow-md shadow-${theme}-500/30`
-                : 'bg-stone-300'
-            }`}
-          >
-            <motion.span
-              animate={{ x: isToggled ? 26 : 2 }}
-              transition={{ type: 'spring', stiffness: 600, damping: 30 }}
-              className="absolute top-[3px] w-[22px] h-[22px] bg-white rounded-full shadow-sm"
-            />
-          </button>
-        </div>
-      </motion.div>
-    );
-  }
-
   return (
     <motion.div
       variants={itemVariants}
-      whileHover={disabled ? {} : { y: -2, boxShadow: '0 8px 30px -10px rgba(0,0,0,0.08)' }}
+      whileHover={disabled ? {} : { y: -2, boxShadow: '0 8px 24px -8px rgba(0,0,0,0.08)' }}
       whileTap={disabled ? {} : { scale: 0.98 }}
       onClick={disabled ? undefined : onClick}
-      className={`group relative overflow-hidden rounded-2xl bg-white border border-stone-200/80 cursor-pointer transition-all duration-300 p-4 ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:border-stone-300 shadow-sm hover:shadow-md'}`}
+      className={`group relative overflow-hidden rounded-2xl bg-white border border-stone-200/80 transition-all duration-300 p-4 ${
+        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-stone-300 shadow-sm hover:shadow-md'
+      }`}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:from-stone-50/50 group-hover:to-stone-100/30 transition-all duration-500" />
-      <div className="relative flex items-center gap-4">
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:from-stone-50/60 group-hover:to-stone-100/30 transition-all duration-500" />
+      <div className="relative flex items-center gap-3.5">
         <IconWrapper icon={Icon} theme={theme} />
         <div className="flex-1 min-w-0 text-right">
-          <div className="flex items-center gap-2 justify-end">
+          <div className="flex items-center gap-2 justify-end flex-wrap">
             <p className="text-[15px] font-bold text-stone-800">{label}</p>
             {badge && (
               <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">
@@ -252,26 +193,27 @@ const SettingRow = ({
           </div>
           {desc && <p className="text-[13px] text-stone-500 mt-0.5 leading-relaxed">{desc}</p>}
         </div>
-        <div className="flex items-center gap-2">
-          {disabled && <span className="text-xs text-stone-400">قريباً</span>}
-          <ChevronRight className="w-5 h-5 text-stone-400 group-hover:text-stone-600 group-hover:-translate-x-1 transition-all duration-300" />
-        </div>
+        {toggle ? (
+          <ToggleSwitch isToggled={isToggled} onToggle={onToggle} theme={theme} disabled={disabled} />
+        ) : (
+          <div className="flex items-center gap-2 shrink-0">
+            {disabled && <span className="text-[11px] text-stone-400 font-medium">قريباً</span>}
+            <ChevronRight className="w-5 h-5 text-stone-400 group-hover:text-stone-600 group-hover:-translate-x-1 transition-all duration-300" />
+          </div>
+        )}
       </div>
     </motion.div>
   );
 };
 
-const SectionHeader = ({ title, icon: Icon, delay = 0 }) => (
-  <motion.div
-    variants={itemVariants}
-    className="flex items-center gap-3 px-1 mb-3 mt-2"
-  >
+const SectionHeader = ({ title, icon: Icon }) => (
+  <motion.div variants={itemVariants} className="flex items-center gap-3 px-1 mb-3 mt-1">
     {Icon && (
-      <div className="p-1.5 rounded-lg bg-stone-100 text-stone-600">
+      <div className="p-1.5 rounded-lg bg-stone-100 text-stone-500">
         <Icon className="w-4 h-4" strokeWidth={2.5} />
       </div>
     )}
-    <h3 className="text-xs font-extrabold text-stone-500 uppercase tracking-widest">{title}</h3>
+    <h3 className="text-[11px] font-extrabold text-stone-500 uppercase tracking-[0.15em]">{title}</h3>
     <div className="flex-1 h-px bg-stone-200/60" />
   </motion.div>
 );
@@ -291,8 +233,8 @@ const SimpleModal = ({ open, onClose, title, children, maxWidth = 'sm', icon: Ic
           initial="hidden"
           animate="visible"
           exit="exit"
-          transition={{ duration: 0.25 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/30"
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/25 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
@@ -300,7 +242,7 @@ const SimpleModal = ({ open, onClose, title, children, maxWidth = 'sm', icon: Ic
             initial="hidden"
             animate="visible"
             exit="exit"
-            className={`bg-white rounded-3xl w-full ${maxWidthClasses[maxWidth]} shadow-2xl shadow-stone-900/10 border border-stone-100 overflow-hidden`}
+            className={`bg-white rounded-[28px] w-full ${maxWidthClasses[maxWidth]} shadow-2xl shadow-stone-900/8 border border-stone-100 overflow-hidden`}
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-5 pb-4 border-b border-stone-100">
@@ -352,7 +294,7 @@ const SelectionItem = ({ label, desc, isSelected, onClick, icon, featured }) => 
           <Check className="w-4 h-4" strokeWidth={3} />
         </motion.div>
       ) : (
-        <div className="w-6 h-6 rounded-full border-2 border-stone-300" />
+        <div className="w-6 h-6 rounded-full border-2 border-stone-300 shrink-0" />
       )}
       <div className="text-right">
         <div className="flex items-center gap-2">
@@ -369,7 +311,7 @@ const SelectionItem = ({ label, desc, isSelected, onClick, icon, featured }) => 
         {desc && <p className="text-xs text-stone-500 mt-0.5">{desc}</p>}
       </div>
     </div>
-    {icon && <span className="text-2xl">{icon}</span>}
+    {icon && <span className="text-2xl shrink-0">{icon}</span>}
   </motion.button>
 );
 
@@ -466,7 +408,7 @@ export default function SettingsScreen({
     }
   }, [resetText]);
 
-  const headerOpacity = Math.min(scrollY / 100, 1);
+  const headerOpacity = Math.min(scrollY / 80, 1);
 
   return (
     <div className="min-h-screen bg-stone-50 pb-32 text-right" dir="rtl">
@@ -476,15 +418,15 @@ export default function SettingsScreen({
         animate={{ opacity: 1, y: 0 }}
         className="fixed top-0 left-0 right-0 z-30 transition-all duration-300"
         style={{
-          backgroundColor: `rgba(255, 255, 255, ${0.8 + headerOpacity * 0.15})`,
+          backgroundColor: `rgba(255, 255, 255, ${0.85 + headerOpacity * 0.1})`,
           backdropFilter: `blur(${12 + headerOpacity * 4}px)`,
-          boxShadow: headerOpacity > 0.5 ? '0 1px 3px rgba(0,0,0,0.05)' : 'none',
+          boxShadow: headerOpacity > 0.5 ? '0 1px 3px rgba(0,0,0,0.04)' : 'none',
         }}
       >
         <div className="max-w-lg mx-auto px-5 pt-12 pb-4 flex items-center justify-between">
           <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
             onClick={onBack}
             className="w-10 h-10 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-600 hover:text-stone-900 hover:border-stone-300 transition-all"
           >
@@ -498,7 +440,6 @@ export default function SettingsScreen({
         </div>
       </motion.header>
 
-      {/* Spacer for fixed header */}
       <div className="h-28" />
 
       <motion.div
@@ -585,14 +526,14 @@ export default function SettingsScreen({
           <SectionHeader title="الخصوصية والأمان" icon={ShieldCheck} />
           <div className="space-y-2.5">
             <SettingRow
-              icon={Fingerprint}
+              icon={Lock}
               label="قفل التطبيق"
               desc="حماية إضافية برمز سري أو بصمة"
               onClick={onOpenAppLock}
               theme="rose"
             />
             <SettingRow
-              icon={Database}
+              icon={RefreshCw}
               label="إدارة البيانات"
               desc="التحكم في التخزين والذاكرة المؤقتة"
               onClick={onOpenDataManagement}
@@ -685,8 +626,8 @@ export default function SettingsScreen({
         style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
       >
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.92 }}
           onClick={onBack}
           className="p-2.5 rounded-xl hover:bg-stone-100 active:bg-stone-200 transition-colors"
         >
@@ -695,8 +636,8 @@ export default function SettingsScreen({
         <span className="text-sm font-semibold text-stone-500">القائمة الرئيسية</span>
         {isAdmin ? (
           <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
             onClick={onOpenAdmin}
             className="p-2.5 rounded-xl bg-violet-100 hover:bg-violet-200 text-violet-700 transition-colors"
           >
@@ -708,12 +649,7 @@ export default function SettingsScreen({
       </div>
 
       {/* Language Modal */}
-      <SimpleModal
-        open={showLanguageModal}
-        onClose={() => setShowLanguageModal(false)}
-        title="لغة التطبيق"
-        icon={Globe}
-      >
+      <SimpleModal open={showLanguageModal} onClose={() => setShowLanguageModal(false)} title="لغة التطبيق" icon={Globe}>
         <div className="space-y-2.5">
           {languages.map(lang => (
             <SelectionItem
@@ -729,12 +665,7 @@ export default function SettingsScreen({
       </SimpleModal>
 
       {/* Font Size Modal */}
-      <SimpleModal
-        open={showSizeModal}
-        onClose={() => setShowSizeModal(false)}
-        title="حجم الخط"
-        icon={Type}
-      >
+      <SimpleModal open={showSizeModal} onClose={() => setShowSizeModal(false)} title="حجم الخط" icon={Type}>
         <div className="space-y-2.5">
           {sizes.map(s => (
             <SelectionItem
@@ -749,12 +680,7 @@ export default function SettingsScreen({
       </SimpleModal>
 
       {/* Font Family Modal */}
-      <SimpleModal
-        open={showFontModal}
-        onClose={() => setShowFontModal(false)}
-        title="نوع الخط"
-        icon={Palette}
-      >
+      <SimpleModal open={showFontModal} onClose={() => setShowFontModal(false)} title="نوع الخط" icon={Palette}>
         <div className="space-y-2.5">
           {fonts.map(f => (
             <SelectionItem
@@ -770,13 +696,7 @@ export default function SettingsScreen({
       </SimpleModal>
 
       {/* Reset Confirmation Modal */}
-      <SimpleModal
-        open={showResetModal}
-        onClose={() => { setShowResetModal(false); setResetText(''); }}
-        title="تأكيد إعادة الضبط"
-        icon={AlertTriangle}
-        maxWidth="md"
-      >
+      <SimpleModal open={showResetModal} onClose={() => { setShowResetModal(false); setResetText(''); }} title="تأكيد إعادة الضبط" icon={AlertTriangle} maxWidth="md">
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-4">
             <motion.div
@@ -823,11 +743,7 @@ export default function SettingsScreen({
             >
               إلغاء
             </motion.button>
-            <DangerButton
-              onClick={handleResetApp}
-              disabled={resetText.trim() !== 'حذف'}
-              loading={resetLoading}
-            >
+            <DangerButton onClick={handleResetApp} disabled={resetText.trim() !== 'حذف'} loading={resetLoading}>
               تأكيد الحذف
             </DangerButton>
           </div>
