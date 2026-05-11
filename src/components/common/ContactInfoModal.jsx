@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { db, auth } from '../../firebase/config';
 import {
   collection, query, where, getDocs, addDoc, serverTimestamp,
-  doc, onSnapshot, updateDoc
+  doc, onSnapshot
 } from 'firebase/firestore';
 import { toast } from 'sonner';
 import {
   X, Copy, MessageCircle, UserPlus, Phone, Video, Star,
-  Pencil, Shield, Calendar, Clock, Mail, User, CheckCircle, XCircle
+  Pencil, Mail, Calendar, Clock
 } from 'lucide-react';
 
 export default function ContactInfoModal({ open, member, onClose, onOpenChat, onCall }) {
@@ -42,18 +42,18 @@ export default function ContactInfoModal({ open, member, onClose, onOpenChat, on
   }, [member, open, currentUser.uid]);
 
   const getStatus = () => {
-    if (!userData) return { text: 'غير متصل', color: 'bg-gray-400', dot: 'bg-gray-400' };
-    if (userData.status === 'online') return { text: 'متصل الآن', color: 'text-emerald-600', dot: 'bg-emerald-500' };
+    if (!userData) return { text: 'غير متصل', dot: 'bg-gray-400' };
+    if (userData.status === 'online') return { text: 'متصل الآن', dot: 'bg-emerald-500' };
     if (userData.lastSeen) {
       const diff = Date.now() - userData.lastSeen.getTime();
       const mins = Math.floor(diff / 60000);
-      if (mins < 1) return { text: 'قبل لحظات', color: 'text-gray-500', dot: 'bg-gray-400' };
-      if (mins < 60) return { text: `قبل ${mins} دقيقة`, color: 'text-gray-500', dot: 'bg-gray-400' };
+      if (mins < 1) return { text: 'قبل لحظات', dot: 'bg-gray-400' };
+      if (mins < 60) return { text: `قبل ${mins} دقيقة`, dot: 'bg-gray-400' };
       const hrs = Math.floor(mins / 60);
-      if (hrs < 24) return { text: `قبل ${hrs} ساعة`, color: 'text-gray-500', dot: 'bg-gray-400' };
-      return { text: `قبل ${Math.floor(hrs / 24)} يوم`, color: 'text-gray-500', dot: 'bg-gray-400' };
+      if (hrs < 24) return { text: `قبل ${hrs} ساعة`, dot: 'bg-gray-400' };
+      return { text: `قبل ${Math.floor(hrs / 24)} يوم`, dot: 'bg-gray-400' };
     }
-    return { text: 'غير متصل', color: 'text-gray-500', dot: 'bg-gray-400' };
+    return { text: 'غير متصل', dot: 'bg-gray-400' };
   };
 
   const addToContacts = async () => {
@@ -110,9 +110,7 @@ export default function ContactInfoModal({ open, member, onClose, onOpenChat, on
     <AnimatePresence>
       {open && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md"
           onClick={onClose}
         >
@@ -124,39 +122,23 @@ export default function ContactInfoModal({ open, member, onClose, onOpenChat, on
             className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-gray-100 overflow-hidden relative"
             onClick={e => e.stopPropagation()}
           >
-            {/* خلفية زخرفية */}
             <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-b-3xl pointer-events-none" />
 
             <div className="relative z-10">
-              {/* زر الإغلاق */}
-              <button
-                onClick={onClose}
-                className="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all"
-              >
+              <button onClick={onClose} className="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all">
                 <X className="w-5 h-5" />
               </button>
 
-              {/* صورة الملف الشخصي والحالة */}
               <div className="flex flex-col items-center mb-6 mt-4">
                 <div className="relative">
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-white text-3xl font-bold shadow-xl ring-4 ring-white">
                     {displayName.charAt(0)?.toUpperCase() || '?'}
                   </div>
-                  <motion.span
-                    animate={{ scale: userData?.status === 'online' ? [1, 1.2, 1] : 1 }}
-                    transition={{ repeat: userData?.status === 'online' ? Infinity : 0, duration: 2 }}
-                    className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white ${status.dot} shadow`}
-                  />
+                  <span className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white ${status.dot} shadow`} />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mt-3">{displayName}</h3>
-                {member.username && (
-                  <p className="text-sm text-gray-500">@{member.username}</p>
-                )}
-                <p className={`text-xs font-medium mt-1 flex items-center gap-1 ${status.color}`}>
-                  {status.text}
-                </p>
-
-                {/* مفضلة */}
+                {member.username && <p className="text-sm text-gray-500">@{member.username}</p>}
+                <p className="text-xs font-medium mt-1 text-gray-500">{status.text}</p>
                 <button
                   onClick={toggleFavorite}
                   className={`mt-2 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all ${
@@ -168,7 +150,6 @@ export default function ContactInfoModal({ open, member, onClose, onOpenChat, on
                 </button>
               </div>
 
-              {/* معلومات إضافية */}
               <div className="bg-gray-50 rounded-2xl p-4 mb-4 space-y-2">
                 {userData?.email && (
                   <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -190,64 +171,33 @@ export default function ContactInfoModal({ open, member, onClose, onOpenChat, on
                 )}
               </div>
 
-              {/* أزرار التواصل */}
               <div className="grid grid-cols-3 gap-2 mb-6">
-                <button
-                  onClick={startChat}
-                  className="flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  <span className="text-xs font-medium">محادثة</span>
+                <button onClick={startChat} className="flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors">
+                  <MessageCircle className="w-5 h-5" /><span className="text-xs font-medium">محادثة</span>
                 </button>
-                <button
-                  onClick={() => handleCall('audio')}
-                  className="flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
-                >
-                  <Phone className="w-5 h-5" />
-                  <span className="text-xs font-medium">مكالمة صوت</span>
+                <button onClick={() => handleCall('audio')} className="flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
+                  <Phone className="w-5 h-5" /><span className="text-xs font-medium">مكالمة صوت</span>
                 </button>
-                <button
-                  onClick={() => handleCall('video')}
-                  className="flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
-                >
-                  <Video className="w-5 h-5" />
-                  <span className="text-xs font-medium">فيديو</span>
+                <button onClick={() => handleCall('video')} className="flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-green-50 text-green-700 hover:bg-green-100 transition-colors">
+                  <Video className="w-5 h-5" /><span className="text-xs font-medium">فيديو</span>
                 </button>
               </div>
 
-              {/* أزرار الإجراءات */}
               <div className="space-y-2">
                 {!isContact ? (
-                  <button
-                    onClick={addToContacts}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors"
-                  >
-                    <UserPlus className="w-5 h-5" />
-                    إضافة لجهات الاتصال
+                  <button onClick={addToContacts} className="w-full flex items-center justify-center gap-2 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors">
+                    <UserPlus className="w-5 h-5" /> إضافة لجهات الاتصال
                   </button>
                 ) : (
-                  <button
-                    onClick={() => { onClose(); }}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-amber-50 text-amber-700 rounded-xl font-bold hover:bg-amber-100 transition-colors"
-                  >
-                    <Pencil className="w-4 h-4" />
-                    تعديل الاسم
+                  <button onClick={() => onClose()} className="w-full flex items-center justify-center gap-2 py-3 bg-amber-50 text-amber-700 rounded-xl font-bold hover:bg-amber-100 transition-colors">
+                    <Pencil className="w-4 h-4" /> تعديل الاسم
                   </button>
                 )}
-                <button
-                  onClick={copyUsername}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
-                >
-                  <Copy className="w-4 h-4" />
-                  نسخ المعرف
+                <button onClick={copyUsername} className="w-full flex items-center justify-center gap-2 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors">
+                  <Copy className="w-4 h-4" /> نسخ المعرف
                 </button>
                 {isContact && (
-                  <button
-                    onClick={toggleFavorite}
-                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-colors ${
-                      isFavorite ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
+                  <button onClick={toggleFavorite} className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-colors ${isFavorite ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                     <Star className={`w-4 h-4 ${isFavorite ? 'fill-yellow-500' : ''}`} />
                     {isFavorite ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}
                   </button>
