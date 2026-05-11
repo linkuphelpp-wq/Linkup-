@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Calendar, Link, Users, UserPlus, UserCheck, MessageCircle, MoreHorizontal, Heart, Repeat2 } from 'lucide-react';
-import { db } from '../../../firebase/config';
+import { ArrowLeft, UserPlus, UserCheck, Heart, MessageCircle, Repeat2 } from 'lucide-react';
+import { db } from '../../firebase/config';
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot, collection, query, orderBy, where } from 'firebase/firestore';
 import { toast } from 'sonner';
-import { useLanguage } from '../../../context/LanguageContext';
 
 export default function WorldProfileScreen({ onBack, currentWorldUser, targetUserId }) {
-  const { t } = useLanguage();
   const [profileUser, setProfileUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -26,7 +24,6 @@ export default function WorldProfileScreen({ onBack, currentWorldUser, targetUse
           setProfileUser(data);
           setIsFollowing(data.followers?.includes(viewerUid) || false);
           
-          // جلب منشورات المستخدم
           const postsQuery = query(
             collection(db, 'world_posts'),
             where('authorId', '==', targetUserId),
@@ -93,7 +90,6 @@ export default function WorldProfileScreen({ onBack, currentWorldUser, targetUse
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pb-24" dir="rtl">
-      {/* الهيدر */}
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-12 pb-4 shadow-sm">
         <div className="flex items-center gap-3">
           {onBack && (
@@ -109,7 +105,6 @@ export default function WorldProfileScreen({ onBack, currentWorldUser, targetUse
       </header>
 
       <main className="flex-1 overflow-y-auto">
-        {/* بطاقة الملف الشخصي */}
         <div className="relative bg-white border-b border-gray-100 px-5 pt-8 pb-6">
           <div className="flex flex-col items-center">
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white text-3xl font-bold shadow-xl ring-4 ring-white mb-4">
@@ -121,7 +116,6 @@ export default function WorldProfileScreen({ onBack, currentWorldUser, targetUse
               <p className="text-sm text-gray-600 mt-2 text-center max-w-xs">{profileUser.bio}</p>
             )}
 
-            {/* إحصائيات */}
             <div className="flex items-center gap-6 mt-4">
               <div className="text-center">
                 <p className="text-lg font-bold text-gray-900">{profileUser.followers?.length || 0}</p>
@@ -137,7 +131,6 @@ export default function WorldProfileScreen({ onBack, currentWorldUser, targetUse
               </div>
             </div>
 
-            {/* زر المتابعة */}
             {!isOwnProfile && (
               <motion.button
                 whileTap={{ scale: 0.95 }}
@@ -164,7 +157,6 @@ export default function WorldProfileScreen({ onBack, currentWorldUser, targetUse
           </div>
         </div>
 
-        {/* منشورات المستخدم */}
         <div className="px-4 py-6 space-y-4">
           <h3 className="text-sm font-bold text-gray-500 mb-2">المنشورات</h3>
           {posts.length === 0 ? (
