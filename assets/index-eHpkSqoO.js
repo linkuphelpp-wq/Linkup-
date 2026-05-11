@@ -10454,28 +10454,6 @@ var Bell = createLucideIcon("bell", [["path", {
 	d: "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326",
 	key: "11g9vi"
 }]]);
-var Calendar = createLucideIcon("calendar", [
-	["path", {
-		d: "M8 2v4",
-		key: "1cmpym"
-	}],
-	["path", {
-		d: "M16 2v4",
-		key: "4m81vk"
-	}],
-	["rect", {
-		width: "18",
-		height: "18",
-		x: "3",
-		y: "4",
-		rx: "2",
-		key: "1hopcy"
-	}],
-	["path", {
-		d: "M3 10h18",
-		key: "8toen8"
-	}]
-]);
 var Camera = createLucideIcon("camera", [["path", {
 	d: "M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z",
 	key: "18u6gg"
@@ -10555,15 +10533,6 @@ var CircleX = createLucideIcon("circle-x", [
 		key: "z0biqf"
 	}]
 ]);
-var Clock = createLucideIcon("clock", [["circle", {
-	cx: "12",
-	cy: "12",
-	r: "10",
-	key: "1mglay"
-}], ["path", {
-	d: "M12 6v6l4 2",
-	key: "mmk7yg"
-}]]);
 var Cloud = createLucideIcon("cloud", [["path", {
 	d: "M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z",
 	key: "p7xjir"
@@ -11262,7 +11231,7 @@ var Video = createLucideIcon("video", [["path", {
 	rx: "2",
 	key: "158x01"
 }]]);
-var X$2 = createLucideIcon("x", [["path", {
+var X$1 = createLucideIcon("x", [["path", {
 	d: "M18 6 6 18",
 	key: "1bl5f8"
 }], ["path", {
@@ -60023,7 +59992,7 @@ var NameChangeModal = ({ open, onClose, currentName, onSave }) => {
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 					onClick: onClose,
 					className: "w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-5 h-5" })
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "w-5 h-5" })
 				})]
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "space-y-5",
@@ -60465,7 +60434,7 @@ var SimpleModal = ({ open, onClose, title, children }) => /* @__PURE__ */ (0, im
 			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 				onClick: onClose,
 				className: "w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-5 h-5" })
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "w-5 h-5" })
 			})]
 		}), children]
 	})
@@ -61555,272 +61524,6 @@ var $e = (0, import_react.forwardRef)(function(e, t) {
 	}));
 });
 //#endregion
-//#region src/components/common/ContactInfoModal.jsx
-function ContactInfoModal({ open, member, onClose, onOpenChat, onCall }) {
-	const [isContact, setIsContact] = (0, import_react.useState)(false);
-	const [userData, setUserData] = (0, import_react.useState)(null);
-	const [isFavorite, setIsFavorite] = (0, import_react.useState)(false);
-	const currentUser = auth.currentUser;
-	(0, import_react.useEffect)(() => {
-		if (!member?.uid || !open) return;
-		const unsub = onSnapshot(doc(db, "users", member.uid), (snap) => {
-			if (snap.exists()) {
-				const data = snap.data();
-				setUserData({
-					...data,
-					lastSeen: data.lastSeen?.toDate?.() || (data.lastSeen ? new Date(data.lastSeen) : null),
-					createdAt: data.createdAt?.toDate?.() || (data.createdAt ? new Date(data.createdAt) : null)
-				});
-			}
-		});
-		const checkContact = async () => {
-			setIsContact((await getDocs(query(collection(db, "contacts"), where("participants", "array-contains", currentUser.uid)))).docs.some((d) => d.data().participants.includes(member.uid)));
-		};
-		checkContact();
-		setIsFavorite(JSON.parse(localStorage.getItem("contact_favorites") || "[]").includes(member.uid));
-		return () => unsub();
-	}, [
-		member,
-		open,
-		currentUser.uid
-	]);
-	const getStatus = () => {
-		if (!userData) return {
-			text: "غير متصل",
-			dot: "bg-gray-400"
-		};
-		if (userData.status === "online") return {
-			text: "متصل الآن",
-			dot: "bg-emerald-500"
-		};
-		if (userData.lastSeen) {
-			const diff = Date.now() - userData.lastSeen.getTime();
-			const mins = Math.floor(diff / 6e4);
-			if (mins < 1) return {
-				text: "قبل لحظات",
-				dot: "bg-gray-400"
-			};
-			if (mins < 60) return {
-				text: `قبل ${mins} دقيقة`,
-				dot: "bg-gray-400"
-			};
-			const hrs = Math.floor(mins / 60);
-			if (hrs < 24) return {
-				text: `قبل ${hrs} ساعة`,
-				dot: "bg-gray-400"
-			};
-			return {
-				text: `قبل ${Math.floor(hrs / 24)} يوم`,
-				dot: "bg-gray-400"
-			};
-		}
-		return {
-			text: "غير متصل",
-			dot: "bg-gray-400"
-		};
-	};
-	const addToContacts = async () => {
-		try {
-			await addDoc(collection(db, "contacts"), {
-				participants: [currentUser.uid, member.uid],
-				displayName: member.name || "",
-				username: member.username || "",
-				email: userData?.email || "",
-				createdAt: serverTimestamp$2()
-			});
-			setIsContact(true);
-			ue.success("تمت الإضافة إلى جهات الاتصال");
-		} catch (err) {
-			ue.error("فشل الإضافة");
-		}
-	};
-	const toggleFavorite = () => {
-		const favs = JSON.parse(localStorage.getItem("contact_favorites") || "[]");
-		const updated = favs.includes(member.uid) ? favs.filter((id) => id !== member.uid) : [...favs, member.uid];
-		localStorage.setItem("contact_favorites", JSON.stringify(updated));
-		setIsFavorite((prev) => !prev);
-	};
-	const copyUsername = () => {
-		if (member.username) {
-			navigator.clipboard.writeText(member.username);
-			ue.success("تم نسخ المعرف");
-		}
-	};
-	const startChat = () => {
-		if (!isContact) addToContacts().then(() => onOpenChat?.({
-			uid: member.uid,
-			displayName: member.name,
-			username: member.username
-		}));
-		else onOpenChat?.({
-			uid: member.uid,
-			displayName: member.name,
-			username: member.username
-		});
-	};
-	const handleCall = (type) => {
-		if (userData?.status !== "online") {
-			ue.error("المستخدم غير متصل حاليًا");
-			return;
-		}
-		onCall?.(member, type);
-	};
-	const status = getStatus();
-	const joinDate = userData?.createdAt?.toLocaleDateString("ar-SA", {
-		year: "numeric",
-		month: "long",
-		day: "numeric"
-	});
-	const displayName = member.name || member.username || "مستخدم";
-	if (!open) return null;
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-		initial: { opacity: 0 },
-		animate: { opacity: 1 },
-		exit: { opacity: 0 },
-		className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md",
-		onClick: onClose,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-			initial: {
-				scale: .9,
-				opacity: 0,
-				y: 30
-			},
-			animate: {
-				scale: 1,
-				opacity: 1,
-				y: 0
-			},
-			exit: {
-				scale: .85,
-				opacity: 0,
-				y: 30
-			},
-			transition: {
-				type: "spring",
-				stiffness: 500,
-				damping: 30
-			},
-			className: "bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-gray-100 overflow-hidden relative",
-			onClick: (e) => e.stopPropagation(),
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-b-3xl pointer-events-none" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "relative z-10",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: onClose,
-						className: "absolute top-2 right-2 w-9 h-9 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-5 h-5" })
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex flex-col items-center mb-6 mt-4",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "relative",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-white text-3xl font-bold shadow-xl ring-4 ring-white",
-									children: displayName.charAt(0)?.toUpperCase() || "?"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white ${status.dot} shadow` })]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-xl font-bold text-gray-900 mt-3",
-								children: displayName
-							}),
-							member.username && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-								className: "text-sm text-gray-500",
-								children: ["@", member.username]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-xs font-medium mt-1 text-gray-500",
-								children: status.text
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: toggleFavorite,
-								className: `mt-2 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition-all ${isFavorite ? "bg-yellow-100 text-yellow-700 border border-yellow-200" : "bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200"}`,
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-3.5 h-3.5 ${isFavorite ? "fill-yellow-500 text-yellow-500" : ""}` }), isFavorite ? "مفضلة" : "إضافة للمفضلة"]
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "bg-gray-50 rounded-2xl p-4 mb-4 space-y-2",
-						children: [
-							userData?.email && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-2 text-sm text-gray-600",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "w-4 h-4 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "truncate",
-									children: userData.email
-								})]
-							}),
-							joinDate && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-2 text-sm text-gray-600",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Calendar, { className: "w-4 h-4 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["انضم ", joinDate] })]
-							}),
-							userData?.lastSeen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-2 text-sm text-gray-600",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-4 h-4 text-gray-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["آخر ظهور ", userData.lastSeen.toLocaleTimeString("ar-SA", {
-									hour: "2-digit",
-									minute: "2-digit"
-								})] })]
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "grid grid-cols-3 gap-2 mb-6",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: startChat,
-								className: "flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircle, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-xs font-medium",
-									children: "محادثة"
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: () => handleCall("audio"),
-								className: "flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-xs font-medium",
-									children: "مكالمة صوت"
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: () => handleCall("video"),
-								className: "flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-green-50 text-green-700 hover:bg-green-100 transition-colors",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Video, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-									className: "text-xs font-medium",
-									children: "فيديو"
-								})]
-							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "space-y-2",
-						children: [
-							!isContact ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: addToContacts,
-								className: "w-full flex items-center justify-center gap-2 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-5 h-5" }), " إضافة لجهات الاتصال"]
-							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: () => onClose(),
-								className: "w-full flex items-center justify-center gap-2 py-3 bg-amber-50 text-amber-700 rounded-xl font-bold hover:bg-amber-100 transition-colors",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-4 h-4" }), " تعديل الاسم"]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: copyUsername,
-								className: "w-full flex items-center justify-center gap-2 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" }), " نسخ المعرف"]
-							}),
-							isContact && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: toggleFavorite,
-								className: `w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-colors ${isFavorite ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`,
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Star, { className: `w-4 h-4 ${isFavorite ? "fill-yellow-500" : ""}` }), isFavorite ? "إزالة من المفضلة" : "إضافة للمفضلة"]
-							})
-						]
-					})
-				]
-			})]
-		})
-	}) });
-}
-//#endregion
 //#region src/features/contacts/ContactsScreen.jsx
 var LinkUpLogo$1 = () => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 	className: "flex items-center gap-2.5",
@@ -61853,7 +61556,7 @@ var getSafeName = (contact) => {
 	for (let candidate of candidates) if (candidate && !emailPattern.test(candidate)) return candidate;
 	return "مستخدم";
 };
-var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0, index = 0, onOpenProfile }) => {
+var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0, index = 0 }) => {
 	const [status, setStatus] = (0, import_react.useState)("offline");
 	const [expanded, setExpanded] = (0, import_react.useState)(false);
 	(0, import_react.useEffect)(() => {
@@ -62039,19 +61742,6 @@ var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavo
 						whileTap: { scale: .95 },
 						onClick: () => {
 							setExpanded(false);
-							onOpenProfile?.(contact);
-						},
-						className: "flex flex-col items-center gap-1 text-indigo-500 hover:bg-indigo-50 p-2 rounded-xl transition-colors",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-5 h-5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-xs font-medium",
-							children: "ملف"
-						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
-						whileHover: { scale: 1.05 },
-						whileTap: { scale: .95 },
-						onClick: () => {
-							setExpanded(false);
 							onDelete?.(contact);
 						},
 						className: "flex flex-col items-center gap-1 text-red-500 hover:bg-red-50 p-2 rounded-xl transition-colors",
@@ -62176,7 +61866,7 @@ var EditNameModal = ({ open, contact, onSave, onClose }) => {
 						children: "تعديل الاسم"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: onClose,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-5 h-5" })
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "w-5 h-5" })
 					})]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
@@ -62215,7 +61905,6 @@ function ContactsScreen({ onCall, onChat }) {
 	const [deleteTarget, setDeleteTarget] = (0, import_react.useState)(null);
 	const [editTarget, setEditTarget] = (0, import_react.useState)(null);
 	const [unreadCounts, setUnreadCounts] = (0, import_react.useState)({});
-	const [selectedProfile, setSelectedProfile] = (0, import_react.useState)(null);
 	const currentUser = auth.currentUser;
 	(0, import_react.useEffect)(() => {
 		if (!currentUser?.uid) return;
@@ -62326,14 +62015,6 @@ function ContactsScreen({ onCall, onChat }) {
 			setAddLoading(false);
 		}
 	};
-	const handleOpenProfile = (contact) => {
-		setSelectedProfile({
-			uid: contact.uid,
-			name: getSafeName(contact),
-			username: contact.username,
-			displayName: contact.displayName || contact.localDisplayName
-		});
-	};
 	const filteredContacts = (0, import_react.useMemo)(() => {
 		let list = contacts;
 		if (activeFilter === "favorites") list = list.filter((c) => favorites.includes(c.uid || c.username));
@@ -62393,7 +62074,7 @@ function ContactsScreen({ onCall, onChat }) {
 								children: "إضافة جهة اتصال"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								onClick: () => setShowAddModal(false),
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-5 h-5" })
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "w-5 h-5" })
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input, {
@@ -62443,16 +62124,6 @@ function ContactsScreen({ onCall, onChat }) {
 				contact: editTarget,
 				onSave: handleEditSave,
 				onClose: () => setEditTarget(null)
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContactInfoModal, {
-				open: !!selectedProfile,
-				member: selectedProfile,
-				onClose: () => setSelectedProfile(null),
-				onOpenChat: (member) => {
-					setSelectedProfile(null);
-					onChat?.(member);
-				},
-				onCall
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.header, {
 				initial: {
@@ -62587,8 +62258,7 @@ function ContactsScreen({ onCall, onChat }) {
 							isFavorite: favorites.includes(contact.uid || contact.username),
 							onEdit: setEditTarget,
 							unreadCount: unreadCounts[contact.uid] || 0,
-							index,
-							onOpenProfile: handleOpenProfile
+							index
 						}, contact.uid || contact.username))
 					})
 				]
@@ -66575,7 +66245,7 @@ var DialogContent = import_react.forwardRef(({ className, children, ...props }, 
 	...props,
 	children: [children, /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Close, {
 		className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "h-4 w-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "h-4 w-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 			className: "sr-only",
 			children: "Close"
 		})]
@@ -66832,7 +66502,6 @@ function ChatScreen({ contact, onBack, onCall }) {
 	const [loading, setLoading] = (0, import_react.useState)(true);
 	const [replyTo, setReplyTo] = (0, import_react.useState)(null);
 	const [actionPopup, setActionPopup] = (0, import_react.useState)(null);
-	const [showProfile, setShowProfile] = (0, import_react.useState)(false);
 	const messagesEndRef = (0, import_react.useRef)(null);
 	const inputRef = (0, import_react.useRef)(null);
 	const currentUser = auth.currentUser;
@@ -66958,8 +66627,7 @@ function ChatScreen({ contact, onBack, onCall }) {
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5 text-gray-700" })
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3 flex-1 min-w-0 cursor-pointer",
-							onClick: () => setShowProfile(true),
+							className: "flex items-center gap-3 flex-1 min-w-0",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 								className: "w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-sm",
 								children: displayName.charAt(0)?.toUpperCase() || "?"
@@ -67079,7 +66747,7 @@ function ChatScreen({ contact, onBack, onCall }) {
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: () => setReplyTo(null),
 						className: "p-1 rounded-full hover:bg-gray-200",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { className: "w-4 h-4" })
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "w-4 h-4" })
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-end gap-2 bg-white rounded-3xl border border-gray-200 shadow-lg p-2",
@@ -67100,18 +66768,6 @@ function ChatScreen({ contact, onBack, onCall }) {
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-5 h-5 text-gray-400" })
 					})]
 				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContactInfoModal, {
-				open: showProfile,
-				member: {
-					uid: contact?.uid,
-					name: displayName,
-					username: contact?.username,
-					displayName: contact?.displayName
-				},
-				onClose: () => setShowProfile(false),
-				onOpenChat: () => {},
-				onCall
 			}),
 			actionPopup && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageActionsPopup$1, {
 				message: actionPopup.message,
@@ -70187,7 +69843,7 @@ function InstallGuide({ onDismiss, deferredPrompt, isInstalled }) {
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 					onClick: onDismiss,
 					className: "absolute top-5 right-5 p-2 rounded-full bg-white/80 hover:bg-white shadow-sm hover:shadow-md transition-all active:scale-95 z-10 backdrop-blur-sm",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-4 h-4 text-gray-500" })
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "w-4 h-4 text-gray-500" })
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "mb-5 flex justify-center",
@@ -70406,7 +70062,6 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 	const [members, setMembers] = (0, import_react.useState)([]);
 	const [replyTo, setReplyTo] = (0, import_react.useState)(null);
 	const [actionPopup, setActionPopup] = (0, import_react.useState)(null);
-	const [selectedProfileUser, setSelectedProfileUser] = (0, import_react.useState)(null);
 	const messagesEndRef = (0, import_react.useRef)(null);
 	const inputRef = (0, import_react.useRef)(null);
 	const [showHeaderMenu, setShowHeaderMenu] = (0, import_react.useState)(false);
@@ -70441,14 +70096,6 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages]);
 	const senderName = (uid) => members.find((m) => m.uid === uid)?.name || uid;
-	const handleOpenProfile = (uid) => {
-		const member = members.find((m) => m.uid === uid);
-		if (member) setSelectedProfileUser({
-			uid,
-			name: member.name,
-			username: ""
-		});
-	};
 	const handleSend = async () => {
 		if (!message.trim()) return;
 		const text = message.trim();
@@ -70660,8 +70307,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 								!isMe && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "flex items-center gap-2 mb-1 mr-2",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-700 cursor-pointer hover:scale-110 transition-transform",
-										onClick: () => handleOpenProfile(msg.senderId),
+										className: "w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-700",
 										children: msg.senderName?.charAt(0)?.toUpperCase() || "?"
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 										className: "text-xs font-medium text-gray-600",
@@ -70730,7 +70376,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: () => setReplyTo(null),
 						className: "p-1 rounded-full hover:bg-gray-200",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$2, { className: "w-4 h-4" })
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "w-4 h-4" })
 					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-end gap-2 bg-white rounded-3xl border border-gray-200 shadow-lg p-2",
@@ -70752,12 +70398,6 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-5 h-5 text-gray-400" })
 					})]
 				})]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContactInfoModal, {
-				open: !!selectedProfileUser,
-				member: selectedProfileUser,
-				onClose: () => setSelectedProfileUser(null),
-				onOpenChat: () => {}
 			}),
 			actionPopup && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageActionsPopup, {
 				message: actionPopup.message,
@@ -70781,8 +70421,6 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 	const [newDesc, setNewDesc] = (0, import_react.useState)(group.description || "");
 	const [showAddMembers, setShowAddMembers] = (0, import_react.useState)(false);
 	const [contacts, setContacts] = (0, import_react.useState)([]);
-	const [selectedMemberForInfo, setSelectedMemberForInfo] = (0, import_react.useState)(null);
-	const [contactInfoModalOpen, setContactInfoModalOpen] = (0, import_react.useState)(false);
 	const currentUser = auth.currentUser;
 	const isAdmin = groupData?.admins?.includes(currentUser.uid) || groupData?.createdBy === currentUser.uid;
 	(0, import_react.useEffect)(() => {
@@ -70912,10 +70550,6 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 		};
 		fetchContacts();
 	}, [showAddMembers]);
-	const openContactInfo = (member) => {
-		setSelectedMemberForInfo(member);
-		setContactInfoModalOpen(true);
-	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen bg-white flex flex-col",
 		dir: "rtl",
@@ -70994,8 +70628,7 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 						children: membersData.map((member) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex items-center justify-between p-3 bg-gray-50 rounded-xl",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center gap-3 cursor-pointer",
-								onClick: () => openContactInfo(member),
+								className: "flex items-center gap-3",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "relative",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -71034,7 +70667,6 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 										className: "w-full text-right px-4 py-2 hover:bg-red-50 flex items-center gap-2 text-sm text-red-600",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Trash2, { className: "w-4 h-4" }), " إزالة"]
 									})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-										onClick: () => openContactInfo(member),
 										className: "w-full text-right px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-sm",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Info, { className: "w-4 h-4" }), " معلومات"]
 									})]
@@ -71138,19 +70770,6 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 						})
 					]
 				})
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ContactInfoModal, {
-				open: contactInfoModalOpen,
-				member: selectedMemberForInfo,
-				onClose: () => {
-					setContactInfoModalOpen(false);
-					setSelectedMemberForInfo(null);
-				},
-				onOpenChat: (member) => {
-					setContactInfoModalOpen(false);
-					setSelectedMemberForInfo(null);
-					onOpenChat?.(member);
-				}
 			})
 		]
 	});
