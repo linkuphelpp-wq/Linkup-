@@ -69353,14 +69353,13 @@ function MainMenuScreen({ onNavigate, username }) {
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
 									onClick: () => setIdVisible(!idVisible),
 									whileTap: { scale: .85 },
-									className: "relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none",
+									className: "relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none overflow-hidden",
 									style: { backgroundColor: idVisible ? "#8b5cf6" : "#e5e7eb" },
 									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-										className: "absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center",
-										animate: {
-											right: idVisible ? 2 : "auto",
-											left: idVisible ? "auto" : 2
-										},
+										className: "absolute top-[2px] w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center",
+										style: { right: "2px" },
+										animate: { x: idVisible ? -20 : 0 },
+										initial: false,
 										transition: {
 											type: "spring",
 											stiffness: 500,
@@ -69381,7 +69380,7 @@ function MainMenuScreen({ onNavigate, username }) {
 													scale: 0,
 													opacity: 0
 												},
-												transition: { duration: .12 },
+												transition: { duration: .1 },
 												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3 h-3 text-purple-600" })
 											}, "eye") : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 												initial: {
@@ -69396,7 +69395,7 @@ function MainMenuScreen({ onNavigate, username }) {
 													scale: 0,
 													opacity: 0
 												},
-												transition: { duration: .12 },
+												transition: { duration: .1 },
 												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3 h-3 text-gray-400" })
 											}, "eyeoff")
 										})

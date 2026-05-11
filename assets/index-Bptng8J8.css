@@ -605,6 +605,10 @@
     top: calc(var(--spacing) * 6);
   }
 
+  .top-\[2px\] {
+    top: 2px;
+  }
+
   .top-\[50\%\] {
     top: 50%;
   }
@@ -5763,6 +5767,9 @@ body {
 }
 .top-1\/4 {
   top: 25%;
+}
+.top-\[2px\] {
+  top: 2px;
 }
 .top-\[50\%\] {
   top: 50%;
