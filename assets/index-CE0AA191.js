@@ -10471,6 +10471,10 @@ var ChevronDown = createLucideIcon("chevron-down", [["path", {
 	d: "m6 9 6 6 6-6",
 	key: "qrunsl"
 }]]);
+var ChevronLeft = createLucideIcon("chevron-left", [["path", {
+	d: "m15 18-6-6 6-6",
+	key: "1wnfg3"
+}]]);
 var ChevronRight = createLucideIcon("chevron-right", [["path", {
 	d: "m9 18 6-6-6-6",
 	key: "mthhwq"
@@ -69192,6 +69196,8 @@ function MainMenuScreen({ onNavigate, username }) {
 	const [copied, setCopied] = (0, import_react.useState)(false);
 	const [idVisible, setIdVisible] = (0, import_react.useState)(true);
 	const [mounted, setMounted] = (0, import_react.useState)(false);
+	const [pressedButton, setPressedButton] = (0, import_react.useState)(null);
+	const [ripples, setRipples] = (0, import_react.useState)([]);
 	(0, import_react.useEffect)(() => {
 		setMounted(true);
 	}, []);
@@ -69202,43 +69208,65 @@ function MainMenuScreen({ onNavigate, username }) {
 		try {
 			await navigator.clipboard.writeText(username);
 			setCopied(true);
+			if (navigator.vibrate) navigator.vibrate(50);
 			setTimeout(() => setCopied(false), 2e3);
 		} catch (err) {
 			console.error("فشل النسخ:", err);
 		}
 	};
+	const createRipple = (0, import_react.useCallback)((e, id) => {
+		const rect = e.currentTarget.getBoundingClientRect();
+		const newRipple = {
+			x: e.clientX - rect.left,
+			y: e.clientY - rect.top,
+			id: Date.now() + id
+		};
+		setRipples((prev) => [...prev, newRipple]);
+		setTimeout(() => {
+			setRipples((prev) => prev.filter((r) => r.id !== newRipple.id));
+		}, 600);
+	}, []);
+	const handlePress = (id) => {
+		setPressedButton(id);
+		if (navigator.vibrate) navigator.vibrate(20);
+		setTimeout(() => setPressedButton(null), 150);
+	};
 	const quickActions = [{
+		id: "contacts",
 		label: "جهات الاتصال",
 		desc: "إدارة القائمة",
 		icon: Users,
 		onClick: () => onNavigate?.("contacts"),
-		gradient: "from-cyan-400 via-blue-500 to-indigo-600",
-		glow: "shadow-cyan-500/30",
-		iconBg: "bg-cyan-500/10"
+		color: "from-sky-500 to-blue-600",
+		lightColor: "bg-sky-50",
+		iconColor: "text-sky-500",
+		shadow: "shadow-sky-200/50"
 	}, {
+		id: "settings",
 		label: "الإعدادات",
 		desc: "تخصيص التطبيق",
 		icon: Settings,
 		onClick: () => onNavigate?.("settings"),
-		gradient: "from-fuchsia-400 via-purple-500 to-violet-600",
-		glow: "shadow-purple-500/30",
-		iconBg: "bg-purple-500/10"
+		color: "from-violet-500 to-purple-600",
+		lightColor: "bg-violet-50",
+		iconColor: "text-violet-500",
+		shadow: "shadow-violet-200/50"
 	}];
 	const containerVariants = {
 		hidden: { opacity: 0 },
 		visible: {
 			opacity: 1,
 			transition: {
-				staggerChildren: .12,
-				delayChildren: .1
+				staggerChildren: .08,
+				delayChildren: .05
 			}
 		}
 	};
 	const itemVariants = {
 		hidden: {
 			opacity: 0,
-			y: 30,
-			scale: .95
+			y: 40,
+			scale: .9
 		},
 		visible: {
 			opacity: 1,
@@ -69246,29 +69274,45 @@ function MainMenuScreen({ onNavigate, username }) {
 			scale: 1,
 			transition: {
 				type: "spring",
-				stiffness: 120,
-				damping: 14
+				stiffness: 100,
+				damping: 12
+			}
+		}
+	};
+	const slideUp = {
+		hidden: {
+			opacity: 0,
+			y: 60,
+			filter: "blur(10px)"
+		},
+		visible: {
+			opacity: 1,
+			y: 0,
+			filter: "blur(0px)",
+			transition: {
+				type: "spring",
+				stiffness: 80,
+				damping: 15
 			}
 		}
 	};
 	if (!mounted) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col relative overflow-hidden bg-[#0a0a0f] pb-32 text-right",
+		className: "min-h-screen flex flex-col relative overflow-hidden bg-[#F8F9FC] pb-32 text-right selection:bg-purple-200 selection:text-purple-900",
 		dir: "rtl",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "absolute inset-0 overflow-hidden pointer-events-none",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -top-40 -right-40 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-1/3 -left-40 w-[400px] h-[400px] bg-blue-600/15 rounded-full blur-[100px]" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -bottom-40 right-1/4 w-[600px] h-[600px] bg-fuchsia-600/10 rounded-full blur-[140px]" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImEiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTAgNDBMODAgMCIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDIpIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjYSkiLz48L3N2Zz4=')] opacity-30" })
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-purple-100/40 via-blue-50/20 to-transparent rounded-full blur-3xl" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-20 right-0 w-72 h-72 bg-sky-100/30 rounded-full blur-3xl" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute bottom-40 left-0 w-96 h-96 bg-violet-100/20 rounded-full blur-3xl" })
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 				initial: {
 					opacity: 0,
-					y: -30
+					y: -20
 				},
 				animate: {
 					opacity: 1,
@@ -69277,91 +69321,171 @@ function MainMenuScreen({ onNavigate, username }) {
 				transition: {
 					type: "spring",
 					stiffness: 200,
-					damping: 20
+					damping: 25
 				},
-				className: "sticky top-0 z-50 backdrop-blur-2xl bg-[#0a0a0f]/60 border-b border-white/5 px-5 py-4 text-center shadow-2xl shadow-purple-900/5",
+				className: "sticky top-0 z-50 backdrop-blur-2xl bg-white/70 border-b border-gray-100/80 px-5 py-4 shadow-sm",
 				style: { paddingTop: "max(1rem, env(safe-area-inset-top))" },
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-center gap-2",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-5 h-5 text-purple-400" }),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-							className: "text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-fuchsia-300 to-blue-400",
-							children: "LINKUP"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Sparkles, { className: "w-5 h-5 text-blue-400" })
-					]
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex items-center justify-center",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/20",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Zap, { className: "w-4 h-4 text-white" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+							className: "text-lg font-black tracking-tight text-gray-900",
+							children: "LinkUp"
+						})]
+					})
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				variants: containerVariants,
 				initial: "hidden",
 				animate: "visible",
-				className: "flex-1 flex flex-col items-center pt-10 px-5 relative z-10",
+				className: "flex-1 flex flex-col items-center pt-8 px-5 relative z-10",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 						variants: itemVariants,
-						className: "mb-6 relative",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 blur-md opacity-40 animate-pulse scale-110" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 opacity-20 animate-ping scale-125" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
-								className: "w-32 h-32 border-[3px] border-white/10 shadow-2xl shadow-purple-500/20 relative",
+						className: "mb-4 relative",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+							whileHover: { scale: 1.05 },
+							whileTap: { scale: .95 },
+							transition: {
+								type: "spring",
+								stiffness: 400,
+								damping: 17
+							},
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Avatar, {
+								className: "w-28 h-28 border-[4px] border-white shadow-xl shadow-gray-200/50 ring-4 ring-purple-100 relative",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarImage, {
 									src: user?.photoURL,
 									className: "object-cover"
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AvatarFallback, {
-									className: "bg-gradient-to-br from-purple-600 via-fuchsia-600 to-blue-600 text-white text-5xl font-black",
+									className: "bg-gradient-to-br from-purple-600 via-purple-500 to-blue-500 text-white text-4xl font-black",
 									children: displayName.charAt(0)
 								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "absolute -bottom-1 -left-1 w-8 h-8 bg-[#0a0a0f] rounded-full flex items-center justify-center border border-white/10",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-4 h-4 bg-emerald-400 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.6)] animate-pulse" })
 							})
-						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-						variants: itemVariants,
-						className: "text-center mb-8",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
-							className: "text-3xl font-black text-white mb-1 tracking-tight",
-							children: displayName
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center justify-center gap-1.5 text-gray-400 text-sm",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-3.5 h-3.5 text-purple-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "حساب موثّق" })]
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+							initial: { scale: 0 },
+							animate: { scale: 1 },
+							transition: {
+								delay: .5,
+								type: "spring"
+							},
+							className: "absolute -bottom-1 -left-1 w-7 h-7 bg-white rounded-full flex items-center justify-center border-2 border-white shadow-md",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-3.5 h-3.5 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.5)]" })
 						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-						variants: itemVariants,
-						className: "w-full max-w-md relative group mb-8",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -inset-0.5 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-blue-600 rounded-3xl blur opacity-20 group-hover:opacity-40 transition duration-700" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "relative bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl p-6 overflow-hidden",
+						variants: slideUp,
+						className: "text-center mb-8",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.h2, {
+							className: "text-2xl font-black text-gray-900 mb-1",
+							initial: {
+								opacity: 0,
+								y: 20
+							},
+							animate: {
+								opacity: 1,
+								y: 0
+							},
+							transition: { delay: .2 },
+							children: displayName
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+							initial: { opacity: 0 },
+							animate: { opacity: 1 },
+							transition: { delay: .4 },
+							className: "flex items-center justify-center gap-1.5 text-gray-400 text-xs",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FingerprintPattern, { className: "w-3 h-3 text-purple-400" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "حساب نشط" })]
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						variants: slideUp,
+						className: "w-full max-w-md relative mb-6",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "bg-white rounded-3xl p-5 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.08)] border border-gray-100/80 overflow-hidden relative",
 							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-violet-500 to-blue-500" }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center justify-between mb-4 relative z-10",
+									className: "flex items-center justify-between mb-4",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h3", {
-										className: "text-sm font-bold text-white/90 flex items-center gap-2",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.8)]" }), "اسم المستخدم الخاص بك"]
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										className: "text-sm font-bold text-gray-800 flex items-center gap-2",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_6px_rgba(168,85,247,0.6)]" }), "اسم المستخدم الخاص بك"]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+										whileTap: { scale: .9 },
 										onClick: () => setIdVisible(!idVisible),
-										className: "text-xs text-gray-400 hover:text-purple-300 font-medium flex items-center gap-1.5 transition-all duration-300 hover:bg-white/5 px-3 py-1.5 rounded-full",
-										children: [idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" }), idVisible ? "إخفاء" : "إظهار"]
+										className: "text-xs text-gray-400 hover:text-purple-600 font-medium flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-full hover:bg-purple-50",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, {
+											mode: "wait",
+											children: idVisible ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+												initial: {
+													opacity: 0,
+													rotate: -90
+												},
+												animate: {
+													opacity: 1,
+													rotate: 0
+												},
+												exit: {
+													opacity: 0,
+													rotate: 90
+												},
+												className: "flex items-center gap-1.5",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "إخفاء" })]
+											}, "hide") : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+												initial: {
+													opacity: 0,
+													rotate: 90
+												},
+												animate: {
+													opacity: 1,
+													rotate: 0
+												},
+												exit: {
+													opacity: 0,
+													rotate: -90
+												},
+												className: "flex items-center gap-1.5",
+												children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "إظهار" })]
+											}, "show")
+										})
 									})]
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "bg-gradient-to-br from-white/[0.07] to-white/[0.02] rounded-2xl p-5 border border-white/10 flex items-center justify-between gap-4 relative z-10 group/input hover:border-purple-500/30 transition-all duration-500",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+									className: "bg-gradient-to-r from-purple-50/80 via-violet-50/50 to-blue-50/80 rounded-2xl p-4 border border-purple-100/60 flex items-center justify-between gap-3 relative overflow-hidden",
+									whileHover: { scale: 1.01 },
+									transition: {
+										type: "spring",
+										stiffness: 400,
+										damping: 25
+									},
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("code", {
-										className: "text-2xl font-mono text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-fuchsia-300 to-blue-300 font-black truncate flex-1 text-right select-all dir-ltr tracking-wider",
+										className: "text-xl font-mono text-purple-700 font-black truncate flex-1 text-right select-all dir-ltr tracking-wide",
 										children: ["@", idVisible ? userHandle : "••••••••"]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
-										whileHover: { scale: 1.08 },
-										whileTap: { scale: .88 },
-										onClick: handleCopy,
+										whileHover: {
+											scale: 1.08,
+											y: -2
+										},
+										whileTap: { scale: .85 },
+										onClick: (e) => {
+											handleCopy();
+											createRipple(e, "copy");
+										},
 										disabled: !username || username === "غير محدد",
-										className: "relative p-3.5 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none overflow-hidden group/btn",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, {
+										className: "relative p-3 rounded-xl bg-gradient-to-br from-purple-600 to-violet-600 text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 active:shadow-inner transition-all disabled:opacity-40 disabled:cursor-not-allowed overflow-hidden",
+										children: [ripples.filter((r) => r.id.toString().includes("copy")).map((ripple) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "absolute rounded-full bg-white/30 animate-ripple pointer-events-none",
+											style: {
+												left: ripple.x,
+												top: ripple.y,
+												width: 20,
+												height: 20,
+												marginLeft: -10,
+												marginTop: -10
+											}
+										}, ripple.id)), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, {
 											mode: "wait",
 											children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 												initial: {
@@ -69376,22 +69500,33 @@ function MainMenuScreen({ onNavigate, username }) {
 													scale: 0,
 													rotate: 180
 												},
+												transition: {
+													type: "spring",
+													stiffness: 200
+												},
 												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-5 h-5" })
 											}, "check") : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 												initial: { scale: 0 },
 												animate: { scale: 1 },
 												exit: { scale: 0 },
+												transition: {
+													type: "spring",
+													stiffness: 200
+												},
 												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-5 h-5" })
 											}, "copy")
 										})]
 									})]
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-									className: "text-[11px] text-gray-500 mt-4 text-center font-medium leading-relaxed relative z-10",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.p, {
+									initial: { opacity: 0 },
+									animate: { opacity: 1 },
+									transition: { delay: .6 },
+									className: "text-[11px] text-gray-400 mt-3 text-center font-medium leading-relaxed",
 									children: [
 										"شارك اسم المستخدم ",
 										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: "text-purple-400 font-bold",
+											className: "text-purple-600 font-bold",
 											children: ["@", username]
 										}),
 										" مع أصدقائك",
@@ -69400,48 +69535,89 @@ function MainMenuScreen({ onNavigate, username }) {
 									]
 								})
 							]
-						})]
+						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-						variants: itemVariants,
-						className: "w-full max-w-md grid grid-cols-2 gap-4 relative z-10",
+						variants: containerVariants,
+						className: "w-full max-w-md grid grid-cols-2 gap-3 relative z-10",
 						children: quickActions.map((action, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+							variants: itemVariants,
 							whileHover: {
-								y: -6,
-								scale: 1.02
+								y: -4,
+								scale: 1.02,
+								transition: {
+									type: "spring",
+									stiffness: 400,
+									damping: 17
+								}
 							},
 							whileTap: { scale: .96 },
-							onClick: action.onClick,
-							className: "relative overflow-hidden rounded-3xl p-6 bg-white/[0.03] backdrop-blur-md border border-white/10 hover:border-white/20 transition-all duration-500 text-right group shadow-xl shadow-black/20",
+							onClick: (e) => {
+								handlePress(action.id);
+								createRipple(e, action.id);
+								action.onClick();
+							},
+							className: `relative overflow-hidden rounded-2xl p-5 bg-white border border-gray-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.12)] transition-all duration-300 text-right group ${pressedButton === action.id ? "scale-95" : ""}`,
 							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500` }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent to-white/10 opacity-0 group-hover:animate-shine" }),
+								ripples.filter((r) => r.id.toString().includes(action.id)).map((ripple) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "absolute rounded-full bg-gray-200/50 animate-ripple pointer-events-none",
+									style: {
+										left: ripple.x,
+										top: ripple.y,
+										width: 20,
+										height: 20,
+										marginLeft: -10,
+										marginTop: -10
+									}
+								}, ripple.id)),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500` }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "relative flex flex-col gap-4",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: `w-14 h-14 rounded-2xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-lg ${action.glow} group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`,
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(action.icon, { className: "w-7 h-7 text-white drop-shadow-md" })
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "font-black text-white text-base mb-1 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-gray-300 transition-all",
-										children: action.label
+									className: "relative flex flex-col gap-3",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+										className: `w-12 h-12 rounded-xl ${action.lightColor} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`,
+										whileHover: { rotate: 5 },
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+											className: `w-10 h-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center shadow-md ${action.shadow}`,
+											children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(action.icon, {
+												className: "w-5 h-5 text-white",
+												strokeWidth: 2.5
+											})
+										})
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center gap-1 mb-0.5",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+											className: "font-black text-gray-800 text-sm group-hover:text-gray-900 transition-colors",
+											children: action.label
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronLeft, { className: "w-3.5 h-3.5 text-gray-300 group-hover:text-gray-500 group-hover:translate-x-[-2px] transition-all" })]
 									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-xs text-gray-500 font-medium group-hover:text-gray-400 transition-colors",
+										className: "text-[11px] text-gray-400 font-medium leading-relaxed",
 										children: action.desc
 									})] })]
 								}),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-									className: "absolute top-4 left-4 text-[10px] font-black text-white/5 group-hover:text-white/10 transition-colors",
+									className: "absolute top-3 left-3 text-[9px] font-black text-gray-100 group-hover:text-gray-200 transition-colors",
 									children: ["0", index + 1]
 								})
 							]
-						}, action.label))
+						}, action.id))
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 						variants: itemVariants,
-						className: "mt-12 flex flex-col items-center gap-2 opacity-40",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-12 h-1 rounded-full bg-gradient-to-r from-purple-500 to-blue-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-[10px] text-gray-500 font-medium tracking-widest uppercase",
-							children: "LinkUp v1.0"
+						className: "mt-10 flex flex-col items-center gap-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+							className: "w-8 h-1 rounded-full bg-gradient-to-r from-purple-400 to-blue-400",
+							animate: { scaleX: [
+								1,
+								1.2,
+								1
+							] },
+							transition: {
+								duration: 2,
+								repeat: Infinity
+							}
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-[10px] text-gray-300 font-medium tracking-wider",
+							children: "LinkUp"
 						})]
 					})
 				]
@@ -69449,13 +69625,14 @@ function MainMenuScreen({ onNavigate, username }) {
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("style", {
 				jsx: true,
 				children: `
-        @keyframes shine {
-          100% {
-            left: 125%;
+        @keyframes ripple {
+          to {
+            transform: scale(4);
+            opacity: 0;
           }
         }
-        .animate-shine {
-          animation: shine 1s;
+        .animate-ripple {
+          animation: ripple 0.6s linear;
         }
       `
 			})
