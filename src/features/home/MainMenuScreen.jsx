@@ -114,7 +114,7 @@ export default function MainMenuScreen({ onNavigate, username }) {
         </motion.h1>
       </motion.div>
 
-      {/* المحتوى الرئيسي — الهيكل الأصلي */}
+      {/* المحتوى الرئيسي */}
       <motion.div
         variants={containerVariants}
         initial="hidden"
@@ -148,7 +148,7 @@ export default function MainMenuScreen({ onNavigate, username }) {
           </motion.h2>
         </motion.div>
 
-        {/* بطاقة اسم المستخدم — الهيكل الأصلي */}
+        {/* بطاقة اسم المستخدم */}
         <motion.div
           variants={itemVariants}
           className="w-full max-w-md bg-white rounded-2xl p-5 shadow-sm border border-gray-100/80 mb-6"
@@ -161,19 +161,18 @@ export default function MainMenuScreen({ onNavigate, username }) {
               اسم المستخدم الخاص بك
             </motion.h3>
 
-            {/* Toggle Switch محسّن */}
+            {/* Toggle Switch مُصلح — يستخدم translateX بدلاً من right/left */}
             <motion.button
               onClick={() => setIdVisible(!idVisible)}
               whileTap={{ scale: 0.85 }}
-              className="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none"
+              className="relative w-11 h-6 rounded-full transition-colors duration-300 focus:outline-none overflow-hidden"
               style={{ backgroundColor: idVisible ? '#8b5cf6' : '#e5e7eb' }}
             >
               <motion.div
-                className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center"
-                animate={{ 
-                  right: idVisible ? 2 : 'auto', 
-                  left: idVisible ? 'auto' : 2 
-                }}
+                className="absolute top-[2px] w-5 h-5 bg-white rounded-full shadow-md flex items-center justify-center"
+                style={{ right: '2px' }}
+                animate={{ x: idVisible ? -20 : 0 }}
+                initial={false}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               >
                 <AnimatePresence mode="wait">
@@ -183,7 +182,7 @@ export default function MainMenuScreen({ onNavigate, username }) {
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      transition={{ duration: 0.12 }}
+                      transition={{ duration: 0.1 }}
                     >
                       <EyeOff className="w-3 h-3 text-purple-600" />
                     </motion.div>
@@ -193,7 +192,7 @@ export default function MainMenuScreen({ onNavigate, username }) {
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      transition={{ duration: 0.12 }}
+                      transition={{ duration: 0.1 }}
                     >
                       <Eye className="w-3 h-3 text-gray-400" />
                     </motion.div>
@@ -266,7 +265,6 @@ export default function MainMenuScreen({ onNavigate, username }) {
             </motion.button>
           </motion.div>
 
-          {/* نص توضيحي */}
           <motion.p 
             className="text-[11px] text-gray-500 mt-3 text-center font-medium cursor-default"
             whileTap={{ scale: 0.98 }}
@@ -275,7 +273,7 @@ export default function MainMenuScreen({ onNavigate, username }) {
           </motion.p>
         </motion.div>
 
-        {/* الأزرار السريعة — الهيكل الأصلي */}
+        {/* الأزرار السريعة */}
         <motion.div
           variants={containerVariants}
           className="w-full max-w-md grid grid-cols-2 gap-4"
