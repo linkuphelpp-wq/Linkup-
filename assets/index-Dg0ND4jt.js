@@ -69341,6 +69341,72 @@ function MainMenuScreen({ onNavigate, username }) {
 						y: 0
 					},
 					transition: {
+						delay: .4,
+						type: "spring",
+						stiffness: 200,
+						damping: 20
+					},
+					className: "w-full max-w-md mb-6",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						onClick: () => onNavigate?.("worldMain"),
+						className: "relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[1px] shadow-lg hover:shadow-xl transition-shadow group",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 opacity-75 blur-md animate-pulse" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative bg-white/90 backdrop-blur-sm rounded-2xl p-5 flex items-center gap-5",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+									animate: {
+										scale: [
+											1,
+											1.15,
+											1
+										],
+										rotate: [
+											0,
+											5,
+											-5,
+											0
+										]
+									},
+									transition: {
+										repeat: Infinity,
+										duration: 3,
+										ease: "easeInOut"
+									},
+									className: "w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-300 group-hover:shadow-xl group-hover:shadow-purple-400 transition-shadow",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Globe, { className: "w-7 h-7 text-white" })
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex-1 text-right",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+										className: "text-lg font-black text-gray-800",
+										children: "العالم من حولك"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: "text-xs text-gray-500 mt-1",
+										children: "اكتشف منشورات الآخرين وشارك يومياتك"
+									})]
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.svg, {
+									className: "w-5 h-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all",
+									viewBox: "0 0 24 24",
+									fill: "none",
+									stroke: "currentColor",
+									strokeWidth: "2",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
+								})
+							]
+						})]
+					})
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					initial: {
+						opacity: 0,
+						y: 20
+					},
+					animate: {
+						opacity: 1,
+						y: 0
+					},
+					transition: {
 						delay: .45,
 						type: "spring",
 						stiffness: 200,
