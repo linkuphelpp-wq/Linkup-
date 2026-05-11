@@ -2,8 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { db, auth } from '../../firebase/config';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { toast } from 'sonner';
-import { ArrowLeft, Send, Trash2, Info } from 'lucide-react';
-import ContactInfoModal from '../../components/common/ContactInfoModal';
+import { ArrowLeft, Send, Trash2, X } from 'lucide-react';
 
 const MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position }) => {
   if (!position) return null;
@@ -37,7 +36,6 @@ export default function ChatScreen({ contact, onBack, onCall }) {
   const [loading, setLoading] = useState(true);
   const [replyTo, setReplyTo] = useState(null);
   const [actionPopup, setActionPopup] = useState(null);
-  const [showProfile, setShowProfile] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const currentUser = auth.currentUser;
@@ -128,10 +126,7 @@ export default function ChatScreen({ contact, onBack, onCall }) {
           <button onClick={onBack} className="w-10 h-10 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
-          <div
-            className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
-            onClick={() => setShowProfile(true)}
-          >
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-sm">
               {displayName.charAt(0)?.toUpperCase() || '?'}
             </div>
@@ -231,14 +226,6 @@ export default function ChatScreen({ contact, onBack, onCall }) {
           )}
         </div>
       </footer>
-
-      <ContactInfoModal
-        open={showProfile}
-        member={{ uid: contact?.uid, name: displayName, username: contact?.username, displayName: contact?.displayName }}
-        onClose={() => setShowProfile(false)}
-        onOpenChat={() => {}}
-        onCall={onCall}
-      />
 
       {actionPopup && (
         <MessageActionsPopup

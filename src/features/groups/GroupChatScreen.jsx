@@ -6,7 +6,6 @@ import {
 } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { X, Send, ArrowLeft, MoreVertical, Trash2 } from 'lucide-react';
-import ContactInfoModal from '../../components/common/ContactInfoModal';
 
 const MessageActionsPopup = ({ message, isOwn, onReply, onDeleteForEveryone, onClose, position }) => {
   if (!position) return null;
@@ -41,7 +40,6 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
   const [members, setMembers] = useState([]);
   const [replyTo, setReplyTo] = useState(null);
   const [actionPopup, setActionPopup] = useState(null);
-  const [selectedProfileUser, setSelectedProfileUser] = useState(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
@@ -71,11 +69,6 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   const senderName = (uid) => members.find(m => m.uid === uid)?.name || uid;
-
-  const handleOpenProfile = (uid) => {
-    const member = members.find(m => m.uid === uid);
-    if (member) setSelectedProfileUser({ uid, name: member.name, username: '' });
-  };
 
   const handleSend = async () => {
     if (!message.trim()) return;
@@ -220,10 +213,7 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
                     <div className={`max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
                       {!isMe && (
                         <div className="flex items-center gap-2 mb-1 mr-2">
-                          <div
-                            className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-700 cursor-pointer hover:scale-110 transition-transform"
-                            onClick={() => handleOpenProfile(msg.senderId)}
-                          >
+                          <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-700">
                             {msg.senderName?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                           <span className="text-xs font-medium text-gray-600">{msg.senderName || 'مستخدم'}</span>
@@ -291,13 +281,6 @@ export default function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
           )}
         </div>
       </footer>
-
-      <ContactInfoModal
-        open={!!selectedProfileUser}
-        member={selectedProfileUser}
-        onClose={() => setSelectedProfileUser(null)}
-        onOpenChat={() => {}}
-      />
 
       {actionPopup && (
         <MessageActionsPopup

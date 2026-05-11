@@ -6,7 +6,6 @@ import {
 } from 'firebase/firestore';
 import { toast } from 'sonner';
 import { ArrowLeft, Pencil, UserPlus, MoreVertical, Shield, Trash2, Info } from 'lucide-react';
-import ContactInfoModal from '../../components/common/ContactInfoModal';
 
 export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
   const [membersData, setMembersData] = useState([]);
@@ -17,8 +16,6 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
   const [newDesc, setNewDesc] = useState(group.description || '');
   const [showAddMembers, setShowAddMembers] = useState(false);
   const [contacts, setContacts] = useState([]);
-  const [selectedMemberForInfo, setSelectedMemberForInfo] = useState(null);
-  const [contactInfoModalOpen, setContactInfoModalOpen] = useState(false);
   const currentUser = auth.currentUser;
   const isAdmin = groupData?.admins?.includes(currentUser.uid) || groupData?.createdBy === currentUser.uid;
 
@@ -95,11 +92,6 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
     fetchContacts();
   }, [showAddMembers]);
 
-  const openContactInfo = (member) => {
-    setSelectedMemberForInfo(member);
-    setContactInfoModalOpen(true);
-  };
-
   return (
     <div className="min-h-screen bg-white flex flex-col" dir="rtl">
       <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 pt-12 pb-4">
@@ -141,7 +133,7 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
           <div className="space-y-2">
             {membersData.map(member => (
               <div key={member.uid} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                <div className="flex items-center gap-3 cursor-pointer" onClick={() => openContactInfo(member)}>
+                <div className="flex items-center gap-3">
                   <div className="relative">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-indigo-400 flex items-center justify-center text-white font-bold">
                       {member.name.charAt(0)?.toUpperCase()}
@@ -168,7 +160,7 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
                         </button>
                       </>
                     )}
-                    <button onClick={() => openContactInfo(member)} className="w-full text-right px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-sm">
+                    <button className="w-full text-right px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-sm">
                       <Info className="w-4 h-4" /> معلومات
                     </button>
                   </div>
@@ -217,17 +209,6 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
           </div>
         </div>
       )}
-
-      <ContactInfoModal
-        open={contactInfoModalOpen}
-        member={selectedMemberForInfo}
-        onClose={() => { setContactInfoModalOpen(false); setSelectedMemberForInfo(null); }}
-        onOpenChat={(member) => {
-          setContactInfoModalOpen(false);
-          setSelectedMemberForInfo(null);
-          onOpenChat?.(member);
-        }}
-      />
     </div>
   );
 }
