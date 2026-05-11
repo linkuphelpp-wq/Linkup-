@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Copy, Check, Settings, Users, Eye, EyeOff, Globe } from 'lucide-react';
+import { Copy, Check, Settings, Users, Eye, EyeOff } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { auth } from '../../firebase/config';
 
@@ -54,7 +54,6 @@ export default function MainMenuScreen({ onNavigate, username }) {
       </motion.div>
 
       <div className="flex-1 flex flex-col items-center pt-12 px-5">
-        {/* الأيقونة والاسم (بدون تغيير) */}
         <motion.div
           initial={{ scale: 0, rotate: -10 }}
           animate={{ scale: 1, rotate: 0 }}
@@ -78,7 +77,6 @@ export default function MainMenuScreen({ onNavigate, username }) {
           {displayName}
         </motion.h2>
 
-        {/* بطاقة المعرف (بدون تغيير) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -115,56 +113,6 @@ export default function MainMenuScreen({ onNavigate, username }) {
           </p>
         </motion.div>
 
-        {/* ✅ بطاقة "العالم" الجديدة – جذابة وتفاعلية */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, type: 'spring', stiffness: 200, damping: 20 }}
-          className="w-full max-w-md mb-6"
-        >
-          <button
-            onClick={() => onNavigate?.('worldMain')}
-            className="relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[1px] shadow-lg hover:shadow-xl transition-shadow group"
-          >
-            {/* تأثير النبض المستمر */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 opacity-75 blur-md animate-pulse" />
-            
-            <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl p-5 flex items-center gap-5">
-              {/* أيقونة العالم مع تأثير حركي مستمر */}
-              <motion.div
-                animate={{
-                  scale: [1, 1.15, 1],
-                  rotate: [0, 5, -5, 0],
-                }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 3,
-                  ease: 'easeInOut',
-                }}
-                className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-300 group-hover:shadow-xl group-hover:shadow-purple-400 transition-shadow"
-              >
-                <Globe className="w-7 h-7 text-white" />
-              </motion.div>
-
-              <div className="flex-1 text-right">
-                <h3 className="text-lg font-black text-gray-800">العالم من حولك</h3>
-                <p className="text-xs text-gray-500 mt-1">اكتشف منشورات الآخرين وشارك يومياتك</p>
-              </div>
-
-              <motion.svg
-                className="w-5 h-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </motion.svg>
-            </div>
-          </button>
-        </motion.div>
-
-        {/* أزرار الاختصارات السريعة (كما هي) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

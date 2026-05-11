@@ -39,10 +39,6 @@ import GroupChatScreen from './features/groups/GroupChatScreen';
 import GroupInfoScreen from './features/groups/GroupInfoScreen';
 import PinLockScreen from './components/common/PinLockScreen';
 import PrivacyOverlay from './components/common/PrivacyOverlay';
-// شاشات العالم
-import WorldAuthScreen from './features/world/WorldAuthScreen';
-import WorldMainScreen from './features/world/WorldMainScreen';
-import WorldProfileScreen from './features/world/WorldProfileScreen';
 import { usePeer } from './hooks/usePeer';
 import { usePresence } from './hooks/usePresence';
 import { AppLockProvider, useAppLock } from './context/AppLockContext';
@@ -52,7 +48,7 @@ import {
   collection, query, where, getDocs, writeBatch, serverTimestamp,
 } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { Home, UsersRound, User, Settings, Shield, Bell, ArrowLeft, Contact2, Globe } from 'lucide-react';
+import { Home, UsersRound, User, Settings, Shield, Bell, ArrowLeft, Contact2 } from 'lucide-react';
 import { Toaster } from 'sonner';
 import './styles/App.css';
 
@@ -81,7 +77,6 @@ const BottomNav = ({ currentScreen, onNavigate, isAdmin, onOpenAdmin, onOpenUser
       <NavItem icon={Home} label="الرئيسية" isActive={currentScreen === 'mainMenu'} onClick={() => onNavigate('mainMenu')} />
       <NavItem icon={Contact2} label="جهات الاتصال" isActive={currentScreen === 'contacts'} onClick={() => onNavigate('contacts')} />
       <NavItem icon={UsersRoundIcon} label="المجموعات" isActive={currentScreen === 'groups' || currentScreen === 'createGroup' || currentScreen === 'groupChat' || currentScreen === 'groupInfo'} onClick={() => onNavigate('groups')} />
-      <NavItem icon={Globe} label="العالم" isActive={currentScreen === 'worldMain' || currentScreen === 'worldAuth' || currentScreen === 'worldProfile'} onClick={() => onNavigate('worldMain')} />
       <NavItem icon={UserIcon} label="الملف الشخصي" isActive={currentScreen === 'profile'} onClick={() => onNavigate('profile')} />
       <NavItem icon={SettingsIcon} label="الإعدادات" isActive={currentScreen === 'settings'} onClick={() => onNavigate('settings')} />
       {isAdmin && (
@@ -132,7 +127,6 @@ function AppContent() {
   const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [modalQueue, setModalQueue] = useState([]);
   const [incomingCallActive, setIncomingCallActive] = useState(false);
-  const [worldUser, setWorldUser] = useState(null); // مستخدم العالم
 
   const {
     myId, callStatus, localStream, remoteStream, remoteUserData,
@@ -240,7 +234,7 @@ function AppContent() {
 
   const handleLogout = async () => {
     if (user?.uid) { try { await setDoc(doc(db, 'users', user.uid), { status: 'offline', lastSeen: serverTimestamp() }, { merge: true }); } catch (e) {} }
-    sessionStorage.removeItem('vibecall_has_seen_welcome'); setUser(null); setProfileLoaded(false); setUsernameResolved(false); setWorldUser(null); await signOut(auth);
+    sessionStorage.removeItem('vibecall_has_seen_welcome'); setUser(null); setProfileLoaded(false); setUsernameResolved(false); await signOut(auth);
   };
 
   useEffect(() => {
@@ -263,7 +257,7 @@ function AppContent() {
   useEffect(() => { document.addEventListener('click', handleFirstClick); return () => document.removeEventListener('click', handleFirstClick); }, [handleFirstClick]);
 
   const handleBannedModalClose = async () => {
-    setBannedModalOpen(false); setPendingBan(false); banTriggered.current = false; localStorage.removeItem('my_username'); sessionStorage.clear(); setUser(null); setWorldUser(null); await signOut(auth);
+    setBannedModalOpen(false); setPendingBan(false); banTriggered.current = false; localStorage.removeItem('my_username'); sessionStorage.clear(); setUser(null); await signOut(auth);
   };
 
   const handleUsernameConfirm = async (u) => {
@@ -276,7 +270,7 @@ function AppContent() {
     } catch (err) { console.error('Failed to save username:', err); alert('حدث خطأ في حفظ المعرف. حاول مرة أخرى.'); }
   };
 
-  const handleSwitchAccount = async () => { localStorage.removeItem('my_username'); setMyUsername(''); setUsernameResolved(false); setWorldUser(null); await handleLogout(); };
+  const handleSwitchAccount = async () => { localStorage.removeItem('my_username'); setMyUsername(''); setUsernameResolved(false); await handleLogout(); };
   const handleUpdateDisplayName = (d) => { setUser((p) => ({ ...p, displayName: d })); setShowNameModal(false); };
   const handleUpdateProfile = (u) => setUser((p) => ({ ...p, ...u }));
 
@@ -305,7 +299,7 @@ function AppContent() {
       chatsSnap.forEach((chatDoc) => batch.delete(doc(db, 'chats', chatDoc.id))); await batch.commit();
       await deleteDoc(doc(db, 'users', uid)).catch(() => {}); await deleteDoc(doc(db, 'peers', uid)).catch(() => {});
     } catch (err) { console.error(err); }
-    finally { localStorage.clear(); sessionStorage.clear(); setMyUsername(''); setUsernameResolved(false); setWorldUser(null); await signOut(auth); setUser(null); setLoading(false); }
+    finally { localStorage.clear(); sessionStorage.clear(); setMyUsername(''); setUsernameResolved(false); await signOut(auth); setUser(null); setLoading(false); }
   };
 
   const handleToggleMuteMic = () => { const v = !muteMicOnJoin; setMuteMicOnJoin(v); localStorage.setItem('muteMicOnJoin', v); };
@@ -334,6 +328,7 @@ function AppContent() {
   const handleOpenGroup = (group) => { setCurrentGroup(group); navigateTo('groupChat'); };
   const handleOpenGroupInfo = (group) => { setCurrentGroup(group); navigateTo('groupInfo'); };
 
+  // ✅ تم تعديل الترتيب: شرط البصمة أصبح مقيدًا بوجود المستخدم
   if (user && isLocked && lockEnabled) {
     return <PinLockScreen />;
   }
@@ -347,6 +342,7 @@ function AppContent() {
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-white"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>;
 
+  // ✅ تم إصلاح دالة onLogin لتعيين المستخدم بشكل صحيح
   if (!user) return <AuthScreen onLogin={(loggedInUser) => { 
     setUser({
       uid: loggedInUser.uid,
@@ -369,8 +365,7 @@ function AppContent() {
     'atheer','about','privacy','support','createGroup','data',
     'lock','changeEmail','resetPasswordProfile','forgotpassword',
     'resetpassword','contacts','chat','groupChat','groupInfo',
-    'settings','mainMenu','notifications','usermanagement','groups','admin',
-    'worldMain','worldAuth','worldProfile'
+    'settings','mainMenu','notifications','usermanagement','groups','admin'
   ];
 
   const headerTitle = {
@@ -379,7 +374,6 @@ function AppContent() {
     lock: 'قفل التطبيق', changeEmail: 'تغيير البريد', resetPasswordProfile: 'إعادة تعيين كلمة المرور', chat: 'المحادثة',
     admin: 'لوحة الإدارة', usermanagement: 'إدارة المستخدمين', notifications: 'الإشعارات', partner: 'تكوين شراكة',
     support: 'تواصل مع المطور', groups: 'المجموعات', createGroup: 'إنشاء مجموعة', groupChat: 'محادثة المجموعة', groupInfo: 'معلومات المجموعة',
-    worldMain: 'العالم', worldAuth: 'تسجيل الدخول للعالم', worldProfile: 'الملف الشخصي في العالم',
   }[currentScreen] || 'LinkUp';
 
   const renderContent = () => {
@@ -419,18 +413,10 @@ function AppContent() {
       );
     if (currentScreen === 'groupChat') return <GroupChatScreen group={currentGroup} onBack={handleBack} onOpenGroupInfo={handleOpenGroupInfo} />;
     if (currentScreen === 'groupInfo') return <GroupInfoScreen group={currentGroup} onBack={handleBack} onOpenChat={handleOpenChat} />;
-    if (currentScreen === 'worldAuth') return <WorldAuthScreen onBack={handleBack} onWorldEnter={(wUser) => { setWorldUser(wUser); }} />;
-    if (currentScreen === 'worldMain') {
-      if (!worldUser) {
-        return <WorldAuthScreen onBack={handleBack} onWorldEnter={(wUser) => { setWorldUser(wUser); }} />;
-      }
-      return <WorldMainScreen worldUser={worldUser} onNavigate={navigateTo} onBack={handleBack} />;
-    }
-    if (currentScreen === 'worldProfile') return <WorldProfileScreen onBack={handleBack} />;
     return <HomeScreen myId={myId} myUsername={myUsername} user={user} />;
   };
 
-  const hideBottomNav = ['chat','notifications','support','usermanagement','admin','createGroup','groupChat','groupInfo','changeEmail','resetPasswordProfile','data','lock','partner','atheer','about','privacy','terms','forgotpassword','resetpassword','settings','worldAuth','worldProfile'].includes(currentScreen);
+  const hideBottomNav = ['chat','notifications','support','usermanagement','admin','createGroup','groupChat','groupInfo','changeEmail','resetPasswordProfile','data','lock','partner','atheer','about','privacy','terms','forgotpassword','resetpassword','settings'].includes(currentScreen);
 
   return (
     <>
@@ -487,6 +473,7 @@ function AppContent() {
   );
 }
 
+// ───────── المكون الرئيسي ─────────
 function App() {
   return (
     <LanguageProvider>
