@@ -7,10 +7,8 @@ import {
 import { toast } from 'sonner';
 import { ArrowLeft, Pencil, UserPlus, MoreVertical, Shield, Trash2, Info } from 'lucide-react';
 import ContactInfoModal from '../../components/common/ContactInfoModal';
-import { useLanguage } from '../../context/LanguageContext';
 
 export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
-  const { t } = useLanguage();
   const [membersData, setMembersData] = useState([]);
   const [groupData, setGroupData] = useState(group);
   const [showEditName, setShowEditName] = useState(false);
@@ -52,17 +50,17 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
       const updated = { ...groupData, [field]: value };
       setGroupData(updated);
       let systemText = '';
-      if (field === 'name') systemText = t('groups.nameChanged', { name: value });
-      if (field === 'description') systemText = t('groups.descChanged');
+      if (field === 'name') systemText = `غيّر اسم المجموعة إلى "${value}"`;
+      if (field === 'description') systemText = 'غيّر وصف المجموعة';
       await addDoc(collection(db, 'groups', group.id, 'messages'), {
         senderId: currentUser.uid,
-        senderName: t('groups.system'),
+        senderName: 'النظام',
         text: systemText,
         timestamp: serverTimestamp(),
         system: true,
       });
-      toast.success(t('common.updated'));
-    } catch (err) { toast.error(t('common.updateFailed')); }
+      toast.success('تم التحديث');
+    } catch (err) { toast.error('فشل التحديث'); }
   };
 
   const handleToggleAdmin = async (uid) => {
@@ -72,13 +70,13 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
       if (admins.includes(uid)) {
         await updateDoc(doc(db, 'groups', group.id), { admins: arrayRemove(uid) });
         setGroupData({ ...groupData, admins: admins.filter(a => a !== uid) });
-        toast.success(t('groups.adminRemoved'));
+        toast.success('تم إزالة الصلاحية');
       } else {
         await updateDoc(doc(db, 'groups', group.id), { admins: arrayUnion(uid) });
         setGroupData({ ...groupData, admins: [...admins, uid] });
-        toast.success(t('groups.adminAdded'));
+        toast.success('تم تعيينه كمشرف');
       }
-    } catch (err) { toast.error(t('common.updateFailed')); }
+    } catch (err) { toast.error('فشل التغيير'); }
   };
 
   const handleRemoveMember = async (uid) => {
@@ -87,21 +85,21 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
       await updateDoc(doc(db, 'groups', group.id), { members: arrayRemove(uid) });
       const updatedMembers = groupData.members.filter(m => m !== uid);
       setGroupData({ ...groupData, members: updatedMembers });
-      const removedName = membersData.find(m => m.uid === uid)?.name || t('groups.member');
+      const removedName = membersData.find(m => m.uid === uid)?.name || 'عضو';
       await addDoc(collection(db, 'groups', group.id, 'messages'), {
         senderId: currentUser.uid,
-        senderName: t('groups.system'),
-        text: t('groups.removedMember', { name: removedName }),
+        senderName: 'النظام',
+        text: `أزال ${removedName}`,
         timestamp: serverTimestamp(),
         system: true,
       });
-      toast.success(t('groups.removed'));
-    } catch (err) { toast.error(t('common.updateFailed')); }
+      toast.success('تم الإزالة');
+    } catch (err) { toast.error('فشل الإزالة'); }
   };
 
   const handleAddMember = async (contact) => {
     if (groupData.members.includes(contact.uid)) {
-      toast.error(t('groups.alreadyMember'));
+      toast.error('العضو موجود بالفعل');
       return;
     }
     try {
@@ -109,13 +107,13 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
       setGroupData({ ...groupData, members: [...groupData.members, contact.uid] });
       await addDoc(collection(db, 'groups', group.id, 'messages'), {
         senderId: currentUser.uid,
-        senderName: t('groups.system'),
-        text: t('groups.addedMember', { name: contact.displayName || contact.username }),
+        senderName: 'النظام',
+        text: `أضاف ${contact.displayName || contact.username}`,
         timestamp: serverTimestamp(),
         system: true,
       });
-      toast.success(t('groups.added'));
-    } catch (err) { toast.error(t('common.updateFailed')); }
+      toast.success('تمت الإضافة');
+    } catch (err) { toast.error('فشل الإضافة'); }
   };
 
   useEffect(() => {
@@ -145,7 +143,7 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
           <button onClick={onBack} className="w-10 h-10 rounded-2xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
             <ArrowLeft className="w-5 h-5 text-gray-700" />
           </button>
-          <h1 className="text-xl font-extrabold text-gray-900">{t('groups.groupInfo')}</h1>
+          <h1 className="text-xl font-extrabold text-gray-900">معلومات المجموعة</h1>
         </div>
       </header>
 
@@ -163,24 +161,24 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
         <div className="grid grid-cols-3 gap-4">
           <button onClick={() => setShowAddMembers(true)} className="flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100">
             <UserPlus className="w-6 h-6 text-purple-600" />
-            <span className="text-xs font-medium">{t('groups.add')}</span>
+            <span className="text-xs font-medium">إضافة</span>
           </button>
           {isAdmin && (
             <>
               <button onClick={() => setShowEditName(true)} className="flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100">
                 <Pencil className="w-6 h-6 text-blue-600" />
-                <span className="text-xs font-medium">{t('groups.editName')}</span>
+                <span className="text-xs font-medium">تعديل الاسم</span>
               </button>
               <button onClick={() => setShowEditDesc(true)} className="flex flex-col items-center gap-1 p-3 bg-gray-50 rounded-xl hover:bg-gray-100">
                 <Pencil className="w-6 h-6 text-emerald-600" />
-                <span className="text-xs font-medium">{t('groups.editDesc')}</span>
+                <span className="text-xs font-medium">تعديل الوصف</span>
               </button>
             </>
           )}
         </div>
 
         <div>
-          <h3 className="text-sm font-bold text-gray-500 mb-3">{t('groups.membersTitle', { count: membersData.length })}</h3>
+          <h3 className="text-sm font-bold text-gray-500 mb-3">الأعضاء ({membersData.length})</h3>
           <div className="space-y-2">
             {membersData.map(member => (
               <div key={member.uid} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
@@ -210,15 +208,15 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
                     {isAdmin && (
                       <>
                         <button onClick={() => handleToggleAdmin(member.uid)} className="w-full text-right px-4 py-2 hover:bg-purple-50 flex items-center gap-2 text-sm">
-                          <Shield className="w-4 h-4" /> {groupData.admins?.includes(member.uid) ? t('groups.removeAdmin') : t('groups.makeAdmin')}
+                          <Shield className="w-4 h-4" /> {groupData.admins?.includes(member.uid) ? 'إزالة مشرف' : 'تعيين كمشرف'}
                         </button>
                         <button onClick={() => handleRemoveMember(member.uid)} className="w-full text-right px-4 py-2 hover:bg-red-50 flex items-center gap-2 text-sm text-red-600">
-                          <Trash2 className="w-4 h-4" /> {t('groups.remove')}
+                          <Trash2 className="w-4 h-4" /> إزالة
                         </button>
                       </>
                     )}
                     <button onClick={() => openContactInfo(member)} className="w-full text-right px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-sm">
-                      <Info className="w-4 h-4" /> {t('groups.info')}
+                      <Info className="w-4 h-4" /> معلومات
                     </button>
                   </div>
                 </div>
@@ -231,11 +229,11 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
       {showEditName && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowEditName(false)}>
           <div className="bg-white rounded-2xl p-6 w-80" onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold mb-4">{t('groups.editName')}</h3>
+            <h3 className="font-bold mb-4">تعديل اسم المجموعة</h3>
             <input value={newName} onChange={(e) => setNewName(e.target.value)} className="w-full h-10 rounded-lg border px-3 mb-4" />
             <div className="flex gap-3">
-              <button onClick={() => setShowEditName(false)} className="flex-1 py-2 rounded-lg border">{t('common.cancel')}</button>
-              <button onClick={() => { updateGroupField('name', newName); setShowEditName(false); }} className="flex-1 py-2 rounded-lg bg-purple-600 text-white">{t('common.save')}</button>
+              <button onClick={() => setShowEditName(false)} className="flex-1 py-2 rounded-lg border">إلغاء</button>
+              <button onClick={() => { updateGroupField('name', newName); setShowEditName(false); }} className="flex-1 py-2 rounded-lg bg-purple-600 text-white">حفظ</button>
             </div>
           </div>
         </div>
@@ -244,11 +242,11 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
       {showEditDesc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowEditDesc(false)}>
           <div className="bg-white rounded-2xl p-6 w-80" onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold mb-4">{t('groups.editDesc')}</h3>
+            <h3 className="font-bold mb-4">تعديل الوصف</h3>
             <input value={newDesc} onChange={(e) => setNewDesc(e.target.value)} className="w-full h-10 rounded-lg border px-3 mb-4" />
             <div className="flex gap-3">
-              <button onClick={() => setShowEditDesc(false)} className="flex-1 py-2 rounded-lg border">{t('common.cancel')}</button>
-              <button onClick={() => { updateGroupField('description', newDesc); setShowEditDesc(false); }} className="flex-1 py-2 rounded-lg bg-purple-600 text-white">{t('common.save')}</button>
+              <button onClick={() => setShowEditDesc(false)} className="flex-1 py-2 rounded-lg border">إلغاء</button>
+              <button onClick={() => { updateGroupField('description', newDesc); setShowEditDesc(false); }} className="flex-1 py-2 rounded-lg bg-purple-600 text-white">حفظ</button>
             </div>
           </div>
         </div>
@@ -257,14 +255,14 @@ export default function GroupInfoScreen({ group, onBack, onOpenChat }) {
       {showAddMembers && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowAddMembers(false)}>
           <div className="bg-white rounded-2xl p-6 w-80 max-h-96 overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold mb-4">{t('groups.addMembers')}</h3>
+            <h3 className="font-bold mb-4">إضافة أعضاء</h3>
             {contacts.map(c => (
               <div key={c.uid} className="flex items-center justify-between py-2">
                 <span>{c.displayName || c.username}</span>
-                <button onClick={() => handleAddMember(c)} className="text-purple-600 text-sm font-medium">{t('groups.add')}</button>
+                <button onClick={() => handleAddMember(c)} className="text-purple-600 text-sm font-medium">إضافة</button>
               </div>
             ))}
-            <button onClick={() => setShowAddMembers(false)} className="mt-4 w-full py-2 rounded-lg border">{t('common.close')}</button>
+            <button onClick={() => setShowAddMembers(false)} className="mt-4 w-full py-2 rounded-lg border">إغلاق</button>
           </div>
         </div>
       )}

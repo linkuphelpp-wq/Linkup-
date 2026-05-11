@@ -8,7 +8,6 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
-// ───────── مكونات مخصصة ─────────
 const Input = ({ className, ...props }) => (
   <input 
     className={`w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all ${className}`}
@@ -26,7 +25,6 @@ const Button = ({ children, className, disabled, ...props }) => (
   </button>
 );
 
-// ───────── مكون الشاشة الرئيسي ─────────
 export default function AuthScreen({ onLogin, onForgotPassword }) {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -39,7 +37,7 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
   const [success, setSuccess] = useState('');
   const [ripples, setRipples] = useState([]);
   const [isLogoPressed, setIsLogoPressed] = useState(false);
-  const [exiting, setExiting] = useState(false); // لحالة الانتقال
+  const [exiting, setExiting] = useState(false);
   const logoRef = useRef(null);
 
   const handleLogoClick = (e) => {
@@ -98,11 +96,10 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
         setSuccess('تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني.');
         setTimeout(() => { setIsLogin(true); setSuccess(''); }, 3000);
       } else {
-        // نجاح تسجيل الدخول ← تشغيل أنيميشن الخروج
         setExiting(true);
         setTimeout(() => {
           onLogin?.(user);
-        }, 500); // يتزامن مع مدة الأنيميشن
+        }, 500);
       }
     } catch (err) {
       console.error(err);
@@ -148,7 +145,6 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden selection:bg-purple-200/50" dir="rtl">
-      {/* تأثيرات خلفية خفيفة */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-200 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-200 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />

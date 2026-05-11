@@ -7,9 +7,7 @@ import {
 } from 'lucide-react';
 import { db, auth } from '../../firebase/config';
 import { collection, query, where, getDocs, writeBatch, doc, deleteDoc } from 'firebase/firestore';
-import { useLanguage } from '../../context/LanguageContext';
 
-// ───────── بطاقة الإعداد المحسّنة ─────────
 const SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle, color = 'purple' }) => {
   const colorsMap = {
     purple: 'from-purple-500 to-indigo-500 bg-purple-50 text-purple-600',
@@ -19,7 +17,7 @@ const SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onTog
     pink: 'from-pink-500 to-rose-500 bg-pink-50 text-pink-600',
   };
   const colorSet = colorsMap[color] || colorsMap.purple;
-  const [gradientFrom, gradientTo, bgColor, textColor] = colorSet.split(' ');
+  const [gradientFrom, gradientTo] = colorSet.split(' ');
 
   return (
     <motion.div
@@ -56,7 +54,6 @@ const SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onTog
   );
 };
 
-// ───────── مكون النافذة المنبثقة العصري ─────────
 const SimpleModal = ({ open, onClose, title, children }) => (
   <AnimatePresence>
     {open && (
@@ -88,7 +85,6 @@ const SimpleModal = ({ open, onClose, title, children }) => (
   </AnimatePresence>
 );
 
-// ───────── القسم الواحد ─────────
 const Section = ({ title, children, delay = 0, icon: Icon }) => (
   <motion.section
     initial={{ opacity: 0, x: -30 }}
@@ -104,14 +100,11 @@ const Section = ({ title, children, delay = 0, icon: Icon }) => (
   </motion.section>
 );
 
-// ───────── المكون الرئيسي (شاشة الإعدادات) ─────────
 export default function SettingsScreen({
   onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile,
   onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker,
   fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner, onBack
 }) {
-  const { language, changeLanguage, t } = useLanguage();
-  
   const [showFontModal, setShowFontModal] = useState(false);
   const [showSizeModal, setShowSizeModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
@@ -130,27 +123,26 @@ export default function SettingsScreen({
   }, [compactMode]);
 
   const sizes = [
-    { v: 'small', l: t('settings.sizes.small') },
-    { v: 'medium', l: t('settings.sizes.medium') },
-    { v: 'large', l: t('settings.sizes.large') },
-    { v: 'xlarge', l: t('settings.sizes.xlarge') }
+    { v: 'small', l: 'صغير' },
+    { v: 'medium', l: 'متوسط' },
+    { v: 'large', l: 'كبير' },
+    { v: 'xlarge', l: 'كبير جداً' }
   ];
 
   const fonts = [
-    { v: 'tajawal', l: 'Tajawal', desc: t('settings.fonts.tajawal') },
-    { v: 'cairo', l: 'Cairo', desc: t('settings.fonts.cairo') },
-    { v: 'rubik', l: 'Rubik', desc: t('settings.fonts.rubik') },
-    { v: 'ibm-plex', l: 'IBM Plex', desc: t('settings.fonts.ibm-plex'), featured: true }
+    { v: 'tajawal', l: 'Tajawal', desc: 'الخط الافتراضي الأنيق' },
+    { v: 'cairo', l: 'Cairo', desc: 'خط عصري وواضح' },
+    { v: 'rubik', l: 'Rubik', desc: 'خط سميك ومقروء' },
+    { v: 'ibm-plex', l: 'IBM Plex', desc: 'خط احترافي', featured: true }
   ];
 
-  // ✅ خيارات اللغات (بدون الفرنسية)
   const languages = [
-    { v: 'ar', l: t('settings.languages.ar'), flag: '🇸🇦' },
-    { v: 'en', l: t('settings.languages.en'), flag: '🇬🇧' }
+    { v: 'ar', l: 'العربية', flag: '🇸🇦' },
+    { v: 'en', l: 'English', flag: '🇬🇧' }
   ];
 
   const handleResetApp = async () => {
-    if (resetText.trim() !== t('common.delete')) return;
+    if (resetText.trim() !== 'حذف') return;
     setResetLoading(true);
     try {
       if (!auth?.currentUser?.uid || !db) throw new Error('فشل المصادقة');
@@ -176,38 +168,38 @@ export default function SettingsScreen({
         animate={{ opacity: 1, y: 0 }}
         className="sticky top-0 z-20 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-14 pb-4 text-center shadow-sm"
       >
-        <h1 className="text-2xl font-black text-gray-800 tracking-tight">{t('settings.title')}</h1>
-        <p className="text-sm text-gray-500 mt-1">{t('settings.subtitle')}</p>
+        <h1 className="text-2xl font-black text-gray-800 tracking-tight">الإعدادات</h1>
+        <p className="text-sm text-gray-500 mt-1">تحكم كامل في تطبيقك كما تحب</p>
       </motion.div>
 
       <div className="px-4 py-6 space-y-8 max-w-lg mx-auto">
-        <Section title={t('settings.sections.account')} delay={0.1} icon={User}>
-          <SettingRow icon={User} label={t('settings.items.profile.label')} desc={t('settings.items.profile.desc')} onClick={onOpenProfile} color="purple" />
+        <Section title="الحساب" delay={0.1} icon={User}>
+          <SettingRow icon={User} label="الملف الشخصي" desc="تعديل اسمك وصورتك" onClick={onOpenProfile} color="purple" />
         </Section>
 
-        <Section title={t('settings.sections.appearance')} delay={0.2} icon={Palette}>
-          <SettingRow icon={Globe} label={t('settings.items.language.label')} desc={t('settings.items.language.desc')} onClick={() => setShowLanguageModal(true)} color="blue" />
-          <SettingRow icon={Palette} label={t('settings.items.fontSize.label')} desc={sizes.find(s => s.v === fontSize)?.l} onClick={() => setShowSizeModal(true)} color="blue" />
-          <SettingRow icon={Palette} label={t('settings.items.fontFamily.label')} desc={fonts.find(f => f.v === fontFamily)?.l} onClick={() => setShowFontModal(true)} color="blue" />
-          <SettingRow icon={TabletSmartphone} label={t('settings.items.compactMode.label')} desc={t('settings.items.compactMode.desc')} toggle isToggled={compactMode} onToggle={() => setCompactMode(!compactMode)} color="green" />
+        <Section title="المظهر" delay={0.2} icon={Palette}>
+          <SettingRow icon={Globe} label="لغة التطبيق" desc="اختر لغة الواجهة" onClick={() => setShowLanguageModal(true)} color="blue" />
+          <SettingRow icon={Palette} label="حجم الخط" desc={sizes.find(s => s.v === fontSize)?.l} onClick={() => setShowSizeModal(true)} color="blue" />
+          <SettingRow icon={Palette} label="نوع الخط" desc={fonts.find(f => f.v === fontFamily)?.l} onClick={() => setShowFontModal(true)} color="blue" />
+          <SettingRow icon={TabletSmartphone} label="تصغير الأبعاد" desc="مناسب للشاشات الصغيرة" toggle isToggled={compactMode} onToggle={() => setCompactMode(!compactMode)} color="green" />
         </Section>
 
-        <Section title={t('settings.sections.calls')} delay={0.3} icon={Mic}>
-          <SettingRow icon={Mic} label={t('settings.items.muteMic.label')} toggle isToggled={muteMicOnJoin} onToggle={onToggleMuteMic} color="orange" />
-          <SettingRow icon={Speaker} label={t('settings.items.speaker.label')} toggle isToggled={speakerDefault} onToggle={onToggleSpeaker} color="orange" />
+        <Section title="المكالمات" delay={0.3} icon={Mic}>
+          <SettingRow icon={Mic} label="كتم الميكروفون تلقائياً" toggle isToggled={muteMicOnJoin} onToggle={onToggleMuteMic} color="orange" />
+          <SettingRow icon={Speaker} label="مكبر الصوت افتراضياً" toggle isToggled={speakerDefault} onToggle={onToggleSpeaker} color="orange" />
         </Section>
 
-        <Section title={t('settings.sections.privacy')} delay={0.4} icon={Lock}>
-          <SettingRow icon={Lock} label={t('settings.items.appLock.label')} desc={t('settings.items.appLock.desc')} onClick={onOpenAppLock} color="pink" />
-          <SettingRow icon={Shield} label={t('settings.items.dataManagement.label')} desc={t('settings.items.dataManagement.desc')} onClick={onOpenDataManagement} color="pink" />
-          <SettingRow icon={RefreshCw} label={t('settings.items.resetApp.label')} desc={t('settings.items.resetApp.desc')} onClick={() => setShowResetModal(true)} color="pink" />
+        <Section title="الخصوصية والأمان" delay={0.4} icon={Lock}>
+          <SettingRow icon={Lock} label="قفل التطبيق" desc="حماية إضافية برمز سري" onClick={onOpenAppLock} color="pink" />
+          <SettingRow icon={Shield} label="إدارة البيانات" desc="التحكم في تخزين بياناتك" onClick={onOpenDataManagement} color="pink" />
+          <SettingRow icon={RefreshCw} label="إعادة ضبط التطبيق" desc="مسح جميع المحادثات والبيانات" onClick={() => setShowResetModal(true)} color="pink" />
         </Section>
 
-        <Section title={t('settings.sections.more')} delay={0.5} icon={Sparkles}>
-          <SettingRow icon={MessageCircle} label={t('settings.items.support.label')} desc={t('settings.items.support.desc')} onClick={onOpenSupport} color="purple" />
-          <SettingRow icon={Share2} label={t('settings.items.share.label')} desc={t('settings.items.share.desc')} onClick={() => navigator.share?.({ title: 'LinkUp', url: window.location.origin }).catch(() => {})} color="blue" />
-          <SettingRow icon={Sparkles} label={t('settings.items.partner.label')} desc={t('settings.items.partner.desc')} onClick={onOpenPartner} color="green" />
-          {isAdmin && <SettingRow icon={Shield} label={t('settings.items.admin.label')} desc={t('settings.items.admin.desc')} onClick={onOpenAdmin} color="orange" />}
+        <Section title="المزيد" delay={0.5} icon={Sparkles}>
+          <SettingRow icon={MessageCircle} label="تواصل مع المطور" desc="ملاحظات، اقتراحات، أو مشاكل" onClick={onOpenSupport} color="purple" />
+          <SettingRow icon={Share2} label="شارك التطبيق" desc="دع أصدقاءك ينضمون" onClick={() => navigator.share?.({ title: 'LinkUp', url: window.location.origin }).catch(() => {})} color="blue" />
+          <SettingRow icon={Sparkles} label="تكوين شراكة" desc="انضم كشريك رسمي" onClick={onOpenPartner} color="green" />
+          {isAdmin && <SettingRow icon={Shield} label="لوحة الإدارة" desc="إدارة المستخدمين والمحتوى" onClick={onOpenAdmin} color="orange" />}
         </Section>
 
         <motion.div
@@ -217,9 +209,9 @@ export default function SettingsScreen({
           className="grid grid-cols-3 gap-3 mt-4"
         >
           {[
-            { label: t('settings.quickActions.atheer'), onClick: onOpenAtheer, gradient: 'from-purple-500 to-indigo-500' },
-            { label: t('settings.quickActions.about'), onClick: onOpenAbout, gradient: 'from-blue-500 to-cyan-500' },
-            { label: t('settings.quickActions.privacy'), onClick: onOpenPrivacy, gradient: 'from-gray-500 to-gray-600' },
+            { label: 'من هو أثير؟', onClick: onOpenAtheer, gradient: 'from-purple-500 to-indigo-500' },
+            { label: 'من نحن', onClick: onOpenAbout, gradient: 'from-blue-500 to-cyan-500' },
+            { label: 'الخصوصية', onClick: onOpenPrivacy, gradient: 'from-gray-500 to-gray-600' },
           ].map((item) => (
             <motion.button
               key={item.label}
@@ -238,20 +230,12 @@ export default function SettingsScreen({
       <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-gray-200/60 px-5 py-2 flex items-center justify-between shadow-lg"
         style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
       >
-        <button
-          onClick={onBack}
-          className="p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all"
-        >
+        <button onClick={onBack} className="p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all">
           <ArrowLeft className="w-6 h-6 text-gray-700" />
         </button>
-
-        <span className="text-sm font-medium text-gray-500">{t('common.menu')}</span>
-
+        <span className="text-sm font-medium text-gray-500">القائمة</span>
         {isAdmin ? (
-          <button
-            onClick={onOpenAdmin}
-            className="p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 active:scale-90 transition-all"
-          >
+          <button onClick={onOpenAdmin} className="p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 active:scale-90 transition-all">
             <Shield className="w-6 h-6" />
           </button>
         ) : (
@@ -259,35 +243,26 @@ export default function SettingsScreen({
         )}
       </div>
 
-      <SimpleModal open={showLanguageModal} onClose={() => setShowLanguageModal(false)} title={t('settings.modals.language.title')}>
+      <SimpleModal open={showLanguageModal} onClose={() => setShowLanguageModal(false)} title="لغة التطبيق">
         <div className="space-y-2">
           {languages.map(lang => (
             <motion.button
               key={lang.v}
               whileHover={{ scale: 1.02, backgroundColor: '#f5f3ff' }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => { changeLanguage(lang.v); setShowLanguageModal(false); }}
-              className={`w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all ${
-                language === lang.v 
-                  ? 'bg-purple-100 text-purple-700 border-2 border-purple-300 shadow-md' 
-                  : 'bg-gray-50 text-gray-700 hover:bg-purple-50'
-              }`}
+              onClick={() => { setShowLanguageModal(false); }}
+              className="w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all bg-gray-50 text-gray-700 hover:bg-purple-50"
             >
               <span className="flex items-center gap-3">
                 <span className="text-2xl">{lang.flag}</span>
                 {lang.l}
               </span>
-              {language === lang.v && (
-                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="bg-purple-500 text-white rounded-full p-1">
-                  <Check className="w-4 h-4" />
-                </motion.div>
-              )}
             </motion.button>
           ))}
         </div>
       </SimpleModal>
 
-      <SimpleModal open={showSizeModal} onClose={() => setShowSizeModal(false)} title={t('settings.modals.fontSize.title')}>
+      <SimpleModal open={showSizeModal} onClose={() => setShowSizeModal(false)} title="حجم الخط">
         <div className="space-y-2">
           {sizes.map(s => (
             <motion.button
@@ -296,9 +271,7 @@ export default function SettingsScreen({
               whileTap={{ scale: 0.97 }}
               onClick={() => { onSelectFontSize?.(s.v); setShowSizeModal(false); }}
               className={`w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all ${
-                fontSize === s.v 
-                  ? 'bg-purple-100 text-purple-700 border-2 border-purple-300 shadow-md' 
-                  : 'bg-gray-50 text-gray-700 hover:bg-purple-50'
+                fontSize === s.v ? 'bg-purple-100 text-purple-700 border-2 border-purple-300 shadow-md' : 'bg-gray-50 text-gray-700 hover:bg-purple-50'
               }`}
             >
               {s.l}
@@ -312,7 +285,7 @@ export default function SettingsScreen({
         </div>
       </SimpleModal>
 
-      <SimpleModal open={showFontModal} onClose={() => setShowFontModal(false)} title={t('settings.modals.fontFamily.title')}>
+      <SimpleModal open={showFontModal} onClose={() => setShowFontModal(false)} title="نوع الخط">
         <div className="space-y-2">
           {fonts.map(f => (
             <motion.button
@@ -321,9 +294,7 @@ export default function SettingsScreen({
               whileTap={{ scale: 0.97 }}
               onClick={() => { onSelectFontFamily?.(f.v); setShowFontModal(false); }}
               className={`w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all ${
-                fontFamily === f.v 
-                  ? 'bg-purple-100 text-purple-700 border-2 border-purple-300 shadow-md' 
-                  : 'bg-gray-50 text-gray-700 hover:bg-purple-50'
+                fontFamily === f.v ? 'bg-purple-100 text-purple-700 border-2 border-purple-300 shadow-md' : 'bg-gray-50 text-gray-700 hover:bg-purple-50'
               }`}
             >
               <span className="flex items-center gap-2">
@@ -339,39 +310,33 @@ export default function SettingsScreen({
           ))}
         </div>
       </SimpleModal>
-      
-      <SimpleModal open={showResetModal} onClose={() => setShowResetModal(false)} title={t('settings.modals.reset.title')}>
+
+      <SimpleModal open={showResetModal} onClose={() => setShowResetModal(false)} title="تأكيد إعادة الضبط">
         <div className="space-y-5">
           <div className="flex flex-col items-center gap-3">
             <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
               <AlertTriangle className="w-8 h-8 text-red-600" />
             </div>
             <p className="text-sm text-gray-600 text-center leading-relaxed">
-              {t('settings.modals.reset.warning')}
+              هذا الإجراء لا يمكن التراجع عنه. اكتب كلمة "حذف" للتأكيد
             </p>
           </div>
           <input
             value={resetText}
             onChange={e => setResetText(e.target.value)}
-            placeholder={t('settings.modals.reset.placeholder')}
+            placeholder='اكتب كلمة حذف هنا...'
             className="w-full h-12 px-4 rounded-xl bg-gray-50 border-2 border-gray-200 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200 text-center text-lg font-medium"
             autoFocus
           />
           <div className="flex gap-3">
+            <motion.button whileTap={{ scale: 0.95 }} onClick={() => setShowResetModal(false)} className="flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all">إلغاء</motion.button>
             <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowResetModal(false)}
-              className="flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all"
-            >
-              {t('settings.modals.reset.cancel')}
-            </motion.button>
-            <motion.button
-              whileTap={resetText.trim() === t('common.delete') ? { scale: 0.9 } : {}}
+              whileTap={resetText.trim() === 'حذف' ? { scale: 0.9 } : {}}
               onClick={handleResetApp}
-              disabled={resetText.trim() !== t('common.delete') || resetLoading}
+              disabled={resetText.trim() !== 'حذف' || resetLoading}
               className="flex-1 h-11 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-red-200 transition-all"
             >
-              {resetLoading ? t('settings.modals.reset.loading') : t('settings.modals.reset.confirm')}
+              {resetLoading ? 'جارٍ...' : 'تأكيد الحذف'}
             </motion.button>
           </div>
         </div>
