@@ -10517,6 +10517,22 @@ var CircleCheckBig = createLucideIcon("circle-check-big", [["path", {
 	d: "m9 11 3 3L22 4",
 	key: "1pflzl"
 }]]);
+var CircleQuestionMark = createLucideIcon("circle-question-mark", [
+	["circle", {
+		cx: "12",
+		cy: "12",
+		r: "10",
+		key: "1mglay"
+	}],
+	["path", {
+		d: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3",
+		key: "1u773s"
+	}],
+	["path", {
+		d: "M12 17h.01",
+		key: "p32p05"
+	}]
+]);
 var CircleX = createLucideIcon("circle-x", [
 	["circle", {
 		cx: "12",
@@ -11005,6 +11021,13 @@ var ShieldAlert = createLucideIcon("shield-alert", [
 		key: "1drbdi"
 	}]
 ]);
+var ShieldCheck = createLucideIcon("shield-check", [["path", {
+	d: "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",
+	key: "oel41y"
+}], ["path", {
+	d: "m9 12 2 2 4-4",
+	key: "dzmm74"
+}]]);
 var ShieldX = createLucideIcon("shield-x", [
 	["path", {
 		d: "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",
@@ -11137,6 +11160,20 @@ var TriangleAlert = createLucideIcon("triangle-alert", [
 		key: "p32p05"
 	}]
 ]);
+var Type = createLucideIcon("type", [
+	["path", {
+		d: "M12 4v16",
+		key: "1654pz"
+	}],
+	["path", {
+		d: "M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2",
+		key: "e0r10z"
+	}],
+	["path", {
+		d: "M9 20h6",
+		key: "s66wpe"
+	}]
+]);
 var Upload = createLucideIcon("upload", [
 	["path", {
 		d: "M12 3v12",
@@ -11231,6 +11268,20 @@ var Video = createLucideIcon("video", [["path", {
 	rx: "2",
 	key: "158x01"
 }]]);
+var Volume2 = createLucideIcon("volume-2", [
+	["path", {
+		d: "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z",
+		key: "uqj9uw"
+	}],
+	["path", {
+		d: "M16 9a5 5 0 0 1 0 6",
+		key: "1q6k2b"
+	}],
+	["path", {
+		d: "M19.364 18.364a9 9 0 0 0 0-12.728",
+		key: "ijwkga"
+	}]
+]);
 var X$1 = createLucideIcon("x", [["path", {
 	d: "M18 6 6 18",
 	key: "1bl5f8"
@@ -60343,129 +60394,376 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 }
 //#endregion
 //#region src/features/Settings/SettingsScreen.jsx
-var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle, color = "purple" }) => {
-	const colorsMap = {
-		purple: "from-purple-500 to-indigo-500 bg-purple-50 text-purple-600",
-		blue: "from-blue-500 to-cyan-500 bg-blue-50 text-blue-600",
-		green: "from-emerald-500 to-teal-500 bg-emerald-50 text-emerald-600",
-		orange: "from-orange-500 to-red-500 bg-orange-50 text-orange-600",
-		pink: "from-pink-500 to-rose-500 bg-pink-50 text-pink-600"
+var colorThemes = {
+	purple: {
+		gradient: "from-violet-500 to-purple-600",
+		bg: "bg-violet-50",
+		text: "text-violet-700",
+		border: "border-violet-200",
+		iconBg: "bg-gradient-to-br from-violet-500 to-purple-600",
+		hoverBg: "hover:bg-violet-50",
+		ring: "focus:ring-violet-200",
+		shadow: "shadow-violet-200/50"
+	},
+	blue: {
+		gradient: "from-blue-500 to-indigo-600",
+		bg: "bg-blue-50",
+		text: "text-blue-700",
+		border: "border-blue-200",
+		iconBg: "bg-gradient-to-br from-blue-500 to-indigo-600",
+		hoverBg: "hover:bg-blue-50",
+		ring: "focus:ring-blue-200",
+		shadow: "shadow-blue-200/50"
+	},
+	emerald: {
+		gradient: "from-emerald-500 to-teal-600",
+		bg: "bg-emerald-50",
+		text: "text-emerald-700",
+		border: "border-emerald-200",
+		iconBg: "bg-gradient-to-br from-emerald-500 to-teal-600",
+		hoverBg: "hover:bg-emerald-50",
+		ring: "focus:ring-emerald-200",
+		shadow: "shadow-emerald-200/50"
+	},
+	amber: {
+		gradient: "from-amber-500 to-orange-600",
+		bg: "bg-amber-50",
+		text: "text-amber-700",
+		border: "border-amber-200",
+		iconBg: "bg-gradient-to-br from-amber-500 to-orange-600",
+		hoverBg: "hover:bg-amber-50",
+		ring: "focus:ring-amber-200",
+		shadow: "shadow-amber-200/50"
+	},
+	rose: {
+		gradient: "from-rose-500 to-pink-600",
+		bg: "bg-rose-50",
+		text: "text-rose-700",
+		border: "border-rose-200",
+		iconBg: "bg-gradient-to-br from-rose-500 to-pink-600",
+		hoverBg: "hover:bg-rose-50",
+		ring: "focus:ring-rose-200",
+		shadow: "shadow-rose-200/50"
+	},
+	slate: {
+		gradient: "from-slate-500 to-slate-700",
+		bg: "bg-slate-50",
+		text: "text-slate-700",
+		border: "border-slate-200",
+		iconBg: "bg-gradient-to-br from-slate-500 to-slate-700",
+		hoverBg: "hover:bg-slate-50",
+		ring: "focus:ring-slate-200",
+		shadow: "shadow-slate-200/50"
+	}
+};
+var containerVariants = {
+	hidden: { opacity: 0 },
+	visible: {
+		opacity: 1,
+		transition: {
+			staggerChildren: .06,
+			delayChildren: .1
+		}
+	}
+};
+var itemVariants = {
+	hidden: {
+		opacity: 0,
+		y: 16,
+		scale: .97
+	},
+	visible: {
+		opacity: 1,
+		y: 0,
+		scale: 1,
+		transition: {
+			type: "spring",
+			stiffness: 400,
+			damping: 28
+		}
+	}
+};
+var modalOverlayVariants = {
+	hidden: {
+		opacity: 0,
+		backdropFilter: "blur(0px)"
+	},
+	visible: {
+		opacity: 1,
+		backdropFilter: "blur(12px)"
+	},
+	exit: {
+		opacity: 0,
+		backdropFilter: "blur(0px)"
+	}
+};
+var modalContentVariants = {
+	hidden: {
+		opacity: 0,
+		scale: .92,
+		y: 40
+	},
+	visible: {
+		opacity: 1,
+		scale: 1,
+		y: 0,
+		transition: {
+			type: "spring",
+			stiffness: 450,
+			damping: 32
+		}
+	},
+	exit: {
+		opacity: 0,
+		scale: .92,
+		y: 40,
+		transition: { duration: .2 }
+	}
+};
+var IconWrapper = ({ icon: Icon, theme = "purple", size = "md" }) => {
+	const sizeClasses = {
+		sm: "w-8 h-8",
+		md: "w-10 h-10",
+		lg: "w-12 h-12"
 	};
-	const [gradientFrom, gradientTo] = (colorsMap[color] || colorsMap.purple).split(" ");
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-		whileHover: {
-			y: -3,
-			boxShadow: "0 12px 24px -8px rgba(0,0,0,0.12)"
+	const iconSizes = {
+		sm: "w-4 h-4",
+		md: "w-5 h-5",
+		lg: "w-6 h-6"
+	};
+	const themeSet = colorThemes[theme] || colorThemes.purple;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: `${sizeClasses[size]} ${themeSet.iconBg} rounded-xl flex items-center justify-center text-white shadow-lg shadow-${theme}-500/20 shrink-0`,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, {
+			className: iconSizes[size],
+			strokeWidth: 2
+		})
+	});
+};
+var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle, theme = "purple", badge, disabled = false }) => {
+	const themeSet = colorThemes[theme] || colorThemes.purple;
+	if (toggle) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+		variants: itemVariants,
+		whileHover: disabled ? {} : {
+			y: -2,
+			boxShadow: "0 8px 30px -10px rgba(0,0,0,0.08)"
 		},
-		whileTap: { scale: .97 },
-		onClick: toggle ? void 0 : onClick,
-		className: "group relative overflow-hidden rounded-2xl bg-white border border-gray-100/80 cursor-pointer transition-all shadow-sm hover:shadow-lg p-4",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-purple-500/0 via-transparent to-blue-500/0 group-hover:from-purple-500/5 group-hover:to-blue-500/5 transition-all duration-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		whileTap: disabled ? {} : { scale: .98 },
+		className: `group relative overflow-hidden rounded-2xl bg-white border border-stone-200/80 cursor-pointer transition-all duration-300 p-4 ${disabled ? "opacity-50 cursor-not-allowed" : "hover:border-stone-300 shadow-sm hover:shadow-md"}`,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "relative flex items-center gap-4",
 			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: `p-3 rounded-xl bg-gradient-to-br ${gradientFrom} ${gradientTo} text-white shadow-md group-hover:shadow-lg transition-all group-hover:scale-110`,
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5" })
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconWrapper, {
+					icon: Icon,
+					theme
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex-1 min-w-0 text-right",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-sm font-bold text-gray-800",
-						children: label
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2 justify-end",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-[15px] font-bold text-stone-800",
+							children: label
+						}), badge && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold",
+							children: badge
+						})]
 					}), desc && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-xs text-gray-500 mt-0.5 truncate",
+						className: "text-[13px] text-stone-500 mt-0.5 leading-relaxed",
 						children: desc
 					})]
 				}),
-				toggle ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 					onClick: (e) => {
 						e.stopPropagation();
 						onToggle?.();
 					},
-					className: `relative w-14 h-7 rounded-full transition-all duration-300 shrink-0 ${isToggled ? "bg-gradient-to-r from-purple-500 to-blue-500 shadow-md" : "bg-gray-300"}`,
+					disabled,
+					className: `relative w-[52px] h-7 rounded-full transition-all duration-300 shrink-0 ${isToggled ? `${themeSet.iconBg} shadow-md shadow-${theme}-500/30` : "bg-stone-300"}`,
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
-						animate: { x: isToggled ? 24 : 2 },
+						animate: { x: isToggled ? 26 : 2 },
 						transition: {
 							type: "spring",
-							stiffness: 500,
+							stiffness: 600,
 							damping: 30
 						},
-						className: "absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+						className: "absolute top-[3px] w-[22px] h-[22px] bg-white rounded-full shadow-sm"
 					})
-				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-5 h-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" })
+				})
+			]
+		})
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+		variants: itemVariants,
+		whileHover: disabled ? {} : {
+			y: -2,
+			boxShadow: "0 8px 30px -10px rgba(0,0,0,0.08)"
+		},
+		whileTap: disabled ? {} : { scale: .98 },
+		onClick: disabled ? void 0 : onClick,
+		className: `group relative overflow-hidden rounded-2xl bg-white border border-stone-200/80 cursor-pointer transition-all duration-300 p-4 ${disabled ? "opacity-50 cursor-not-allowed" : "hover:border-stone-300 shadow-sm hover:shadow-md"}`,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:from-stone-50/50 group-hover:to-stone-100/30 transition-all duration-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "relative flex items-center gap-4",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconWrapper, {
+					icon: Icon,
+					theme
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex-1 min-w-0 text-right",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-2 justify-end",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-[15px] font-bold text-stone-800",
+							children: label
+						}), badge && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold",
+							children: badge
+						})]
+					}), desc && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-[13px] text-stone-500 mt-0.5 leading-relaxed",
+						children: desc
+					})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-2",
+					children: [disabled && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-xs text-stone-400",
+						children: "قريباً"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-5 h-5 text-stone-400 group-hover:text-stone-600 group-hover:-translate-x-1 transition-all duration-300" })]
+				})
 			]
 		})]
 	});
 };
-var SimpleModal = ({ open, onClose, title, children }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-	initial: { opacity: 0 },
-	animate: { opacity: 1 },
-	exit: { opacity: 0 },
-	className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md",
-	onClick: onClose,
-	children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-		initial: {
-			scale: .9,
-			opacity: 0,
-			y: 30
-		},
-		animate: {
-			scale: 1,
-			opacity: 1,
-			y: 0
-		},
-		exit: {
-			scale: .85,
-			opacity: 0,
-			y: 30
-		},
-		transition: {
-			type: "spring",
-			stiffness: 500,
-			damping: 30
-		},
-		className: "bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-gray-100",
-		onClick: (e) => e.stopPropagation(),
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex items-center justify-between mb-5",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-				className: "text-xl font-bold text-gray-800",
-				children: title
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-				onClick: onClose,
-				className: "w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "w-5 h-5" })
-			})]
-		}), children]
-	})
-}) });
-var Section = ({ title, children, delay = 0, icon: Icon }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.section, {
-	initial: {
-		opacity: 0,
-		x: -30
-	},
-	animate: {
-		opacity: 1,
-		x: 0
-	},
-	transition: {
-		duration: .5,
-		delay,
-		type: "spring",
-		stiffness: 200,
-		damping: 18
-	},
-	className: "space-y-4",
-	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex items-center gap-3 px-1 mb-2",
-		children: [Icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5 text-purple-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-			className: "text-sm font-bold text-gray-500 uppercase tracking-wider",
+var SectionHeader = ({ title, icon: Icon, delay = 0 }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+	variants: itemVariants,
+	className: "flex items-center gap-3 px-1 mb-3 mt-2",
+	children: [
+		Icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "p-1.5 rounded-lg bg-stone-100 text-stone-600",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, {
+				className: "w-4 h-4",
+				strokeWidth: 2.5
+			})
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+			className: "text-xs font-extrabold text-stone-500 uppercase tracking-widest",
 			children: title
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex-1 h-px bg-stone-200/60" })
+	]
+});
+var SimpleModal = ({ open, onClose, title, children, maxWidth = "sm", icon: Icon }) => {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: open && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+		variants: modalOverlayVariants,
+		initial: "hidden",
+		animate: "visible",
+		exit: "exit",
+		transition: { duration: .25 },
+		className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/30",
+		onClick: onClose,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+			variants: modalContentVariants,
+			initial: "hidden",
+			animate: "visible",
+			exit: "exit",
+			className: `bg-white rounded-3xl w-full ${{
+				sm: "max-w-sm",
+				md: "max-w-md",
+				lg: "max-w-lg"
+			}[maxWidth]} shadow-2xl shadow-stone-900/10 border border-stone-100 overflow-hidden`,
+			onClick: (e) => e.stopPropagation(),
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center justify-between p-5 pb-4 border-b border-stone-100",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-3",
+					children: [Icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "p-2 rounded-xl bg-stone-100 text-stone-600",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { className: "w-5 h-5" })
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-lg font-bold text-stone-800",
+						children: title
+					})]
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+					whileHover: {
+						scale: 1.1,
+						backgroundColor: "#fef2f2"
+					},
+					whileTap: { scale: .9 },
+					onClick: onClose,
+					className: "w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 hover:text-red-500 transition-colors",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "w-5 h-5" })
+				})]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "p-5",
+				children
+			})]
+		})
+	}) });
+};
+var SelectionItem = ({ label, desc, isSelected, onClick, icon, featured }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+	whileHover: {
+		scale: 1.01,
+		backgroundColor: isSelected ? "#f5f3ff" : "#fafaf9"
+	},
+	whileTap: { scale: .98 },
+	onClick,
+	className: `w-full p-4 rounded-2xl text-right flex items-center justify-between transition-all duration-200 border-2 ${isSelected ? "bg-violet-50 border-violet-300 shadow-md shadow-violet-100" : "bg-stone-50 border-transparent hover:border-stone-200"}`,
+	children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "flex items-center gap-3",
+		children: [isSelected ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+			initial: {
+				scale: 0,
+				rotate: -180
+			},
+			animate: {
+				scale: 1,
+				rotate: 0
+			},
+			className: "bg-violet-600 text-white rounded-full p-1 shadow-md shadow-violet-300",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, {
+				className: "w-4 h-4",
+				strokeWidth: 3
+			})
+		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-6 h-6 rounded-full border-2 border-stone-300" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "text-right",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center gap-2",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: `text-sm font-bold ${isSelected ? "text-violet-800" : "text-stone-700"}`,
+					children: label
+				}), featured && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+					className: "flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-3 h-3" }), "مميز"]
+				})]
+			}), desc && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-xs text-stone-500 mt-0.5",
+				children: desc
+			})]
 		})]
-	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "space-y-3",
-		children
+	}), icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+		className: "text-2xl",
+		children: icon
 	})]
+});
+var DangerButton = ({ onClick, disabled, loading, children }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+	whileTap: !disabled ? { scale: .96 } : {},
+	onClick,
+	disabled: disabled || loading,
+	className: `flex-1 h-12 rounded-xl font-bold text-white shadow-lg transition-all duration-300 ${disabled || loading ? "bg-stone-300 cursor-not-allowed shadow-none" : "bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 shadow-red-200 hover:shadow-red-300"}`,
+	children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+		className: "flex items-center justify-center gap-2",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
+			animate: { rotate: 360 },
+			transition: {
+				repeat: Infinity,
+				duration: 1,
+				ease: "linear"
+			},
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RefreshCw, { className: "w-4 h-4" })
+		}), "جارٍ المعالجة..."]
+	}) : children
 });
 function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataManagement, onOpenAppLock, onOpenProfile, onOpenSupport, muteMicOnJoin, speakerDefault, onToggleMuteMic, onToggleSpeaker, fontSize, fontFamily, onSelectFontSize, onSelectFontFamily, isAdmin, onOpenAdmin, onOpenPartner, onBack }) {
 	const [showFontModal, setShowFontModal] = (0, import_react.useState)(false);
@@ -60475,62 +60773,73 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 	const [resetText, setResetText] = (0, import_react.useState)("");
 	const [resetLoading, setResetLoading] = (0, import_react.useState)(false);
 	const [compactMode, setCompactMode] = (0, import_react.useState)(() => localStorage.getItem("compactMode") === "true");
+	const [scrollY, setScrollY] = (0, import_react.useState)(0);
 	(0, import_react.useEffect)(() => {
 		localStorage.setItem("compactMode", compactMode);
-		if (compactMode) document.documentElement.style.fontSize = "14px";
-		else document.documentElement.style.fontSize = "";
+		document.documentElement.style.fontSize = compactMode ? "14px" : "";
 	}, [compactMode]);
+	(0, import_react.useEffect)(() => {
+		const handleScroll = () => setScrollY(window.scrollY);
+		window.addEventListener("scroll", handleScroll, { passive: true });
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, []);
 	const sizes = [
 		{
 			v: "small",
-			l: "صغير"
+			l: "صغير",
+			desc: "مريح للقراءة الطويلة"
 		},
 		{
 			v: "medium",
-			l: "متوسط"
+			l: "متوسط",
+			desc: "الحجم الموصى به"
 		},
 		{
 			v: "large",
-			l: "كبير"
+			l: "كبير",
+			desc: "وضوح إضافي"
 		},
 		{
 			v: "xlarge",
-			l: "كبير جداً"
+			l: "كبير جداً",
+			desc: "لضعف البصر"
 		}
 	];
 	const fonts = [
 		{
 			v: "tajawal",
 			l: "Tajawal",
-			desc: "الخط الافتراضي الأنيق"
+			desc: "الخط الافتراضي الأنيق والمتناسق"
 		},
 		{
 			v: "cairo",
 			l: "Cairo",
-			desc: "خط عصري وواضح"
+			desc: "خط عصري وواضح للقراءة"
 		},
 		{
 			v: "rubik",
 			l: "Rubik",
-			desc: "خط سميك ومقروء"
+			desc: "خط سميك ومقروء بشكل ممتاز"
 		},
 		{
 			v: "ibm-plex",
-			l: "IBM Plex",
-			desc: "خط احترافي",
+			l: "IBM Plex Arabic",
+			desc: "خط احترافي للمطورين",
 			featured: true
 		}
 	];
 	const languages = [{
 		v: "ar",
 		l: "العربية",
-		flag: "🇸🇦"
+		flag: "🇸🇦",
+		desc: "الواجهة باللغة العربية"
 	}, {
 		v: "en",
 		l: "English",
-		flag: "🇬🇧"
+		flag: "🇬🇧",
+		desc: "English interface"
 	}];
-	const handleResetApp = async () => {
+	const handleResetApp = (0, import_react.useCallback)(async () => {
 		if (resetText.trim() !== "حذف") return;
 		setResetLoading(true);
 		try {
@@ -60547,258 +60856,285 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 		} finally {
 			setResetLoading(false);
 		}
-	};
+	}, [resetText]);
+	const headerOpacity = Math.min(scrollY / 100, 1);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 pb-32 text-right",
+		className: "min-h-screen bg-stone-50 pb-32 text-right",
 		dir: "rtl",
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.header, {
 				initial: {
 					opacity: 0,
-					y: -30
+					y: -20
 				},
 				animate: {
 					opacity: 1,
 					y: 0
 				},
-				className: "sticky top-0 z-20 bg-white/80 backdrop-blur-2xl border-b border-gray-200/40 px-5 pt-14 pb-4 text-center shadow-sm",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-					className: "text-2xl font-black text-gray-800 tracking-tight",
-					children: "الإعدادات"
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-sm text-gray-500 mt-1",
-					children: "تحكم كامل في تطبيقك كما تحب"
-				})]
+				className: "fixed top-0 left-0 right-0 z-30 transition-all duration-300",
+				style: {
+					backgroundColor: `rgba(255, 255, 255, ${.8 + headerOpacity * .15})`,
+					backdropFilter: `blur(${12 + headerOpacity * 4}px)`,
+					boxShadow: headerOpacity > .5 ? "0 1px 3px rgba(0,0,0,0.05)" : "none"
+				},
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "max-w-lg mx-auto px-5 pt-12 pb-4 flex items-center justify-between",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+							whileHover: { scale: 1.1 },
+							whileTap: { scale: .9 },
+							onClick: onBack,
+							className: "w-10 h-10 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-600 hover:text-stone-900 hover:border-stone-300 transition-all",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5" })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "text-center",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+								className: "text-xl font-black text-stone-900 tracking-tight",
+								children: "الإعدادات"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-xs text-stone-500 mt-0.5 font-medium",
+								children: "تحكم كامل في تجربتك"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
+					]
+				})
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "px-4 py-6 space-y-8 max-w-lg mx-auto",
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-28" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+				variants: containerVariants,
+				initial: "hidden",
+				animate: "visible",
+				className: "px-4 space-y-6 max-w-lg mx-auto",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Section, {
-						title: "الحساب",
-						delay: .1,
-						icon: User$1,
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						variants: itemVariants,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 							icon: User$1,
 							label: "الملف الشخصي",
-							desc: "تعديل اسمك وصورتك",
+							desc: "تعديل اسمك، صورتك، والمعلومات الشخصية",
 							onClick: onOpenProfile,
-							color: "purple"
+							theme: "purple"
 						})
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
-						title: "المظهر",
-						delay: .2,
-						icon: Palette,
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionHeader, {
+						title: "المظهر والعرض",
+						icon: Palette
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-2.5",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Globe,
 								label: "لغة التطبيق",
-								desc: "اختر لغة الواجهة",
+								desc: languages.find((l) => l.v === "ar")?.l,
 								onClick: () => setShowLanguageModal(true),
-								color: "blue"
+								theme: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Palette,
+								icon: Type,
 								label: "حجم الخط",
-								desc: sizes.find((s) => s.v === fontSize)?.l,
+								desc: sizes.find((s) => s.v === fontSize)?.l || "متوسط",
 								onClick: () => setShowSizeModal(true),
-								color: "blue"
+								theme: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Palette,
 								label: "نوع الخط",
-								desc: fonts.find((f) => f.v === fontFamily)?.l,
+								desc: fonts.find((f) => f.v === fontFamily)?.l || "Tajawal",
 								onClick: () => setShowFontModal(true),
-								color: "blue"
+								theme: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: TabletSmartphone,
-								label: "تصغير الأبعاد",
-								desc: "مناسب للشاشات الصغيرة",
+								label: "وضع الشاشات الصغيرة",
+								desc: "تصغير الأبعاد لشاشات أصغر",
 								toggle: true,
 								isToggled: compactMode,
 								onToggle: () => setCompactMode(!compactMode),
-								color: "green"
+								theme: "emerald"
 							})
 						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
-						title: "المكالمات",
-						delay: .3,
-						icon: Mic,
+					})] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionHeader, {
+						title: "المكالمات والصوت",
+						icon: Volume2
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-2.5",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 							icon: Mic,
 							label: "كتم الميكروفون تلقائياً",
+							desc: "عند الانضمام للمكالمات",
 							toggle: true,
 							isToggled: muteMicOnJoin,
 							onToggle: onToggleMuteMic,
-							color: "orange"
+							theme: "amber"
 						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 							icon: Speaker,
 							label: "مكبر الصوت افتراضياً",
+							desc: "تفعيل السماعة الخارجية تلقائياً",
 							toggle: true,
 							isToggled: speakerDefault,
 							onToggle: onToggleSpeaker,
-							color: "orange"
+							theme: "amber"
 						})]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
+					})] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionHeader, {
 						title: "الخصوصية والأمان",
-						delay: .4,
-						icon: Lock,
+						icon: ShieldCheck
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-2.5",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Lock,
+								icon: FingerprintPattern,
 								label: "قفل التطبيق",
-								desc: "حماية إضافية برمز سري",
+								desc: "حماية إضافية برمز سري أو بصمة",
 								onClick: onOpenAppLock,
-								color: "pink"
+								theme: "rose"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Shield,
+								icon: Database$1,
 								label: "إدارة البيانات",
-								desc: "التحكم في تخزين بياناتك",
+								desc: "التحكم في التخزين والذاكرة المؤقتة",
 								onClick: onOpenDataManagement,
-								color: "pink"
+								theme: "rose"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: RefreshCw,
+								icon: Trash2,
 								label: "إعادة ضبط التطبيق",
-								desc: "مسح جميع المحادثات والبيانات",
+								desc: "مسح جميع المحادثات والبيانات نهائياً",
 								onClick: () => setShowResetModal(true),
-								color: "pink"
+								theme: "rose"
 							})
 						]
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Section, {
+					})] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SectionHeader, {
 						title: "المزيد",
-						delay: .5,
-						icon: Sparkles,
+						icon: Sparkles
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "space-y-2.5",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: MessageCircle,
+								icon: CircleQuestionMark,
 								label: "تواصل مع المطور",
-								desc: "ملاحظات، اقتراحات، أو مشاكل",
+								desc: "ملاحظات، اقتراحات، أو الإبلاغ عن مشكلة",
 								onClick: onOpenSupport,
-								color: "purple"
+								theme: "purple"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Share2,
 								label: "شارك التطبيق",
-								desc: "دع أصدقاءك ينضمون",
+								desc: "دع أصدقاءك ينضمون إلى LinkUp",
 								onClick: () => navigator.share?.({
 									title: "LinkUp",
 									url: window.location.origin
 								}).catch(() => {}),
-								color: "blue"
+								theme: "blue"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Sparkles,
+								icon: Zap,
 								label: "تكوين شراكة",
-								desc: "انضم كشريك رسمي",
+								desc: "انضم كشريك رسمي للتطبيق",
 								onClick: onOpenPartner,
-								color: "green"
+								theme: "emerald"
 							}),
 							isAdmin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 								icon: Shield,
 								label: "لوحة الإدارة",
-								desc: "إدارة المستخدمين والمحتوى",
+								desc: "إدارة المستخدمين والمحتوى والإحصائيات",
 								onClick: onOpenAdmin,
-								color: "orange"
+								theme: "amber",
+								badge: "مسؤول"
 							})
 						]
-					}),
+					})] }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-						initial: {
-							opacity: 0,
-							y: 20
-						},
-						animate: {
-							opacity: 1,
-							y: 0
-						},
-						transition: {
-							delay: .7,
-							type: "spring",
-							stiffness: 200,
-							damping: 20
-						},
-						className: "grid grid-cols-3 gap-3 mt-4",
+						variants: itemVariants,
+						className: "grid grid-cols-3 gap-2.5 mt-6",
 						children: [
 							{
 								label: "من هو أثير؟",
 								onClick: onOpenAtheer,
-								gradient: "from-purple-500 to-indigo-500"
+								theme: "purple",
+								icon: Sparkles
 							},
 							{
 								label: "من نحن",
 								onClick: onOpenAbout,
-								gradient: "from-blue-500 to-cyan-500"
+								theme: "blue",
+								icon: Globe
 							},
 							{
 								label: "الخصوصية",
 								onClick: onOpenPrivacy,
-								gradient: "from-gray-500 to-gray-600"
+								theme: "slate",
+								icon: Shield
 							}
 						].map((item) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
 							whileHover: {
-								scale: 1.05,
-								y: -5
+								scale: 1.03,
+								y: -3
 							},
-							whileTap: { scale: .93 },
+							whileTap: { scale: .95 },
 							onClick: item.onClick,
-							className: "relative overflow-hidden rounded-2xl p-3 bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all group",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "relative text-xs font-bold text-gray-700 group-hover:text-purple-700 transition-colors",
-								children: item.label
-							})]
+							className: "relative overflow-hidden rounded-2xl p-4 bg-white border border-stone-200 shadow-sm hover:shadow-md transition-all duration-300 group text-center",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute inset-0 bg-gradient-to-br ${colorThemes[item.theme].gradient} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-300` }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(item.icon, { className: `w-5 h-5 mx-auto mb-2 text-stone-400 group-hover:${colorThemes[item.theme].text} transition-colors` }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "relative text-xs font-bold text-stone-700 group-hover:text-stone-900 transition-colors block",
+									children: item.label
+								})
+							]
 						}, item.label))
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						variants: itemVariants,
+						className: "text-center py-6",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-[11px] text-stone-400 font-medium",
+							children: "LinkUp v2.0 · صُنع بإتقان"
+						})
 					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-gray-200/60 px-5 py-2 flex items-center justify-between shadow-lg",
-				style: { paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" },
+				className: "fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-2xl border-t border-stone-200/60 px-6 py-3 flex items-center justify-between shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)]",
+				style: { paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" },
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						whileHover: { scale: 1.1 },
+						whileTap: { scale: .9 },
 						onClick: onBack,
-						className: "p-2 rounded-full hover:bg-gray-100 active:scale-90 transition-all",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-6 h-6 text-gray-700" })
+						className: "p-2.5 rounded-xl hover:bg-stone-100 active:bg-stone-200 transition-colors",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-6 h-6 text-stone-700" })
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-sm font-medium text-gray-500",
-						children: "القائمة"
+						className: "text-sm font-semibold text-stone-500",
+						children: "القائمة الرئيسية"
 					}),
-					isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						whileHover: { scale: 1.1 },
+						whileTap: { scale: .9 },
 						onClick: onOpenAdmin,
-						className: "p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 active:scale-90 transition-all",
+						className: "p-2.5 rounded-xl bg-violet-100 hover:bg-violet-200 text-violet-700 transition-colors",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-6 h-6" })
-					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
+					}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-11" })
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
 				open: showLanguageModal,
 				onClose: () => setShowLanguageModal(false),
 				title: "لغة التطبيق",
+				icon: Globe,
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "space-y-2",
-					children: languages.map((lang) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-						whileHover: {
-							scale: 1.02,
-							backgroundColor: "#f5f3ff"
-						},
-						whileTap: { scale: .97 },
-						onClick: () => {
-							setShowLanguageModal(false);
-						},
-						className: "w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all bg-gray-50 text-gray-700 hover:bg-purple-50",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "flex items-center gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-2xl",
-								children: lang.flag
-							}), lang.l]
-						})
+					className: "space-y-2.5",
+					children: languages.map((lang) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectionItem, {
+						label: lang.l,
+						desc: lang.desc,
+						icon: lang.flag,
+						isSelected: lang.v === "ar",
+						onClick: () => setShowLanguageModal(false)
 					}, lang.v))
 				})
 			}),
@@ -60806,25 +61142,17 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				open: showSizeModal,
 				onClose: () => setShowSizeModal(false),
 				title: "حجم الخط",
+				icon: Type,
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "space-y-2",
-					children: sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
-						whileHover: {
-							scale: 1.02,
-							backgroundColor: "#f5f3ff"
-						},
-						whileTap: { scale: .97 },
+					className: "space-y-2.5",
+					children: sizes.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectionItem, {
+						label: s.l,
+						desc: s.desc,
+						isSelected: fontSize === s.v,
 						onClick: () => {
 							onSelectFontSize?.(s.v);
 							setShowSizeModal(false);
-						},
-						className: `w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all ${fontSize === s.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300 shadow-md" : "bg-gray-50 text-gray-700 hover:bg-purple-50"}`,
-						children: [s.l, fontSize === s.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-							initial: { scale: 0 },
-							animate: { scale: 1 },
-							className: "bg-purple-500 text-white rounded-full p-1",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })
-						})]
+						}
 					}, s.v))
 				})
 			}),
@@ -60832,68 +61160,99 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				open: showFontModal,
 				onClose: () => setShowFontModal(false),
 				title: "نوع الخط",
+				icon: Palette,
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "space-y-2",
-					children: fonts.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
-						whileHover: {
-							scale: 1.02,
-							backgroundColor: "#f5f3ff"
-						},
-						whileTap: { scale: .97 },
+					className: "space-y-2.5",
+					children: fonts.map((f) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SelectionItem, {
+						label: f.l,
+						desc: f.desc,
+						isSelected: fontFamily === f.v,
+						featured: f.featured,
 						onClick: () => {
 							onSelectFontFamily?.(f.v);
 							setShowFontModal(false);
-						},
-						className: `w-full p-4 rounded-xl text-right text-sm font-bold flex items-center justify-between transition-all ${fontFamily === f.v ? "bg-purple-100 text-purple-700 border-2 border-purple-300 shadow-md" : "bg-gray-50 text-gray-700 hover:bg-purple-50"}`,
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "flex items-center gap-2",
-							children: [f.l, f.featured && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-4 h-4 text-yellow-500" })]
-						}), fontFamily === f.v && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-							initial: { scale: 0 },
-							animate: { scale: 1 },
-							className: "bg-purple-500 text-white rounded-full p-1",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, { className: "w-4 h-4" })
-						})]
+						}
 					}, f.v))
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SimpleModal, {
 				open: showResetModal,
-				onClose: () => setShowResetModal(false),
+				onClose: () => {
+					setShowResetModal(false);
+					setResetText("");
+				},
 				title: "تأكيد إعادة الضبط",
+				icon: TriangleAlert,
+				maxWidth: "md",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "space-y-5",
+					className: "space-y-6",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex flex-col items-center gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-16 h-16 rounded-full bg-red-100 flex items-center justify-center",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-8 h-8 text-red-600" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-sm text-gray-600 text-center leading-relaxed",
-								children: "هذا الإجراء لا يمكن التراجع عنه. اكتب كلمة \"حذف\" للتأكيد"
+							className: "flex flex-col items-center gap-4",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+								initial: { scale: 0 },
+								animate: { scale: 1 },
+								transition: {
+									type: "spring",
+									stiffness: 300,
+									damping: 20
+								},
+								className: "w-20 h-20 rounded-3xl bg-red-50 flex items-center justify-center border-4 border-red-100",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, {
+									className: "w-10 h-10 text-red-500",
+									strokeWidth: 2
+								})
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "text-center",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-base font-bold text-stone-800 mb-1",
+									children: "هذا الإجراء لا يمكن التراجع عنه"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: "text-sm text-stone-500 leading-relaxed max-w-xs mx-auto",
+									children: "سيتم حذف جميع محادثاتك وبياناتك المحلية بشكل نهائي. اكتب كلمة \"حذف\" للتأكيد."
+								})]
 							})]
 						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-							value: resetText,
-							onChange: (e) => setResetText(e.target.value),
-							placeholder: "اكتب كلمة حذف هنا...",
-							className: "w-full h-12 px-4 rounded-xl bg-gray-50 border-2 border-gray-200 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200 text-center text-lg font-medium",
-							autoFocus: true
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								value: resetText,
+								onChange: (e) => setResetText(e.target.value),
+								placeholder: "اكتب \"حذف\" هنا للتأكيد...",
+								className: "w-full h-14 px-5 rounded-2xl bg-stone-50 border-2 border-stone-200 focus:border-red-400 focus:outline-none focus:ring-4 focus:ring-red-100 text-center text-lg font-bold text-stone-800 placeholder:font-normal placeholder:text-stone-400 transition-all",
+								autoFocus: true,
+								dir: "rtl"
+							}), resetText.trim() === "حذف" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+								initial: {
+									scale: 0,
+									opacity: 0
+								},
+								animate: {
+									scale: 1,
+									opacity: 1
+								},
+								className: "absolute left-4 top-1/2 -translate-y-1/2",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Check, {
+									className: "w-6 h-6 text-red-500",
+									strokeWidth: 3
+								})
+							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "flex gap-3",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-								whileTap: { scale: .95 },
-								onClick: () => setShowResetModal(false),
-								className: "flex-1 h-11 rounded-xl border-2 border-gray-200 bg-white hover:bg-gray-50 font-medium transition-all",
+								whileTap: { scale: .96 },
+								onClick: () => {
+									setShowResetModal(false);
+									setResetText("");
+								},
+								className: "flex-1 h-12 rounded-xl border-2 border-stone-200 bg-white hover:bg-stone-50 font-bold text-stone-700 transition-all",
 								children: "إلغاء"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-								whileTap: resetText.trim() === "حذف" ? { scale: .9 } : {},
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DangerButton, {
 								onClick: handleResetApp,
-								disabled: resetText.trim() !== "حذف" || resetLoading,
-								className: "flex-1 h-11 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold disabled:opacity-40 disabled:cursor-not-allowed shadow-md shadow-red-200 transition-all",
-								children: resetLoading ? "جارٍ..." : "تأكيد الحذف"
+								disabled: resetText.trim() !== "حذف",
+								loading: resetLoading,
+								children: "تأكيد الحذف"
 							})]
 						})
 					]
