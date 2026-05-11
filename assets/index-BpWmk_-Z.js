@@ -61587,12 +61587,10 @@ function ContactInfoModal({ open, member, onClose, onOpenChat, onCall }) {
 	const getStatus = () => {
 		if (!userData) return {
 			text: "غير متصل",
-			color: "bg-gray-400",
 			dot: "bg-gray-400"
 		};
 		if (userData.status === "online") return {
 			text: "متصل الآن",
-			color: "text-emerald-600",
 			dot: "bg-emerald-500"
 		};
 		if (userData.lastSeen) {
@@ -61600,29 +61598,24 @@ function ContactInfoModal({ open, member, onClose, onOpenChat, onCall }) {
 			const mins = Math.floor(diff / 6e4);
 			if (mins < 1) return {
 				text: "قبل لحظات",
-				color: "text-gray-500",
 				dot: "bg-gray-400"
 			};
 			if (mins < 60) return {
 				text: `قبل ${mins} دقيقة`,
-				color: "text-gray-500",
 				dot: "bg-gray-400"
 			};
 			const hrs = Math.floor(mins / 60);
 			if (hrs < 24) return {
 				text: `قبل ${hrs} ساعة`,
-				color: "text-gray-500",
 				dot: "bg-gray-400"
 			};
 			return {
 				text: `قبل ${Math.floor(hrs / 24)} يوم`,
-				color: "text-gray-500",
 				dot: "bg-gray-400"
 			};
 		}
 		return {
 			text: "غير متصل",
-			color: "text-gray-500",
 			dot: "bg-gray-400"
 		};
 	};
@@ -61725,18 +61718,7 @@ function ContactInfoModal({ open, member, onClose, onOpenChat, onCall }) {
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 									className: "w-24 h-24 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center text-white text-3xl font-bold shadow-xl ring-4 ring-white",
 									children: displayName.charAt(0)?.toUpperCase() || "?"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
-									animate: { scale: userData?.status === "online" ? [
-										1,
-										1.2,
-										1
-									] : 1 },
-									transition: {
-										repeat: userData?.status === "online" ? Infinity : 0,
-										duration: 2
-									},
-									className: `absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white ${status.dot} shadow`
-								})]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-white ${status.dot} shadow` })]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 								className: "text-xl font-bold text-gray-900 mt-3",
@@ -61747,7 +61729,7 @@ function ContactInfoModal({ open, member, onClose, onOpenChat, onCall }) {
 								children: ["@", member.username]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: `text-xs font-medium mt-1 flex items-center gap-1 ${status.color}`,
+								className: "text-xs font-medium mt-1 text-gray-500",
 								children: status.text
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
@@ -61815,18 +61797,16 @@ function ContactInfoModal({ open, member, onClose, onOpenChat, onCall }) {
 							!isContact ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								onClick: addToContacts,
 								className: "w-full flex items-center justify-center gap-2 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-5 h-5" }), "إضافة لجهات الاتصال"]
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(UserPlus, { className: "w-5 h-5" }), " إضافة لجهات الاتصال"]
 							}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-								onClick: () => {
-									onClose();
-								},
+								onClick: () => onClose(),
 								className: "w-full flex items-center justify-center gap-2 py-3 bg-amber-50 text-amber-700 rounded-xl font-bold hover:bg-amber-100 transition-colors",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-4 h-4" }), "تعديل الاسم"]
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pencil, { className: "w-4 h-4" }), " تعديل الاسم"]
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								onClick: copyUsername,
 								className: "w-full flex items-center justify-center gap-2 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" }), "نسخ المعرف"]
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" }), " نسخ المعرف"]
 							}),
 							isContact && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								onClick: toggleFavorite,
