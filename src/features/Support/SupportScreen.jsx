@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { db, auth } from '../../firebase/config';
 import {
   collection, doc, addDoc, query, orderBy, onSnapshot,
-  serverTimestamp, getDocs, where, setDoc, deleteDoc, writeBatch
+  serverTimestamp, getDocs, where, setDoc, writeBatch
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -13,10 +13,10 @@ export default function SupportScreen({ onBack }) {
   const [user, setUser] = useState(null);
   const [ticketId, setTicketId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [cooldown, setCooldown] = useState(0); // نظام التهدئة
+  const [cooldownText, setCooldownText] = useState(''); // لنص التنبيه بالوقت المتبقي
   const bottomRef = useRef(null);
 
-  // رسائل اقتراحية سريعة
+  // --- 1. الرسائل الاقتراحية ---
   const suggestions = [
     "واجهت مشكلة في الدفع 💳",
     "التطبيق يتوقف فجأة ⚠️",
@@ -24,14 +24,7 @@ export default function SupportScreen({ onBack }) {
     "شكراً لكم على الخدمة 🌟"
   ];
 
-  // مؤقت لتعطيل الإرسال
-  useEffect(() => {
-    if (cooldown > 0) {
-      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [cooldown]);
-
+  // --- 2. إدارة حالة المستخدم ---
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
       if (u) {
@@ -48,6 +41,7 @@ export default function SupportScreen({ onBack }) {
     return () => unsub();
   }, []);
 
+  // --- 3. مراقبة التذاكر والرسائل والحذف التلقائي ---
   useEffect(() => {
     if (!user?.uid) return;
     let unsubMessages = () => {};
@@ -77,6 +71,7 @@ export default function SupportScreen({ onBack }) {
             userUsername: username,
             status: 'open',
             createdAt: serverTimestamp(),
+            lastMessageAt: null
           });
           setTicketId(tid);
         }
@@ -95,10 +90,19 @@ export default function SupportScreen({ onBack }) {
           setMessages(msgs);
           setLoading(false);
 
-          // منطق الحذف التلقائي: إذا كان آخر رسالة من الأدمن، انتظر 15 دقيقة ثم احذف
-          const lastMsg = msgs[msgs.length - 1];
-          if (lastMsg && lastMsg.sender === 'admin') {
-            handleAutoDelete(tid, msgs);
+          // --- نظام الحذف التلقائي بعد 15 دقيقة من رد الإدارة ---
+          if (msgs.length > 0) {
+            const lastMsg = msgs[msgs.length - 1];
+            if (lastMsg.sender === 'admin') {
+              const diffMinutes = (Date.now() - lastMsg.createdAt.getTime()) / (1000 * 60);
+              if (diffMinutes >= 15) {
+                const batch = writeBatch(db);
+                snapshot.docs.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                // تحديث التذكرة لتمكين الإرسال مجدداً بعد الحذف
+                await setDoc(doc(db, 'supportTickets', tid), { lastMessageAt: null }, { merge: true });
+              }
+            }
           }
 
           setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
@@ -113,19 +117,32 @@ export default function SupportScreen({ onBack }) {
     return () => unsubMessages();
   }, [user?.uid]);
 
-  // دالة الحذف التلقائي (اختياري تنفيذها من جهة العميل أو Cloud Functions أفضل)
-  const handleAutoDelete = (tid, msgs) => {
-    // هنا نقوم بجدولة عملية حذف بسيطة إذا رغبنا (للتجربة)
-    // ملاحظة: الحذف الحقيقي يفضل أن يكون عبر Backend، لكن هنا سنحذف الرسائل محلياً لراحة المستخدم
-    console.log("سيتم تنظيف الدردشة قريباً...");
-  };
-
+  // --- 4. دالة الإرسال مع التقييد الحقيقي (5 دقائق) ---
   const handleSend = useCallback(async (textOverride) => {
     const textToSend = textOverride || inputText;
-    if (!textToSend.trim() || !ticketId || !user || cooldown > 0) return;
+    if (!textToSend.trim() || !ticketId || !user || sending) return;
 
-    setSending(true);
     try {
+      setSending(true);
+      
+      // جلب بيانات التذكرة للتحقق من التوقيت الحقيقي
+      const ticketSnap = await getDocs(query(collection(db, 'supportTickets'), where('userId', '==', user.uid)));
+      const ticketData = ticketSnap.docs[0]?.data();
+
+      if (ticketData?.lastMessageAt) {
+        const lastTime = ticketData.lastMessageAt.toMillis();
+        const diffMinutes = (Date.now() - lastTime) / (1000 * 60);
+
+        if (diffMinutes < 5) {
+          const remaining = Math.ceil(5 - diffMinutes);
+          setCooldownText(`يرجى الانتظار ${remaining} دقائق لإرسال رسالة أخرى 🛡️`);
+          setTimeout(() => setCooldownText(''), 5000);
+          setSending(false);
+          return;
+        }
+      }
+
+      // إضافة الرسالة
       await addDoc(collection(db, 'supportTickets', ticketId, 'messages'), {
         sender: 'user',
         text: textToSend.trim(),
@@ -133,20 +150,36 @@ export default function SupportScreen({ onBack }) {
         read: false,
         notifiedAdmin: false,
       });
+
+      // تحديث "قفل" التوقيت في Firestore
       await setDoc(doc(db, 'supportTickets', ticketId), { 
-        createdAt: serverTimestamp(),
-        lastMessageAt: serverTimestamp() 
+        lastMessageAt: serverTimestamp(),
+        status: 'open' 
       }, { merge: true });
-      
+
       setInputText('');
-      setCooldown(30); // قفل الإرسال لمدة 30 ثانية
     } catch (err) {
       console.error('Send error:', err);
-      alert('فشل إرسال الرسالة.');
+      alert('فشل في الإرسال، حاول مجدداً.');
     } finally {
       setSending(false);
     }
-  }, [inputText, ticketId, user, cooldown]);
+  }, [inputText, ticketId, user, sending]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]" dir="rtl">
+        <p className="text-gray-500 font-medium">يجب تسجيل الدخول لاستخدام الدعم الفني</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F8FAFC]" dir="rtl">
@@ -157,25 +190,25 @@ export default function SupportScreen({ onBack }) {
             <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
           <div className="flex-1">
-            <h1 className="text-lg font-bold text-gray-900">مركز المساعدة</h1>
+            <h1 className="text-lg font-bold text-gray-900">الدعم المباشر</h1>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-              <span className="text-[11px] text-gray-500 font-medium">نتصل الآن.. نرد خلال دقائق</span>
+              <span className="text-[11px] text-gray-500 font-medium">المطور متصل الآن</span>
             </div>
           </div>
         </div>
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-40">
-        {/* بطاقة الإرشاد والوضوح */}
+        {/* نص التوضيح الأنيق */}
         {!loading && messages.length === 0 && (
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-4">
+          <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 animate-in fade-in zoom-in duration-500">
             <div className="flex gap-3">
               <span className="text-xl">💡</span>
               <div>
-                <h3 className="text-sm font-bold text-blue-900 mb-1">للحصول على رد سريع</h3>
-                <p className="text-xs text-blue-700 leading-relaxed">
-                  من فضلك اشرح مشكلتك بالتفصيل في <b>رسالة واحدة فقط</b>. سيتم مراجعة طلبك والرد عليك هنا من قبل المطور.
+                <h3 className="text-sm font-bold text-indigo-900 mb-1">نظام الرسالة الواحدة</h3>
+                <p className="text-xs text-indigo-700 leading-relaxed">
+                  لضمان سرعة الاستجابة، يرجى كتابة مشكلتك في <b>رسالة واحدة مفصلة</b>. سيتم تقييد الإرسال لمدة 5 دقائق بعد كل رسالة.
                 </p>
               </div>
             </div>
@@ -189,7 +222,7 @@ export default function SupportScreen({ onBack }) {
               <button 
                 key={i}
                 onClick={() => handleSend(s)}
-                className="text-[11px] text-right p-3 bg-white border border-gray-100 rounded-xl text-gray-600 hover:border-blue-300 transition-colors active:bg-blue-50"
+                className="text-[11px] text-right p-3 bg-white border border-gray-100 rounded-xl text-gray-600 hover:border-indigo-200 transition-all active:bg-indigo-50"
               >
                 {s}
               </button>
@@ -197,15 +230,16 @@ export default function SupportScreen({ onBack }) {
           </div>
         )}
 
+        {/* قائمة الرسائل */}
         {messages.map((msg) => {
           const isUser = msg.sender === 'user';
           return (
-            <div key={msg.id} className={`flex ${isUser ? 'justify-start' : 'justify-end animate-in fade-in slide-in-from-bottom-2'}`}>
-              <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-[13.5px] shadow-sm ${
-                isUser ? 'bg-white text-gray-800 rounded-br-none border border-gray-50' : 'bg-blue-600 text-white rounded-bl-none'
+            <div key={msg.id} className={`flex ${isUser ? 'justify-start' : 'justify-end'}`}>
+              <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-[13.5px] shadow-sm animate-in slide-in-from-bottom-1 ${
+                isUser ? 'bg-white text-gray-800 rounded-br-none border border-gray-50' : 'bg-indigo-600 text-white rounded-bl-none'
               }`}>
-                <p>{msg.text}</p>
-                <span className={`text-[9px] block mt-1 opacity-60 ${isUser ? 'text-gray-500' : 'text-white'}`}>
+                <p className="leading-relaxed">{msg.text}</p>
+                <span className={`text-[9px] block mt-1 opacity-60 ${isUser ? 'text-gray-400' : 'text-indigo-100'}`}>
                   {msg.createdAt.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
@@ -217,10 +251,10 @@ export default function SupportScreen({ onBack }) {
 
       {/* Input Area */}
       <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-gray-100 px-4 py-4 pb-10 z-30">
-        {cooldown > 0 && (
-          <div className="text-center mb-2">
-            <span className="text-[10px] text-orange-600 font-medium bg-orange-50 px-3 py-1 rounded-full">
-              يرجى الانتظار {cooldown} ثانية لإرسال رسالة أخرى ⏳
+        {cooldownText && (
+          <div className="text-center mb-2 animate-bounce">
+            <span className="text-[10px] text-red-600 font-bold bg-red-50 px-3 py-1 rounded-full border border-red-100">
+              {cooldownText}
             </span>
           </div>
         )}
@@ -230,18 +264,18 @@ export default function SupportScreen({ onBack }) {
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              disabled={cooldown > 0}
-              placeholder={cooldown > 0 ? "نظام الحماية مفعل..." : "اكتب مشكلتك هنا بالتفصيل..."}
+              onKeyDown={handleKeyDown}
+              placeholder="اكتب رسالتك بالتفصيل..."
               rows={1}
-              className="w-full bg-transparent px-3 py-2 text-sm text-gray-900 outline-none resize-none disabled:opacity-50"
+              className="w-full bg-transparent px-3 py-2 text-sm text-gray-900 outline-none resize-none"
               style={{ minHeight: '40px' }}
             />
           </div>
           <button
             onClick={() => handleSend()}
-            disabled={sending || !inputText.trim() || cooldown > 0}
+            disabled={sending || !inputText.trim()}
             className={`w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-90 ${
-              cooldown > 0 ? 'bg-gray-200 text-gray-400' : 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+              !inputText.trim() ? 'bg-gray-200 text-gray-400' : 'bg-indigo-600 text-white shadow-lg shadow-indigo-100'
             }`}
           >
             {sending ? (
