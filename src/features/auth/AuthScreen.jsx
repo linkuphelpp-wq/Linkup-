@@ -1,14 +1,10 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Shield, Users,
-  MessageCircle, CheckCircle2, Loader2, Phone, Hash, Globe
-} from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, Shield, Users, MessageCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { auth, db } from '../../firebase/config';
 import {
   signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification,
-  signInWithPopup, GoogleAuthProvider,
-  signInWithPhoneNumber, RecaptchaVerifier
+  signInWithPopup, GoogleAuthProvider
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -31,16 +27,11 @@ const Button = ({ children, className, disabled, ...props }) => (
 
 export default function AuthScreen({ onLogin, onForgotPassword }) {
   const [isLogin, setIsLogin] = useState(true);
-  const [authMode, setAuthMode] = useState('email'); // 'email' | 'phone'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [phoneCountry, setPhoneCountry] = useState('+966');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [confirmationResult, setConfirmationResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -48,7 +39,6 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
   const [isLogoPressed, setIsLogoPressed] = useState(false);
   const [exiting, setExiting] = useState(false);
   const logoRef = useRef(null);
-  const recaptchaVerifierRef = useRef(null);
 
   const handleLogoClick = (e) => {
     if (!logoRef.current) return;
@@ -68,85 +58,7 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
       case 'auth/weak-password': return 'كلمة المرور ضعيفة جداً، يجب أن تكون 6 أحرف على الأقل';
       case 'auth/too-many-requests': return 'محاولات كثيرة، حاول مرة أخرى لاحقاً';
       case 'auth/invalid-email': return 'صيغة البريد الإلكتروني غير صالحة';
-      case 'auth/invalid-phone-number': return 'رقم الهاتف غير صالح';
-      case 'auth/invalid-verification-code': return 'رمز التحقق غير صحيح';
       default: return 'حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى';
-    }
-  };
-
-  const setupRecaptcha = () => {
-    if (!recaptchaVerifierRef.current) {
-      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => {}
-      });
-    }
-    return recaptchaVerifierRef.current;
-  };
-
-  const handleSendVerification = async () => {
-    setError('');
-    const fullNumber = `${phoneCountry}${phoneNumber}`;
-    if (!phoneNumber.trim() || phoneNumber.length < 7) {
-      setError('يرجى إدخال رقم هاتف صالح');
-      return;
-    }
-    setLoading(true);
-    try {
-      const verifier = setupRecaptcha();
-      const result = await signInWithPhoneNumber(auth, fullNumber, verifier);
-      setConfirmationResult(result);
-      setSuccess('تم إرسال رمز التحقق إلى رقمك');
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      console.error(err);
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyCode = async () => {
-    setError('');
-    if (!verificationCode.trim() || verificationCode.length < 6) {
-      setError('يرجى إدخال رمز التحقق');
-      return;
-    }
-    if (!confirmationResult) {
-      setError('الرجاء إرسال رمز التحقق أولاً');
-      return;
-    }
-    setLoading(true);
-    try {
-      const { user } = await confirmationResult.confirm(verificationCode);
-      const ref = doc(db, 'users', user.uid);
-      if (!(await getDoc(ref)).exists()) {
-        const today = new Date().toISOString().split('T')[0];
-        await setDoc(ref, {
-          uid: user.uid,
-          email: user.email || '',
-          displayName: user.phoneNumber || '',
-          photoURL: '',
-          username: '',
-          status: 'online',
-          lastSeen: serverTimestamp(),
-          loginDates: [today],
-          loginCount: 1,
-          settings: { fontSize: 'medium', fontFamily: 'tajawal', muteMicOnJoin: false, speakerDefault: false },
-          contacts: [],
-          blockedUsers: [],
-          createdAt: serverTimestamp()
-        });
-      }
-      setExiting(true);
-      setTimeout(() => {
-        onLogin?.(user);
-      }, 500);
-    } catch (err) {
-      console.error(err);
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -231,18 +143,8 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
     }
   };
 
-  // تحديد موضع شريط التبويب بناءً على الوضع الحالي
-  const getTabPosition = () => {
-    if (authMode === 'email' && isLogin) return 'left-1.5';
-    if (authMode === 'email' && !isLogin) return 'left-[calc(33.33%+4px)]';
-    return 'left-[calc(66.66%+4px)]';
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden selection:bg-purple-200/50" dir="rtl">
-      {/* عنصر مخفي لـ reCAPTCHA */}
-      <div id="recaptcha-container"></div>
-
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-200 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-200 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
@@ -271,116 +173,39 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
                   <h1 className="mt-4 text-3xl font-black text-gray-800 tracking-tight">Link<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">Up</span></h1>
                 </div>
 
-                {/* أزرار التبويب الثلاثة */}
                 <div className="relative flex bg-gray-100 rounded-2xl p-1.5 mb-6 border border-gray-200">
-                  <div className={`absolute top-1.5 bottom-1.5 w-[calc(33.33%-4px)] rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 shadow-md transition-all duration-300 ease-out ${getTabPosition()}`} />
-                  <button
-                    type="button"
-                    onClick={() => { setAuthMode('email'); setIsLogin(true); setError(''); setSuccess(''); }}
-                    className={`relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${authMode === 'email' && isLogin ? 'text-white' : 'text-gray-500 hover:text-gray-700'}`}
-                  >
-                    <Mail className="w-4 h-4 inline ml-1" /> تسجيل
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setAuthMode('email'); setIsLogin(false); setError(''); setSuccess(''); }}
-                    className={`relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${authMode === 'email' && !isLogin ? 'text-white' : 'text-gray-500 hover:text-gray-700'}`}
-                  >
-                    <Users className="w-4 h-4 inline ml-1" /> جديد
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setAuthMode('phone'); setError(''); setSuccess(''); }}
-                    className={`relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${authMode === 'phone' ? 'text-white' : 'text-gray-500 hover:text-gray-700'}`}
-                  >
-                    <Phone className="w-4 h-4 inline ml-1" /> هاتف
-                  </button>
+                  <div className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 shadow-md transition-all duration-300 ease-out ${!isLogin ? 'left-1.5' : 'left-[calc(50%+3px)]'}`} />
+                  <button type="button" onClick={() => { setIsLogin(true); setError(''); setSuccess(''); }} className={`relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isLogin ? 'text-white' : 'text-gray-500 hover:text-gray-700'}`}>تسجيل الدخول</button>
+                  <button type="button" onClick={() => { setIsLogin(false); setError(''); setSuccess(''); }} className={`relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${!isLogin ? 'text-white' : 'text-gray-500 hover:text-gray-700'}`}>إنشاء حساب</button>
                 </div>
 
-                {/* نموذج البريد الإلكتروني (تسجيل الدخول وإنشاء حساب) */}
-                {authMode === 'email' && (
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="relative group/input">
-                      <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" />
-                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="البريد الإلكتروني" className="h-14 pr-12" required disabled={loading} />
-                    </div>
-                    
-                    <div className="relative group/input">
-                      <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" />
-                      <Input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="كلمة المرور" className="h-14 pr-12" required disabled={loading} />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 active:scale-90" disabled={loading}>{showPassword ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}</button>
-                    </div>
-
-                    {!isLogin && <div className="relative group/input">
-                      <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" />
-                      <Input type={showConfirm ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="تأكيد كلمة المرور" className="h-14 pr-12" required disabled={loading} />
-                      <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 active:scale-90" disabled={loading}>{showConfirm ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}</button>
-                    </div>}
-
-                    {isLogin && <button type="button" onClick={onForgotPassword} className="text-xs text-purple-500 hover:text-purple-700 font-medium text-left transition-all hover:underline active:scale-95 origin-left" disabled={loading}>نسيت كلمة المرور؟</button>}
-                    
-                    {error && <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2"><Shield className="w-4 h-4 shrink-0"/>{error}</div>}
-                    {success && <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2"><CheckCircle2 className="w-4 h-4 shrink-0"/>{success}</div>}
-                    
-                    <Button type="submit" disabled={loading} className="w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group/btn">
-                      {loading ? <Loader2 className="w-5 h-5 animate-spin"/> : <>{isLogin ? 'تسجيل الدخول' : 'إنشاء حساب'}<ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"/></>}
-                    </Button>
-                  </form>
-                )}
-
-                {/* نموذج رقم الهاتف */}
-                {authMode === 'phone' && (
-                  <div className="space-y-4">
-                    <div className="flex gap-2">
-                      <div className="relative group/input w-[30%]">
-                        <Globe className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" />
-                        <input
-                          type="text"
-                          value={phoneCountry}
-                          onChange={e => setPhoneCountry(e.target.value)}
-                          placeholder="+966"
-                          className="w-full h-14 pr-8 pl-2 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all text-center text-sm"
-                          disabled={loading || confirmationResult}
-                        />
-                      </div>
-                      <div className="relative group/input flex-1">
-                        <Phone className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" />
-                        <input
-                          type="tel"
-                          value={phoneNumber}
-                          onChange={e => setPhoneNumber(e.target.value)}
-                          placeholder="رقم الهاتف (5xxxxxxxx)"
-                          className="w-full h-14 pr-12 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all"
-                          disabled={loading || confirmationResult}
-                        />
-                      </div>
-                    </div>
-                    {!confirmationResult ? (
-                      <Button onClick={handleSendVerification} disabled={loading || !phoneNumber.trim()} className="w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
-                        {loading ? <Loader2 className="w-5 h-5 animate-spin"/> : <>إرسال رمز التحقق<ArrowRight className="w-4 h-4"/></>}
-                      </Button>
-                    ) : (
-                      <>
-                        <div className="relative group/input">
-                          <Hash className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" />
-                          <input
-                            type="text"
-                            value={verificationCode}
-                            onChange={e => setVerificationCode(e.target.value)}
-                            placeholder="رمز التحقق"
-                            className="w-full h-14 pr-12 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all"
-                            disabled={loading}
-                          />
-                        </div>
-                        <Button onClick={handleVerifyCode} disabled={loading || !verificationCode.trim()} className="w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2">
-                          {loading ? <Loader2 className="w-5 h-5 animate-spin"/> : <>تأكيد الرمز<CheckCircle2 className="w-4 h-4"/></>}
-                        </Button>
-                      </>
-                    )}
-                    {error && <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2"><Shield className="w-4 h-4 shrink-0"/>{error}</div>}
-                    {success && <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2"><CheckCircle2 className="w-4 h-4 shrink-0"/>{success}</div>}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="relative group/input">
+                    <Mail className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" />
+                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="البريد الإلكتروني" className="h-14 pr-12" required disabled={loading} />
                   </div>
-                )}
+                  
+                  <div className="relative group/input">
+                    <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" />
+                    <Input type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="كلمة المرور" className="h-14 pr-12" required disabled={loading} />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 active:scale-90" disabled={loading}>{showPassword ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}</button>
+                  </div>
+
+                  {!isLogin && <div className="relative group/input">
+                    <Lock className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" />
+                    <Input type={showConfirm ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="تأكيد كلمة المرور" className="h-14 pr-12" required disabled={loading} />
+                    <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 active:scale-90" disabled={loading}>{showConfirm ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}</button>
+                  </div>}
+
+                  {isLogin && <button type="button" onClick={onForgotPassword} className="text-xs text-purple-500 hover:text-purple-700 font-medium text-left transition-all hover:underline active:scale-95 origin-left" disabled={loading}>نسيت كلمة المرور؟</button>}
+                  
+                  {error && <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2"><Shield className="w-4 h-4 shrink-0"/>{error}</div>}
+                  {success && <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2"><CheckCircle2 className="w-4 h-4 shrink-0"/>{success}</div>}
+                  
+                  <Button type="submit" disabled={loading} className="w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group/btn">
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin"/> : <>{isLogin ? 'تسجيل الدخول' : 'إنشاء حساب'}<ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform"/></>}
+                  </Button>
+                </form>
 
                 <div className="flex items-center gap-4 my-6"><div className="flex-1 h-px bg-gray-200"/><span className="text-xs text-gray-400 font-medium">أو</span><div className="flex-1 h-px bg-gray-200"/></div>
                 
