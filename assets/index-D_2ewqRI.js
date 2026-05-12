@@ -55894,7 +55894,6 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 		setLoading(true);
 		try {
 			const { user } = await confirmationResult.confirm(verificationCode);
-			if (!user.emailVerified) {}
 			const ref = doc(db, "users", user.uid);
 			if (!(await getDoc(ref)).exists()) {
 				const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
