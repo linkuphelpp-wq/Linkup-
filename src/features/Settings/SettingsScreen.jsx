@@ -11,57 +11,39 @@ import { db, auth } from '../../firebase/config';
 import { collection, query, where, getDocs, writeBatch, doc } from 'firebase/firestore';
 
 /* ================================================================
-   DESIGN SYSTEM - Light Mode Focused
+   DESIGN SYSTEM
    ================================================================ */
 
 const colorThemes = {
   purple: {
-    gradient: 'from-violet-500 to-purple-600',
     iconBg: 'bg-gradient-to-br from-violet-500 to-purple-600',
     activeBg: 'bg-violet-600',
     text: 'text-violet-700',
-    lightBg: 'bg-violet-50',
-    border: 'border-violet-200',
   },
   blue: {
-    gradient: 'from-blue-500 to-indigo-600',
     iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600',
     activeBg: 'bg-blue-600',
     text: 'text-blue-700',
-    lightBg: 'bg-blue-50',
-    border: 'border-blue-200',
   },
   emerald: {
-    gradient: 'from-emerald-500 to-teal-600',
     iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-600',
     activeBg: 'bg-emerald-600',
     text: 'text-emerald-700',
-    lightBg: 'bg-emerald-50',
-    border: 'border-emerald-200',
   },
   amber: {
-    gradient: 'from-amber-500 to-orange-600',
     iconBg: 'bg-gradient-to-br from-amber-500 to-orange-600',
     activeBg: 'bg-amber-600',
     text: 'text-amber-700',
-    lightBg: 'bg-amber-50',
-    border: 'border-amber-200',
   },
   rose: {
-    gradient: 'from-rose-500 to-pink-600',
     iconBg: 'bg-gradient-to-br from-rose-500 to-pink-600',
     activeBg: 'bg-rose-600',
     text: 'text-rose-700',
-    lightBg: 'bg-rose-50',
-    border: 'border-rose-200',
   },
   slate: {
-    gradient: 'from-slate-500 to-slate-700',
     iconBg: 'bg-gradient-to-br from-slate-500 to-slate-700',
     activeBg: 'bg-slate-600',
     text: 'text-slate-700',
-    lightBg: 'bg-slate-50',
-    border: 'border-slate-200',
   },
 };
 
@@ -109,16 +91,8 @@ const modalContentVariants = {
    ================================================================ */
 
 const IconWrapper = ({ icon: Icon, theme = 'purple', size = 'md' }) => {
-  const sizeClasses = {
-    sm: 'w-9 h-9',
-    md: 'w-10 h-10',
-    lg: 'w-11 h-11',
-  };
-  const iconSizes = {
-    sm: 'w-[18px] h-[18px]',
-    md: 'w-5 h-5',
-    lg: 'w-6 h-6',
-  };
+  const sizeClasses = { sm: 'w-9 h-9', md: 'w-10 h-10', lg: 'w-11 h-11' };
+  const iconSizes = { sm: 'w-[18px] h-[18px]', md: 'w-5 h-5', lg: 'w-6 h-6' };
   const themeSet = colorThemes[theme] || colorThemes.purple;
 
   return (
@@ -129,29 +103,45 @@ const IconWrapper = ({ icon: Icon, theme = 'purple', size = 'md' }) => {
 };
 
 /*
-  TOGGLE SWITCH - FIXED
-  العرض الكلي: 48px (w-12)
-  الدائرة: 22px × 22px
-  عند الإغلاق: x = 3px ← الهامش الأيسر 3px، الهامش الأيمن = 48 - 3 - 22 = 23px ✓
-  عند الفتح: x = 23px ← الهامش الأيسر 23px، الهامش الأيمن = 48 - 23 - 22 = 3px ✓
-  overflow-hidden مضاف لضمان عدم تجاوز الحدود
+  ═══════════════════════════════════════════════════════════════
+  TOGGLE SWITCH — FIXED FOR RTL
+  ═══════════════════════════════════════════════════════════════
+  المشكلة: في RTL، framer-motion x يتعارض مع اتجاه الصفحة
+  الحل: عزل التوجل بـ dir="ltr" داخليًا + أبعاد دقيقة
+  
+  أبعاد الحاوية:  52px × 28px
+  أبعاد الدائرة:  22px × 22px
+  الهامش العمودي: (28 - 22) / 2 = 3px
+  الهامش الأفقي:  3px
+  مسار الحركة:    52 - 3 - 22 - 3 = 24px
+  
+  مغلق:  left = 3px,  x = 0  → الدائرة على اليسار
+  مفتوح: left = 3px,  x = 24 → الدائرة على اليمين
+  ═══════════════════════════════════════════════════════════════
 */
 const ToggleSwitch = ({ isToggled, onToggle, theme = 'purple', disabled = false }) => {
   const themeSet = colorThemes[theme] || colorThemes.purple;
 
   return (
     <button
+      dir="ltr"
+      type="button"
       onClick={(e) => { e.stopPropagation(); onToggle?.(); }}
       disabled={disabled}
-      className={`relative w-12 h-7 rounded-full transition-colors duration-300 shrink-0 overflow-hidden ${
-        isToggled ? themeSet.activeBg : 'bg-stone-300'
-      } ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+      className={`
+        relative w-[52px] h-7 rounded-full shrink-0 overflow-hidden
+        transition-colors duration-300 ease-out
+        ${isToggled ? themeSet.activeBg : 'bg-stone-300'}
+        ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer active:scale-95'}
+      `}
       aria-label={isToggled ? 'تفعيل' : 'إيقاف'}
+      aria-pressed={isToggled}
     >
       <motion.span
-        animate={{ x: isToggled ? 23 : 3 }}
-        transition={{ type: 'spring', stiffness: 550, damping: 28 }}
-        className="absolute top-[3px] w-[22px] h-[22px] bg-white rounded-full shadow-sm block"
+        initial={false}
+        animate={{ x: isToggled ? 24 : 0 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        className="absolute left-[3px] top-[3px] block w-[22px] h-[22px] bg-white rounded-full shadow-sm"
       />
     </button>
   );
@@ -175,9 +165,11 @@ const SettingRow = ({
       whileHover={disabled ? {} : { y: -2, boxShadow: '0 8px 24px -8px rgba(0,0,0,0.08)' }}
       whileTap={disabled ? {} : { scale: 0.98 }}
       onClick={disabled ? undefined : onClick}
-      className={`group relative overflow-hidden rounded-2xl bg-white border border-stone-200/80 transition-all duration-300 p-4 ${
-        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-stone-300 shadow-sm hover:shadow-md'
-      }`}
+      className={`
+        group relative overflow-hidden rounded-2xl bg-white border border-stone-200/80 
+        transition-all duration-300 p-4
+        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-stone-300 shadow-sm hover:shadow-md'}
+      `}
     >
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:from-stone-50/60 group-hover:to-stone-100/30 transition-all duration-500" />
       <div className="relative flex items-center gap-3.5">
@@ -219,11 +211,7 @@ const SectionHeader = ({ title, icon: Icon }) => (
 );
 
 const SimpleModal = ({ open, onClose, title, children, maxWidth = 'sm', icon: Icon }) => {
-  const maxWidthClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-  };
+  const maxWidthClasses = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg' };
 
   return (
     <AnimatePresence>
@@ -263,9 +251,7 @@ const SimpleModal = ({ open, onClose, title, children, maxWidth = 'sm', icon: Ic
                 <X className="w-5 h-5" />
               </motion.button>
             </div>
-            <div className="p-5">
-              {children}
-            </div>
+            <div className="p-5">{children}</div>
           </motion.div>
         </motion.div>
       )}
@@ -298,13 +284,10 @@ const SelectionItem = ({ label, desc, isSelected, onClick, icon, featured }) => 
       )}
       <div className="text-right">
         <div className="flex items-center gap-2">
-          <span className={`text-sm font-bold ${isSelected ? 'text-violet-800' : 'text-stone-700'}`}>
-            {label}
-          </span>
+          <span className={`text-sm font-bold ${isSelected ? 'text-violet-800' : 'text-stone-700'}`}>{label}</span>
           {featured && (
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">
-              <Crown className="w-3 h-3" />
-              مميز
+              <Crown className="w-3 h-3" /> مميز
             </span>
           )}
         </div>
@@ -328,10 +311,7 @@ const DangerButton = ({ onClick, disabled, loading, children }) => (
   >
     {loading ? (
       <span className="flex items-center justify-center gap-2">
-        <motion.span
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-        >
+        <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
           <RefreshCw className="w-4 h-4" />
         </motion.span>
         جارٍ المعالجة...
@@ -448,7 +428,7 @@ export default function SettingsScreen({
         animate="visible"
         className="px-4 space-y-6 max-w-lg mx-auto"
       >
-        {/* Profile Card */}
+        {/* Profile */}
         <motion.div variants={itemVariants}>
           <SettingRow
             icon={User}
@@ -459,139 +439,49 @@ export default function SettingsScreen({
           />
         </motion.div>
 
-        {/* Appearance Section */}
+        {/* Appearance */}
         <div>
           <SectionHeader title="المظهر والعرض" icon={Palette} />
           <div className="space-y-2.5">
-            <SettingRow
-              icon={Globe}
-              label="لغة التطبيق"
-              desc={languages.find(l => l.v === 'ar')?.l}
-              onClick={() => setShowLanguageModal(true)}
-              theme="blue"
-            />
-            <SettingRow
-              icon={Type}
-              label="حجم الخط"
-              desc={sizes.find(s => s.v === fontSize)?.l || 'متوسط'}
-              onClick={() => setShowSizeModal(true)}
-              theme="blue"
-            />
-            <SettingRow
-              icon={Palette}
-              label="نوع الخط"
-              desc={fonts.find(f => f.v === fontFamily)?.l || 'Tajawal'}
-              onClick={() => setShowFontModal(true)}
-              theme="blue"
-            />
-            <SettingRow
-              icon={TabletSmartphone}
-              label="وضع الشاشات الصغيرة"
-              desc="تصغير الأبعاد لشاشات أصغر"
-              toggle
-              isToggled={compactMode}
-              onToggle={() => setCompactMode(!compactMode)}
-              theme="emerald"
-            />
+            <SettingRow icon={Globe} label="لغة التطبيق" desc={languages.find(l => l.v === 'ar')?.l} onClick={() => setShowLanguageModal(true)} theme="blue" />
+            <SettingRow icon={Type} label="حجم الخط" desc={sizes.find(s => s.v === fontSize)?.l || 'متوسط'} onClick={() => setShowSizeModal(true)} theme="blue" />
+            <SettingRow icon={Palette} label="نوع الخط" desc={fonts.find(f => f.v === fontFamily)?.l || 'Tajawal'} onClick={() => setShowFontModal(true)} theme="blue" />
+            <SettingRow icon={TabletSmartphone} label="وضع الشاشات الصغيرة" desc="تصغير الأبعاد لشاشات أصغر" toggle isToggled={compactMode} onToggle={() => setCompactMode(!compactMode)} theme="emerald" />
           </div>
         </div>
 
-        {/* Calls Section */}
+        {/* Calls */}
         <div>
           <SectionHeader title="المكالمات والصوت" icon={Volume2} />
           <div className="space-y-2.5">
-            <SettingRow
-              icon={Mic}
-              label="كتم الميكروفون تلقائياً"
-              desc="عند الانضمام للمكالمات"
-              toggle
-              isToggled={muteMicOnJoin}
-              onToggle={onToggleMuteMic}
-              theme="amber"
-            />
-            <SettingRow
-              icon={Speaker}
-              label="مكبر الصوت افتراضياً"
-              desc="تفعيل السماعة الخارجية تلقائياً"
-              toggle
-              isToggled={speakerDefault}
-              onToggle={onToggleSpeaker}
-              theme="amber"
-            />
+            <SettingRow icon={Mic} label="كتم الميكروفون تلقائياً" desc="عند الانضمام للمكالمات" toggle isToggled={muteMicOnJoin} onToggle={onToggleMuteMic} theme="amber" />
+            <SettingRow icon={Speaker} label="مكبر الصوت افتراضياً" desc="تفعيل السماعة الخارجية تلقائياً" toggle isToggled={speakerDefault} onToggle={onToggleSpeaker} theme="amber" />
           </div>
         </div>
 
-        {/* Privacy Section */}
+        {/* Privacy */}
         <div>
           <SectionHeader title="الخصوصية والأمان" icon={ShieldCheck} />
           <div className="space-y-2.5">
-            <SettingRow
-              icon={Lock}
-              label="قفل التطبيق"
-              desc="حماية إضافية برمز سري أو بصمة"
-              onClick={onOpenAppLock}
-              theme="rose"
-            />
-            <SettingRow
-              icon={RefreshCw}
-              label="إدارة البيانات"
-              desc="التحكم في التخزين والذاكرة المؤقتة"
-              onClick={onOpenDataManagement}
-              theme="rose"
-            />
-            <SettingRow
-              icon={Trash2}
-              label="إعادة ضبط التطبيق"
-              desc="مسح جميع المحادثات والبيانات نهائياً"
-              onClick={() => setShowResetModal(true)}
-              theme="rose"
-            />
+            <SettingRow icon={Lock} label="قفل التطبيق" desc="حماية إضافية برمز سري أو بصمة" onClick={onOpenAppLock} theme="rose" />
+            <SettingRow icon={RefreshCw} label="إدارة البيانات" desc="التحكم في التخزين والذاكرة المؤقتة" onClick={onOpenDataManagement} theme="rose" />
+            <SettingRow icon={Trash2} label="إعادة ضبط التطبيق" desc="مسح جميع المحادثات والبيانات نهائياً" onClick={() => setShowResetModal(true)} theme="rose" />
           </div>
         </div>
 
-        {/* More Section */}
+        {/* More */}
         <div>
           <SectionHeader title="المزيد" icon={Sparkles} />
           <div className="space-y-2.5">
-            <SettingRow
-              icon={HelpCircle}
-              label="تواصل مع المطور"
-              desc="ملاحظات، اقتراحات، أو الإبلاغ عن مشكلة"
-              onClick={onOpenSupport}
-              theme="purple"
-            />
-            <SettingRow
-              icon={Share2}
-              label="شارك التطبيق"
-              desc="دع أصدقاءك ينضمون إلى LinkUp"
-              onClick={() => navigator.share?.({ title: 'LinkUp', url: window.location.origin }).catch(() => {})}
-              theme="blue"
-            />
-            <SettingRow
-              icon={Zap}
-              label="تكوين شراكة"
-              desc="انضم كشريك رسمي للتطبيق"
-              onClick={onOpenPartner}
-              theme="emerald"
-            />
-            {isAdmin && (
-              <SettingRow
-                icon={Shield}
-                label="لوحة الإدارة"
-                desc="إدارة المستخدمين والمحتوى والإحصائيات"
-                onClick={onOpenAdmin}
-                theme="amber"
-                badge="مسؤول"
-              />
-            )}
+            <SettingRow icon={HelpCircle} label="تواصل مع المطور" desc="ملاحظات، اقتراحات، أو الإبلاغ عن مشكلة" onClick={onOpenSupport} theme="purple" />
+            <SettingRow icon={Share2} label="شارك التطبيق" desc="دع أصدقاءك ينضمون إلى LinkUp" onClick={() => navigator.share?.({ title: 'LinkUp', url: window.location.origin }).catch(() => {})} theme="blue" />
+            <SettingRow icon={Zap} label="تكوين شراكة" desc="انضم كشريك رسمي للتطبيق" onClick={onOpenPartner} theme="emerald" />
+            {isAdmin && <SettingRow icon={Shield} label="لوحة الإدارة" desc="إدارة المستخدمين والمحتوى والإحصائيات" onClick={onOpenAdmin} theme="amber" badge="مسؤول" />}
           </div>
         </div>
 
         {/* Info Cards */}
-        <motion.div
-          variants={itemVariants}
-          className="grid grid-cols-3 gap-2.5 mt-6"
-        >
+        <motion.div variants={itemVariants} className="grid grid-cols-3 gap-2.5 mt-6">
           {[
             { label: 'من هو أثير؟', onClick: onOpenAtheer, theme: 'purple', icon: Sparkles },
             { label: 'من نحن', onClick: onOpenAbout, theme: 'blue', icon: Globe },
@@ -604,148 +494,73 @@ export default function SettingsScreen({
               onClick={item.onClick}
               className="relative overflow-hidden rounded-2xl p-4 bg-white border border-stone-200 shadow-sm hover:shadow-md transition-all duration-300 group text-center"
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${colorThemes[item.theme].gradient} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-300`} />
+              <div className={`absolute inset-0 bg-gradient-to-br ${colorThemes[item.theme].iconBg.replace('bg-gradient-to-br ', '')} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-300`} />
               <item.icon className={`w-5 h-5 mx-auto mb-2 text-stone-400 group-hover:${colorThemes[item.theme].text} transition-colors`} />
-              <span className="relative text-xs font-bold text-stone-700 group-hover:text-stone-900 transition-colors block">
-                {item.label}
-              </span>
+              <span className="relative text-xs font-bold text-stone-700 group-hover:text-stone-900 transition-colors block">{item.label}</span>
             </motion.button>
           ))}
         </motion.div>
 
         {/* Footer */}
         <motion.div variants={itemVariants} className="text-center py-6">
-          <p className="text-[11px] text-stone-400 font-medium">
-            LinkUp v2.0 · صُنع بإتقان
-          </p>
+          <p className="text-[11px] text-stone-400 font-medium">LinkUp v2.0 · صُنع بإتقان</p>
         </motion.div>
       </motion.div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-2xl border-t border-stone-200/60 px-6 py-3 flex items-center justify-between shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)]"
-        style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
-      >
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.92 }}
-          onClick={onBack}
-          className="p-2.5 rounded-xl hover:bg-stone-100 active:bg-stone-200 transition-colors"
-        >
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-2xl border-t border-stone-200/60 px-6 py-3 flex items-center justify-between shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)]" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+        <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }} onClick={onBack} className="p-2.5 rounded-xl hover:bg-stone-100 active:bg-stone-200 transition-colors">
           <ArrowLeft className="w-6 h-6 text-stone-700" />
         </motion.button>
         <span className="text-sm font-semibold text-stone-500">القائمة الرئيسية</span>
         {isAdmin ? (
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
-            onClick={onOpenAdmin}
-            className="p-2.5 rounded-xl bg-violet-100 hover:bg-violet-200 text-violet-700 transition-colors"
-          >
+          <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }} onClick={onOpenAdmin} className="p-2.5 rounded-xl bg-violet-100 hover:bg-violet-200 text-violet-700 transition-colors">
             <Shield className="w-6 h-6" />
           </motion.button>
-        ) : (
-          <div className="w-11" />
-        )}
+        ) : <div className="w-11" />}
       </div>
 
-      {/* Language Modal */}
+      {/* Modals */}
       <SimpleModal open={showLanguageModal} onClose={() => setShowLanguageModal(false)} title="لغة التطبيق" icon={Globe}>
         <div className="space-y-2.5">
-          {languages.map(lang => (
-            <SelectionItem
-              key={lang.v}
-              label={lang.l}
-              desc={lang.desc}
-              icon={lang.flag}
-              isSelected={lang.v === 'ar'}
-              onClick={() => setShowLanguageModal(false)}
-            />
-          ))}
+          {languages.map(lang => <SelectionItem key={lang.v} label={lang.l} desc={lang.desc} icon={lang.flag} isSelected={lang.v === 'ar'} onClick={() => setShowLanguageModal(false)} />)}
         </div>
       </SimpleModal>
 
-      {/* Font Size Modal */}
       <SimpleModal open={showSizeModal} onClose={() => setShowSizeModal(false)} title="حجم الخط" icon={Type}>
         <div className="space-y-2.5">
-          {sizes.map(s => (
-            <SelectionItem
-              key={s.v}
-              label={s.l}
-              desc={s.desc}
-              isSelected={fontSize === s.v}
-              onClick={() => { onSelectFontSize?.(s.v); setShowSizeModal(false); }}
-            />
-          ))}
+          {sizes.map(s => <SelectionItem key={s.v} label={s.l} desc={s.desc} isSelected={fontSize === s.v} onClick={() => { onSelectFontSize?.(s.v); setShowSizeModal(false); }} />)}
         </div>
       </SimpleModal>
 
-      {/* Font Family Modal */}
       <SimpleModal open={showFontModal} onClose={() => setShowFontModal(false)} title="نوع الخط" icon={Palette}>
         <div className="space-y-2.5">
-          {fonts.map(f => (
-            <SelectionItem
-              key={f.v}
-              label={f.l}
-              desc={f.desc}
-              isSelected={fontFamily === f.v}
-              featured={f.featured}
-              onClick={() => { onSelectFontFamily?.(f.v); setShowFontModal(false); }}
-            />
-          ))}
+          {fonts.map(f => <SelectionItem key={f.v} label={f.l} desc={f.desc} isSelected={fontFamily === f.v} featured={f.featured} onClick={() => { onSelectFontFamily?.(f.v); setShowFontModal(false); }} />)}
         </div>
       </SimpleModal>
 
-      {/* Reset Confirmation Modal */}
       <SimpleModal open={showResetModal} onClose={() => { setShowResetModal(false); setResetText(''); }} title="تأكيد إعادة الضبط" icon={AlertTriangle} maxWidth="md">
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="w-20 h-20 rounded-3xl bg-red-50 flex items-center justify-center border-4 border-red-100"
-            >
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} className="w-20 h-20 rounded-3xl bg-red-50 flex items-center justify-center border-4 border-red-100">
               <AlertTriangle className="w-10 h-10 text-red-500" strokeWidth={2} />
             </motion.div>
             <div className="text-center">
               <p className="text-base font-bold text-stone-800 mb-1">هذا الإجراء لا يمكن التراجع عنه</p>
-              <p className="text-sm text-stone-500 leading-relaxed max-w-xs mx-auto">
-                سيتم حذف جميع محادثاتك وبياناتك المحلية بشكل نهائي. اكتب كلمة "حذف" للتأكيد.
-              </p>
+              <p className="text-sm text-stone-500 leading-relaxed max-w-xs mx-auto">سيتم حذف جميع محادثاتك وبياناتك المحلية بشكل نهائي. اكتب كلمة "حذف" للتأكيد.</p>
             </div>
           </div>
-
           <div className="relative">
-            <input
-              value={resetText}
-              onChange={e => setResetText(e.target.value)}
-              placeholder='اكتب "حذف" هنا للتأكيد...'
-              className="w-full h-14 px-5 rounded-2xl bg-stone-50 border-2 border-stone-200 focus:border-red-400 focus:outline-none focus:ring-4 focus:ring-red-100 text-center text-lg font-bold text-stone-800 placeholder:font-normal placeholder:text-stone-400 transition-all"
-              autoFocus
-              dir="rtl"
-            />
+            <input value={resetText} onChange={e => setResetText(e.target.value)} placeholder='اكتب "حذف" هنا للتأكيد...' className="w-full h-14 px-5 rounded-2xl bg-stone-50 border-2 border-stone-200 focus:border-red-400 focus:outline-none focus:ring-4 focus:ring-red-100 text-center text-lg font-bold text-stone-800 placeholder:font-normal placeholder:text-stone-400 transition-all" autoFocus dir="rtl" />
             {resetText.trim() === 'حذف' && (
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2"
-              >
+              <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="absolute left-4 top-1/2 -translate-y-1/2">
                 <Check className="w-6 h-6 text-red-500" strokeWidth={3} />
               </motion.div>
             )}
           </div>
-
           <div className="flex gap-3">
-            <motion.button
-              whileTap={{ scale: 0.96 }}
-              onClick={() => { setShowResetModal(false); setResetText(''); }}
-              className="flex-1 h-12 rounded-xl border-2 border-stone-200 bg-white hover:bg-stone-50 font-bold text-stone-700 transition-all"
-            >
-              إلغاء
-            </motion.button>
-            <DangerButton onClick={handleResetApp} disabled={resetText.trim() !== 'حذف'} loading={resetLoading}>
-              تأكيد الحذف
-            </DangerButton>
+            <motion.button whileTap={{ scale: 0.96 }} onClick={() => { setShowResetModal(false); setResetText(''); }} className="flex-1 h-12 rounded-xl border-2 border-stone-200 bg-white hover:bg-stone-50 font-bold text-stone-700 transition-all">إلغاء</motion.button>
+            <DangerButton onClick={handleResetApp} disabled={resetText.trim() !== 'حذف'} loading={resetLoading}>تأكيد الحذف</DangerButton>
           </div>
         </div>
       </SimpleModal>
