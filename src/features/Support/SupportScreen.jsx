@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { db, auth } from '../../firebase/config';
 import {
   collection, doc, addDoc, query, orderBy, onSnapshot,
-  serverTimestamp, getDocs, where, setDoc, writeBatch
-} from 'firebase/firestore';
+  serverTimestamp, getDocs, getDoc, where, setDoc, writeBatch
+} from 'firebase/firestore'; // تم إضافة getDoc هنا
 import { onAuthStateChanged } from 'firebase/auth';
 
 export default function SupportScreen({ onBack }) {
@@ -16,7 +16,6 @@ export default function SupportScreen({ onBack }) {
   const [cooldownMinutes, setCooldownMinutes] = useState(0);
   const bottomRef = useRef(null);
 
-  // الرسائل المقترحة
   const suggestions = [
     "واجهت مشكلة في الدفع 💳",
     "التطبيق يتوقف فجأة ⚠️",
@@ -28,14 +27,9 @@ export default function SupportScreen({ onBack }) {
     const unsub = onAuthStateChanged(auth, (u) => {
       if (u) {
         setUser({
-          uid: u.uid,
-          email: u.email,
-          displayName: u.displayName || '',
-          photoURL: u.photoURL || '',
+          uid: u.uid, email: u.email, displayName: u.displayName || '', photoURL: u.photoURL || '',
         });
-      } else {
-        setUser(null);
-      }
+      } else setUser(null);
     });
     return () => unsub();
   }, []);
@@ -48,8 +42,8 @@ export default function SupportScreen({ onBack }) {
       try {
         const q = query(collection(db, 'supportTickets'), where('userId', '==', user.uid));
         const snap = await getDocs(q);
-
         let tid;
+        
         if (!snap.empty) {
           const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           docs.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
@@ -59,32 +53,21 @@ export default function SupportScreen({ onBack }) {
           const newTicketRef = doc(collection(db, 'supportTickets'));
           tid = newTicketRef.id;
           await setDoc(newTicketRef, {
-            userId: user.uid,
-            userEmail: user.email || '',
-            userName: user.displayName || '',
-            userUsername: username,
-            status: 'open',
-            createdAt: serverTimestamp(),
-            lastMessageAt: null
+            userId: user.uid, userEmail: user.email || '', userName: user.displayName || '',
+            userUsername: username, status: 'open', createdAt: serverTimestamp(), lastMessageAt: null
           });
         }
         setTicketId(tid);
 
-        const messagesQuery = query(
-          collection(db, 'supportTickets', tid, 'messages'),
-          orderBy('createdAt', 'asc')
-        );
-
+        const messagesQuery = query(collection(db, 'supportTickets', tid, 'messages'), orderBy('createdAt', 'asc'));
         unsubMessages = onSnapshot(messagesQuery, async (snapshot) => {
           const msgs = snapshot.docs.map((d) => ({
-            id: d.id,
-            ...d.data(),
-            createdAt: d.data().createdAt?.toDate?.() || new Date(),
+            id: d.id, ...d.data(), createdAt: d.data().createdAt?.toDate?.() || new Date(),
           }));
           setMessages(msgs);
           setLoading(false);
 
-          // الحذف التلقائي بعد 15 دقيقة من رد المدير
+          // الحذف التلقائي
           const lastMsg = msgs[msgs.length - 1];
           if (lastMsg && lastMsg.sender === 'admin') {
             const diff = (Date.now() - lastMsg.createdAt.getTime()) / (1000 * 60);
@@ -102,25 +85,26 @@ export default function SupportScreen({ onBack }) {
         setLoading(false);
       }
     };
-
     initTicket();
     return () => unsubMessages();
   }, [user?.uid]);
 
   const handleSend = useCallback(async (textOverride) => {
-    const textToSend = textOverride || inputText;
+    // التأكد من النص سواء كتبه يدوياً أو ضغط زر الاقتراح
+    const textToSend = typeof textOverride === 'string' ? textOverride : inputText;
     if (!textToSend.trim() || !ticketId || !user || sending) return;
 
     try {
       setSending(true);
       
-      // التفتيش عن وقت آخر رسالة (التقييد الحقيقي)
+      // الجلب الآمن للتذكرة لمنع الانهيار
       const ticketRef = doc(db, 'supportTickets', ticketId);
-      const ticketSnap = await getDocs(query(collection(db, 'supportTickets'), where('userId', '==', user.uid)));
-      const ticketData = ticketSnap.docs[0]?.data();
+      const ticketSnap = await getDoc(ticketRef);
+      const tData = ticketSnap.data();
 
-      if (ticketData?.lastMessageAt) {
-        const diff = (Date.now() - ticketData.lastMessageAt.toMillis()) / (1000 * 60);
+      // الفحص الآمن للتقييد (بدون التسبب في خطأ صامت)
+      if (tData && tData.lastMessageAt && typeof tData.lastMessageAt.toMillis === 'function') {
+        const diff = (Date.now() - tData.lastMessageAt.toMillis()) / (1000 * 60);
         if (diff < 5) {
           setCooldownMinutes(Math.ceil(5 - diff));
           setTimeout(() => setCooldownMinutes(0), 4000);
@@ -129,13 +113,13 @@ export default function SupportScreen({ onBack }) {
         }
       }
 
-      // إضافة الرسالة - مع حقل notifiedAdmin الضروري للبوت
+      // الإرسال للقاعدة (نفس الهيكلة القديمة التي كان يقرأها البوت بنجاح)
       await addDoc(collection(db, 'supportTickets', ticketId, 'messages'), {
         sender: 'user',
         text: textToSend.trim(),
         createdAt: serverTimestamp(),
         read: false,
-        notifiedAdmin: false, // مهم جداً لكي يعمل البوت
+        notifiedAdmin: false,
       });
 
       await setDoc(ticketRef, { 
@@ -145,17 +129,24 @@ export default function SupportScreen({ onBack }) {
 
       setInputText('');
     } catch (err) {
-      console.error(err);
+      console.error("خطأ حرج في الإرسال:", err);
+      alert("حدث خطأ! تأكد من اتصالك بالإنترنت.");
     } finally {
       setSending(false);
     }
   }, [inputText, ticketId, user, sending]);
 
-  if (!user) return null;
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  if (!user) return <div className="min-h-screen flex items-center justify-center bg-slate-50/50" dir="rtl"><p className="text-gray-500">يجب تسجيل الدخول</p></div>;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50" dir="rtl">
-      {/* Header - تصميمك الأصلي */}
       <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-14 pb-4">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center active:scale-95 transition-transform">
@@ -169,7 +160,6 @@ export default function SupportScreen({ onBack }) {
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 py-4 space-y-3 pb-36">
-        {/* توضيح النظام */}
         {!loading && messages.length === 0 && (
           <div className="p-4 bg-blue-50/60 border border-blue-100 rounded-2xl text-center mb-4">
             <p className="text-xs text-blue-700 leading-relaxed font-medium">
@@ -178,7 +168,6 @@ export default function SupportScreen({ onBack }) {
           </div>
         )}
 
-        {/* الرسائل الاقتراحية */}
         {!loading && messages.length === 0 && (
           <div className="grid grid-cols-2 gap-2 mb-4">
             {suggestions.map((s, i) => (
@@ -189,7 +178,6 @@ export default function SupportScreen({ onBack }) {
           </div>
         )}
 
-        {/* عرض الرسائل */}
         {messages.map((msg) => {
           const isUser = msg.sender === 'user';
           return (
@@ -208,7 +196,6 @@ export default function SupportScreen({ onBack }) {
         <div ref={bottomRef} />
       </main>
 
-      {/* Input Area - تصميمك الأصلي */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 pb-8 z-30">
         {cooldownMinutes > 0 && (
           <p className="text-center text-[10px] text-red-500 font-bold mb-2 animate-pulse">
@@ -219,6 +206,7 @@ export default function SupportScreen({ onBack }) {
           <textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="اكتب رسالتك هنا..."
             rows={1}
             className="flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500/20 max-h-32"
