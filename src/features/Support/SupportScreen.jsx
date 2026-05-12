@@ -39,6 +39,7 @@ export default function SupportScreen({ onBack }) {
 
     const initTicket = async () => {
       try {
+        // البحث بدون orderBy (ما يحتاج Index مركب)
         const q = query(
           collection(db, 'supportTickets'),
           where('userId', '==', user.uid)
@@ -47,10 +48,11 @@ export default function SupportScreen({ onBack }) {
 
         let tid;
         if (!snap.empty) {
-          const docs = snap.docs;
+          // نرتب يدوياً في الجافاسكربت
+          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           docs.sort((a, b) => {
-            const aTime = a.data().lastMessageAt?.toMillis?.() || 0;
-            const bTime = b.data().lastMessageAt?.toMillis?.() || 0;
+            const aTime = a.last_message_at?.toMillis?.() || a.createdAt?.toMillis?.() || 0;
+            const bTime = b.last_message_at?.toMillis?.() || b.createdAt?.toMillis?.() || 0;
             return bTime - aTime;
           });
           tid = docs[0].id;
@@ -67,7 +69,7 @@ export default function SupportScreen({ onBack }) {
             userUsername: username,
             status: 'open',
             createdAt: serverTimestamp(),
-            lastMessageAt: serverTimestamp(),
+            last_message_at: serverTimestamp(),
           });
           setTicketId(tid);
         }
@@ -110,7 +112,7 @@ export default function SupportScreen({ onBack }) {
       });
       await setDoc(
         doc(db, 'supportTickets', ticketId),
-        { lastMessageAt: serverTimestamp() },
+        { last_message_at: serverTimestamp() },
         { merge: true }
       );
       setInputText('');
