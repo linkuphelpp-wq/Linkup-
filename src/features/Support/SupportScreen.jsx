@@ -1,12 +1,141 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { db, auth } from '../../firebase/config';
+import {
+  collection, doc, addDoc, query, orderBy, onSnapshot,
+  serverTimestamp, getDocs, where, setDoc
+} from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function SupportScreen({ onBack }) {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = () => {
-    navigator.clipboard.writeText('Linkup.helpp@gmail.com');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const [messages, setMessages] = useState([]);
+  const [inputText, setInputText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [user, setUser] = useState(null);
+  const [ticketId, setTicketId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const bottomRef = useRef(null);
+
+  // ١. جلب المستخدم الحالي
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      if (u) {
+        setUser({
+          uid: u.uid,
+          email: u.email,
+          displayName: u.displayName || '',
+          photoURL: u.photoURL || '',
+        });
+      } else {
+        setUser(null);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // ٢. إنشاء التذكرة أو جلبها + الاستماع على الرسائل
+  useEffect(() => {
+    if (!user?.uid) return;
+    let unsubMessages = () => {};
+
+    const initTicket = async () => {
+      try {
+        const q = query(
+          collection(db, 'supportTickets'),
+          where('userId', '==', user.uid)
+        );
+        const snap = await getDocs(q);
+
+        let tid;
+        if (!snap.empty) {
+          const docs = snap.docs;
+          docs.sort((a, b) => {
+            const aTime = a.data().lastMessageAt?.toMillis?.() || 0;
+            const bTime = b.data().lastMessageAt?.toMillis?.() || 0;
+            return bTime - aTime;
+          });
+          tid = docs[0].id;
+          setTicketId(tid);
+        } else {
+          const username = localStorage.getItem('my_username') || '';
+          const newTicketRef = doc(collection(db, 'supportTickets'));
+          tid = newTicketRef.id;
+          await setDoc(newTicketRef, {
+            userId: user.uid,
+            userEmail: user.email || '',
+            userName: user.displayName || '',
+            userPhotoURL: user.photoURL || '',
+            userUsername: username,
+            status: 'open',
+            createdAt: serverTimestamp(),
+            lastMessageAt: serverTimestamp(),
+          });
+          setTicketId(tid);
+        }
+
+        const messagesQuery = query(
+          collection(db, 'supportTickets', tid, 'messages'),
+          orderBy('createdAt', 'asc('createdAt', 'asc')
+        );
+        unsubMessages = onSnapshot(messagesQuery, (snapshot) => {
+          const msgs = snapshot.docs.map((d) => ({
+            id: d.id,
+            ...d.data(),
+            createdAt: d.data().createdAt?.toDate?.() || new Date(),
+          }));
+          setMessages(msgs);
+          setLoading(false);
+          setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+        });
+      } catch (err) {
+        console.error('Ticket init error:', err);
+        setLoading(false);
+      }
+    };
+
+    initTicket();
+    return () => unsubMessages();
+  }, [user?.uid]);
+
+  // ٣. إرسال الرسالة
+  const handleSend = useCallback(async () => {
+    if (!inputText.trim() || !ticketId || !user) return;
+    setSending(true);
+    try {
+      await addDoc(collection(db, 'supportTickets', ticketId, 'messages'), {
+        sender: 'user',
+        text: inputText.trim(),
+        createdAt: serverTimestamp(),
+        read: false,
+        notifiedAdmin: false,
+      });
+      await setDoc(
+        doc(db, 'supportTickets', ticketId),
+        { lastMessageAt: serverTimestamp() },
+        { merge: true }
+      );
+      setInputText('');
+    } catch (err) {
+      console.error('Send error:', err);
+      alert('فشل إرسال الرسالة. تحقق من الاتصال.');
+    } finally {
+      setSending(false);
+    }
+  }, [inputText, ticketId, user]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50/50" dir="rtl">
+        <p className="text-gray-500">يجب تسجيل الدخول لاستخدام الدعم الفني</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50" dir="rtl">
@@ -15,52 +144,73 @@ export default function SupportScreen({ onBack }) {
           <button onClick={onBack} className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors active:scale-95">
             <svg className="w-5 h-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
-          <h1 className="text-xl font-black text-gray-900 tracking-tight">تواصل مع المطور</h1>
+          <div className="flex-1">
+            <h1 className="text-xl font-black text-gray-900 tracking-tight">الدعم الفني</h1>
+            <p className="text-xs text-green-600 font-medium">● متصل الآن</p>
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-5 py-6 pb-24 space-y-5">
-        <div className="text-center mb-2">
-          <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center">
-            <svg className="w-8 h-8 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <main className="flex-1 overflow-y-auto px-4 py-4 space-y-3 pb-32">
+        {loading && (
+          <div className="flex justify-center py-10">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
           </div>
-          <p className="text-sm text-gray-600">نحن هنا لمساعدتك. اختر القناة المناسبة وسنرد خلال 24 ساعة.</p>
-        </div>
+        )}
 
-        <a href="mailto:Linkup.helpp@gmail.com" className="group block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors">
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        {!loading && messages.length === 0 && (
+          <div className="text-center py-10">
+            <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center">
+              <svg className="w-8 h-8 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </div>
-            <div className="flex-1">
-              <p className="font-bold text-gray-900">البريد الإلكتروني</p>
-              <p className="text-xs text-gray-500 mt-0.5 font-mono">Linkup.helpp@gmail.com</p>
-            </div>
-            <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <p className="text-sm text-gray-500">مرحباً بك في الدعم الفني 👋<br/>اكتب رسالتك وسنرد عليك في أقرب وقت.</p>
           </div>
-        </a>
+        )}
 
-        <a href="https://wa.me/966500000000" target="_blank" rel="noopener noreferrer" className="group block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:border-green-200 hover:shadow-md transition-all active:scale-[0.98]">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-green-100 transition-colors">
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        {messages.map((msg) => {
+          const isUser = msg.sender === 'user';
+          return (
+            <div key={msg.id} className={`flex ${isUser ? 'justify-start' : 'justify-end'}`}>
+              <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                isUser
+                  ? 'bg-white text-gray-900 rounded-br-none border border-gray-100'
+                  : 'bg-blue-600 text-white rounded-bl-none'
+              }`}>
+                <p>{msg.text}</p>
+                <p className={`text-[10px] mt-1 ${isUser ? 'text-gray-400' : 'text-blue-200'}`}>
+                  {msg.createdAt.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
             </div>
-            <div className="flex-1">
-              <p className="font-bold text-gray-900">واتساب</p>
-              <p className="text-xs text-gray-500 mt-0.5">تواصل مباشر وسريع</p>
-            </div>
-            <svg className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-        </a>
-
-        <button onClick={handleCopy} className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3.5 rounded-2xl transition-colors flex items-center justify-center gap-2 active:scale-[0.98]">
-          {copied ? (
-            <><svg className="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> تم نسخ البريد بنجاح</>
-          ) : (
-            <><svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> نسخ عنوان البريد الإلكتروني</>
-          )}
-        </button>
+          );
+        })}
+        <div ref={bottomRef} />
       </main>
+
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 pb-8 z-30">
+        <div className="flex items-end gap-2">
+          <textarea
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="اكتب رسالتك هنا..."
+            rows={1}
+            className="flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 resize-none outline-none focus:ring-2 focus:ring-blue-500/20 max-h-32"
+            style={{ minHeight: '44px' }}
+          />
+          <button
+            onClick={handleSend}
+            disabled={sending || !inputText.trim()}
+            className="w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors active:scale-95 shrink-0"
+          >
+            {sending ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            )}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
