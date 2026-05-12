@@ -15,7 +15,6 @@ export default function SupportScreen({ onBack }) {
   const [loading, setLoading] = useState(true);
   const bottomRef = useRef(null);
 
-  // ١. جلب المستخدم الحالي
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
       if (u) {
@@ -32,14 +31,12 @@ export default function SupportScreen({ onBack }) {
     return () => unsub();
   }, []);
 
-  // ٢. إنشاء التذكرة أو جلبها + الاستماع على الرسائل
   useEffect(() => {
     if (!user?.uid) return;
     let unsubMessages = () => {};
 
     const initTicket = async () => {
       try {
-        // البحث بدون orderBy (ما يحتاج Index مركب)
         const q = query(
           collection(db, 'supportTickets'),
           where('userId', '==', user.uid)
@@ -48,11 +45,10 @@ export default function SupportScreen({ onBack }) {
 
         let tid;
         if (!snap.empty) {
-          // نرتب يدوياً في الجافاسكربت
           const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           docs.sort((a, b) => {
-            const aTime = a.last_message_at?.toMillis?.() || a.createdAt?.toMillis?.() || 0;
-            const bTime = b.last_message_at?.toMillis?.() || b.createdAt?.toMillis?.() || 0;
+            const aTime = a.createdAt?.toMillis?.() || 0;
+            const bTime = b.createdAt?.toMillis?.() || 0;
             return bTime - aTime;
           });
           tid = docs[0].id;
@@ -69,7 +65,6 @@ export default function SupportScreen({ onBack }) {
             userUsername: username,
             status: 'open',
             createdAt: serverTimestamp(),
-            last_message_at: serverTimestamp(),
           });
           setTicketId(tid);
         }
@@ -98,7 +93,6 @@ export default function SupportScreen({ onBack }) {
     return () => unsubMessages();
   }, [user?.uid]);
 
-  // ٣. إرسال الرسالة
   const handleSend = useCallback(async () => {
     if (!inputText.trim() || !ticketId || !user) return;
     setSending(true);
@@ -112,7 +106,7 @@ export default function SupportScreen({ onBack }) {
       });
       await setDoc(
         doc(db, 'supportTickets', ticketId),
-        { last_message_at: serverTimestamp() },
+        { createdAt: serverTimestamp() },
         { merge: true }
       );
       setInputText('');
