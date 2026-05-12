@@ -68761,183 +68761,223 @@ function OnboardingScreen({ onFinish }) {
 //#endregion
 //#region src/features/Support/SupportScreen.jsx
 function SupportScreen({ onBack }) {
-	const [copied, setCopied] = (0, import_react.useState)(false);
-	const handleCopy = () => {
-		navigator.clipboard.writeText("Linkup.helpp@gmail.com");
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2e3);
+	const [messages, setMessages] = (0, import_react.useState)([]);
+	const [inputText, setInputText] = (0, import_react.useState)("");
+	const [sending, setSending] = (0, import_react.useState)(false);
+	const [user, setUser] = (0, import_react.useState)(null);
+	const [ticketId, setTicketId] = (0, import_react.useState)(null);
+	const [loading, setLoading] = (0, import_react.useState)(true);
+	const bottomRef = (0, import_react.useRef)(null);
+	(0, import_react.useEffect)(() => {
+		const unsub = onAuthStateChanged(auth, (u) => {
+			if (u) setUser({
+				uid: u.uid,
+				email: u.email,
+				displayName: u.displayName || "",
+				photoURL: u.photoURL || ""
+			});
+			else setUser(null);
+		});
+		return () => unsub();
+	}, []);
+	(0, import_react.useEffect)(() => {
+		if (!user?.uid) return;
+		let unsubMessages = () => {};
+		const initTicket = async () => {
+			try {
+				const snap = await getDocs(query(collection(db, "supportTickets"), where("userId", "==", user.uid)));
+				let tid;
+				if (!snap.empty) {
+					const docs = snap.docs;
+					docs.sort((a, b) => {
+						const aTime = a.data().lastMessageAt?.toMillis?.() || 0;
+						return (b.data().lastMessageAt?.toMillis?.() || 0) - aTime;
+					});
+					tid = docs[0].id;
+					setTicketId(tid);
+				} else {
+					const username = localStorage.getItem("my_username") || "";
+					const newTicketRef = doc(collection(db, "supportTickets"));
+					tid = newTicketRef.id;
+					await setDoc(newTicketRef, {
+						userId: user.uid,
+						userEmail: user.email || "",
+						userName: user.displayName || "",
+						userPhotoURL: user.photoURL || "",
+						userUsername: username,
+						status: "open",
+						createdAt: serverTimestamp$2(),
+						lastMessageAt: serverTimestamp$2()
+					});
+					setTicketId(tid);
+				}
+				unsubMessages = onSnapshot(query(collection(db, "supportTickets", tid, "messages"), orderBy("createdAt", "asc")), (snapshot) => {
+					setMessages(snapshot.docs.map((d) => ({
+						id: d.id,
+						...d.data(),
+						createdAt: d.data().createdAt?.toDate?.() || /* @__PURE__ */ new Date()
+					})));
+					setLoading(false);
+					setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+				});
+			} catch (err) {
+				console.error("Ticket init error:", err);
+				setLoading(false);
+			}
+		};
+		initTicket();
+		return () => unsubMessages();
+	}, [user?.uid]);
+	const handleSend = (0, import_react.useCallback)(async () => {
+		if (!inputText.trim() || !ticketId || !user) return;
+		setSending(true);
+		try {
+			await addDoc(collection(db, "supportTickets", ticketId, "messages"), {
+				sender: "user",
+				text: inputText.trim(),
+				createdAt: serverTimestamp$2(),
+				read: false,
+				notifiedAdmin: false
+			});
+			await setDoc(doc(db, "supportTickets", ticketId), { lastMessageAt: serverTimestamp$2() }, { merge: true });
+			setInputText("");
+		} catch (err) {
+			console.error("Send error:", err);
+			alert("فشل إرسال الرسالة. تحقق من الاتصال.");
+		} finally {
+			setSending(false);
+		}
+	}, [
+		inputText,
+		ticketId,
+		user
+	]);
+	const handleKeyDown = (e) => {
+		if (e.key === "Enter" && !e.shiftKey) {
+			e.preventDefault();
+			handleSend();
+		}
 	};
+	if (!user) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "min-h-screen flex items-center justify-center bg-slate-50/50",
+		dir: "rtl",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-gray-500",
+			children: "يجب تسجيل الدخول لاستخدام الدعم الفني"
+		})
+	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen flex flex-col bg-slate-50/50",
 		dir: "rtl",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
-			className: "sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-14 pb-4",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "flex items-center gap-3",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					onClick: onBack,
-					className: "w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors active:scale-95",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-						className: "w-5 h-5 text-gray-700",
-						viewBox: "0 0 24 24",
-						fill: "none",
-						stroke: "currentColor",
-						strokeWidth: "2",
-						strokeLinecap: "round",
-						strokeLinejoin: "round",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
-					})
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-					className: "text-xl font-black text-gray-900 tracking-tight",
-					children: "تواصل مع المطور"
-				})]
-			})
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-			className: "flex-1 overflow-y-auto px-5 py-6 pb-24 space-y-5",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "text-center mb-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "w-16 h-16 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
+				className: "sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-14 pb-4",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-3",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: onBack,
+						className: "w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors active:scale-95",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-							className: "w-8 h-8 text-purple-600",
+							className: "w-5 h-5 text-gray-700",
 							viewBox: "0 0 24 24",
 							fill: "none",
 							stroke: "currentColor",
 							strokeWidth: "2",
 							strokeLinecap: "round",
 							strokeLinejoin: "round",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
 						})
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-sm text-gray-600",
-						children: "نحن هنا لمساعدتك. اختر القناة المناسبة وسنرد خلال 24 ساعة."
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex-1",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+							className: "text-xl font-black text-gray-900 tracking-tight",
+							children: "الدعم الفني"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-xs text-green-600 font-medium",
+							children: "● متصل الآن"
+						})]
 					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-					href: "mailto:Linkup.helpp@gmail.com",
-					className: "group block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-4",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition-colors",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-									className: "w-6 h-6",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									strokeLinecap: "round",
-									strokeLinejoin: "round",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-										x: "2",
-										y: "4",
-										width: "20",
-										height: "16",
-										rx: "2"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" })]
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "font-bold text-gray-900",
-									children: "البريد الإلكتروني"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-gray-500 mt-0.5 font-mono",
-									children: "Linkup.helpp@gmail.com"
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-								className: "w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors",
-								viewBox: "0 0 24 24",
-								fill: "none",
-								stroke: "currentColor",
-								strokeWidth: "2",
-								strokeLinecap: "round",
-								strokeLinejoin: "round",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
-							})
-						]
-					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-					href: "https://wa.me/966500000000",
-					target: "_blank",
-					rel: "noopener noreferrer",
-					className: "group block bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:border-green-200 hover:shadow-md transition-all active:scale-[0.98]",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-4",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: "w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-green-100 transition-colors",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-									className: "w-6 h-6",
-									viewBox: "0 0 24 24",
-									fill: "none",
-									stroke: "currentColor",
-									strokeWidth: "2",
-									strokeLinecap: "round",
-									strokeLinejoin: "round",
-									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" })
-								})
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "font-bold text-gray-900",
-									children: "واتساب"
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-xs text-gray-500 mt-0.5",
-									children: "تواصل مباشر وسريع"
-								})]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-								className: "w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors",
-								viewBox: "0 0 24 24",
-								fill: "none",
-								stroke: "currentColor",
-								strokeWidth: "2",
-								strokeLinecap: "round",
-								strokeLinejoin: "round",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 12h14M12 5l7 7-7 7" })
-							})
-						]
-					})
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					onClick: handleCopy,
-					className: "w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3.5 rounded-2xl transition-colors flex items-center justify-center gap-2 active:scale-[0.98]",
-					children: copied ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-						className: "w-4 h-4 text-green-600",
-						viewBox: "0 0 24 24",
-						fill: "none",
-						stroke: "currentColor",
-						strokeWidth: "2",
-						strokeLinecap: "round",
-						strokeLinejoin: "round",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("polyline", { points: "20 6 9 17 4 12" })
-					}), " تم نسخ البريد بنجاح"] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
-						className: "w-4 h-4",
-						viewBox: "0 0 24 24",
-						fill: "none",
-						stroke: "currentColor",
-						strokeWidth: "2",
-						strokeLinecap: "round",
-						strokeLinejoin: "round",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
-							x: "9",
-							y: "9",
-							width: "13",
-							height: "13",
-							rx: "2",
-							ry: "2"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" })]
-					}), " نسخ عنوان البريد الإلكتروني"] })
 				})
-			]
-		})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
+				className: "flex-1 overflow-y-auto px-4 py-4 space-y-3 pb-32",
+				children: [
+					loading && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex justify-center py-10",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" })
+					}),
+					!loading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "text-center py-10",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "w-16 h-16 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+								className: "w-8 h-8 text-purple-600",
+								viewBox: "0 0 24 24",
+								fill: "none",
+								stroke: "currentColor",
+								strokeWidth: "2",
+								strokeLinecap: "round",
+								strokeLinejoin: "round",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })
+							})
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+							className: "text-sm text-gray-500",
+							children: [
+								"مرحباً بك في الدعم الفني 👋",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
+								"اكتب رسالتك وسنرد عليك في أقرب وقت."
+							]
+						})]
+					}),
+					messages.map((msg) => {
+						const isUser = msg.sender === "user";
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: `flex ${isUser ? "justify-start" : "justify-end"}`,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: `max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${isUser ? "bg-white text-gray-900 rounded-br-none border border-gray-100" : "bg-blue-600 text-white rounded-bl-none"}`,
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: msg.text }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+									className: `text-[10px] mt-1 ${isUser ? "text-gray-400" : "text-blue-200"}`,
+									children: msg.createdAt.toLocaleTimeString("ar-SA", {
+										hour: "2-digit",
+										minute: "2-digit"
+									})
+								})]
+							})
+						}, msg.id);
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { ref: bottomRef })
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 pb-8 z-30",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-end gap-2",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
+						value: inputText,
+						onChange: (e) => setInputText(e.target.value),
+						onKeyDown: handleKeyDown,
+						placeholder: "اكتب رسالتك هنا...",
+						rows: 1,
+						className: "flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 resize-none outline-none focus:ring-2 focus:ring-blue-500/20 max-h-32",
+						style: { minHeight: "44px" }
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: handleSend,
+						disabled: sending || !inputText.trim(),
+						className: "w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors active:scale-95 shrink-0",
+						children: sending ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+							className: "w-5 h-5",
+							viewBox: "0 0 24 24",
+							fill: "none",
+							stroke: "currentColor",
+							strokeWidth: "2",
+							strokeLinecap: "round",
+							strokeLinejoin: "round",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" })
+						})
+					})]
+				})
+			})
+		]
 	});
 }
 //#endregion
