@@ -10736,36 +10736,6 @@ var Globe = createLucideIcon("globe", [
 		key: "9i4pu4"
 	}]
 ]);
-var Hash = createLucideIcon("hash", [
-	["line", {
-		x1: "4",
-		x2: "20",
-		y1: "9",
-		y2: "9",
-		key: "4lhtct"
-	}],
-	["line", {
-		x1: "4",
-		x2: "20",
-		y1: "15",
-		y2: "15",
-		key: "vyu0kd"
-	}],
-	["line", {
-		x1: "10",
-		x2: "8",
-		y1: "3",
-		y2: "21",
-		key: "1ggp8o"
-	}],
-	["line", {
-		x1: "16",
-		x2: "14",
-		y1: "3",
-		y2: "21",
-		key: "weycgp"
-	}]
-]);
 var House = createLucideIcon("house", [["path", {
 	d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8",
 	key: "5wwlr5"
@@ -24312,25 +24282,6 @@ function _makeTaggedError(auth, code, response) {
 	error.customData._tokenResponse = response;
 	return error;
 }
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-function isV2(grecaptcha) {
-	return grecaptcha !== void 0 && grecaptcha.getResponse !== void 0;
-}
 function isEnterprise(grecaptcha) {
 	return grecaptcha !== void 0 && grecaptcha.enterprise !== void 0;
 }
@@ -24378,25 +24329,6 @@ var RecaptchaConfig = class {
 		return this.isProviderEnabled("EMAIL_PASSWORD_PROVIDER") || this.isProviderEnabled("PHONE_PROVIDER");
 	}
 };
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-async function getRecaptchaParams(auth) {
-	return (await _performApiRequest(auth, "GET", "/v1/recaptchaParams")).recaptchaSiteKey || "";
-}
 async function getRecaptchaConfig(auth, request) {
 	return _performApiRequest(auth, "GET", "/v2/recaptchaConfig", _addTidIfNecessary(auth, request));
 }
@@ -25935,9 +25867,6 @@ function _setExternalJSProvider(p) {
 function _loadJS(url) {
 	return externalJSProvider.loadJS(url);
 }
-function _recaptchaV2ScriptUrl() {
-	return externalJSProvider.recaptchaV2Script;
-}
 function _recaptchaEnterpriseScriptUrl() {
 	return externalJSProvider.recaptchaEnterpriseScript;
 }
@@ -25947,52 +25876,6 @@ function _gapiScriptUrl() {
 function _generateCallbackName(prefix) {
 	return `__${prefix}${Math.floor(Math.random() * 1e6)}`;
 }
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-var _SOLVE_TIME_MS = 500;
-var _EXPIRATION_TIME_MS = 6e4;
-var _WIDGET_ID_START = 0xe8d4a51000;
-var MockReCaptcha = class {
-	constructor(auth) {
-		this.auth = auth;
-		this.counter = _WIDGET_ID_START;
-		this._widgets = /* @__PURE__ */ new Map();
-	}
-	render(container, parameters) {
-		const id = this.counter;
-		this._widgets.set(id, new MockWidget(container, this.auth.name, parameters || {}));
-		this.counter++;
-		return id;
-	}
-	reset(optWidgetId) {
-		const id = optWidgetId || _WIDGET_ID_START;
-		this._widgets.get(id)?.delete();
-		this._widgets.delete(id);
-	}
-	getResponse(optWidgetId) {
-		const id = optWidgetId || _WIDGET_ID_START;
-		return this._widgets.get(id)?.getResponse() || "";
-	}
-	async execute(optWidgetId) {
-		const id = optWidgetId || _WIDGET_ID_START;
-		this._widgets.get(id)?.execute();
-		return "";
-	}
-};
 var MockGreCAPTCHATopLevel = class {
 	constructor() {
 		this.enterprise = new MockGreCAPTCHA();
@@ -26018,64 +25901,6 @@ var MockGreCAPTCHA = class {
 		return "";
 	}
 };
-var MockWidget = class {
-	constructor(containerOrId, appName, params) {
-		this.params = params;
-		this.timerId = null;
-		this.deleted = false;
-		this.responseToken = null;
-		this.clickHandler = () => {
-			this.execute();
-		};
-		const container = typeof containerOrId === "string" ? document.getElementById(containerOrId) : containerOrId;
-		_assert(container, "argument-error", { appName });
-		this.container = container;
-		this.isVisible = this.params.size !== "invisible";
-		if (this.isVisible) this.execute();
-		else this.container.addEventListener("click", this.clickHandler);
-	}
-	getResponse() {
-		this.checkIfDeleted();
-		return this.responseToken;
-	}
-	delete() {
-		this.checkIfDeleted();
-		this.deleted = true;
-		if (this.timerId) {
-			clearTimeout(this.timerId);
-			this.timerId = null;
-		}
-		this.container.removeEventListener("click", this.clickHandler);
-	}
-	execute() {
-		this.checkIfDeleted();
-		if (this.timerId) return;
-		this.timerId = window.setTimeout(() => {
-			this.responseToken = generateRandomAlphaNumericString(50);
-			const { callback, "expired-callback": expiredCallback } = this.params;
-			if (callback) try {
-				callback(this.responseToken);
-			} catch (e) {}
-			this.timerId = window.setTimeout(() => {
-				this.timerId = null;
-				this.responseToken = null;
-				if (expiredCallback) try {
-					expiredCallback();
-				} catch (e) {}
-				if (this.isVisible) this.execute();
-			}, _EXPIRATION_TIME_MS);
-		}, _SOLVE_TIME_MS);
-	}
-	checkIfDeleted() {
-		if (this.deleted) throw new Error("reCAPTCHA mock was already deleted!");
-	}
-};
-function generateRandomAlphaNumericString(len) {
-	const chars = [];
-	const allowedChars = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	for (let i = 0; i < len; i++) chars.push(allowedChars.charAt(Math.floor(Math.random() * 62)));
-	return chars.join("");
-}
 var RECAPTCHA_ENTERPRISE_VERIFIER_TYPE = "recaptcha-enterprise";
 var FAKE_TOKEN = "NO_RECAPTCHA";
 var RecaptchaEnterpriseVerifier = class {
@@ -29032,88 +28857,8 @@ function finalizeSignInPhoneMfa(auth, request) {
 function finalizeSignInTotpMfa(auth, request) {
 	return _performApiRequest(auth, "POST", "/v2/accounts/mfaSignIn:finalize", _addTidIfNecessary(auth, request));
 }
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-var _JSLOAD_CALLBACK = _generateCallbackName("rcb");
-var NETWORK_TIMEOUT_DELAY = new Delay(3e4, 6e4);
-/**
-* Loader for the GReCaptcha library. There should only ever be one of this.
-*/
-var ReCaptchaLoaderImpl = class {
-	constructor() {
-		this.hostLanguage = "";
-		this.counter = 0;
-		/**
-		* Check for `render()` method. `window.grecaptcha` will exist if the Enterprise
-		* version of the ReCAPTCHA script was loaded by someone else (e.g. App Check) but
-		* `window.grecaptcha.render()` will not. Another load will add it.
-		*/
-		this.librarySeparatelyLoaded = !!_window().grecaptcha?.render;
-	}
-	load(auth, hl = "") {
-		_assert(isHostLanguageValid(hl), auth, "argument-error");
-		if (this.shouldResolveImmediately(hl) && isV2(_window().grecaptcha)) return Promise.resolve(_window().grecaptcha);
-		return new Promise((resolve, reject) => {
-			const networkTimeout = _window().setTimeout(() => {
-				reject(_createError(auth, "network-request-failed"));
-			}, NETWORK_TIMEOUT_DELAY.get());
-			_window()[_JSLOAD_CALLBACK] = () => {
-				_window().clearTimeout(networkTimeout);
-				delete _window()[_JSLOAD_CALLBACK];
-				const recaptcha = _window().grecaptcha;
-				if (!recaptcha || !isV2(recaptcha)) {
-					reject(_createError(auth, "internal-error"));
-					return;
-				}
-				const render = recaptcha.render;
-				recaptcha.render = (container, params) => {
-					const widgetId = render(container, params);
-					this.counter++;
-					return widgetId;
-				};
-				this.hostLanguage = hl;
-				resolve(recaptcha);
-			};
-			_loadJS(`${_recaptchaV2ScriptUrl()}?${querystring({
-				onload: _JSLOAD_CALLBACK,
-				render: "explicit",
-				hl
-			})}`).catch(() => {
-				clearTimeout(networkTimeout);
-				reject(_createError(auth, "internal-error"));
-			});
-		});
-	}
-	clearedOneInstance() {
-		this.counter--;
-	}
-	shouldResolveImmediately(hl) {
-		return !!_window().grecaptcha?.render && (hl === this.hostLanguage || this.counter > 0 || this.librarySeparatelyLoaded);
-	}
-};
-function isHostLanguageValid(hl) {
-	return hl.length <= 6 && /^\s*[a-zA-Z0-9\-]*\s*$/.test(hl);
-}
-var MockReCaptchaLoaderImpl = class {
-	async load(auth) {
-		return new MockReCaptcha(auth);
-	}
-	clearedOneInstance() {}
-};
+_generateCallbackName("rcb");
+new Delay(3e4, 6e4);
 /**
 * @license
 * Copyright 2020 Google LLC
@@ -29131,242 +28876,6 @@ var MockReCaptchaLoaderImpl = class {
 * limitations under the License.
 */
 var RECAPTCHA_VERIFIER_TYPE = "recaptcha";
-var DEFAULT_PARAMS = {
-	theme: "light",
-	type: "image"
-};
-/**
-* An {@link https://www.google.com/recaptcha/ | reCAPTCHA}-based application verifier.
-*
-* @remarks
-* `RecaptchaVerifier` does not work in a Node.js environment.
-*
-* @public
-*/
-var RecaptchaVerifier = class {
-	/**
-	* @param authExtern - The corresponding Firebase {@link Auth} instance.
-	*
-	* @param containerOrId - The reCAPTCHA container parameter.
-	*
-	* @remarks
-	* This has different meaning depending on whether the reCAPTCHA is hidden or visible. For a
-	* visible reCAPTCHA the container must be empty. If a string is used, it has to correspond to
-	* an element ID. The corresponding element must also must be in the DOM at the time of
-	* initialization.
-	*
-	* @param parameters - The optional reCAPTCHA parameters.
-	*
-	* @remarks
-	* Check the reCAPTCHA docs for a comprehensive list. All parameters are accepted except for
-	* the sitekey. Firebase Auth backend provisions a reCAPTCHA for each project and will
-	* configure this upon rendering. For an invisible reCAPTCHA, a size key must have the value
-	* 'invisible'.
-	*/
-	constructor(authExtern, containerOrId, parameters = { ...DEFAULT_PARAMS }) {
-		this.parameters = parameters;
-		/**
-		* The application verifier type.
-		*
-		* @remarks
-		* For a reCAPTCHA verifier, this is 'recaptcha'.
-		*/
-		this.type = RECAPTCHA_VERIFIER_TYPE;
-		this.destroyed = false;
-		this.widgetId = null;
-		this.tokenChangeListeners = /* @__PURE__ */ new Set();
-		this.renderPromise = null;
-		this.recaptcha = null;
-		this.auth = _castAuth(authExtern);
-		this.isInvisible = this.parameters.size === "invisible";
-		_assert(typeof document !== "undefined", this.auth, "operation-not-supported-in-this-environment");
-		const container = typeof containerOrId === "string" ? document.getElementById(containerOrId) : containerOrId;
-		_assert(container, this.auth, "argument-error");
-		this.container = container;
-		this.parameters.callback = this.makeTokenCallback(this.parameters.callback);
-		this._recaptchaLoader = this.auth.settings.appVerificationDisabledForTesting ? new MockReCaptchaLoaderImpl() : new ReCaptchaLoaderImpl();
-		this.validateStartingState();
-	}
-	/**
-	* Waits for the user to solve the reCAPTCHA and resolves with the reCAPTCHA token.
-	*
-	* @returns A Promise for the reCAPTCHA token.
-	*/
-	async verify() {
-		this.assertNotDestroyed();
-		const id = await this.render();
-		const recaptcha = this.getAssertedRecaptcha();
-		const response = recaptcha.getResponse(id);
-		if (response) return response;
-		return new Promise((resolve) => {
-			const tokenChange = (token) => {
-				if (!token) return;
-				this.tokenChangeListeners.delete(tokenChange);
-				resolve(token);
-			};
-			this.tokenChangeListeners.add(tokenChange);
-			if (this.isInvisible) recaptcha.execute(id);
-		});
-	}
-	/**
-	* Renders the reCAPTCHA widget on the page.
-	*
-	* @returns A Promise that resolves with the reCAPTCHA widget ID.
-	*/
-	render() {
-		try {
-			this.assertNotDestroyed();
-		} catch (e) {
-			return Promise.reject(e);
-		}
-		if (this.renderPromise) return this.renderPromise;
-		this.renderPromise = this.makeRenderPromise().catch((e) => {
-			this.renderPromise = null;
-			throw e;
-		});
-		return this.renderPromise;
-	}
-	/** @internal */
-	_reset() {
-		this.assertNotDestroyed();
-		if (this.widgetId !== null) this.getAssertedRecaptcha().reset(this.widgetId);
-	}
-	/**
-	* Clears the reCAPTCHA widget from the page and destroys the instance.
-	*/
-	clear() {
-		this.assertNotDestroyed();
-		this.destroyed = true;
-		this._recaptchaLoader.clearedOneInstance();
-		if (!this.isInvisible) this.container.childNodes.forEach((node) => {
-			this.container.removeChild(node);
-		});
-	}
-	validateStartingState() {
-		_assert(!this.parameters.sitekey, this.auth, "argument-error");
-		_assert(this.isInvisible || !this.container.hasChildNodes(), this.auth, "argument-error");
-		_assert(typeof document !== "undefined", this.auth, "operation-not-supported-in-this-environment");
-	}
-	makeTokenCallback(existing) {
-		return (token) => {
-			this.tokenChangeListeners.forEach((listener) => listener(token));
-			if (typeof existing === "function") existing(token);
-			else if (typeof existing === "string") {
-				const globalFunc = _window()[existing];
-				if (typeof globalFunc === "function") globalFunc(token);
-			}
-		};
-	}
-	assertNotDestroyed() {
-		_assert(!this.destroyed, this.auth, "internal-error");
-	}
-	async makeRenderPromise() {
-		await this.init();
-		if (!this.widgetId) {
-			let container = this.container;
-			if (!this.isInvisible) {
-				const guaranteedEmpty = document.createElement("div");
-				container.appendChild(guaranteedEmpty);
-				container = guaranteedEmpty;
-			}
-			this.widgetId = this.getAssertedRecaptcha().render(container, this.parameters);
-		}
-		return this.widgetId;
-	}
-	async init() {
-		_assert(_isHttpOrHttps() && !_isWorker(), this.auth, "internal-error");
-		await domReady();
-		this.recaptcha = await this._recaptchaLoader.load(this.auth, this.auth.languageCode || void 0);
-		const siteKey = await getRecaptchaParams(this.auth);
-		_assert(siteKey, this.auth, "internal-error");
-		this.parameters.sitekey = siteKey;
-	}
-	getAssertedRecaptcha() {
-		_assert(this.recaptcha, this.auth, "internal-error");
-		return this.recaptcha;
-	}
-};
-function domReady() {
-	let resolver = null;
-	return new Promise((resolve) => {
-		if (document.readyState === "complete") {
-			resolve();
-			return;
-		}
-		resolver = () => resolve();
-		window.addEventListener("load", resolver);
-	}).catch((e) => {
-		if (resolver) window.removeEventListener("load", resolver);
-		throw e;
-	});
-}
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-var ConfirmationResultImpl = class {
-	constructor(verificationId, onConfirmation) {
-		this.verificationId = verificationId;
-		this.onConfirmation = onConfirmation;
-	}
-	confirm(verificationCode) {
-		const authCredential = PhoneAuthCredential._fromVerification(this.verificationId, verificationCode);
-		return this.onConfirmation(authCredential);
-	}
-};
-/**
-* Asynchronously signs in using a phone number.
-*
-* @remarks
-* This method sends a code via SMS to the given
-* phone number, and returns a {@link ConfirmationResult}. After the user
-* provides the code sent to their phone, call {@link ConfirmationResult.confirm}
-* with the code to sign the user in.
-*
-* For abuse prevention, this method requires a {@link ApplicationVerifier}.
-* This SDK includes an implementation based on reCAPTCHA v2, {@link RecaptchaVerifier}.
-* This function can work on other platforms that do not support the
-* {@link RecaptchaVerifier} (like React Native), but you need to use a
-* third-party {@link ApplicationVerifier} implementation.
-*
-* If you've enabled project-level reCAPTCHA Enterprise bot protection in
-* Enforce mode, you can omit the {@link ApplicationVerifier}.
-*
-* This method does not work in a Node.js environment or with {@link Auth} instances created with a
-* {@link @firebase/app#FirebaseServerApp}.
-*
-* @example
-* ```javascript
-* // 'recaptcha-container' is the ID of an element in the DOM.
-* const applicationVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
-* const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, applicationVerifier);
-* // Obtain a verificationCode from the user.
-* const credential = await confirmationResult.confirm(verificationCode);
-* ```
-*
-* @param auth - The {@link Auth} instance.
-* @param phoneNumber - The user's phone number in E.164 format (e.g. +16505550101).
-* @param appVerifier - The {@link ApplicationVerifier}.
-*
-* @public
-*/
-async function signInWithPhoneNumber(auth, phoneNumber, appVerifier) {
-	if (_isFirebaseServerApp(auth.app)) return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(auth));
-	const authInternal = _castAuth(auth);
-	return new ConfirmationResultImpl(await _verifyPhoneNumber(authInternal, phoneNumber, getModularInstance(appVerifier)), (cred) => signInWithCredential(authInternal, cred));
-}
 /**
 * Returns a verification ID to be used in conjunction with the SMS code that is sent.
 *
@@ -55810,16 +55319,11 @@ var Button$1 = ({ children, className, disabled, ...props }) => /* @__PURE__ */ 
 });
 function AuthScreen({ onLogin, onForgotPassword }) {
 	const [isLogin, setIsLogin] = (0, import_react.useState)(true);
-	const [authMode, setAuthMode] = (0, import_react.useState)("email");
 	const [email, setEmail] = (0, import_react.useState)("");
 	const [password, setPassword] = (0, import_react.useState)("");
 	const [confirmPassword, setConfirmPassword] = (0, import_react.useState)("");
 	const [showPassword, setShowPassword] = (0, import_react.useState)(false);
 	const [showConfirm, setShowConfirm] = (0, import_react.useState)(false);
-	const [phoneCountry, setPhoneCountry] = (0, import_react.useState)("+966");
-	const [phoneNumber, setPhoneNumber] = (0, import_react.useState)("");
-	const [verificationCode, setVerificationCode] = (0, import_react.useState)("");
-	const [confirmationResult, setConfirmationResult] = (0, import_react.useState)(null);
 	const [loading, setLoading] = (0, import_react.useState)(false);
 	const [error, setError] = (0, import_react.useState)("");
 	const [success, setSuccess] = (0, import_react.useState)("");
@@ -55827,7 +55331,6 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 	const [isLogoPressed, setIsLogoPressed] = (0, import_react.useState)(false);
 	const [exiting, setExiting] = (0, import_react.useState)(false);
 	const logoRef = (0, import_react.useRef)(null);
-	const recaptchaVerifierRef = (0, import_react.useRef)(null);
 	const handleLogoClick = (e) => {
 		if (!logoRef.current) return;
 		const rect = logoRef.current.getBoundingClientRect();
@@ -55852,83 +55355,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 			case "auth/weak-password": return "كلمة المرور ضعيفة جداً، يجب أن تكون 6 أحرف على الأقل";
 			case "auth/too-many-requests": return "محاولات كثيرة، حاول مرة أخرى لاحقاً";
 			case "auth/invalid-email": return "صيغة البريد الإلكتروني غير صالحة";
-			case "auth/invalid-phone-number": return "رقم الهاتف غير صالح";
-			case "auth/invalid-verification-code": return "رمز التحقق غير صحيح";
 			default: return "حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى";
-		}
-	};
-	const setupRecaptcha = () => {
-		if (!recaptchaVerifierRef.current) recaptchaVerifierRef.current = new RecaptchaVerifier(auth, "recaptcha-container", {
-			size: "invisible",
-			callback: () => {}
-		});
-		return recaptchaVerifierRef.current;
-	};
-	const handleSendVerification = async () => {
-		setError("");
-		const fullNumber = `${phoneCountry}${phoneNumber}`;
-		if (!phoneNumber.trim() || phoneNumber.length < 7) {
-			setError("يرجى إدخال رقم هاتف صالح");
-			return;
-		}
-		setLoading(true);
-		try {
-			setConfirmationResult(await signInWithPhoneNumber(auth, fullNumber, setupRecaptcha()));
-			setSuccess("تم إرسال رمز التحقق إلى رقمك");
-			setTimeout(() => setSuccess(""), 3e3);
-		} catch (err) {
-			console.error(err);
-			setError(getErrorMessage(err));
-		} finally {
-			setLoading(false);
-		}
-	};
-	const handleVerifyCode = async () => {
-		setError("");
-		if (!verificationCode.trim() || verificationCode.length < 6) {
-			setError("يرجى إدخال رمز التحقق");
-			return;
-		}
-		if (!confirmationResult) {
-			setError("الرجاء إرسال رمز التحقق أولاً");
-			return;
-		}
-		setLoading(true);
-		try {
-			const { user } = await confirmationResult.confirm(verificationCode);
-			const ref = doc(db, "users", user.uid);
-			if (!(await getDoc(ref)).exists()) {
-				const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
-				await setDoc(ref, {
-					uid: user.uid,
-					email: user.email || "",
-					displayName: user.phoneNumber || "",
-					photoURL: "",
-					username: "",
-					status: "online",
-					lastSeen: serverTimestamp$2(),
-					loginDates: [today],
-					loginCount: 1,
-					settings: {
-						fontSize: "medium",
-						fontFamily: "tajawal",
-						muteMicOnJoin: false,
-						speakerDefault: false
-					},
-					contacts: [],
-					blockedUsers: [],
-					createdAt: serverTimestamp$2()
-				});
-			}
-			setExiting(true);
-			setTimeout(() => {
-				onLogin?.(user);
-			}, 500);
-		} catch (err) {
-			console.error(err);
-			setError(getErrorMessage(err));
-		} finally {
-			setLoading(false);
 		}
 	};
 	const handleSubmit = async (e) => {
@@ -56026,16 +55453,10 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 			setLoading(false);
 		}
 	};
-	const getTabPosition = () => {
-		if (authMode === "email" && isLogin) return "left-1.5";
-		if (authMode === "email" && !isLogin) return "left-[calc(33.33%+4px)]";
-		return "left-[calc(66.66%+4px)]";
-	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden selection:bg-purple-200/50",
 		dir: "rtl",
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "recaptcha-container" }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "absolute inset-0 opacity-30 pointer-events-none",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-1/4 left-1/4 w-96 h-96 bg-purple-200 rounded-full blur-[120px] animate-pulse" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -56101,42 +55522,30 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "relative flex bg-gray-100 rounded-2xl p-1.5 mb-6 border border-gray-200",
 								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute top-1.5 bottom-1.5 w-[calc(33.33%-4px)] rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 shadow-md transition-all duration-300 ease-out ${getTabPosition()}` }),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 shadow-md transition-all duration-300 ease-out ${!isLogin ? "left-1.5" : "left-[calc(50%+3px)]"}` }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 										type: "button",
 										onClick: () => {
-											setAuthMode("email");
 											setIsLogin(true);
 											setError("");
 											setSuccess("");
 										},
-										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${authMode === "email" && isLogin ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "w-4 h-4 inline ml-1" }), " تسجيل"]
+										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isLogin ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
+										children: "تسجيل الدخول"
 									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 										type: "button",
 										onClick: () => {
-											setAuthMode("email");
 											setIsLogin(false);
 											setError("");
 											setSuccess("");
 										},
-										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${authMode === "email" && !isLogin ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-4 h-4 inline ml-1" }), " جديد"]
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-										type: "button",
-										onClick: () => {
-											setAuthMode("phone");
-											setError("");
-											setSuccess("");
-										},
-										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${authMode === "phone" ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-4 h-4 inline ml-1" }), " هاتف"]
+										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${!isLogin ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
+										children: "إنشاء حساب"
 									})
 								]
 							}),
-							authMode === "email" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 								onSubmit: handleSubmit,
 								className: "space-y-4",
 								children: [
@@ -56216,64 +55625,6 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 										disabled: loading,
 										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group/btn",
 										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [isLogin ? "تسجيل الدخول" : "إنشاء حساب", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4 group-hover/btn:translate-x-1 transition-transform" })] })
-									})
-								]
-							}),
-							authMode === "phone" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "space-y-4",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "flex gap-2",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "relative group/input w-[30%]",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Globe, { className: "absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-												type: "text",
-												value: phoneCountry,
-												onChange: (e) => setPhoneCountry(e.target.value),
-												placeholder: "+966",
-												className: "w-full h-14 pr-8 pl-2 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all text-center text-sm",
-												disabled: loading || confirmationResult
-											})]
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-											className: "relative group/input flex-1",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-												type: "tel",
-												value: phoneNumber,
-												onChange: (e) => setPhoneNumber(e.target.value),
-												placeholder: "رقم الهاتف (5xxxxxxxx)",
-												className: "w-full h-14 pr-12 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all",
-												disabled: loading || confirmationResult
-											})]
-										})]
-									}),
-									!confirmationResult ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
-										onClick: handleSendVerification,
-										disabled: loading || !phoneNumber.trim(),
-										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2",
-										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["إرسال رمز التحقق", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4" })] })
-									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "relative group/input",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Hash, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-											type: "text",
-											value: verificationCode,
-											onChange: (e) => setVerificationCode(e.target.value),
-											placeholder: "رمز التحقق",
-											className: "w-full h-14 pr-12 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all",
-											disabled: loading
-										})]
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
-										onClick: handleVerifyCode,
-										disabled: loading || !verificationCode.trim(),
-										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2",
-										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["تأكيد الرمز", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4" })] })
-									})] }),
-									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), error]
-									}),
-									success && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4 shrink-0" }), success]
 									})
 								]
 							}),

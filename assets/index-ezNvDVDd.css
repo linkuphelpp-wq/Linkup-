@@ -524,10 +524,6 @@
     pointer-events: none;
   }
 
-  .invisible {
-    visibility: hidden;
-  }
-
   .visible {
     visibility: visible;
   }
@@ -672,10 +668,6 @@
     right: 25%;
   }
 
-  .right-3 {
-    right: calc(var(--spacing) * 3);
-  }
-
   .right-4 {
     right: calc(var(--spacing) * 4);
   }
@@ -788,12 +780,8 @@
     left: 50%;
   }
 
-  .left-\[calc\(33\.33\%\+4px\)\] {
-    left: calc(33.33% + 4px);
-  }
-
-  .left-\[calc\(66\.66\%\+4px\)\] {
-    left: calc(66.66% + 4px);
+  .left-\[calc\(50\%\+3px\)\] {
+    left: calc(50% + 3px);
   }
 
   .-z-10 {
@@ -982,10 +970,6 @@
 
   .hidden {
     display: none;
-  }
-
-  .inline {
-    display: inline;
   }
 
   .inline-block {
@@ -1256,10 +1240,6 @@
     width: 18px;
   }
 
-  .w-\[30\%\] {
-    width: 30%;
-  }
-
   .w-\[52px\] {
     width: 52px;
   }
@@ -1284,8 +1264,8 @@
     width: 600px;
   }
 
-  .w-\[calc\(33\.33\%-4px\)\] {
-    width: calc(33.33% - 4px);
+  .w-\[calc\(50\%-6px\)\] {
+    width: calc(50% - 6px);
   }
 
   .w-\[calc\(100\%-2rem\)\] {
@@ -3433,10 +3413,6 @@
     padding-right: calc(var(--spacing) * 4);
   }
 
-  .pr-8 {
-    padding-right: calc(var(--spacing) * 8);
-  }
-
   .pr-12 {
     padding-right: calc(var(--spacing) * 12);
   }
@@ -3475,10 +3451,6 @@
 
   .pb-32 {
     padding-bottom: calc(var(--spacing) * 32);
-  }
-
-  .pl-2 {
-    padding-left: calc(var(--spacing) * 2);
   }
 
   .pl-4 {
@@ -6070,9 +6042,6 @@ body {
 .pointer-events-none {
   pointer-events: none;
 }
-.invisible {
-  visibility: hidden;
-}
 .visible {
   visibility: visible;
 }
@@ -6141,11 +6110,8 @@ body {
 .left-\[50\%\] {
   left: 50%;
 }
-.left-\[calc\(33\.33\%\+4px\)\] {
-  left: calc(33.33% + 4px);
-}
-.left-\[calc\(66\.66\%\+4px\)\] {
-  left: calc(66.66% + 4px);
+.left-\[calc\(50\%\+3px\)\] {
+  left: calc(50% + 3px);
 }
 .-z-10 {
   z-index: calc(10 * -1);
@@ -6192,9 +6158,6 @@ body {
 .hidden {
   display: none;
 }
-.inline {
-  display: inline;
-}
 .inline-block {
   display: inline-block;
 }
@@ -6240,9 +6203,6 @@ body {
 .w-\[18px\] {
   width: 18px;
 }
-.w-\[30\%\] {
-  width: 30%;
-}
 .w-\[52px\] {
   width: 52px;
 }
@@ -6261,8 +6221,8 @@ body {
 .w-\[600px\] {
   width: 600px;
 }
-.w-\[calc\(33\.33\%-4px\)\] {
-  width: calc(33.33% - 4px);
+.w-\[calc\(50\%-6px\)\] {
+  width: calc(50% - 6px);
 }
 .w-\[calc\(100\%-2rem\)\] {
   width: calc(100% - 2rem);
