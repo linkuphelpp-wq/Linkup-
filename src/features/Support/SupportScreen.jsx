@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Send, ArrowLeft, Clock, CreditCard, AlertTriangle, RefreshCw, Heart
+  Send, ArrowLeft, Clock, LogIn, AlertTriangle, RefreshCw, Heart
 } from 'lucide-react';
 import { db, auth } from '../../firebase/config';
 import {
@@ -29,10 +29,10 @@ const messageVariants = {
 };
 
 /* ================================================================
-   SUGGESTIONS DATA (أيقونات SVG بدل الإيموجي)
+   SUGGESTIONS DATA (تم استبدال "مشكلة في الدفع" بـ "مشكلة في تسجيل الدخول")
    ================================================================ */
 const suggestions = [
-  { text: "مشكلة في الدفع", icon: CreditCard, color: "from-amber-500 to-orange-600" },
+  { text: "مشكلة في تسجيل الدخول", icon: LogIn, color: "from-purple-500 to-indigo-600" },
   { text: "التطبيق يتوقف فجأة", icon: AlertTriangle, color: "from-rose-500 to-pink-600" },
   { text: "سؤال عن تحديث جديد", icon: RefreshCw, color: "from-blue-500 to-indigo-600" },
   { text: "شكر و تقدير", icon: Heart, color: "from-emerald-500 to-teal-600" },
@@ -226,7 +226,7 @@ export default function SupportScreen({ onBack }) {
           </motion.div>
         )}
 
-        {/* اقتراحات بأيقونات SVG */}
+        {/* اقتراحات بأيقونات SVG (تم استبدال الدفع بتسجيل الدخول) */}
         {!loading && messages.length === 0 && (
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-2 gap-2.5">
             {suggestions.map((s) => (
