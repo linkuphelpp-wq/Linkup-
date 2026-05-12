@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { db, auth } from '../../firebase/config';
 import {
   collection, doc, addDoc, query, orderBy, onSnapshot,
-  serverTimestamp, getDocs, getDoc, where, setDoc, writeBatch
-} from 'firebase/firestore'; // تم إضافة getDoc هنا
+  serverTimestamp, getDocs, where, setDoc, writeBatch
+} from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
 export default function SupportScreen({ onBack }) {
@@ -42,19 +42,18 @@ export default function SupportScreen({ onBack }) {
       try {
         const q = query(collection(db, 'supportTickets'), where('userId', '==', user.uid));
         const snap = await getDocs(q);
-        let tid;
         
+        let tid;
         if (!snap.empty) {
-          const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          docs.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-          tid = docs[0].id;
+          // جلب آمن جداً لمعرف التذكرة بدون التسبب في خطأ التواريخ
+          tid = snap.docs[0].id; 
         } else {
           const username = localStorage.getItem('my_username') || '';
           const newTicketRef = doc(collection(db, 'supportTickets'));
           tid = newTicketRef.id;
           await setDoc(newTicketRef, {
             userId: user.uid, userEmail: user.email || '', userName: user.displayName || '',
-            userUsername: username, status: 'open', createdAt: serverTimestamp(), lastMessageAt: null
+            userUsername: username, status: 'open', createdAt: serverTimestamp()
           });
         }
         setTicketId(tid);
@@ -67,7 +66,7 @@ export default function SupportScreen({ onBack }) {
           setMessages(msgs);
           setLoading(false);
 
-          // الحذف التلقائي
+          // الحذف التلقائي بعد 15 دقيقة
           const lastMsg = msgs[msgs.length - 1];
           if (lastMsg && lastMsg.sender === 'admin') {
             const diff = (Date.now() - lastMsg.createdAt.getTime()) / (1000 * 60);
@@ -75,13 +74,12 @@ export default function SupportScreen({ onBack }) {
               const batch = writeBatch(db);
               snapshot.docs.forEach(d => batch.delete(d.ref));
               await batch.commit();
-              await setDoc(doc(db, 'supportTickets', tid), { lastMessageAt: null }, { merge: true });
             }
           }
           setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
         });
       } catch (err) {
-        console.error(err);
+        console.error("Ticket init error:", err);
         setLoading(false);
       }
     };
@@ -90,51 +88,46 @@ export default function SupportScreen({ onBack }) {
   }, [user?.uid]);
 
   const handleSend = useCallback(async (textOverride) => {
-    // التأكد من النص سواء كتبه يدوياً أو ضغط زر الاقتراح
     const textToSend = typeof textOverride === 'string' ? textOverride : inputText;
     if (!textToSend.trim() || !ticketId || !user || sending) return;
+
+    // 🛡️ التقييد الآمن 100% (يفحص الرسائل الموجودة أمامه في الشاشة فقط)
+    const lastUserMsg = [...messages].reverse().find(m => m.sender === 'user');
+    if (lastUserMsg && lastUserMsg.createdAt) {
+      const diffMinutes = (Date.now() - lastUserMsg.createdAt.getTime()) / (1000 * 60);
+      if (diffMinutes < 5) {
+        setCooldownMinutes(Math.ceil(5 - diffMinutes));
+        setTimeout(() => setCooldownMinutes(0), 4000);
+        return; // إيقاف الإرسال
+      }
+    }
 
     try {
       setSending(true);
       
-      // الجلب الآمن للتذكرة لمنع الانهيار
-      const ticketRef = doc(db, 'supportTickets', ticketId);
-      const ticketSnap = await getDoc(ticketRef);
-      const tData = ticketSnap.data();
-
-      // الفحص الآمن للتقييد (بدون التسبب في خطأ صامت)
-      if (tData && tData.lastMessageAt && typeof tData.lastMessageAt.toMillis === 'function') {
-        const diff = (Date.now() - tData.lastMessageAt.toMillis()) / (1000 * 60);
-        if (diff < 5) {
-          setCooldownMinutes(Math.ceil(5 - diff));
-          setTimeout(() => setCooldownMinutes(0), 4000);
-          setSending(false);
-          return;
-        }
-      }
-
-      // الإرسال للقاعدة (نفس الهيكلة القديمة التي كان يقرأها البوت بنجاح)
+      // الإرسال السليم الذي يقرأه البوت
       await addDoc(collection(db, 'supportTickets', ticketId, 'messages'), {
         sender: 'user',
         text: textToSend.trim(),
         createdAt: serverTimestamp(),
         read: false,
-        notifiedAdmin: false,
+        notifiedAdmin: false, // 🚨 تم التأكيد على هذا الحقل للبوت
       });
 
-      await setDoc(ticketRef, { 
-        lastMessageAt: serverTimestamp(),
-        createdAt: serverTimestamp() 
+      // تحديث حالة التذكرة ليعرف المدير أن هناك رسالة
+      await setDoc(doc(db, 'supportTickets', ticketId), { 
+        updatedAt: serverTimestamp(),
+        status: 'open'
       }, { merge: true });
 
       setInputText('');
     } catch (err) {
-      console.error("خطأ حرج في الإرسال:", err);
-      alert("حدث خطأ! تأكد من اتصالك بالإنترنت.");
+      console.error("Send error:", err);
+      alert("فشل الإرسال، تحقق من الإنترنت.");
     } finally {
       setSending(false);
     }
-  }, [inputText, ticketId, user, sending]);
+  }, [inputText, ticketId, user, sending, messages]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
