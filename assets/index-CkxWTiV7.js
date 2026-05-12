@@ -68767,7 +68767,20 @@ function SupportScreen({ onBack }) {
 	const [user, setUser] = (0, import_react.useState)(null);
 	const [ticketId, setTicketId] = (0, import_react.useState)(null);
 	const [loading, setLoading] = (0, import_react.useState)(true);
+	const [cooldown, setCooldown] = (0, import_react.useState)(0);
 	const bottomRef = (0, import_react.useRef)(null);
+	const suggestions = [
+		"واجهت مشكلة في الدفع 💳",
+		"التطبيق يتوقف فجأة ⚠️",
+		"سؤال عن تحديث جديد 🚀",
+		"شكراً لكم على الخدمة 🌟"
+	];
+	(0, import_react.useEffect)(() => {
+		if (cooldown > 0) {
+			const timer = setTimeout(() => setCooldown(cooldown - 1), 1e3);
+			return () => clearTimeout(timer);
+		}
+	}, [cooldown]);
 	(0, import_react.useEffect)(() => {
 		const unsub = onAuthStateChanged(auth, (u) => {
 			if (u) setUser({
@@ -68792,10 +68805,7 @@ function SupportScreen({ onBack }) {
 						id: d.id,
 						...d.data()
 					}));
-					docs.sort((a, b) => {
-						const aTime = a.createdAt?.toMillis?.() || 0;
-						return (b.createdAt?.toMillis?.() || 0) - aTime;
-					});
+					docs.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
 					tid = docs[0].id;
 					setTicketId(tid);
 				} else {
@@ -68806,20 +68816,22 @@ function SupportScreen({ onBack }) {
 						userId: user.uid,
 						userEmail: user.email || "",
 						userName: user.displayName || "",
-						userPhotoURL: user.photoURL || "",
 						userUsername: username,
 						status: "open",
 						createdAt: serverTimestamp$2()
 					});
 					setTicketId(tid);
 				}
-				unsubMessages = onSnapshot(query(collection(db, "supportTickets", tid, "messages"), orderBy("createdAt", "asc")), (snapshot) => {
-					setMessages(snapshot.docs.map((d) => ({
+				unsubMessages = onSnapshot(query(collection(db, "supportTickets", tid, "messages"), orderBy("createdAt", "asc")), async (snapshot) => {
+					const msgs = snapshot.docs.map((d) => ({
 						id: d.id,
 						...d.data(),
 						createdAt: d.data().createdAt?.toDate?.() || /* @__PURE__ */ new Date()
-					})));
+					}));
+					setMessages(msgs);
 					setLoading(false);
+					const lastMsg = msgs[msgs.length - 1];
+					if (lastMsg && lastMsg.sender === "admin") handleAutoDelete(tid, msgs);
 					setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
 				});
 			} catch (err) {
@@ -68830,115 +68842,112 @@ function SupportScreen({ onBack }) {
 		initTicket();
 		return () => unsubMessages();
 	}, [user?.uid]);
-	const handleSend = (0, import_react.useCallback)(async () => {
-		if (!inputText.trim() || !ticketId || !user) return;
+	const handleAutoDelete = (tid, msgs) => {
+		console.log("سيتم تنظيف الدردشة قريباً...");
+	};
+	const handleSend = (0, import_react.useCallback)(async (textOverride) => {
+		const textToSend = textOverride || inputText;
+		if (!textToSend.trim() || !ticketId || !user || cooldown > 0) return;
 		setSending(true);
 		try {
 			await addDoc(collection(db, "supportTickets", ticketId, "messages"), {
 				sender: "user",
-				text: inputText.trim(),
+				text: textToSend.trim(),
 				createdAt: serverTimestamp$2(),
 				read: false,
 				notifiedAdmin: false
 			});
-			await setDoc(doc(db, "supportTickets", ticketId), { createdAt: serverTimestamp$2() }, { merge: true });
+			await setDoc(doc(db, "supportTickets", ticketId), {
+				createdAt: serverTimestamp$2(),
+				lastMessageAt: serverTimestamp$2()
+			}, { merge: true });
 			setInputText("");
+			setCooldown(30);
 		} catch (err) {
 			console.error("Send error:", err);
-			alert("فشل إرسال الرسالة. تحقق من الاتصال.");
+			alert("فشل إرسال الرسالة.");
 		} finally {
 			setSending(false);
 		}
 	}, [
 		inputText,
 		ticketId,
-		user
+		user,
+		cooldown
 	]);
-	const handleKeyDown = (e) => {
-		if (e.key === "Enter" && !e.shiftKey) {
-			e.preventDefault();
-			handleSend();
-		}
-	};
-	if (!user) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "min-h-screen flex items-center justify-center bg-slate-50/50",
-		dir: "rtl",
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "text-gray-500",
-			children: "يجب تسجيل الدخول لاستخدام الدعم الفني"
-		})
-	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "min-h-screen flex flex-col bg-slate-50/50",
+		className: "min-h-screen flex flex-col bg-[#F8FAFC]",
 		dir: "rtl",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("header", {
-				className: "sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-gray-200/60 px-5 pt-14 pb-4",
+				className: "sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-gray-100 px-5 pt-12 pb-4",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-center gap-3",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 						onClick: onBack,
-						className: "w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors active:scale-95",
+						className: "w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center active:scale-90 transition-transform",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
 							className: "w-5 h-5 text-gray-700",
 							viewBox: "0 0 24 24",
 							fill: "none",
 							stroke: "currentColor",
-							strokeWidth: "2",
-							strokeLinecap: "round",
-							strokeLinejoin: "round",
+							strokeWidth: "2.5",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M15 18l-6-6 6-6" })
 						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "flex-1",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-							className: "text-xl font-black text-gray-900 tracking-tight",
-							children: "الدعم الفني"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-xs text-green-600 font-medium",
-							children: "● متصل الآن"
+							className: "text-lg font-bold text-gray-900",
+							children: "مركز المساعدة"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-1.5",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-2 h-2 bg-green-500 rounded-full animate-pulse" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-[11px] text-gray-500 font-medium",
+								children: "نتصل الآن.. نرد خلال دقائق"
+							})]
 						})]
 					})]
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
-				className: "flex-1 overflow-y-auto px-4 py-4 space-y-3 pb-32",
+				className: "flex-1 overflow-y-auto px-4 py-4 space-y-4 pb-40",
 				children: [
-					loading && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-						className: "flex justify-center py-10",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" })
+					!loading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-4",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex gap-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-xl",
+								children: "💡"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								className: "text-sm font-bold text-blue-900 mb-1",
+								children: "للحصول على رد سريع"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+								className: "text-xs text-blue-700 leading-relaxed",
+								children: [
+									"من فضلك اشرح مشكلتك بالتفصيل في ",
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("b", { children: "رسالة واحدة فقط" }),
+									". سيتم مراجعة طلبك والرد عليك هنا من قبل المطور."
+								]
+							})] })]
+						})
 					}),
-					!loading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "text-center py-10",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "w-16 h-16 mx-auto mb-3 rounded-full bg-purple-100 flex items-center justify-center",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-								className: "w-8 h-8 text-purple-600",
-								viewBox: "0 0 24 24",
-								fill: "none",
-								stroke: "currentColor",
-								strokeWidth: "2",
-								strokeLinecap: "round",
-								strokeLinejoin: "round",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" })
-							})
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-							className: "text-sm text-gray-500",
-							children: [
-								"مرحباً بك في الدعم الفني 👋",
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-								"اكتب رسالتك وسنرد عليك في أقرب وقت."
-							]
-						})]
+					!loading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "grid grid-cols-2 gap-2",
+						children: suggestions.map((s, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => handleSend(s),
+							className: "text-[11px] text-right p-3 bg-white border border-gray-100 rounded-xl text-gray-600 hover:border-blue-300 transition-colors active:bg-blue-50",
+							children: s
+						}, i))
 					}),
 					messages.map((msg) => {
 						const isUser = msg.sender === "user";
 						return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: `flex ${isUser ? "justify-start" : "justify-end"}`,
+							className: `flex ${isUser ? "justify-start" : "justify-end animate-in fade-in slide-in-from-bottom-2"}`,
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: `max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow-sm ${isUser ? "bg-white text-gray-900 rounded-br-none border border-gray-100" : "bg-blue-600 text-white rounded-bl-none"}`,
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: msg.text }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: `text-[10px] mt-1 ${isUser ? "text-gray-400" : "text-blue-200"}`,
+								className: `max-w-[85%] px-4 py-3 rounded-2xl text-[13.5px] shadow-sm ${isUser ? "bg-white text-gray-800 rounded-br-none border border-gray-50" : "bg-blue-600 text-white rounded-bl-none"}`,
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: msg.text }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: `text-[9px] block mt-1 opacity-60 ${isUser ? "text-gray-500" : "text-white"}`,
 									children: msg.createdAt.toLocaleTimeString("ar-SA", {
 										hour: "2-digit",
 										minute: "2-digit"
@@ -68950,34 +68959,45 @@ function SupportScreen({ onBack }) {
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { ref: bottomRef })
 				]
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 pb-8 z-30",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-gray-100 px-4 py-4 pb-10 z-30",
+				children: [cooldown > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "text-center mb-2",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+						className: "text-[10px] text-orange-600 font-medium bg-orange-50 px-3 py-1 rounded-full",
+						children: [
+							"يرجى الانتظار ",
+							cooldown,
+							" ثانية لإرسال رسالة أخرى ⏳"
+						]
+					})
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-end gap-2",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
-						value: inputText,
-						onChange: (e) => setInputText(e.target.value),
-						onKeyDown: handleKeyDown,
-						placeholder: "اكتب رسالتك هنا...",
-						rows: 1,
-						className: "flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 resize-none outline-none focus:ring-2 focus:ring-blue-500/20 max-h-32",
-						style: { minHeight: "44px" }
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex-1 bg-gray-100 rounded-2xl p-1 transition-all focus-within:bg-gray-200/50",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
+							value: inputText,
+							onChange: (e) => setInputText(e.target.value),
+							disabled: cooldown > 0,
+							placeholder: cooldown > 0 ? "نظام الحماية مفعل..." : "اكتب مشكلتك هنا بالتفصيل...",
+							rows: 1,
+							className: "w-full bg-transparent px-3 py-2 text-sm text-gray-900 outline-none resize-none disabled:opacity-50",
+							style: { minHeight: "40px" }
+						})
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: handleSend,
-						disabled: sending || !inputText.trim(),
-						className: "w-11 h-11 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors active:scale-95 shrink-0",
+						onClick: () => handleSend(),
+						disabled: sending || !inputText.trim() || cooldown > 0,
+						className: `w-11 h-11 rounded-full flex items-center justify-center transition-all active:scale-90 ${cooldown > 0 ? "bg-gray-200 text-gray-400" : "bg-blue-600 text-white shadow-lg shadow-blue-200"}`,
 						children: sending ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
-							className: "w-5 h-5",
+							className: "w-5 h-5 rotate-45",
 							viewBox: "0 0 24 24",
 							fill: "none",
 							stroke: "currentColor",
-							strokeWidth: "2",
-							strokeLinecap: "round",
-							strokeLinejoin: "round",
+							strokeWidth: "2.5",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", { d: "M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" })
 						})
 					})]
-				})
+				})]
 			})
 		]
 	});
