@@ -61196,22 +61196,29 @@ var ToggleSwitch = ({ isToggled, onToggle, theme = "purple", disabled = false })
 		},
 		disabled,
 		className: `
-        relative w-[52px] h-7 rounded-full shrink-0 overflow-hidden
+        relative shrink-0
+        w-[52px] h-7
+        rounded-full
+        overflow-hidden
+        box-border
+        p-0
         transition-colors duration-300 ease-out
         ${isToggled ? themeSet.activeBg : "bg-stone-300"}
         ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer active:scale-95"}
       `,
 		"aria-label": isToggled ? "تفعيل" : "إيقاف",
 		"aria-pressed": isToggled,
+		style: { WebkitTapHighlightColor: "transparent" },
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
 			initial: false,
-			animate: { x: isToggled ? 24 : 0 },
+			animate: { x: isToggled ? 23.5 : 0 },
 			transition: {
 				type: "spring",
 				stiffness: 500,
 				damping: 30
 			},
-			className: "absolute left-[3px] top-[3px] block w-[22px] h-[22px] bg-white rounded-full shadow-sm"
+			className: "\n          absolute\n          left-[3px]\n          top-[3px]\n          block\n          w-[22px]\n          h-[22px]\n          rounded-full\n          bg-white\n          shadow-[0_1px_3px_rgba(0,0,0,0.18)]\n          will-change-transform\n        ",
+			style: { boxSizing: "border-box" }
 		})
 	});
 };
