@@ -10602,6 +10602,20 @@ var Copy = createLucideIcon("copy", [["rect", {
 	d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2",
 	key: "zix9uf"
 }]]);
+var CreditCard = createLucideIcon("credit-card", [["rect", {
+	width: "20",
+	height: "14",
+	x: "2",
+	y: "5",
+	rx: "2",
+	key: "ynyp8z"
+}], ["line", {
+	x1: "2",
+	x2: "22",
+	y1: "10",
+	y2: "10",
+	key: "1b3vmo"
+}]]);
 var Crown = createLucideIcon("crown", [["path", {
 	d: "M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z",
 	key: "1vdc57"
@@ -10745,6 +10759,10 @@ var Globe = createLucideIcon("globe", [
 		key: "9i4pu4"
 	}]
 ]);
+var Heart = createLucideIcon("heart", [["path", {
+	d: "M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5",
+	key: "mvr1a0"
+}]]);
 var House = createLucideIcon("house", [["path", {
 	d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8",
 	key: "5wwlr5"
@@ -11291,10 +11309,6 @@ var Volume2 = createLucideIcon("volume-2", [
 		key: "ijwkga"
 	}]
 ]);
-var Wrench = createLucideIcon("wrench", [["path", {
-	d: "M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z",
-	key: "1ngwbx"
-}]]);
 var X$1 = createLucideIcon("x", [["path", {
 	d: "M18 6 6 18",
 	key: "1bl5f8"
@@ -60407,7 +60421,7 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 }
 //#endregion
 //#region src/features/Settings/SettingsScreen.jsx
-var colorThemes$1 = {
+var colorThemes = {
 	purple: {
 		iconBg: "bg-gradient-to-br from-violet-500 to-purple-600",
 		activeBg: "bg-violet-600",
@@ -60505,7 +60519,7 @@ var IconWrapper = ({ icon: Icon, theme = "purple", size = "md" }) => {
 		md: "w-5 h-5",
 		lg: "w-6 h-6"
 	};
-	const themeSet = colorThemes$1[theme] || colorThemes$1.purple;
+	const themeSet = colorThemes[theme] || colorThemes.purple;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: `${sizeClasses[size]} ${themeSet.iconBg} rounded-xl flex items-center justify-center text-white shadow-md shrink-0`,
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, {
@@ -60515,7 +60529,7 @@ var IconWrapper = ({ icon: Icon, theme = "purple", size = "md" }) => {
 	});
 };
 var ToggleSwitch = ({ isToggled, onToggle, theme = "purple", disabled = false }) => {
-	const themeSet = colorThemes$1[theme] || colorThemes$1.purple;
+	const themeSet = colorThemes[theme] || colorThemes.purple;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 		dir: "ltr",
 		type: "button",
@@ -61040,8 +61054,8 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 							onClick: item.onClick,
 							className: "relative overflow-hidden rounded-2xl p-4 bg-white border border-stone-200 shadow-sm hover:shadow-md transition-all duration-300 group text-center",
 							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute inset-0 bg-gradient-to-br ${colorThemes$1[item.theme].iconBg.replace("bg-gradient-to-br ", "")} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-300` }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(item.icon, { className: `w-5 h-5 mx-auto mb-2 text-stone-400 group-hover:${colorThemes$1[item.theme].text} transition-colors` }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute inset-0 bg-gradient-to-br ${colorThemes[item.theme].iconBg.replace("bg-gradient-to-br ", "")} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-300` }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(item.icon, { className: `w-5 h-5 mx-auto mb-2 text-stone-400 group-hover:${colorThemes[item.theme].text} transition-colors` }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "relative text-xs font-bold text-stone-700 group-hover:text-stone-900 transition-colors block",
 									children: item.label
@@ -68773,30 +68787,18 @@ function OnboardingScreen({ onFinish }) {
 }
 //#endregion
 //#region src/features/Support/SupportScreen.jsx
-var colorThemes = {
-	purple: {
-		iconBg: "bg-gradient-to-br from-violet-500 to-purple-600",
-		activeBg: "bg-violet-600",
-		text: "text-violet-700"
-	},
-	blue: {
-		iconBg: "bg-gradient-to-br from-blue-500 to-indigo-600",
-		activeBg: "bg-blue-600",
-		text: "text-blue-700"
-	}
-};
 var containerVariants = {
 	hidden: { opacity: 0 },
 	visible: {
 		opacity: 1,
-		transition: { staggerChildren: .05 }
+		transition: { staggerChildren: .07 }
 	}
 };
 var itemVariants = {
 	hidden: {
 		opacity: 0,
-		y: 12,
-		scale: .97
+		y: 14,
+		scale: .96
 	},
 	visible: {
 		opacity: 1,
@@ -68804,11 +68806,50 @@ var itemVariants = {
 		scale: 1,
 		transition: {
 			type: "spring",
-			stiffness: 400,
-			damping: 26
+			stiffness: 420,
+			damping: 24
 		}
 	}
 };
+var messageVariants = {
+	hidden: {
+		opacity: 0,
+		y: 12,
+		scale: .94
+	},
+	visible: {
+		opacity: 1,
+		y: 0,
+		scale: 1,
+		transition: {
+			type: "spring",
+			stiffness: 450,
+			damping: 28
+		}
+	}
+};
+var suggestions = [
+	{
+		text: "مشكلة في الدفع",
+		icon: CreditCard,
+		color: "from-amber-500 to-orange-600"
+	},
+	{
+		text: "التطبيق يتوقف فجأة",
+		icon: TriangleAlert,
+		color: "from-rose-500 to-pink-600"
+	},
+	{
+		text: "سؤال عن تحديث جديد",
+		icon: RefreshCw,
+		color: "from-blue-500 to-indigo-600"
+	},
+	{
+		text: "شكر و تقدير",
+		icon: Heart,
+		color: "from-emerald-500 to-teal-600"
+	}
+];
 function SupportScreen({ onBack }) {
 	const [messages, setMessages] = (0, import_react.useState)([]);
 	const [inputText, setInputText] = (0, import_react.useState)("");
@@ -68818,12 +68859,6 @@ function SupportScreen({ onBack }) {
 	const [loading, setLoading] = (0, import_react.useState)(true);
 	const [cooldownMinutes, setCooldownMinutes] = (0, import_react.useState)(0);
 	const bottomRef = (0, import_react.useRef)(null);
-	const suggestions = [
-		"واجهت مشكلة في الدفع 💳",
-		"التطبيق يتوقف فجأة ⚠️",
-		"سؤال عن تحديث جديد 🚀",
-		"شكراً لكم على الخدمة 🌟"
-	];
 	(0, import_react.useEffect)(() => {
 		const unsub = onAuthStateChanged(auth, (u) => {
 			if (u) setUser({
@@ -68877,7 +68912,7 @@ function SupportScreen({ onBack }) {
 					setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
 				});
 			} catch (err) {
-				console.error("Ticket init error:", err);
+				console.error("Init error:", err);
 				setLoading(false);
 			}
 		};
@@ -68911,7 +68946,7 @@ function SupportScreen({ onBack }) {
 			}, { merge: true });
 			setInputText("");
 		} catch (err) {
-			console.error("Send error:", err);
+			console.error(err);
 			alert("فشل الإرسال، تحقق من الإنترنت.");
 		} finally {
 			setSending(false);
@@ -68950,30 +68985,30 @@ function SupportScreen({ onBack }) {
 					opacity: 1,
 					y: 0
 				},
-				className: "fixed top-0 left-0 right-0 z-30 bg-white/85 backdrop-blur-xl border-b border-stone-200/60",
+				className: "fixed top-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-xl border-b border-stone-200/60 px-4 py-3",
 				style: { paddingTop: "max(0.75rem, env(safe-area-inset-top))" },
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "max-w-lg mx-auto px-5 pt-4 pb-3 flex items-center justify-between",
+					className: "flex items-center gap-3 max-w-lg mx-auto",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-							whileHover: { scale: 1.08 },
-							whileTap: { scale: .92 },
+							whileHover: { scale: 1.1 },
+							whileTap: { scale: .9 },
 							onClick: onBack,
-							className: "w-10 h-10 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-600",
+							className: "w-10 h-10 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-all",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5" })
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-center gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-								className: `p-2 rounded-xl ${colorThemes.purple.iconBg} text-white`,
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Wrench, { className: "w-5 h-5" })
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-								className: "text-lg font-black text-stone-900",
+							className: "flex-1",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+								className: "text-lg font-black text-stone-900 tracking-tight",
 								children: "الدعم الفني"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-								className: "text-[11px] text-emerald-600 font-medium",
-								children: "● متصل الآن"
-							})] })]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center gap-1.5 mt-0.5",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-2 h-2 bg-emerald-500 rounded-full animate-pulse" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[11px] text-emerald-700 font-medium",
+									children: "متصل"
+								})]
+							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
 					]
@@ -68983,58 +69018,72 @@ function SupportScreen({ onBack }) {
 				variants: containerVariants,
 				initial: "hidden",
 				animate: "visible",
-				className: "flex-1 overflow-y-auto px-4 py-4 pt-28 pb-44 space-y-4",
+				className: "flex-1 overflow-y-auto px-4 py-4 pt-28 pb-44 space-y-5",
 				children: [
-					!loading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					!loading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 						variants: itemVariants,
-						className: "p-4 bg-blue-50/80 border border-blue-100 rounded-2xl text-center mb-4",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-							className: "text-[13px] text-blue-700 font-medium leading-relaxed",
-							children: [
-								"💡 يرجى شرح مشكلتك في رسالة واحدة.",
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("br", {}),
-								"يُسمح بإرسال رسالة كل 5 دقائق لضمان جودة الرد."
-							]
-						})
+						className: "text-center py-6",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+								initial: { scale: 0 },
+								animate: { scale: 1 },
+								transition: {
+									type: "spring",
+									stiffness: 300,
+									damping: 20
+								},
+								className: "w-16 h-16 mx-auto mb-3 rounded-2xl bg-blue-50 flex items-center justify-center",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TriangleAlert, { className: "w-8 h-8 text-blue-600" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+								className: "text-[15px] font-bold text-stone-800 mb-1",
+								children: "كيف نقدر نساعدك؟"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-[13px] text-stone-500 leading-relaxed",
+								children: "اشرح مشكلتك وسيتم الرد خلال وقت قصير"
+							})
+						]
 					}),
 					!loading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 						variants: containerVariants,
 						initial: "hidden",
 						animate: "visible",
-						className: "grid grid-cols-2 gap-2 mb-4",
-						children: suggestions.map((s, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						className: "grid grid-cols-2 gap-2.5",
+						children: suggestions.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
 							variants: itemVariants,
 							whileHover: {
-								scale: 1.02,
-								y: -2
+								y: -3,
+								scale: 1.02
 							},
-							whileTap: { scale: .96 },
-							onClick: () => handleSend(s),
-							className: "p-3 bg-white border border-stone-200 rounded-2xl text-[13px] text-stone-700 text-right shadow-sm hover:shadow-md transition-all",
-							children: s
-						}, i))
+							whileTap: { scale: .95 },
+							onClick: () => handleSend(s.text),
+							className: "relative overflow-hidden rounded-2xl bg-white border border-stone-200 shadow-sm hover:shadow-md p-3.5 text-right transition-all group",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-start gap-3",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: `bg-gradient-to-br ${s.color} rounded-xl p-2 text-white shrink-0 shadow-sm`,
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(s.icon, { className: "w-4 h-4" })
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-[13px] font-bold text-stone-700 group-hover:text-stone-900 transition-colors leading-tight",
+									children: s.text
+								})]
+							})
+						}, s.text))
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: messages.map((msg) => {
 						const isUser = msg.sender === "user";
 						return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-							initial: {
+							variants: messageVariants,
+							initial: "hidden",
+							animate: "visible",
+							exit: {
 								opacity: 0,
-								y: 10,
-								scale: .96
-							},
-							animate: {
-								opacity: 1,
-								y: 0,
-								scale: 1
-							},
-							transition: {
-								type: "spring",
-								stiffness: 400,
-								damping: 25
+								scale: .9
 							},
 							className: `flex ${isUser ? "justify-end" : "justify-start"}`,
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: `max-w-[80%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${isUser ? "bg-blue-600 text-white rounded-br-none" : "bg-white text-stone-800 rounded-bl-none border border-stone-200"}`,
+								className: `max-w-[82%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${isUser ? "bg-blue-600 text-white rounded-br-none" : "bg-white text-stone-800 rounded-bl-none border border-stone-200"}`,
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: msg.text }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 									className: `text-[10px] mt-1.5 ${isUser ? "text-blue-200" : "text-stone-400"}`,
 									children: msg.createdAt.toLocaleTimeString("ar-SA", {
@@ -69052,11 +69101,11 @@ function SupportScreen({ onBack }) {
 				className: "fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-xl border-t border-stone-200/60 px-4 py-3",
 				style: { paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" },
 				children: [cooldownMinutes > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center justify-center gap-2 mb-2 text-rose-600 text-[12px] font-bold animate-pulse",
+					className: "flex items-center justify-center gap-2 mb-2 text-rose-600 text-[12px] font-medium",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Clock, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [
-						"انتظر ",
+						"الرجاء الانتظار ",
 						cooldownMinutes,
-						" دقائق للإرسال مجدداً"
+						" دقائق"
 					] })]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-end gap-2 max-w-lg mx-auto",
@@ -69073,7 +69122,7 @@ function SupportScreen({ onBack }) {
 						}
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
 						whileHover: { scale: 1.05 },
-						whileTap: { scale: .92 },
+						whileTap: { scale: .9 },
 						onClick: () => handleSend(),
 						disabled: sending || !inputText.trim(),
 						className: `w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all ${sending || !inputText.trim() ? "bg-stone-300 cursor-not-allowed shadow-none" : "bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 shadow-blue-200"}`,

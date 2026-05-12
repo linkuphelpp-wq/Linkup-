@@ -226,6 +226,7 @@
     --tracking-wide: .025em;
     --tracking-wider: .05em;
     --tracking-widest: .1em;
+    --leading-tight: 1.25;
     --leading-relaxed: 1.625;
     --leading-loose: 2;
     --radius-sm: .25rem;
@@ -1294,6 +1295,10 @@
     max-width: 80%;
   }
 
+  .max-w-\[82\%\] {
+    max-width: 82%;
+  }
+
   .max-w-\[90\%\] {
     max-width: 90%;
   }
@@ -1826,10 +1831,6 @@
     border-color: var(--color-amber-100);
   }
 
-  .border-blue-100 {
-    border-color: var(--color-blue-100);
-  }
-
   .border-blue-400 {
     border-color: var(--color-blue-400);
   }
@@ -2188,16 +2189,6 @@
 
   .bg-blue-50 {
     background-color: var(--color-blue-50);
-  }
-
-  .bg-blue-50\/80 {
-    background-color: #eff6ffcc;
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-blue-50\/80 {
-      background-color: color-mix(in oklab, var(--color-blue-50) 80%, transparent);
-    }
   }
 
   .bg-blue-100 {
@@ -2601,16 +2592,6 @@
   @supports (color: color-mix(in lab, red, red)) {
     .bg-white\/80 {
       background-color: color-mix(in oklab, var(--color-white) 80%, transparent);
-    }
-  }
-
-  .bg-white\/85 {
-    background-color: #ffffffd9;
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-white\/85 {
-      background-color: color-mix(in oklab, var(--color-white) 85%, transparent);
     }
   }
 
@@ -3271,6 +3252,10 @@
     padding: calc(var(--spacing) * 3);
   }
 
+  .p-3\.5 {
+    padding: calc(var(--spacing) * 3.5);
+  }
+
   .p-4 {
     padding: calc(var(--spacing) * 4);
   }
@@ -3605,6 +3590,11 @@
   .leading-relaxed {
     --tw-leading: var(--leading-relaxed);
     line-height: var(--leading-relaxed);
+  }
+
+  .leading-tight {
+    --tw-leading: var(--leading-tight);
+    line-height: var(--leading-tight);
   }
 
   .font-black {
@@ -4873,6 +4863,10 @@
 
     .hover\:bg-stone-100:hover {
       background-color: var(--color-stone-100);
+    }
+
+    .hover\:bg-stone-200:hover {
+      background-color: var(--color-stone-200);
     }
 
     .hover\:bg-violet-200:hover {
@@ -6278,6 +6272,9 @@ body {
 }
 .max-w-\[80\%\] {
   max-width: 80%;
+}
+.max-w-\[82\%\] {
+  max-width: 82%;
 }
 .max-w-\[90\%\] {
   max-width: 90%;
