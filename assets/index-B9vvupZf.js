@@ -68794,14 +68794,8 @@ function SupportScreen({ onBack }) {
 			try {
 				const snap = await getDocs(query(collection(db, "supportTickets"), where("userId", "==", user.uid)));
 				let tid;
-				if (!snap.empty) {
-					const docs = snap.docs.map((d) => ({
-						id: d.id,
-						...d.data()
-					}));
-					docs.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
-					tid = docs[0].id;
-				} else {
+				if (!snap.empty) tid = snap.docs[0].id;
+				else {
 					const username = localStorage.getItem("my_username") || "";
 					const newTicketRef = doc(collection(db, "supportTickets"));
 					tid = newTicketRef.id;
@@ -68811,8 +68805,7 @@ function SupportScreen({ onBack }) {
 						userName: user.displayName || "",
 						userUsername: username,
 						status: "open",
-						createdAt: serverTimestamp$2(),
-						lastMessageAt: null
+						createdAt: serverTimestamp$2()
 					});
 				}
 				setTicketId(tid);
@@ -68830,13 +68823,12 @@ function SupportScreen({ onBack }) {
 							const batch = writeBatch(db);
 							snapshot.docs.forEach((d) => batch.delete(d.ref));
 							await batch.commit();
-							await setDoc(doc(db, "supportTickets", tid), { lastMessageAt: null }, { merge: true });
 						}
 					}
 					setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
 				});
 			} catch (err) {
-				console.error(err);
+				console.error("Ticket init error:", err);
 				setLoading(false);
 			}
 		};
@@ -68846,19 +68838,17 @@ function SupportScreen({ onBack }) {
 	const handleSend = (0, import_react.useCallback)(async (textOverride) => {
 		const textToSend = typeof textOverride === "string" ? textOverride : inputText;
 		if (!textToSend.trim() || !ticketId || !user || sending) return;
+		const lastUserMsg = [...messages].reverse().find((m) => m.sender === "user");
+		if (lastUserMsg && lastUserMsg.createdAt) {
+			const diffMinutes = (Date.now() - lastUserMsg.createdAt.getTime()) / (1e3 * 60);
+			if (diffMinutes < 5) {
+				setCooldownMinutes(Math.ceil(5 - diffMinutes));
+				setTimeout(() => setCooldownMinutes(0), 4e3);
+				return;
+			}
+		}
 		try {
 			setSending(true);
-			const ticketRef = doc(db, "supportTickets", ticketId);
-			const tData = (await getDoc(ticketRef)).data();
-			if (tData && tData.lastMessageAt && typeof tData.lastMessageAt.toMillis === "function") {
-				const diff = (Date.now() - tData.lastMessageAt.toMillis()) / (1e3 * 60);
-				if (diff < 5) {
-					setCooldownMinutes(Math.ceil(5 - diff));
-					setTimeout(() => setCooldownMinutes(0), 4e3);
-					setSending(false);
-					return;
-				}
-			}
 			await addDoc(collection(db, "supportTickets", ticketId, "messages"), {
 				sender: "user",
 				text: textToSend.trim(),
@@ -68866,14 +68856,14 @@ function SupportScreen({ onBack }) {
 				read: false,
 				notifiedAdmin: false
 			});
-			await setDoc(ticketRef, {
-				lastMessageAt: serverTimestamp$2(),
-				createdAt: serverTimestamp$2()
+			await setDoc(doc(db, "supportTickets", ticketId), {
+				updatedAt: serverTimestamp$2(),
+				status: "open"
 			}, { merge: true });
 			setInputText("");
 		} catch (err) {
-			console.error("خطأ حرج في الإرسال:", err);
-			alert("حدث خطأ! تأكد من اتصالك بالإنترنت.");
+			console.error("Send error:", err);
+			alert("فشل الإرسال، تحقق من الإنترنت.");
 		} finally {
 			setSending(false);
 		}
@@ -68881,7 +68871,8 @@ function SupportScreen({ onBack }) {
 		inputText,
 		ticketId,
 		user,
-		sending
+		sending,
+		messages
 	]);
 	const handleKeyDown = (e) => {
 		if (e.key === "Enter" && !e.shiftKey) {
