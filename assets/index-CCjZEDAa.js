@@ -10602,20 +10602,6 @@ var Copy = createLucideIcon("copy", [["rect", {
 	d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2",
 	key: "zix9uf"
 }]]);
-var CreditCard = createLucideIcon("credit-card", [["rect", {
-	width: "20",
-	height: "14",
-	x: "2",
-	y: "5",
-	rx: "2",
-	key: "ynyp8z"
-}], ["line", {
-	x1: "2",
-	x2: "22",
-	y1: "10",
-	y2: "10",
-	key: "1b3vmo"
-}]]);
 var Crown = createLucideIcon("crown", [["path", {
 	d: "M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z",
 	key: "1vdc57"
@@ -10818,6 +10804,20 @@ var Lock = createLucideIcon("lock", [["rect", {
 	d: "M7 11V7a5 5 0 0 1 10 0v4",
 	key: "fwvmzm"
 }]]);
+var LogIn = createLucideIcon("log-in", [
+	["path", {
+		d: "m10 17 5-5-5-5",
+		key: "1bsop3"
+	}],
+	["path", {
+		d: "M15 12H3",
+		key: "6jk70r"
+	}],
+	["path", {
+		d: "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4",
+		key: "u53s6r"
+	}]
+]);
 var LogOut = createLucideIcon("log-out", [
 	["path", {
 		d: "m16 17 5-5-5-5",
@@ -68830,9 +68830,9 @@ var messageVariants = {
 };
 var suggestions = [
 	{
-		text: "مشكلة في الدفع",
-		icon: CreditCard,
-		color: "from-amber-500 to-orange-600"
+		text: "مشكلة في تسجيل الدخول",
+		icon: LogIn,
+		color: "from-purple-500 to-indigo-600"
 	},
 	{
 		text: "التطبيق يتوقف فجأة",
