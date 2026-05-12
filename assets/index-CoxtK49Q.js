@@ -10736,6 +10736,36 @@ var Globe = createLucideIcon("globe", [
 		key: "9i4pu4"
 	}]
 ]);
+var Hash = createLucideIcon("hash", [
+	["line", {
+		x1: "4",
+		x2: "20",
+		y1: "9",
+		y2: "9",
+		key: "4lhtct"
+	}],
+	["line", {
+		x1: "4",
+		x2: "20",
+		y1: "15",
+		y2: "15",
+		key: "vyu0kd"
+	}],
+	["line", {
+		x1: "10",
+		x2: "8",
+		y1: "3",
+		y2: "21",
+		key: "1ggp8o"
+	}],
+	["line", {
+		x1: "16",
+		x2: "14",
+		y1: "3",
+		y2: "21",
+		key: "weycgp"
+	}]
+]);
 var House = createLucideIcon("house", [["path", {
 	d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8",
 	key: "5wwlr5"
@@ -24282,6 +24312,25 @@ function _makeTaggedError(auth, code, response) {
 	error.customData._tokenResponse = response;
 	return error;
 }
+/**
+* @license
+* Copyright 2020 Google LLC
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+function isV2(grecaptcha) {
+	return grecaptcha !== void 0 && grecaptcha.getResponse !== void 0;
+}
 function isEnterprise(grecaptcha) {
 	return grecaptcha !== void 0 && grecaptcha.enterprise !== void 0;
 }
@@ -24329,6 +24378,25 @@ var RecaptchaConfig = class {
 		return this.isProviderEnabled("EMAIL_PASSWORD_PROVIDER") || this.isProviderEnabled("PHONE_PROVIDER");
 	}
 };
+/**
+* @license
+* Copyright 2020 Google LLC
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+async function getRecaptchaParams(auth) {
+	return (await _performApiRequest(auth, "GET", "/v1/recaptchaParams")).recaptchaSiteKey || "";
+}
 async function getRecaptchaConfig(auth, request) {
 	return _performApiRequest(auth, "GET", "/v2/recaptchaConfig", _addTidIfNecessary(auth, request));
 }
@@ -25867,6 +25935,9 @@ function _setExternalJSProvider(p) {
 function _loadJS(url) {
 	return externalJSProvider.loadJS(url);
 }
+function _recaptchaV2ScriptUrl() {
+	return externalJSProvider.recaptchaV2Script;
+}
 function _recaptchaEnterpriseScriptUrl() {
 	return externalJSProvider.recaptchaEnterpriseScript;
 }
@@ -25876,6 +25947,52 @@ function _gapiScriptUrl() {
 function _generateCallbackName(prefix) {
 	return `__${prefix}${Math.floor(Math.random() * 1e6)}`;
 }
+/**
+* @license
+* Copyright 2020 Google LLC
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+var _SOLVE_TIME_MS = 500;
+var _EXPIRATION_TIME_MS = 6e4;
+var _WIDGET_ID_START = 0xe8d4a51000;
+var MockReCaptcha = class {
+	constructor(auth) {
+		this.auth = auth;
+		this.counter = _WIDGET_ID_START;
+		this._widgets = /* @__PURE__ */ new Map();
+	}
+	render(container, parameters) {
+		const id = this.counter;
+		this._widgets.set(id, new MockWidget(container, this.auth.name, parameters || {}));
+		this.counter++;
+		return id;
+	}
+	reset(optWidgetId) {
+		const id = optWidgetId || _WIDGET_ID_START;
+		this._widgets.get(id)?.delete();
+		this._widgets.delete(id);
+	}
+	getResponse(optWidgetId) {
+		const id = optWidgetId || _WIDGET_ID_START;
+		return this._widgets.get(id)?.getResponse() || "";
+	}
+	async execute(optWidgetId) {
+		const id = optWidgetId || _WIDGET_ID_START;
+		this._widgets.get(id)?.execute();
+		return "";
+	}
+};
 var MockGreCAPTCHATopLevel = class {
 	constructor() {
 		this.enterprise = new MockGreCAPTCHA();
@@ -25901,6 +26018,64 @@ var MockGreCAPTCHA = class {
 		return "";
 	}
 };
+var MockWidget = class {
+	constructor(containerOrId, appName, params) {
+		this.params = params;
+		this.timerId = null;
+		this.deleted = false;
+		this.responseToken = null;
+		this.clickHandler = () => {
+			this.execute();
+		};
+		const container = typeof containerOrId === "string" ? document.getElementById(containerOrId) : containerOrId;
+		_assert(container, "argument-error", { appName });
+		this.container = container;
+		this.isVisible = this.params.size !== "invisible";
+		if (this.isVisible) this.execute();
+		else this.container.addEventListener("click", this.clickHandler);
+	}
+	getResponse() {
+		this.checkIfDeleted();
+		return this.responseToken;
+	}
+	delete() {
+		this.checkIfDeleted();
+		this.deleted = true;
+		if (this.timerId) {
+			clearTimeout(this.timerId);
+			this.timerId = null;
+		}
+		this.container.removeEventListener("click", this.clickHandler);
+	}
+	execute() {
+		this.checkIfDeleted();
+		if (this.timerId) return;
+		this.timerId = window.setTimeout(() => {
+			this.responseToken = generateRandomAlphaNumericString(50);
+			const { callback, "expired-callback": expiredCallback } = this.params;
+			if (callback) try {
+				callback(this.responseToken);
+			} catch (e) {}
+			this.timerId = window.setTimeout(() => {
+				this.timerId = null;
+				this.responseToken = null;
+				if (expiredCallback) try {
+					expiredCallback();
+				} catch (e) {}
+				if (this.isVisible) this.execute();
+			}, _EXPIRATION_TIME_MS);
+		}, _SOLVE_TIME_MS);
+	}
+	checkIfDeleted() {
+		if (this.deleted) throw new Error("reCAPTCHA mock was already deleted!");
+	}
+};
+function generateRandomAlphaNumericString(len) {
+	const chars = [];
+	const allowedChars = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	for (let i = 0; i < len; i++) chars.push(allowedChars.charAt(Math.floor(Math.random() * 62)));
+	return chars.join("");
+}
 var RECAPTCHA_ENTERPRISE_VERIFIER_TYPE = "recaptcha-enterprise";
 var FAKE_TOKEN = "NO_RECAPTCHA";
 var RecaptchaEnterpriseVerifier = class {
@@ -28857,8 +29032,88 @@ function finalizeSignInPhoneMfa(auth, request) {
 function finalizeSignInTotpMfa(auth, request) {
 	return _performApiRequest(auth, "POST", "/v2/accounts/mfaSignIn:finalize", _addTidIfNecessary(auth, request));
 }
-_generateCallbackName("rcb");
-new Delay(3e4, 6e4);
+/**
+* @license
+* Copyright 2020 Google LLC
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+var _JSLOAD_CALLBACK = _generateCallbackName("rcb");
+var NETWORK_TIMEOUT_DELAY = new Delay(3e4, 6e4);
+/**
+* Loader for the GReCaptcha library. There should only ever be one of this.
+*/
+var ReCaptchaLoaderImpl = class {
+	constructor() {
+		this.hostLanguage = "";
+		this.counter = 0;
+		/**
+		* Check for `render()` method. `window.grecaptcha` will exist if the Enterprise
+		* version of the ReCAPTCHA script was loaded by someone else (e.g. App Check) but
+		* `window.grecaptcha.render()` will not. Another load will add it.
+		*/
+		this.librarySeparatelyLoaded = !!_window().grecaptcha?.render;
+	}
+	load(auth, hl = "") {
+		_assert(isHostLanguageValid(hl), auth, "argument-error");
+		if (this.shouldResolveImmediately(hl) && isV2(_window().grecaptcha)) return Promise.resolve(_window().grecaptcha);
+		return new Promise((resolve, reject) => {
+			const networkTimeout = _window().setTimeout(() => {
+				reject(_createError(auth, "network-request-failed"));
+			}, NETWORK_TIMEOUT_DELAY.get());
+			_window()[_JSLOAD_CALLBACK] = () => {
+				_window().clearTimeout(networkTimeout);
+				delete _window()[_JSLOAD_CALLBACK];
+				const recaptcha = _window().grecaptcha;
+				if (!recaptcha || !isV2(recaptcha)) {
+					reject(_createError(auth, "internal-error"));
+					return;
+				}
+				const render = recaptcha.render;
+				recaptcha.render = (container, params) => {
+					const widgetId = render(container, params);
+					this.counter++;
+					return widgetId;
+				};
+				this.hostLanguage = hl;
+				resolve(recaptcha);
+			};
+			_loadJS(`${_recaptchaV2ScriptUrl()}?${querystring({
+				onload: _JSLOAD_CALLBACK,
+				render: "explicit",
+				hl
+			})}`).catch(() => {
+				clearTimeout(networkTimeout);
+				reject(_createError(auth, "internal-error"));
+			});
+		});
+	}
+	clearedOneInstance() {
+		this.counter--;
+	}
+	shouldResolveImmediately(hl) {
+		return !!_window().grecaptcha?.render && (hl === this.hostLanguage || this.counter > 0 || this.librarySeparatelyLoaded);
+	}
+};
+function isHostLanguageValid(hl) {
+	return hl.length <= 6 && /^\s*[a-zA-Z0-9\-]*\s*$/.test(hl);
+}
+var MockReCaptchaLoaderImpl = class {
+	async load(auth) {
+		return new MockReCaptcha(auth);
+	}
+	clearedOneInstance() {}
+};
 /**
 * @license
 * Copyright 2020 Google LLC
@@ -28876,6 +29131,242 @@ new Delay(3e4, 6e4);
 * limitations under the License.
 */
 var RECAPTCHA_VERIFIER_TYPE = "recaptcha";
+var DEFAULT_PARAMS = {
+	theme: "light",
+	type: "image"
+};
+/**
+* An {@link https://www.google.com/recaptcha/ | reCAPTCHA}-based application verifier.
+*
+* @remarks
+* `RecaptchaVerifier` does not work in a Node.js environment.
+*
+* @public
+*/
+var RecaptchaVerifier = class {
+	/**
+	* @param authExtern - The corresponding Firebase {@link Auth} instance.
+	*
+	* @param containerOrId - The reCAPTCHA container parameter.
+	*
+	* @remarks
+	* This has different meaning depending on whether the reCAPTCHA is hidden or visible. For a
+	* visible reCAPTCHA the container must be empty. If a string is used, it has to correspond to
+	* an element ID. The corresponding element must also must be in the DOM at the time of
+	* initialization.
+	*
+	* @param parameters - The optional reCAPTCHA parameters.
+	*
+	* @remarks
+	* Check the reCAPTCHA docs for a comprehensive list. All parameters are accepted except for
+	* the sitekey. Firebase Auth backend provisions a reCAPTCHA for each project and will
+	* configure this upon rendering. For an invisible reCAPTCHA, a size key must have the value
+	* 'invisible'.
+	*/
+	constructor(authExtern, containerOrId, parameters = { ...DEFAULT_PARAMS }) {
+		this.parameters = parameters;
+		/**
+		* The application verifier type.
+		*
+		* @remarks
+		* For a reCAPTCHA verifier, this is 'recaptcha'.
+		*/
+		this.type = RECAPTCHA_VERIFIER_TYPE;
+		this.destroyed = false;
+		this.widgetId = null;
+		this.tokenChangeListeners = /* @__PURE__ */ new Set();
+		this.renderPromise = null;
+		this.recaptcha = null;
+		this.auth = _castAuth(authExtern);
+		this.isInvisible = this.parameters.size === "invisible";
+		_assert(typeof document !== "undefined", this.auth, "operation-not-supported-in-this-environment");
+		const container = typeof containerOrId === "string" ? document.getElementById(containerOrId) : containerOrId;
+		_assert(container, this.auth, "argument-error");
+		this.container = container;
+		this.parameters.callback = this.makeTokenCallback(this.parameters.callback);
+		this._recaptchaLoader = this.auth.settings.appVerificationDisabledForTesting ? new MockReCaptchaLoaderImpl() : new ReCaptchaLoaderImpl();
+		this.validateStartingState();
+	}
+	/**
+	* Waits for the user to solve the reCAPTCHA and resolves with the reCAPTCHA token.
+	*
+	* @returns A Promise for the reCAPTCHA token.
+	*/
+	async verify() {
+		this.assertNotDestroyed();
+		const id = await this.render();
+		const recaptcha = this.getAssertedRecaptcha();
+		const response = recaptcha.getResponse(id);
+		if (response) return response;
+		return new Promise((resolve) => {
+			const tokenChange = (token) => {
+				if (!token) return;
+				this.tokenChangeListeners.delete(tokenChange);
+				resolve(token);
+			};
+			this.tokenChangeListeners.add(tokenChange);
+			if (this.isInvisible) recaptcha.execute(id);
+		});
+	}
+	/**
+	* Renders the reCAPTCHA widget on the page.
+	*
+	* @returns A Promise that resolves with the reCAPTCHA widget ID.
+	*/
+	render() {
+		try {
+			this.assertNotDestroyed();
+		} catch (e) {
+			return Promise.reject(e);
+		}
+		if (this.renderPromise) return this.renderPromise;
+		this.renderPromise = this.makeRenderPromise().catch((e) => {
+			this.renderPromise = null;
+			throw e;
+		});
+		return this.renderPromise;
+	}
+	/** @internal */
+	_reset() {
+		this.assertNotDestroyed();
+		if (this.widgetId !== null) this.getAssertedRecaptcha().reset(this.widgetId);
+	}
+	/**
+	* Clears the reCAPTCHA widget from the page and destroys the instance.
+	*/
+	clear() {
+		this.assertNotDestroyed();
+		this.destroyed = true;
+		this._recaptchaLoader.clearedOneInstance();
+		if (!this.isInvisible) this.container.childNodes.forEach((node) => {
+			this.container.removeChild(node);
+		});
+	}
+	validateStartingState() {
+		_assert(!this.parameters.sitekey, this.auth, "argument-error");
+		_assert(this.isInvisible || !this.container.hasChildNodes(), this.auth, "argument-error");
+		_assert(typeof document !== "undefined", this.auth, "operation-not-supported-in-this-environment");
+	}
+	makeTokenCallback(existing) {
+		return (token) => {
+			this.tokenChangeListeners.forEach((listener) => listener(token));
+			if (typeof existing === "function") existing(token);
+			else if (typeof existing === "string") {
+				const globalFunc = _window()[existing];
+				if (typeof globalFunc === "function") globalFunc(token);
+			}
+		};
+	}
+	assertNotDestroyed() {
+		_assert(!this.destroyed, this.auth, "internal-error");
+	}
+	async makeRenderPromise() {
+		await this.init();
+		if (!this.widgetId) {
+			let container = this.container;
+			if (!this.isInvisible) {
+				const guaranteedEmpty = document.createElement("div");
+				container.appendChild(guaranteedEmpty);
+				container = guaranteedEmpty;
+			}
+			this.widgetId = this.getAssertedRecaptcha().render(container, this.parameters);
+		}
+		return this.widgetId;
+	}
+	async init() {
+		_assert(_isHttpOrHttps() && !_isWorker(), this.auth, "internal-error");
+		await domReady();
+		this.recaptcha = await this._recaptchaLoader.load(this.auth, this.auth.languageCode || void 0);
+		const siteKey = await getRecaptchaParams(this.auth);
+		_assert(siteKey, this.auth, "internal-error");
+		this.parameters.sitekey = siteKey;
+	}
+	getAssertedRecaptcha() {
+		_assert(this.recaptcha, this.auth, "internal-error");
+		return this.recaptcha;
+	}
+};
+function domReady() {
+	let resolver = null;
+	return new Promise((resolve) => {
+		if (document.readyState === "complete") {
+			resolve();
+			return;
+		}
+		resolver = () => resolve();
+		window.addEventListener("load", resolver);
+	}).catch((e) => {
+		if (resolver) window.removeEventListener("load", resolver);
+		throw e;
+	});
+}
+/**
+* @license
+* Copyright 2020 Google LLC
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+var ConfirmationResultImpl = class {
+	constructor(verificationId, onConfirmation) {
+		this.verificationId = verificationId;
+		this.onConfirmation = onConfirmation;
+	}
+	confirm(verificationCode) {
+		const authCredential = PhoneAuthCredential._fromVerification(this.verificationId, verificationCode);
+		return this.onConfirmation(authCredential);
+	}
+};
+/**
+* Asynchronously signs in using a phone number.
+*
+* @remarks
+* This method sends a code via SMS to the given
+* phone number, and returns a {@link ConfirmationResult}. After the user
+* provides the code sent to their phone, call {@link ConfirmationResult.confirm}
+* with the code to sign the user in.
+*
+* For abuse prevention, this method requires a {@link ApplicationVerifier}.
+* This SDK includes an implementation based on reCAPTCHA v2, {@link RecaptchaVerifier}.
+* This function can work on other platforms that do not support the
+* {@link RecaptchaVerifier} (like React Native), but you need to use a
+* third-party {@link ApplicationVerifier} implementation.
+*
+* If you've enabled project-level reCAPTCHA Enterprise bot protection in
+* Enforce mode, you can omit the {@link ApplicationVerifier}.
+*
+* This method does not work in a Node.js environment or with {@link Auth} instances created with a
+* {@link @firebase/app#FirebaseServerApp}.
+*
+* @example
+* ```javascript
+* // 'recaptcha-container' is the ID of an element in the DOM.
+* const applicationVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+* const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, applicationVerifier);
+* // Obtain a verificationCode from the user.
+* const credential = await confirmationResult.confirm(verificationCode);
+* ```
+*
+* @param auth - The {@link Auth} instance.
+* @param phoneNumber - The user's phone number in E.164 format (e.g. +16505550101).
+* @param appVerifier - The {@link ApplicationVerifier}.
+*
+* @public
+*/
+async function signInWithPhoneNumber(auth, phoneNumber, appVerifier) {
+	if (_isFirebaseServerApp(auth.app)) return Promise.reject(_serverAppCurrentUserOperationNotSupportedError(auth));
+	const authInternal = _castAuth(auth);
+	return new ConfirmationResultImpl(await _verifyPhoneNumber(authInternal, phoneNumber, getModularInstance(appVerifier)), (cred) => signInWithCredential(authInternal, cred));
+}
 /**
 * Returns a verification ID to be used in conjunction with the SMS code that is sent.
 *
@@ -55319,11 +55810,15 @@ var Button$1 = ({ children, className, disabled, ...props }) => /* @__PURE__ */ 
 });
 function AuthScreen({ onLogin, onForgotPassword }) {
 	const [isLogin, setIsLogin] = (0, import_react.useState)(true);
+	const [authMode, setAuthMode] = (0, import_react.useState)("email");
 	const [email, setEmail] = (0, import_react.useState)("");
 	const [password, setPassword] = (0, import_react.useState)("");
 	const [confirmPassword, setConfirmPassword] = (0, import_react.useState)("");
 	const [showPassword, setShowPassword] = (0, import_react.useState)(false);
 	const [showConfirm, setShowConfirm] = (0, import_react.useState)(false);
+	const [phoneNumber, setPhoneNumber] = (0, import_react.useState)("");
+	const [verificationCode, setVerificationCode] = (0, import_react.useState)("");
+	const [confirmationResult, setConfirmationResult] = (0, import_react.useState)(null);
 	const [loading, setLoading] = (0, import_react.useState)(false);
 	const [error, setError] = (0, import_react.useState)("");
 	const [success, setSuccess] = (0, import_react.useState)("");
@@ -55331,6 +55826,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 	const [isLogoPressed, setIsLogoPressed] = (0, import_react.useState)(false);
 	const [exiting, setExiting] = (0, import_react.useState)(false);
 	const logoRef = (0, import_react.useRef)(null);
+	const recaptchaVerifierRef = (0, import_react.useRef)(null);
 	const handleLogoClick = (e) => {
 		if (!logoRef.current) return;
 		const rect = logoRef.current.getBoundingClientRect();
@@ -55355,7 +55851,83 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 			case "auth/weak-password": return "كلمة المرور ضعيفة جداً، يجب أن تكون 6 أحرف على الأقل";
 			case "auth/too-many-requests": return "محاولات كثيرة، حاول مرة أخرى لاحقاً";
 			case "auth/invalid-email": return "صيغة البريد الإلكتروني غير صالحة";
+			case "auth/invalid-phone-number": return "رقم الهاتف غير صالح";
+			case "auth/invalid-verification-code": return "رمز التحقق غير صحيح";
 			default: return "حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى";
+		}
+	};
+	const setupRecaptcha = () => {
+		if (!recaptchaVerifierRef.current) recaptchaVerifierRef.current = new RecaptchaVerifier(auth, "recaptcha-container", {
+			size: "invisible",
+			callback: () => {}
+		});
+		return recaptchaVerifierRef.current;
+	};
+	const handleSendVerification = async () => {
+		setError("");
+		if (!phoneNumber.trim() || phoneNumber.length < 8) {
+			setError("يرجى إدخال رقم هاتف صالح");
+			return;
+		}
+		setLoading(true);
+		try {
+			setConfirmationResult(await signInWithPhoneNumber(auth, phoneNumber, setupRecaptcha()));
+			setSuccess("تم إرسال رمز التحقق إلى رقمك");
+			setTimeout(() => setSuccess(""), 3e3);
+		} catch (err) {
+			console.error(err);
+			setError(getErrorMessage(err));
+		} finally {
+			setLoading(false);
+		}
+	};
+	const handleVerifyCode = async () => {
+		setError("");
+		if (!verificationCode.trim() || verificationCode.length < 6) {
+			setError("يرجى إدخال رمز التحقق");
+			return;
+		}
+		if (!confirmationResult) {
+			setError("الرجاء إرسال رمز التحقق أولاً");
+			return;
+		}
+		setLoading(true);
+		try {
+			const { user } = await confirmationResult.confirm(verificationCode);
+			if (!user.emailVerified) {}
+			const ref = doc(db, "users", user.uid);
+			if (!(await getDoc(ref)).exists()) {
+				const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+				await setDoc(ref, {
+					uid: user.uid,
+					email: user.email || "",
+					displayName: user.phoneNumber || "",
+					photoURL: "",
+					username: "",
+					status: "online",
+					lastSeen: serverTimestamp$2(),
+					loginDates: [today],
+					loginCount: 1,
+					settings: {
+						fontSize: "medium",
+						fontFamily: "tajawal",
+						muteMicOnJoin: false,
+						speakerDefault: false
+					},
+					contacts: [],
+					blockedUsers: [],
+					createdAt: serverTimestamp$2()
+				});
+			}
+			setExiting(true);
+			setTimeout(() => {
+				onLogin?.(user);
+			}, 500);
+		} catch (err) {
+			console.error(err);
+			setError(getErrorMessage(err));
+		} finally {
+			setLoading(false);
 		}
 	};
 	const handleSubmit = async (e) => {
@@ -55457,6 +56029,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 		className: "min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden selection:bg-purple-200/50",
 		dir: "rtl",
 		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { id: "recaptcha-container" }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "absolute inset-0 opacity-30 pointer-events-none",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute top-1/4 left-1/4 w-96 h-96 bg-purple-200 rounded-full blur-[120px] animate-pulse" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -55522,18 +56095,19 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "relative flex bg-gray-100 rounded-2xl p-1.5 mb-6 border border-gray-200",
 								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 shadow-md transition-all duration-300 ease-out ${!isLogin ? "left-1.5" : "left-[calc(50%+3px)]"}` }),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute top-1.5 bottom-1.5 w-[calc(33.33%-4px)] rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 shadow-md transition-all duration-300 ease-out ${isLogin && authMode === "email" ? "left-1.5" : !isLogin ? "left-[calc(33.33%+4px)]" : "left-[calc(66.66%+4px)]"}` }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										type: "button",
 										onClick: () => {
 											setIsLogin(true);
+											setAuthMode("email");
 											setError("");
 											setSuccess("");
 										},
-										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isLogin ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
-										children: "تسجيل الدخول"
+										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isLogin && authMode === "email" ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "w-4 h-4 inline ml-1" }), " تسجيل"]
 									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										type: "button",
 										onClick: () => {
 											setIsLogin(false);
@@ -55541,11 +56115,22 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 											setSuccess("");
 										},
 										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${!isLogin ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
-										children: "إنشاء حساب"
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-4 h-4 inline ml-1" }), " جديد"]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										type: "button",
+										onClick: () => {
+											setIsLogin(true);
+											setAuthMode("phone");
+											setError("");
+											setSuccess("");
+										},
+										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isLogin && authMode === "phone" ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-4 h-4 inline ml-1" }), " هاتف"]
 									})
 								]
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+							isLogin && authMode === "email" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 								onSubmit: handleSubmit,
 								className: "space-y-4",
 								children: [
@@ -55583,7 +56168,113 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 											})
 										]
 									}),
-									!isLogin && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										onClick: onForgotPassword,
+										className: "text-xs text-purple-500 hover:text-purple-700 font-medium text-left transition-all hover:underline active:scale-95 origin-left",
+										disabled: loading,
+										children: "نسيت كلمة المرور؟"
+									}),
+									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), error]
+									}),
+									success && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4 shrink-0" }), success]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
+										type: "submit",
+										disabled: loading,
+										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group/btn",
+										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["تسجيل الدخول", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4 group-hover/btn:translate-x-1 transition-transform" })] })
+									})
+								]
+							}),
+							isLogin && authMode === "phone" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "space-y-4",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "relative group/input",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
+											type: "tel",
+											value: phoneNumber,
+											onChange: (e) => setPhoneNumber(e.target.value),
+											placeholder: "رقم الهاتف (+9665xxxxxxxx)",
+											className: "h-14 pr-12",
+											disabled: loading
+										})]
+									}),
+									!confirmationResult ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
+										onClick: handleSendVerification,
+										disabled: loading || !phoneNumber.trim(),
+										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2",
+										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["إرسال رمز التحقق", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4" })] })
+									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "relative group/input",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Hash, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
+											type: "text",
+											value: verificationCode,
+											onChange: (e) => setVerificationCode(e.target.value),
+											placeholder: "رمز التحقق",
+											className: "h-14 pr-12",
+											disabled: loading
+										})]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
+										onClick: handleVerifyCode,
+										disabled: loading || !verificationCode.trim(),
+										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2",
+										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["تأكيد الرمز", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4" })] })
+									})] }),
+									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), error]
+									}),
+									success && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4 shrink-0" }), success]
+									})
+								]
+							}),
+							!isLogin && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+								onSubmit: handleSubmit,
+								className: "space-y-4",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "relative group/input",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
+											type: "email",
+											value: email,
+											onChange: (e) => setEmail(e.target.value),
+											placeholder: "البريد الإلكتروني",
+											className: "h-14 pr-12",
+											required: true,
+											disabled: loading
+										})]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "relative group/input",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
+												type: showPassword ? "text" : "password",
+												value: password,
+												onChange: (e) => setPassword(e.target.value),
+												placeholder: "كلمة المرور",
+												className: "h-14 pr-12",
+												required: true,
+												disabled: loading
+											}),
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+												type: "button",
+												onClick: () => setShowPassword(!showPassword),
+												className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 active:scale-90",
+												disabled: loading,
+												children: showPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
+											})
+										]
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "relative group/input",
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }),
@@ -55605,13 +56296,6 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 											})
 										]
 									}),
-									isLogin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-										type: "button",
-										onClick: onForgotPassword,
-										className: "text-xs text-purple-500 hover:text-purple-700 font-medium text-left transition-all hover:underline active:scale-95 origin-left",
-										disabled: loading,
-										children: "نسيت كلمة المرور؟"
-									}),
 									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), error]
@@ -55623,8 +56307,8 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
 										type: "submit",
 										disabled: loading,
-										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group/btn",
-										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [isLogin ? "تسجيل الدخول" : "إنشاء حساب", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4 group-hover/btn:translate-x-1 transition-transform" })] })
+										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2",
+										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["إنشاء حساب", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4" })] })
 									})
 								]
 							}),
@@ -60396,64 +61080,34 @@ function ProfileScreen({ user, onUpdateProfile, onLogout, onChangeEmail, onReset
 //#region src/features/Settings/SettingsScreen.jsx
 var colorThemes = {
 	purple: {
-		gradient: "from-violet-500 to-purple-600",
-		bg: "bg-violet-50",
-		text: "text-violet-700",
-		border: "border-violet-200",
 		iconBg: "bg-gradient-to-br from-violet-500 to-purple-600",
-		hoverBg: "hover:bg-violet-50",
-		ring: "focus:ring-violet-200",
-		shadow: "shadow-violet-200/50"
+		activeBg: "bg-violet-600",
+		text: "text-violet-700"
 	},
 	blue: {
-		gradient: "from-blue-500 to-indigo-600",
-		bg: "bg-blue-50",
-		text: "text-blue-700",
-		border: "border-blue-200",
 		iconBg: "bg-gradient-to-br from-blue-500 to-indigo-600",
-		hoverBg: "hover:bg-blue-50",
-		ring: "focus:ring-blue-200",
-		shadow: "shadow-blue-200/50"
+		activeBg: "bg-blue-600",
+		text: "text-blue-700"
 	},
 	emerald: {
-		gradient: "from-emerald-500 to-teal-600",
-		bg: "bg-emerald-50",
-		text: "text-emerald-700",
-		border: "border-emerald-200",
 		iconBg: "bg-gradient-to-br from-emerald-500 to-teal-600",
-		hoverBg: "hover:bg-emerald-50",
-		ring: "focus:ring-emerald-200",
-		shadow: "shadow-emerald-200/50"
+		activeBg: "bg-emerald-600",
+		text: "text-emerald-700"
 	},
 	amber: {
-		gradient: "from-amber-500 to-orange-600",
-		bg: "bg-amber-50",
-		text: "text-amber-700",
-		border: "border-amber-200",
 		iconBg: "bg-gradient-to-br from-amber-500 to-orange-600",
-		hoverBg: "hover:bg-amber-50",
-		ring: "focus:ring-amber-200",
-		shadow: "shadow-amber-200/50"
+		activeBg: "bg-amber-600",
+		text: "text-amber-700"
 	},
 	rose: {
-		gradient: "from-rose-500 to-pink-600",
-		bg: "bg-rose-50",
-		text: "text-rose-700",
-		border: "border-rose-200",
 		iconBg: "bg-gradient-to-br from-rose-500 to-pink-600",
-		hoverBg: "hover:bg-rose-50",
-		ring: "focus:ring-rose-200",
-		shadow: "shadow-rose-200/50"
+		activeBg: "bg-rose-600",
+		text: "text-rose-700"
 	},
 	slate: {
-		gradient: "from-slate-500 to-slate-700",
-		bg: "bg-slate-50",
-		text: "text-slate-700",
-		border: "border-slate-200",
 		iconBg: "bg-gradient-to-br from-slate-500 to-slate-700",
-		hoverBg: "hover:bg-slate-50",
-		ring: "focus:ring-slate-200",
-		shadow: "shadow-slate-200/50"
+		activeBg: "bg-slate-600",
+		text: "text-slate-700"
 	}
 };
 var containerVariants = {
@@ -60461,7 +61115,7 @@ var containerVariants = {
 	visible: {
 		opacity: 1,
 		transition: {
-			staggerChildren: .06,
+			staggerChildren: .05,
 			delayChildren: .1
 		}
 	}
@@ -60469,8 +61123,8 @@ var containerVariants = {
 var itemVariants = {
 	hidden: {
 		opacity: 0,
-		y: 16,
-		scale: .97
+		y: 14,
+		scale: .98
 	},
 	visible: {
 		opacity: 1,
@@ -60478,30 +61132,21 @@ var itemVariants = {
 		scale: 1,
 		transition: {
 			type: "spring",
-			stiffness: 400,
+			stiffness: 450,
 			damping: 28
 		}
 	}
 };
 var modalOverlayVariants = {
-	hidden: {
-		opacity: 0,
-		backdropFilter: "blur(0px)"
-	},
-	visible: {
-		opacity: 1,
-		backdropFilter: "blur(12px)"
-	},
-	exit: {
-		opacity: 0,
-		backdropFilter: "blur(0px)"
-	}
+	hidden: { opacity: 0 },
+	visible: { opacity: 1 },
+	exit: { opacity: 0 }
 };
 var modalContentVariants = {
 	hidden: {
 		opacity: 0,
-		scale: .92,
-		y: 40
+		scale: .94,
+		y: 30
 	},
 	visible: {
 		opacity: 1,
@@ -60515,95 +61160,77 @@ var modalContentVariants = {
 	},
 	exit: {
 		opacity: 0,
-		scale: .92,
-		y: 40,
-		transition: { duration: .2 }
+		scale: .94,
+		y: 30,
+		transition: { duration: .18 }
 	}
 };
 var IconWrapper = ({ icon: Icon, theme = "purple", size = "md" }) => {
 	const sizeClasses = {
-		sm: "w-8 h-8",
+		sm: "w-9 h-9",
 		md: "w-10 h-10",
-		lg: "w-12 h-12"
+		lg: "w-11 h-11"
 	};
 	const iconSizes = {
-		sm: "w-4 h-4",
+		sm: "w-[18px] h-[18px]",
 		md: "w-5 h-5",
 		lg: "w-6 h-6"
 	};
 	const themeSet = colorThemes[theme] || colorThemes.purple;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: `${sizeClasses[size]} ${themeSet.iconBg} rounded-xl flex items-center justify-center text-white shadow-lg shadow-${theme}-500/20 shrink-0`,
+		className: `${sizeClasses[size]} ${themeSet.iconBg} rounded-xl flex items-center justify-center text-white shadow-md shrink-0`,
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, {
 			className: iconSizes[size],
 			strokeWidth: 2
 		})
 	});
 };
-var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle, theme = "purple", badge, disabled = false }) => {
+var ToggleSwitch = ({ isToggled, onToggle, theme = "purple", disabled = false }) => {
 	const themeSet = colorThemes[theme] || colorThemes.purple;
-	if (toggle) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-		variants: itemVariants,
-		whileHover: disabled ? {} : {
-			y: -2,
-			boxShadow: "0 8px 30px -10px rgba(0,0,0,0.08)"
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+		dir: "ltr",
+		type: "button",
+		onClick: (e) => {
+			e.stopPropagation();
+			onToggle?.();
 		},
-		whileTap: disabled ? {} : { scale: .98 },
-		className: `group relative overflow-hidden rounded-2xl bg-white border border-stone-200/80 cursor-pointer transition-all duration-300 p-4 ${disabled ? "opacity-50 cursor-not-allowed" : "hover:border-stone-300 shadow-sm hover:shadow-md"}`,
-		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "relative flex items-center gap-4",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconWrapper, {
-					icon: Icon,
-					theme
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex-1 min-w-0 text-right",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-2 justify-end",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "text-[15px] font-bold text-stone-800",
-							children: label
-						}), badge && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold",
-							children: badge
-						})]
-					}), desc && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "text-[13px] text-stone-500 mt-0.5 leading-relaxed",
-						children: desc
-					})]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					onClick: (e) => {
-						e.stopPropagation();
-						onToggle?.();
-					},
-					disabled,
-					className: `relative w-[52px] h-7 rounded-full transition-all duration-300 shrink-0 ${isToggled ? `${themeSet.iconBg} shadow-md shadow-${theme}-500/30` : "bg-stone-300"}`,
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
-						animate: { x: isToggled ? 26 : 2 },
-						transition: {
-							type: "spring",
-							stiffness: 600,
-							damping: 30
-						},
-						className: "absolute top-[3px] w-[22px] h-[22px] bg-white rounded-full shadow-sm"
-					})
-				})
-			]
+		disabled,
+		className: `
+        relative w-[52px] h-7 rounded-full shrink-0 overflow-hidden
+        transition-colors duration-300 ease-out
+        ${isToggled ? themeSet.activeBg : "bg-stone-300"}
+        ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer active:scale-95"}
+      `,
+		"aria-label": isToggled ? "تفعيل" : "إيقاف",
+		"aria-pressed": isToggled,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
+			initial: false,
+			animate: { x: isToggled ? 24 : 0 },
+			transition: {
+				type: "spring",
+				stiffness: 500,
+				damping: 30
+			},
+			className: "absolute left-[3px] top-[3px] block w-[22px] h-[22px] bg-white rounded-full shadow-sm"
 		})
 	});
+};
+var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle, theme = "purple", badge, disabled = false }) => {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 		variants: itemVariants,
 		whileHover: disabled ? {} : {
 			y: -2,
-			boxShadow: "0 8px 30px -10px rgba(0,0,0,0.08)"
+			boxShadow: "0 8px 24px -8px rgba(0,0,0,0.08)"
 		},
 		whileTap: disabled ? {} : { scale: .98 },
 		onClick: disabled ? void 0 : onClick,
-		className: `group relative overflow-hidden rounded-2xl bg-white border border-stone-200/80 cursor-pointer transition-all duration-300 p-4 ${disabled ? "opacity-50 cursor-not-allowed" : "hover:border-stone-300 shadow-sm hover:shadow-md"}`,
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:from-stone-50/50 group-hover:to-stone-100/30 transition-all duration-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "relative flex items-center gap-4",
+		className: `
+        group relative overflow-hidden rounded-2xl bg-white border border-stone-200/80 
+        transition-all duration-300 p-4
+        ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:border-stone-300 shadow-sm hover:shadow-md"}
+      `,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-transparent group-hover:from-stone-50/60 group-hover:to-stone-100/30 transition-all duration-500" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "relative flex items-center gap-3.5",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconWrapper, {
 					icon: Icon,
@@ -60612,7 +61239,7 @@ var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggl
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex-1 min-w-0 text-right",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-2 justify-end",
+						className: "flex items-center gap-2 justify-end flex-wrap",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-[15px] font-bold text-stone-800",
 							children: label
@@ -60625,10 +61252,15 @@ var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggl
 						children: desc
 					})]
 				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-center gap-2",
+				toggle ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ToggleSwitch, {
+					isToggled,
+					onToggle,
+					theme,
+					disabled
+				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-2 shrink-0",
 					children: [disabled && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-xs text-stone-400",
+						className: "text-[11px] text-stone-400 font-medium",
 						children: "قريباً"
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronRight, { className: "w-5 h-5 text-stone-400 group-hover:text-stone-600 group-hover:-translate-x-1 transition-all duration-300" })]
 				})
@@ -60636,19 +61268,19 @@ var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggl
 		})]
 	});
 };
-var SectionHeader = ({ title, icon: Icon, delay = 0 }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+var SectionHeader = ({ title, icon: Icon }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 	variants: itemVariants,
-	className: "flex items-center gap-3 px-1 mb-3 mt-2",
+	className: "flex items-center gap-3 px-1 mb-3 mt-1",
 	children: [
 		Icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "p-1.5 rounded-lg bg-stone-100 text-stone-600",
+			className: "p-1.5 rounded-lg bg-stone-100 text-stone-500",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, {
 				className: "w-4 h-4",
 				strokeWidth: 2.5
 			})
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-			className: "text-xs font-extrabold text-stone-500 uppercase tracking-widest",
+			className: "text-[11px] font-extrabold text-stone-500 uppercase tracking-[0.15em]",
 			children: title
 		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "flex-1 h-px bg-stone-200/60" })
@@ -60660,19 +61292,19 @@ var SimpleModal = ({ open, onClose, title, children, maxWidth = "sm", icon: Icon
 		initial: "hidden",
 		animate: "visible",
 		exit: "exit",
-		transition: { duration: .25 },
-		className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/30",
+		transition: { duration: .2 },
+		className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/25 backdrop-blur-sm",
 		onClick: onClose,
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 			variants: modalContentVariants,
 			initial: "hidden",
 			animate: "visible",
 			exit: "exit",
-			className: `bg-white rounded-3xl w-full ${{
+			className: `bg-white rounded-[28px] w-full ${{
 				sm: "max-w-sm",
 				md: "max-w-md",
 				lg: "max-w-lg"
-			}[maxWidth]} shadow-2xl shadow-stone-900/10 border border-stone-100 overflow-hidden`,
+			}[maxWidth]} shadow-2xl shadow-stone-900/8 border border-stone-100 overflow-hidden`,
 			onClick: (e) => e.stopPropagation(),
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center justify-between p-5 pb-4 border-b border-stone-100",
@@ -60726,7 +61358,7 @@ var SelectionItem = ({ label, desc, isSelected, onClick, icon, featured }) => /*
 				className: "w-4 h-4",
 				strokeWidth: 3
 			})
-		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-6 h-6 rounded-full border-2 border-stone-300" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		}) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-6 h-6 rounded-full border-2 border-stone-300 shrink-0" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "text-right",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center gap-2",
@@ -60735,7 +61367,7 @@ var SelectionItem = ({ label, desc, isSelected, onClick, icon, featured }) => /*
 					children: label
 				}), featured && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 					className: "flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-3 h-3" }), "مميز"]
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Crown, { className: "w-3 h-3" }), " مميز"]
 				})]
 			}), desc && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "text-xs text-stone-500 mt-0.5",
@@ -60743,7 +61375,7 @@ var SelectionItem = ({ label, desc, isSelected, onClick, icon, featured }) => /*
 			})]
 		})]
 	}), icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-		className: "text-2xl",
+		className: "text-2xl shrink-0",
 		children: icon
 	})]
 });
@@ -60857,7 +61489,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 			setResetLoading(false);
 		}
 	}, [resetText]);
-	const headerOpacity = Math.min(scrollY / 100, 1);
+	const headerOpacity = Math.min(scrollY / 80, 1);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen bg-stone-50 pb-32 text-right",
 		dir: "rtl",
@@ -60873,16 +61505,16 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				},
 				className: "fixed top-0 left-0 right-0 z-30 transition-all duration-300",
 				style: {
-					backgroundColor: `rgba(255, 255, 255, ${.8 + headerOpacity * .15})`,
+					backgroundColor: `rgba(255, 255, 255, ${.85 + headerOpacity * .1})`,
 					backdropFilter: `blur(${12 + headerOpacity * 4}px)`,
-					boxShadow: headerOpacity > .5 ? "0 1px 3px rgba(0,0,0,0.05)" : "none"
+					boxShadow: headerOpacity > .5 ? "0 1px 3px rgba(0,0,0,0.04)" : "none"
 				},
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "max-w-lg mx-auto px-5 pt-12 pb-4 flex items-center justify-between",
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-							whileHover: { scale: 1.1 },
-							whileTap: { scale: .9 },
+							whileHover: { scale: 1.08 },
+							whileTap: { scale: .92 },
 							onClick: onBack,
 							className: "w-10 h-10 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-600 hover:text-stone-900 hover:border-stone-300 transition-all",
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5" })
@@ -60986,14 +61618,14 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 						className: "space-y-2.5",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: FingerprintPattern,
+								icon: Lock,
 								label: "قفل التطبيق",
 								desc: "حماية إضافية برمز سري أو بصمة",
 								onClick: onOpenAppLock,
 								theme: "rose"
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
-								icon: Database$1,
+								icon: RefreshCw,
 								label: "إدارة البيانات",
 								desc: "التحكم في التخزين والذاكرة المؤقتة",
 								onClick: onOpenDataManagement,
@@ -61079,7 +61711,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 							onClick: item.onClick,
 							className: "relative overflow-hidden rounded-2xl p-4 bg-white border border-stone-200 shadow-sm hover:shadow-md transition-all duration-300 group text-center",
 							children: [
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute inset-0 bg-gradient-to-br ${colorThemes[item.theme].gradient} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-300` }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute inset-0 bg-gradient-to-br ${colorThemes[item.theme].iconBg.replace("bg-gradient-to-br ", "")} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-300` }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)(item.icon, { className: `w-5 h-5 mx-auto mb-2 text-stone-400 group-hover:${colorThemes[item.theme].text} transition-colors` }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "relative text-xs font-bold text-stone-700 group-hover:text-stone-900 transition-colors block",
@@ -61103,8 +61735,8 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 				style: { paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" },
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-						whileHover: { scale: 1.1 },
-						whileTap: { scale: .9 },
+						whileHover: { scale: 1.08 },
+						whileTap: { scale: .92 },
 						onClick: onBack,
 						className: "p-2.5 rounded-xl hover:bg-stone-100 active:bg-stone-200 transition-colors",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-6 h-6 text-stone-700" })
@@ -61114,8 +61746,8 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 						children: "القائمة الرئيسية"
 					}),
 					isAdmin ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-						whileHover: { scale: 1.1 },
-						whileTap: { scale: .9 },
+						whileHover: { scale: 1.08 },
+						whileTap: { scale: .92 },
 						onClick: onOpenAdmin,
 						className: "p-2.5 rounded-xl bg-violet-100 hover:bg-violet-200 text-violet-700 transition-colors",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-6 h-6" })
