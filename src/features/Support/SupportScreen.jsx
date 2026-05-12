@@ -74,7 +74,7 @@ export default function SupportScreen({ onBack }) {
 
         const messagesQuery = query(
           collection(db, 'supportTickets', tid, 'messages'),
-          orderBy('createdAt', 'asc('createdAt', 'asc')
+          orderBy('createdAt', 'asc')
         );
         unsubMessages = onSnapshot(messagesQuery, (snapshot) => {
           const msgs = snapshot.docs.map((d) => ({
@@ -91,6 +91,7 @@ export default function SupportScreen({ onBack }) {
         setLoading(false);
       }
     };
+
     initTicket();
     return () => unsubMessages();
   }, [user?.uid]);
