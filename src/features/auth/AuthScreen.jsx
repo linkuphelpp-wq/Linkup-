@@ -31,7 +31,7 @@ const Button = ({ children, className, disabled, ...props }) => (
 
 export default function AuthScreen({ onLogin, onForgotPassword }) {
   const [isLogin, setIsLogin] = useState(true);
-  const [authMode, setAuthMode] = useState('email'); // 'email' أو 'phone'
+  const [authMode, setAuthMode] = useState('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -77,7 +77,7 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
     if (!recaptchaVerifierRef.current) {
       recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
         size: 'invisible',
-        callback: () => { /* التحقق التلقائي */ }
+        callback: () => {}
       });
     }
     return recaptchaVerifierRef.current;
@@ -117,11 +117,6 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
     setLoading(true);
     try {
       const { user } = await confirmationResult.confirm(verificationCode);
-      // تم الدخول برقم الهاتف بنجاح
-      if (!user.emailVerified) {
-        // لا يوجد بريد للتحقق، ننتقل مباشرة
-      }
-      // إنشاء مستند المستخدم إذا لم يكن موجوداً
       const ref = doc(db, 'users', user.uid);
       if (!(await getDoc(ref)).exists()) {
         const today = new Date().toISOString().split('T')[0];
@@ -236,7 +231,6 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden selection:bg-purple-200/50" dir="rtl">
-      {/* عنصر مخفي لـ reCAPTCHA */}
       <div id="recaptcha-container"></div>
 
       <div className="absolute inset-0 opacity-30 pointer-events-none">
@@ -267,7 +261,6 @@ export default function AuthScreen({ onLogin, onForgotPassword }) {
                   <h1 className="mt-4 text-3xl font-black text-gray-800 tracking-tight">Link<span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">Up</span></h1>
                 </div>
 
-                {/* تبويبات اختيار الوسيلة */}
                 <div className="relative flex bg-gray-100 rounded-2xl p-1.5 mb-6 border border-gray-200">
                   <div className={`absolute top-1.5 bottom-1.5 w-[calc(33.33%-4px)] rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 shadow-md transition-all duration-300 ease-out ${
                     isLogin && authMode === 'email' ? 'left-1.5' : !isLogin ? 'left-[calc(33.33%+4px)]' : 'left-[calc(66.66%+4px)]'
