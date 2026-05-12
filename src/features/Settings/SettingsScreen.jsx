@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+Import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield, Palette, Mic, Speaker, Lock, RefreshCw,
@@ -103,10 +103,27 @@ const IconWrapper = ({ icon: Icon, theme = 'purple', size = 'md' }) => {
 
 /*
   ═══════════════════════════════════════════════════════════════
-  TOGGLE SWITCH — FIXED FOR RTL / OVERFLOW
+  TOGGLE SWITCH — FIXED FOR RTL & CIRCLE OVERFLOW
   ═══════════════════════════════════════════════════════════════
-  المشكلة: الدائرة كانت تلامس الحافة وتظهر خارج الإطار بشكل بسيط
-  الحل: تثبيت الأبعاد بدقة + box-border + overflow-hidden + حركة أقل
+  المشكلة: الدائرة كانت تخرج قليلاً عن إطار الحاوية بسبب:
+  1. عدم تطابق نصف قطر انحناء الدائرة (11px) مع نصف قطر الحاوية (14px)
+  2. الهوامش كانت 3px فقط بينما الفرق المطلوب 4px
+  3. animation spring كان underdamped مما يسبب overshoot
+  
+  الحل:
+  - تقليل الدائرة من 22px إلى 20px (نصف قطر 10px)
+  - زيادة الهوامش من 3px إلى 4px
+  - تعديل مسار الحركة: 52 - 4 - 20 - 4 = 24px
+  - زيادة damping من 30 إلى 40 لمنع الارتداد
+  
+  أبعاد الحاوية:  52px × 28px
+  أبعاد الدائرة:  20px × 20px
+  الهامش العمودي: (28 - 20) / 2 = 4px
+  الهامش الأفقي:  4px
+  مسار الحركة:    52 - 4 - 20 - 4 = 24px
+  
+  مغلق:  left = 4px,  x = 0  → الدائرة على اليسار
+  مفتوح: left = 4px,  x = 24 → الدائرة على اليمين
   ═══════════════════════════════════════════════════════════════
 */
 const ToggleSwitch = ({ isToggled, onToggle, theme = 'purple', disabled = false }) => {
@@ -116,47 +133,22 @@ const ToggleSwitch = ({ isToggled, onToggle, theme = 'purple', disabled = false 
     <button
       dir="ltr"
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onToggle?.();
-      }}
+      onClick={(e) => { e.stopPropagation(); onToggle?.(); }}
       disabled={disabled}
       className={`
-        relative shrink-0
-        w-[52px] h-7
-        rounded-full
-        overflow-hidden
-        box-border
-        p-0
+        relative w-[52px] h-7 rounded-full shrink-0 overflow-hidden
         transition-colors duration-300 ease-out
         ${isToggled ? themeSet.activeBg : 'bg-stone-300'}
         ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer active:scale-95'}
       `}
       aria-label={isToggled ? 'تفعيل' : 'إيقاف'}
       aria-pressed={isToggled}
-      style={{
-        WebkitTapHighlightColor: 'transparent',
-      }}
     >
       <motion.span
         initial={false}
-        animate={{ x: isToggled ? 23.5 : 0 }}
-        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        className="
-          absolute
-          left-[3px]
-          top-[3px]
-          block
-          w-[22px]
-          h-[22px]
-          rounded-full
-          bg-white
-          shadow-[0_1px_3px_rgba(0,0,0,0.18)]
-          will-change-transform
-        "
-        style={{
-          boxSizing: 'border-box',
-        }}
+        animate={{ x: isToggled ? 24 : 0 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+        className="absolute left-[4px] top-[4px] block w-5 h-5 bg-white rounded-full shadow-sm"
       />
     </button>
   );
@@ -523,26 +515,13 @@ export default function SettingsScreen({
       </motion.div>
 
       {/* Bottom Navigation */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-2xl border-t border-stone-200/60 px-6 py-3 flex items-center justify-between shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)]"
-        style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
-      >
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.92 }}
-          onClick={onBack}
-          className="p-2.5 rounded-xl hover:bg-stone-100 active:bg-stone-200 transition-colors"
-        >
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-2xl border-t border-stone-200/60 px-6 py-3 flex items-center justify-between shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)]" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+        <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }} onClick={onBack} className="p-2.5 rounded-xl hover:bg-stone-100 active:bg-stone-200 transition-colors">
           <ArrowLeft className="w-6 h-6 text-stone-700" />
         </motion.button>
         <span className="text-sm font-semibold text-stone-500">القائمة الرئيسية</span>
         {isAdmin ? (
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
-            onClick={onOpenAdmin}
-            className="p-2.5 rounded-xl bg-violet-100 hover:bg-violet-200 text-violet-700 transition-colors"
-          >
+          <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }} onClick={onOpenAdmin} className="p-2.5 rounded-xl bg-violet-100 hover:bg-violet-200 text-violet-700 transition-colors">
             <Shield className="w-6 h-6" />
           </motion.button>
         ) : <div className="w-11" />}
@@ -551,63 +530,26 @@ export default function SettingsScreen({
       {/* Modals */}
       <SimpleModal open={showLanguageModal} onClose={() => setShowLanguageModal(false)} title="لغة التطبيق" icon={Globe}>
         <div className="space-y-2.5">
-          {languages.map(lang => (
-            <SelectionItem
-              key={lang.v}
-              label={lang.l}
-              desc={lang.desc}
-              icon={lang.flag}
-              isSelected={lang.v === 'ar'}
-              onClick={() => setShowLanguageModal(false)}
-            />
-          ))}
+          {languages.map(lang => <SelectionItem key={lang.v} label={lang.l} desc={lang.desc} icon={lang.flag} isSelected={lang.v === 'ar'} onClick={() => setShowLanguageModal(false)} />)}
         </div>
       </SimpleModal>
 
       <SimpleModal open={showSizeModal} onClose={() => setShowSizeModal(false)} title="حجم الخط" icon={Type}>
         <div className="space-y-2.5">
-          {sizes.map(s => (
-            <SelectionItem
-              key={s.v}
-              label={s.l}
-              desc={s.desc}
-              isSelected={fontSize === s.v}
-              onClick={() => {
-                onSelectFontSize?.(s.v);
-                setShowSizeModal(false);
-              }}
-            />
-          ))}
+          {sizes.map(s => <SelectionItem key={s.v} label={s.l} desc={s.desc} isSelected={fontSize === s.v} onClick={() => { onSelectFontSize?.(s.v); setShowSizeModal(false); }} />)}
         </div>
       </SimpleModal>
 
       <SimpleModal open={showFontModal} onClose={() => setShowFontModal(false)} title="نوع الخط" icon={Palette}>
         <div className="space-y-2.5">
-          {fonts.map(f => (
-            <SelectionItem
-              key={f.v}
-              label={f.l}
-              desc={f.desc}
-              isSelected={fontFamily === f.v}
-              featured={f.featured}
-              onClick={() => {
-                onSelectFontFamily?.(f.v);
-                setShowFontModal(false);
-              }}
-            />
-          ))}
+          {fonts.map(f => <SelectionItem key={f.v} label={f.l} desc={f.desc} isSelected={fontFamily === f.v} featured={f.featured} onClick={() => { onSelectFontFamily?.(f.v); setShowFontModal(false); }} />)}
         </div>
       </SimpleModal>
 
       <SimpleModal open={showResetModal} onClose={() => { setShowResetModal(false); setResetText(''); }} title="تأكيد إعادة الضبط" icon={AlertTriangle} maxWidth="md">
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="w-20 h-20 rounded-3xl bg-red-50 flex items-center justify-center border-4 border-red-100"
-            >
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} className="w-20 h-20 rounded-3xl bg-red-50 flex items-center justify-center border-4 border-red-100">
               <AlertTriangle className="w-10 h-10 text-red-500" strokeWidth={2} />
             </motion.div>
             <div className="text-center">
@@ -616,32 +558,15 @@ export default function SettingsScreen({
             </div>
           </div>
           <div className="relative">
-            <input
-              value={resetText}
-              onChange={e => setResetText(e.target.value)}
-              placeholder='اكتب "حذف" هنا للتأكيد...'
-              className="w-full h-14 px-5 rounded-2xl bg-stone-50 border-2 border-stone-200 focus:border-red-400 focus:outline-none focus:ring-4 focus:ring-red-100 text-center text-lg font-bold text-stone-800 placeholder:font-normal placeholder:text-stone-400 transition-all"
-              autoFocus
-              dir="rtl"
-            />
+            <input value={resetText} onChange={e => setResetText(e.target.value)} placeholder='اكتب "حذف" هنا للتأكيد...' className="w-full h-14 px-5 rounded-2xl bg-stone-50 border-2 border-stone-200 focus:border-red-400 focus:outline-none focus:ring-4 focus:ring-red-100 text-center text-lg font-bold text-stone-800 placeholder:font-normal placeholder:text-stone-400 transition-all" autoFocus dir="rtl" />
             {resetText.trim() === 'حذف' && (
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2"
-              >
+              <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="absolute left-4 top-1/2 -translate-y-1/2">
                 <Check className="w-6 h-6 text-red-500" strokeWidth={3} />
               </motion.div>
             )}
           </div>
           <div className="flex gap-3">
-            <motion.button
-              whileTap={{ scale: 0.96 }}
-              onClick={() => { setShowResetModal(false); setResetText(''); }}
-              className="flex-1 h-12 rounded-xl border-2 border-stone-200 bg-white hover:bg-stone-50 font-bold text-stone-700 transition-all"
-            >
-              إلغاء
-            </motion.button>
+            <motion.button whileTap={{ scale: 0.96 }} onClick={() => { setShowResetModal(false); setResetText(''); }} className="flex-1 h-12 rounded-xl border-2 border-stone-200 bg-white hover:bg-stone-50 font-bold text-stone-700 transition-all">إلغاء</motion.button>
             <DangerButton onClick={handleResetApp} disabled={resetText.trim() !== 'حذف'} loading={resetLoading}>تأكيد الحذف</DangerButton>
           </div>
         </div>
