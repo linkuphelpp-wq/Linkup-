@@ -55816,6 +55816,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 	const [confirmPassword, setConfirmPassword] = (0, import_react.useState)("");
 	const [showPassword, setShowPassword] = (0, import_react.useState)(false);
 	const [showConfirm, setShowConfirm] = (0, import_react.useState)(false);
+	const [phoneCountry, setPhoneCountry] = (0, import_react.useState)("+966");
 	const [phoneNumber, setPhoneNumber] = (0, import_react.useState)("");
 	const [verificationCode, setVerificationCode] = (0, import_react.useState)("");
 	const [confirmationResult, setConfirmationResult] = (0, import_react.useState)(null);
@@ -55865,13 +55866,14 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 	};
 	const handleSendVerification = async () => {
 		setError("");
-		if (!phoneNumber.trim() || phoneNumber.length < 8) {
+		const fullNumber = `${phoneCountry}${phoneNumber}`;
+		if (!phoneNumber.trim() || phoneNumber.length < 7) {
 			setError("يرجى إدخال رقم هاتف صالح");
 			return;
 		}
 		setLoading(true);
 		try {
-			setConfirmationResult(await signInWithPhoneNumber(auth, phoneNumber, setupRecaptcha()));
+			setConfirmationResult(await signInWithPhoneNumber(auth, fullNumber, setupRecaptcha()));
 			setSuccess("تم إرسال رمز التحقق إلى رقمك");
 			setTimeout(() => setSuccess(""), 3e3);
 		} catch (err) {
@@ -56024,6 +56026,11 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 			setLoading(false);
 		}
 	};
+	const getTabPosition = () => {
+		if (authMode === "email" && isLogin) return "left-1.5";
+		if (authMode === "email" && !isLogin) return "left-[calc(33.33%+4px)]";
+		return "left-[calc(66.66%+4px)]";
+	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden selection:bg-purple-200/50",
 		dir: "rtl",
@@ -56094,42 +56101,42 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "relative flex bg-gray-100 rounded-2xl p-1.5 mb-6 border border-gray-200",
 								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute top-1.5 bottom-1.5 w-[calc(33.33%-4px)] rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 shadow-md transition-all duration-300 ease-out ${isLogin && authMode === "email" ? "left-1.5" : !isLogin ? "left-[calc(33.33%+4px)]" : "left-[calc(66.66%+4px)]"}` }),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: `absolute top-1.5 bottom-1.5 w-[calc(33.33%-4px)] rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 shadow-md transition-all duration-300 ease-out ${getTabPosition()}` }),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										type: "button",
 										onClick: () => {
-											setIsLogin(true);
 											setAuthMode("email");
+											setIsLogin(true);
 											setError("");
 											setSuccess("");
 										},
-										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isLogin && authMode === "email" ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
+										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${authMode === "email" && isLogin ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "w-4 h-4 inline ml-1" }), " تسجيل"]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										type: "button",
 										onClick: () => {
+											setAuthMode("email");
 											setIsLogin(false);
 											setError("");
 											setSuccess("");
 										},
-										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${!isLogin ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
+										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${authMode === "email" && !isLogin ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Users, { className: "w-4 h-4 inline ml-1" }), " جديد"]
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 										type: "button",
 										onClick: () => {
-											setIsLogin(true);
 											setAuthMode("phone");
 											setError("");
 											setSuccess("");
 										},
-										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${isLogin && authMode === "phone" ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
+										className: `relative z-10 flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${authMode === "phone" ? "text-white" : "text-gray-500 hover:text-gray-700"}`,
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "w-4 h-4 inline ml-1" }), " هاتف"]
 									})
 								]
 							}),
-							isLogin && authMode === "email" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+							authMode === "email" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 								onSubmit: handleSubmit,
 								className: "space-y-4",
 								children: [
@@ -56167,113 +56174,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 											})
 										]
 									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-										type: "button",
-										onClick: onForgotPassword,
-										className: "text-xs text-purple-500 hover:text-purple-700 font-medium text-left transition-all hover:underline active:scale-95 origin-left",
-										disabled: loading,
-										children: "نسيت كلمة المرور؟"
-									}),
-									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), error]
-									}),
-									success && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4 shrink-0" }), success]
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
-										type: "submit",
-										disabled: loading,
-										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group/btn",
-										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["تسجيل الدخول", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4 group-hover/btn:translate-x-1 transition-transform" })] })
-									})
-								]
-							}),
-							isLogin && authMode === "phone" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "space-y-4",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "relative group/input",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
-											type: "tel",
-											value: phoneNumber,
-											onChange: (e) => setPhoneNumber(e.target.value),
-											placeholder: "رقم الهاتف (+9665xxxxxxxx)",
-											className: "h-14 pr-12",
-											disabled: loading
-										})]
-									}),
-									!confirmationResult ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
-										onClick: handleSendVerification,
-										disabled: loading || !phoneNumber.trim(),
-										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2",
-										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["إرسال رمز التحقق", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4" })] })
-									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "relative group/input",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Hash, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
-											type: "text",
-											value: verificationCode,
-											onChange: (e) => setVerificationCode(e.target.value),
-											placeholder: "رمز التحقق",
-											className: "h-14 pr-12",
-											disabled: loading
-										})]
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
-										onClick: handleVerifyCode,
-										disabled: loading || !verificationCode.trim(),
-										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2",
-										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["تأكيد الرمز", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4" })] })
-									})] }),
-									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), error]
-									}),
-									success && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4 shrink-0" }), success]
-									})
-								]
-							}),
-							!isLogin && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-								onSubmit: handleSubmit,
-								className: "space-y-4",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "relative group/input",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Mail, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
-											type: "email",
-											value: email,
-											onChange: (e) => setEmail(e.target.value),
-											placeholder: "البريد الإلكتروني",
-											className: "h-14 pr-12",
-											required: true,
-											disabled: loading
-										})]
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "relative group/input",
-										children: [
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Input$1, {
-												type: showPassword ? "text" : "password",
-												value: password,
-												onChange: (e) => setPassword(e.target.value),
-												placeholder: "كلمة المرور",
-												className: "h-14 pr-12",
-												required: true,
-												disabled: loading
-											}),
-											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-												type: "button",
-												onClick: () => setShowPassword(!showPassword),
-												className: "absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 active:scale-90",
-												disabled: loading,
-												children: showPassword ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(EyeOff, { className: "w-5 h-5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Eye, { className: "w-5 h-5" })
-											})
-										]
-									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									!isLogin && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "relative group/input",
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lock, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }),
@@ -56295,6 +56196,13 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 											})
 										]
 									}),
+									isLogin && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										type: "button",
+										onClick: onForgotPassword,
+										className: "text-xs text-purple-500 hover:text-purple-700 font-medium text-left transition-all hover:underline active:scale-95 origin-left",
+										disabled: loading,
+										children: "نسيت كلمة المرور؟"
+									}),
 									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), error]
@@ -56306,8 +56214,66 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 									/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
 										type: "submit",
 										disabled: loading,
+										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 group/btn",
+										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [isLogin ? "تسجيل الدخول" : "إنشاء حساب", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4 group-hover/btn:translate-x-1 transition-transform" })] })
+									})
+								]
+							}),
+							authMode === "phone" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "space-y-4",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex gap-2",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "relative group/input w-[30%]",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Globe, { className: "absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+												type: "text",
+												value: phoneCountry,
+												onChange: (e) => setPhoneCountry(e.target.value),
+												placeholder: "+966",
+												className: "w-full h-14 pr-8 pl-2 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all text-center text-sm",
+												disabled: loading || confirmationResult
+											})]
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+											className: "relative group/input flex-1",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Phone, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+												type: "tel",
+												value: phoneNumber,
+												onChange: (e) => setPhoneNumber(e.target.value),
+												placeholder: "رقم الهاتف (5xxxxxxxx)",
+												className: "w-full h-14 pr-12 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all",
+												disabled: loading || confirmationResult
+											})]
+										})]
+									}),
+									!confirmationResult ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
+										onClick: handleSendVerification,
+										disabled: loading || !phoneNumber.trim(),
 										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2",
-										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["إنشاء حساب", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4" })] })
+										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["إرسال رمز التحقق", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowRight, { className: "w-4 h-4" })] })
+									}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "relative group/input",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Hash, { className: "absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within/input:text-purple-500 transition-colors" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+											type: "text",
+											value: verificationCode,
+											onChange: (e) => setVerificationCode(e.target.value),
+											placeholder: "رمز التحقق",
+											className: "w-full h-14 pr-12 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all",
+											disabled: loading
+										})]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Button$1, {
+										onClick: handleVerifyCode,
+										disabled: loading || !verificationCode.trim(),
+										className: "w-full h-14 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-400 hover:to-blue-400 text-white rounded-xl font-bold text-base shadow-lg shadow-purple-200/50 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2",
+										children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(LoaderCircle, { className: "w-5 h-5 animate-spin" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["تأكيد الرمز", /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4" })] })
+									})] }),
+									error && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-xl flex items-center gap-2",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Shield, { className: "w-4 h-4 shrink-0" }), error]
+									}),
+									success && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm p-3 rounded-xl flex items-center gap-2",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4 shrink-0" }), success]
 									})
 								]
 							}),
@@ -61195,29 +61161,22 @@ var ToggleSwitch = ({ isToggled, onToggle, theme = "purple", disabled = false })
 		},
 		disabled,
 		className: `
-        relative shrink-0
-        w-[52px] h-7
-        rounded-full
-        overflow-hidden
-        box-border
-        p-0
+        relative w-[52px] h-7 rounded-full shrink-0 overflow-hidden
         transition-colors duration-300 ease-out
         ${isToggled ? themeSet.activeBg : "bg-stone-300"}
         ${disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer active:scale-95"}
       `,
 		"aria-label": isToggled ? "تفعيل" : "إيقاف",
 		"aria-pressed": isToggled,
-		style: { WebkitTapHighlightColor: "transparent" },
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.span, {
 			initial: false,
-			animate: { x: isToggled ? 23.5 : 0 },
+			animate: { x: isToggled ? 24 : 0 },
 			transition: {
 				type: "spring",
 				stiffness: 500,
-				damping: 30
+				damping: 40
 			},
-			className: "\n          absolute\n          left-[3px]\n          top-[3px]\n          block\n          w-[22px]\n          h-[22px]\n          rounded-full\n          bg-white\n          shadow-[0_1px_3px_rgba(0,0,0,0.18)]\n          will-change-transform\n        ",
-			style: { boxSizing: "border-box" }
+			className: "absolute left-[4px] top-[4px] block w-5 h-5 bg-white rounded-full shadow-sm"
 		})
 	});
 };
