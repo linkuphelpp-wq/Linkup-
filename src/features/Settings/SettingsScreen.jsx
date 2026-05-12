@@ -1,4 +1,4 @@
-Import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield, Palette, Mic, Speaker, Lock, RefreshCw,
