@@ -91,7 +91,6 @@ export default function SupportScreen({ onBack }) {
         setLoading(false);
       }
     };
-
     initTicket();
     return () => unsubMessages();
   }, [user?.uid]);
