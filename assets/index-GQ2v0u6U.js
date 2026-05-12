@@ -68793,8 +68793,8 @@ function SupportScreen({ onBack }) {
 						...d.data()
 					}));
 					docs.sort((a, b) => {
-						const aTime = a.last_message_at?.toMillis?.() || a.createdAt?.toMillis?.() || 0;
-						return (b.last_message_at?.toMillis?.() || b.createdAt?.toMillis?.() || 0) - aTime;
+						const aTime = a.createdAt?.toMillis?.() || 0;
+						return (b.createdAt?.toMillis?.() || 0) - aTime;
 					});
 					tid = docs[0].id;
 					setTicketId(tid);
@@ -68809,8 +68809,7 @@ function SupportScreen({ onBack }) {
 						userPhotoURL: user.photoURL || "",
 						userUsername: username,
 						status: "open",
-						createdAt: serverTimestamp$2(),
-						last_message_at: serverTimestamp$2()
+						createdAt: serverTimestamp$2()
 					});
 					setTicketId(tid);
 				}
@@ -68842,7 +68841,7 @@ function SupportScreen({ onBack }) {
 				read: false,
 				notifiedAdmin: false
 			});
-			await setDoc(doc(db, "supportTickets", ticketId), { last_message_at: serverTimestamp$2() }, { merge: true });
+			await setDoc(doc(db, "supportTickets", ticketId), { createdAt: serverTimestamp$2() }, { merge: true });
 			setInputText("");
 		} catch (err) {
 			console.error("Send error:", err);
