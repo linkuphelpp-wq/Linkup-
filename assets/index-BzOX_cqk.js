@@ -68844,14 +68844,14 @@ function SupportScreen({ onBack }) {
 		return () => unsubMessages();
 	}, [user?.uid]);
 	const handleSend = (0, import_react.useCallback)(async (textOverride) => {
-		const textToSend = textOverride || inputText;
+		const textToSend = typeof textOverride === "string" ? textOverride : inputText;
 		if (!textToSend.trim() || !ticketId || !user || sending) return;
 		try {
 			setSending(true);
 			const ticketRef = doc(db, "supportTickets", ticketId);
-			const ticketData = (await getDocs(query(collection(db, "supportTickets"), where("userId", "==", user.uid)))).docs[0]?.data();
-			if (ticketData?.lastMessageAt) {
-				const diff = (Date.now() - ticketData.lastMessageAt.toMillis()) / (1e3 * 60);
+			const tData = (await getDoc(ticketRef)).data();
+			if (tData && tData.lastMessageAt && typeof tData.lastMessageAt.toMillis === "function") {
+				const diff = (Date.now() - tData.lastMessageAt.toMillis()) / (1e3 * 60);
 				if (diff < 5) {
 					setCooldownMinutes(Math.ceil(5 - diff));
 					setTimeout(() => setCooldownMinutes(0), 4e3);
@@ -68872,7 +68872,8 @@ function SupportScreen({ onBack }) {
 			}, { merge: true });
 			setInputText("");
 		} catch (err) {
-			console.error(err);
+			console.error("خطأ حرج في الإرسال:", err);
+			alert("حدث خطأ! تأكد من اتصالك بالإنترنت.");
 		} finally {
 			setSending(false);
 		}
@@ -68882,7 +68883,20 @@ function SupportScreen({ onBack }) {
 		user,
 		sending
 	]);
-	if (!user) return null;
+	const handleKeyDown = (e) => {
+		if (e.key === "Enter" && !e.shiftKey) {
+			e.preventDefault();
+			handleSend();
+		}
+	};
+	if (!user) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "min-h-screen flex items-center justify-center bg-slate-50/50",
+		dir: "rtl",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-gray-500",
+			children: "يجب تسجيل الدخول"
+		})
+	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen flex flex-col bg-slate-50/50",
 		dir: "rtl",
@@ -68969,6 +68983,7 @@ function SupportScreen({ onBack }) {
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
 						value: inputText,
 						onChange: (e) => setInputText(e.target.value),
+						onKeyDown: handleKeyDown,
 						placeholder: "اكتب رسالتك هنا...",
 						rows: 1,
 						className: "flex-1 bg-gray-100 rounded-2xl px-4 py-3 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500/20 max-h-32",
