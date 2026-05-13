@@ -69026,6 +69026,24 @@ function SupportScreen({ onBack, onNavigate }) {
 		});
 		return () => unsub();
 	}, []);
+	const sendInitialMessage = (0, import_react.useCallback)(async (text) => {
+		if (!ticketId || !user) return;
+		try {
+			await addDoc(collection(db, "supportTickets", ticketId, "messages"), {
+				sender: "user",
+				text: text.trim(),
+				createdAt: serverTimestamp$2(),
+				read: false,
+				notifiedAdmin: false
+			});
+			await setDoc(doc(db, "supportTickets", ticketId), {
+				updatedAt: serverTimestamp$2(),
+				status: "open"
+			}, { merge: true });
+		} catch (e) {
+			console.error(e);
+		}
+	}, [ticketId, user]);
 	(0, import_react.useEffect)(() => {
 		if (!user?.uid) return;
 		let unsubMessages = () => {};
@@ -69048,6 +69066,11 @@ function SupportScreen({ onBack, onNavigate }) {
 					});
 				}
 				setTicketId(tid);
+				const pendingMsg = sessionStorage.getItem("pendingSupportMessage");
+				if (pendingMsg) {
+					sessionStorage.removeItem("pendingSupportMessage");
+					setTimeout(() => sendInitialMessage(pendingMsg), 100);
+				}
 				unsubMessages = onSnapshot(query(collection(db, "supportTickets", tid, "messages"), orderBy("createdAt", "asc")), async (snapshot) => {
 					const msgs = snapshot.docs.map((d) => ({
 						id: d.id,
@@ -69075,7 +69098,7 @@ function SupportScreen({ onBack, onNavigate }) {
 		};
 		initTicket();
 		return () => unsubMessages();
-	}, [user?.uid]);
+	}, [user?.uid, sendInitialMessage]);
 	const handleSend = (0, import_react.useCallback)(async (textOverride) => {
 		const textToSend = typeof textOverride === "string" ? textOverride : inputText;
 		if (!textToSend.trim() || !ticketId || !user || sending) return;
@@ -69485,6 +69508,10 @@ function FAQScreen({ onBack, onNavigate }) {
 		navigator.clipboard.writeText(text).then(() => {
 			ue.success(`✅ ${label} تم نسخه`, { duration: 2e3 });
 		}).catch(() => ue.error("تعذر النسخ"));
+	};
+	const handleSendToSupport = (question) => {
+		sessionStorage.setItem("pendingSupportMessage", question);
+		onNavigate("support");
 	};
 	const filtered = problems.filter((p) => {
 		const q = searchQuery.toLowerCase();
