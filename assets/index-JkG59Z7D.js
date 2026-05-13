@@ -10517,6 +10517,22 @@ var CircleCheckBig = createLucideIcon("circle-check-big", [["path", {
 	d: "m9 11 3 3L22 4",
 	key: "1pflzl"
 }]]);
+var CirclePlus = createLucideIcon("circle-plus", [
+	["circle", {
+		cx: "12",
+		cy: "12",
+		r: "10",
+		key: "1mglay"
+	}],
+	["path", {
+		d: "M8 12h8",
+		key: "1wcyev"
+	}],
+	["path", {
+		d: "M12 8v8",
+		key: "napkw2"
+	}]
+]);
 var CircleQuestionMark = createLucideIcon("circle-question-mark", [
 	["circle", {
 		cx: "12",
@@ -10660,6 +10676,26 @@ var EllipsisVertical = createLucideIcon("ellipsis-vertical", [
 		key: "lyex9k"
 	}]
 ]);
+var Ellipsis = createLucideIcon("ellipsis", [
+	["circle", {
+		cx: "12",
+		cy: "12",
+		r: "1",
+		key: "41hilf"
+	}],
+	["circle", {
+		cx: "19",
+		cy: "12",
+		r: "1",
+		key: "1wjl8i"
+	}],
+	["circle", {
+		cx: "5",
+		cy: "12",
+		r: "1",
+		key: "1pcz8c"
+	}]
+]);
 var EyeOff = createLucideIcon("eye-off", [
 	["path", {
 		d: "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49",
@@ -10687,6 +10723,28 @@ var Eye = createLucideIcon("eye", [["path", {
 	r: "3",
 	key: "1v7zrd"
 }]]);
+var FileText = createLucideIcon("file-text", [
+	["path", {
+		d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",
+		key: "1oefj6"
+	}],
+	["path", {
+		d: "M14 2v5a1 1 0 0 0 1 1h5",
+		key: "wfsgrz"
+	}],
+	["path", {
+		d: "M10 9H8",
+		key: "b1mrlr"
+	}],
+	["path", {
+		d: "M16 13H8",
+		key: "t4e002"
+	}],
+	["path", {
+		d: "M16 17H8",
+		key: "z1uh3a"
+	}]
+]);
 var FingerprintPattern = createLucideIcon("fingerprint-pattern", [
 	["path", {
 		d: "M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4",
@@ -10788,6 +10846,20 @@ var Key = createLucideIcon("key", [
 		key: "yqb3hr"
 	}]
 ]);
+var Lightbulb = createLucideIcon("lightbulb", [
+	["path", {
+		d: "M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5",
+		key: "1gvzjb"
+	}],
+	["path", {
+		d: "M9 18h6",
+		key: "x1upvd"
+	}],
+	["path", {
+		d: "M10 22h4",
+		key: "ceow96"
+	}]
+]);
 var LoaderCircle = createLucideIcon("loader-circle", [["path", {
 	d: "M21 12a9 9 0 1 1-6.219-8.56",
 	key: "13zald"
@@ -10843,10 +10915,42 @@ var Mail = createLucideIcon("mail", [["path", {
 	rx: "2",
 	key: "izxlao"
 }]]);
+var MessageCircleQuestionMark = createLucideIcon("message-circle-question-mark", [
+	["path", {
+		d: "M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719",
+		key: "1sd12s"
+	}],
+	["path", {
+		d: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3",
+		key: "1u773s"
+	}],
+	["path", {
+		d: "M12 17h.01",
+		key: "p32p05"
+	}]
+]);
 var MessageCircle = createLucideIcon("message-circle", [["path", {
 	d: "M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719",
 	key: "1sd12s"
 }]]);
+var MessageSquareText = createLucideIcon("message-square-text", [
+	["path", {
+		d: "M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z",
+		key: "18887p"
+	}],
+	["path", {
+		d: "M7 11h10",
+		key: "1twpyw"
+	}],
+	["path", {
+		d: "M7 15h6",
+		key: "d9of3u"
+	}],
+	["path", {
+		d: "M7 7h8",
+		key: "af5zfr"
+	}]
+]);
 var MicOff = createLucideIcon("mic-off", [
 	["path", {
 		d: "M12 19v3",
@@ -60467,7 +60571,7 @@ var colorThemes = {
 		text: "text-slate-700"
 	}
 };
-var containerVariants$1 = {
+var containerVariants$3 = {
 	hidden: { opacity: 0 },
 	visible: {
 		opacity: 1,
@@ -60477,7 +60581,7 @@ var containerVariants$1 = {
 		}
 	}
 };
-var itemVariants$1 = {
+var itemVariants$3 = {
 	hidden: {
 		opacity: 0,
 		y: 14,
@@ -60574,7 +60678,7 @@ var ToggleSwitch = ({ isToggled, onToggle, theme = "purple", disabled = false })
 };
 var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggle, theme = "purple", badge, disabled = false }) => {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-		variants: itemVariants$1,
+		variants: itemVariants$3,
 		whileHover: disabled ? {} : {
 			y: -2,
 			boxShadow: "0 8px 24px -8px rgba(0,0,0,0.08)"
@@ -60626,7 +60730,7 @@ var SettingRow = ({ icon: Icon, label, desc, onClick, toggle, isToggled, onToggl
 	});
 };
 var SectionHeader = ({ title, icon: Icon }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-	variants: itemVariants$1,
+	variants: itemVariants$3,
 	className: "flex items-center gap-3 px-1 mb-3 mt-1",
 	children: [
 		Icon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -60892,13 +60996,13 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "h-28" }),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-				variants: containerVariants$1,
+				variants: containerVariants$3,
 				initial: "hidden",
 				animate: "visible",
 				className: "px-4 space-y-6 max-w-lg mx-auto",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-						variants: itemVariants$1,
+						variants: itemVariants$3,
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingRow, {
 							icon: User$1,
 							label: "الملف الشخصي",
@@ -61038,7 +61142,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 						]
 					})] }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-						variants: itemVariants$1,
+						variants: itemVariants$3,
 						className: "grid grid-cols-3 gap-2.5 mt-6",
 						children: [
 							{
@@ -61078,7 +61182,7 @@ function SettingsScreen({ onOpenAtheer, onOpenAbout, onOpenPrivacy, onOpenDataMa
 						}, item.label))
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-						variants: itemVariants$1,
+						variants: itemVariants$3,
 						className: "text-center py-6",
 						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 							className: "text-[11px] text-stone-400 font-medium",
@@ -68801,14 +68905,14 @@ function OnboardingScreen({ onFinish }) {
 }
 //#endregion
 //#region src/features/Support/SupportScreen.jsx
-var containerVariants = {
+var containerVariants$2 = {
 	hidden: { opacity: 0 },
 	visible: {
 		opacity: 1,
 		transition: { staggerChildren: .07 }
 	}
 };
-var itemVariants = {
+var itemVariants$2 = {
 	hidden: {
 		opacity: 0,
 		y: 14,
@@ -68842,6 +68946,29 @@ var messageVariants = {
 		}
 	}
 };
+var menuVariants = {
+	hidden: {
+		opacity: 0,
+		scale: .9,
+		y: -15
+	},
+	visible: {
+		opacity: 1,
+		scale: 1,
+		y: 0,
+		transition: {
+			type: "spring",
+			stiffness: 450,
+			damping: 28
+		}
+	},
+	exit: {
+		opacity: 0,
+		scale: .9,
+		y: -10,
+		transition: { duration: .15 }
+	}
+};
 var suggestions = [
 	{
 		text: "مشكلة في تسجيل الدخول",
@@ -68864,7 +68991,7 @@ var suggestions = [
 		color: "from-emerald-500 to-teal-600"
 	}
 ];
-function SupportScreen({ onBack }) {
+function SupportScreen({ onBack, onNavigate }) {
 	const [messages, setMessages] = (0, import_react.useState)([]);
 	const [inputText, setInputText] = (0, import_react.useState)("");
 	const [sending, setSending] = (0, import_react.useState)(false);
@@ -68873,7 +69000,9 @@ function SupportScreen({ onBack }) {
 	const [loading, setLoading] = (0, import_react.useState)(true);
 	const [cooldownMinutes, setCooldownMinutes] = (0, import_react.useState)(0);
 	const [feedbackState, setFeedbackState] = (0, import_react.useState)(null);
+	const [menuOpen, setMenuOpen] = (0, import_react.useState)(false);
 	const bottomRef = (0, import_react.useRef)(null);
+	const menuRef = (0, import_react.useRef)(null);
 	(0, import_react.useEffect)(() => {
 		const unsub = onAuthStateChanged(auth, (u) => {
 			if (u) setUser({
@@ -68987,6 +69116,19 @@ function SupportScreen({ onBack }) {
 			console.error("Failed to save feedback:", err);
 		}
 	};
+	const handleNewSession = () => {
+		setTicketId(null);
+		setMessages([]);
+		setFeedbackState(null);
+		setLoading(true);
+	};
+	(0, import_react.useEffect)(() => {
+		const handleClickOutside = (e) => {
+			if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+		};
+		if (menuOpen) document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, [menuOpen]);
 	const handleKeyDown = (e) => {
 		if (e.key === "Enter" && !e.shiftKey) {
 			e.preventDefault();
@@ -69039,18 +69181,61 @@ function SupportScreen({ onBack }) {
 								})]
 							})]
 						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "relative",
+							ref: menuRef,
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+								whileHover: { scale: 1.08 },
+								whileTap: { scale: .92 },
+								onClick: () => setMenuOpen(!menuOpen),
+								className: "w-10 h-10 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-all",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Ellipsis, { className: "w-5 h-5" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: menuOpen && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+								variants: menuVariants,
+								initial: "hidden",
+								animate: "visible",
+								exit: "exit",
+								className: "absolute left-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden z-50",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									onClick: () => {
+										setMenuOpen(false);
+										onNavigate("faq");
+									},
+									className: "w-full flex items-center gap-3 px-4 py-3 text-right hover:bg-stone-50 transition-colors",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "p-1.5 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 text-white",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleQuestionMark, { className: "w-4 h-4" })
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-[14px] font-medium text-stone-700",
+										children: "المشاكل الشائعة"
+									})]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+									onClick: () => {
+										setMenuOpen(false);
+										onNavigate("howitworks");
+									},
+									className: "w-full flex items-center gap-3 px-4 py-3 text-right hover:bg-stone-50 transition-colors",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+										className: "p-1.5 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FileText, { className: "w-4 h-4" })
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "text-[14px] font-medium text-stone-700",
+										children: "كيفية عمل الدعم"
+									})]
+								})]
+							}) })]
+						})
 					]
 				})
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.main, {
-				variants: containerVariants,
+				variants: containerVariants$2,
 				initial: "hidden",
 				animate: "visible",
 				className: "flex-1 overflow-y-auto px-4 py-4 pt-28 pb-44 space-y-5",
 				children: [
-					!loading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-						variants: itemVariants,
+					!loading && messages.length === 0 && feedbackState !== "liked" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						variants: itemVariants$2,
 						className: "text-center py-6",
 						children: [
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
@@ -69074,13 +69259,13 @@ function SupportScreen({ onBack }) {
 							})
 						]
 					}),
-					!loading && messages.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-						variants: containerVariants,
+					!loading && messages.length === 0 && feedbackState !== "liked" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						variants: containerVariants$2,
 						initial: "hidden",
 						animate: "visible",
 						className: "grid grid-cols-2 gap-2.5",
 						children: suggestions.map((s) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-							variants: itemVariants,
+							variants: itemVariants$2,
 							whileHover: {
 								y: -3,
 								scale: 1.02
@@ -69099,6 +69284,24 @@ function SupportScreen({ onBack }) {
 								})]
 							})
 						}, s.text))
+					}),
+					feedbackState === "liked" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						variants: itemVariants$2,
+						className: "flex flex-col items-center justify-center py-12 gap-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-12 h-12 text-emerald-500" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+								className: "text-stone-600 font-medium",
+								children: "تم حل مشكلتك بنجاح"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.button, {
+								whileHover: { scale: 1.05 },
+								whileTap: { scale: .95 },
+								onClick: handleNewSession,
+								className: "flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-200 font-bold text-sm",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CirclePlus, { className: "w-5 h-5" }), "بدء جلسة جديدة"]
+							})
+						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: messages.map((msg) => {
 						const isUser = msg.sender === "user";
@@ -69199,6 +69402,269 @@ function SupportScreen({ onBack }) {
 				})]
 			})
 		]
+	});
+}
+//#endregion
+//#region src/features/Support/FAQScreen.jsx
+var containerVariants$1 = {
+	hidden: { opacity: 0 },
+	visible: {
+		opacity: 1,
+		transition: { staggerChildren: .04 }
+	}
+};
+var itemVariants$1 = {
+	hidden: {
+		opacity: 0,
+		y: 12,
+		scale: .97
+	},
+	visible: {
+		opacity: 1,
+		y: 0,
+		scale: 1,
+		transition: {
+			type: "spring",
+			stiffness: 400,
+			damping: 26
+		}
+	}
+};
+var COMMON_PROBLEMS = Array.from({ length: 30 }, (_, i) => ({
+	id: i + 1,
+	question: `المشكلة الشائعة رقم ${i + 1} - هذا مثال لسؤال متكرر من المستخدمين`
+}));
+function FAQScreen({ onBack, onNavigate }) {
+	const [copiedId, setCopiedId] = (0, import_react.useState)(null);
+	const handleCopy = (text) => {
+		navigator.clipboard.writeText(text).then(() => {
+			setCopiedId(text);
+			setTimeout(() => setCopiedId(null), 2e3);
+		}).catch(() => alert("تعذر النسخ"));
+	};
+	const handleSendToSupport = (text) => {
+		onNavigate("support");
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen bg-stone-50 text-right",
+		dir: "rtl",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.header, {
+			initial: {
+				opacity: 0,
+				y: -20
+			},
+			animate: {
+				opacity: 1,
+				y: 0
+			},
+			className: "fixed top-0 left-0 right-0 z-30 bg-white/85 backdrop-blur-xl border-b border-stone-200/60",
+			style: { paddingTop: "max(0.75rem, env(safe-area-inset-top))" },
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "max-w-2xl mx-auto px-5 pt-4 pb-3 flex items-center justify-between",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						whileHover: { scale: 1.08 },
+						whileTap: { scale: .92 },
+						onClick: onBack,
+						className: "w-10 h-10 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-600",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5" })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "p-2 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircleQuestionMark, { className: "w-5 h-5" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+							className: "text-lg font-black text-stone-900",
+							children: "المشاكل الشائعة"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
+				]
+			})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.main, {
+			variants: containerVariants$1,
+			initial: "hidden",
+			animate: "visible",
+			className: "px-4 pt-28 pb-6 space-y-2 max-w-2xl mx-auto",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "text-[13px] text-stone-500 px-2 mb-4",
+				children: "اضغط على أي مشكلة لنسخها، أو اضغط زر الإرسال للذهاب مباشرة للدعم."
+			}), COMMON_PROBLEMS.map((problem) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+				variants: itemVariants$1,
+				className: "flex items-center gap-3 bg-white border border-stone-200 rounded-2xl p-3 shadow-sm hover:shadow-md transition-all group",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-[11px] font-bold text-stone-400 w-6 text-center",
+						children: problem.id
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "flex-1 text-[14px] font-medium text-stone-700 text-right leading-relaxed",
+						children: problem.question
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-1 shrink-0",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => handleCopy(problem.question),
+							className: `p-2 rounded-xl transition-all ${copiedId === problem.question ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-500 hover:bg-stone-200"}`,
+							title: "نسخ",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => handleSendToSupport(problem.question),
+							className: "p-2 rounded-xl bg-violet-50 text-violet-700 hover:bg-violet-100 transition-all",
+							title: "إرسال للدعم",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-4 h-4" })
+						})]
+					})
+				]
+			}, problem.id))]
+		})]
+	});
+}
+//#endregion
+//#region src/features/Support/HowItWorksScreen.jsx
+var containerVariants = {
+	hidden: { opacity: 0 },
+	visible: {
+		opacity: 1,
+		transition: { staggerChildren: .08 }
+	}
+};
+var itemVariants = {
+	hidden: {
+		opacity: 0,
+		y: 16,
+		scale: .97
+	},
+	visible: {
+		opacity: 1,
+		y: 0,
+		scale: 1,
+		transition: {
+			type: "spring",
+			stiffness: 400,
+			damping: 24
+		}
+	}
+};
+var steps = [
+	{
+		icon: MessageSquareText,
+		title: "1. اشرح مشكلتك",
+		description: "اكتب وصفاً دقيقاً للمشكلة التي تواجهها أو اختر من المشاكل الشائعة."
+	},
+	{
+		icon: Clock,
+		title: "2. انتظر الرد",
+		description: "فريق الدعم سيرد عليك في أقرب وقت ممكن. يُعطى الأولوية حسب الترتيب."
+	},
+	{
+		icon: Lightbulb,
+		title: "3. احصل على الحل",
+		description: "نقدم لك حلولاً مباشرة أو إرشادات لحل المشكلة تماماً."
+	},
+	{
+		icon: CircleCheck,
+		title: "4. قيّم الخدمة",
+		description: "بعد الحل، أخبرنا إن كانت الإجابة مفيدة لتحسين خدمتنا."
+	}
+];
+function HowItWorksScreen({ onBack, onNavigate }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "min-h-screen bg-stone-50 text-right",
+		dir: "rtl",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.header, {
+			initial: {
+				opacity: 0,
+				y: -20
+			},
+			animate: {
+				opacity: 1,
+				y: 0
+			},
+			className: "fixed top-0 left-0 right-0 z-30 bg-white/85 backdrop-blur-xl border-b border-stone-200/60",
+			style: { paddingTop: "max(0.75rem, env(safe-area-inset-top))" },
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "max-w-2xl mx-auto px-5 pt-4 pb-3 flex items-center justify-between",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+						whileHover: { scale: 1.08 },
+						whileTap: { scale: .92 },
+						onClick: onBack,
+						className: "w-10 h-10 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-600",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5" })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-3",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ShieldCheck, { className: "w-5 h-5" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+							className: "text-lg font-black text-stone-900",
+							children: "كيفية عمل الدعم"
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
+				]
+			})
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.main, {
+			variants: containerVariants,
+			initial: "hidden",
+			animate: "visible",
+			className: "px-4 pt-28 pb-8 space-y-8 max-w-2xl mx-auto",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+					variants: itemVariants,
+					className: "text-center py-4",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+							initial: { scale: 0 },
+							animate: { scale: 1 },
+							transition: {
+								type: "spring",
+								stiffness: 300,
+								damping: 20
+							},
+							className: "w-20 h-20 mx-auto mb-4 rounded-3xl bg-emerald-50 flex items-center justify-center",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Lightbulb, { className: "w-10 h-10 text-emerald-600" })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+							className: "text-lg font-bold text-stone-800 mb-2",
+							children: "كيف تحصل على المساعدة؟"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-[14px] text-stone-600 leading-relaxed max-w-md mx-auto",
+							children: "صممنا نظام الدعم ليكون سريعاً وفعالاً. اتبع الخطوات أدناه لتحصل على أفضل تجربة."
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "space-y-4",
+					children: steps.map((step, idx) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						variants: itemVariants,
+						className: "bg-white border border-stone-200 rounded-2xl p-5 shadow-sm flex items-start gap-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shrink-0",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(step.icon, { className: "w-5 h-5" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "text-[15px] font-bold text-stone-800 mb-1",
+							children: step.title
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-[13px] text-stone-600 leading-relaxed",
+							children: step.description
+						})] })]
+					}, idx))
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					variants: itemVariants,
+					className: "bg-white/70 border border-stone-200 rounded-2xl p-5 text-center shadow-sm",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-[13px] text-stone-500 leading-relaxed",
+						children: "🛡️ خصوصيتك مهمة جداً. لا تتم مشاركة أي معلومات مع أطراف خارجية. فريق الدعم يلتزم بسرية تامة."
+					})
+				})
+			]
+		})]
 	});
 }
 //#endregion
@@ -76660,6 +77126,8 @@ function AppContent() {
 		"about",
 		"privacy",
 		"support",
+		"faq",
+		"howitworks",
 		"createGroup",
 		"data",
 		"lock",
@@ -76697,6 +77165,8 @@ function AppContent() {
 		notifications: "الإشعارات",
 		partner: "تكوين شراكة",
 		support: "تواصل مع المطور",
+		faq: "المشاكل الشائعة",
+		howitworks: "كيفية عمل الدعم",
 		groups: "المجموعات",
 		createGroup: "إنشاء مجموعة",
 		groupChat: "محادثة المجموعة",
@@ -76717,7 +77187,18 @@ function AppContent() {
 			onOpenForgotPassword: () => navigateTo("forgotpassword")
 		});
 		if (currentScreen === "notifications") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NotificationsScreen, { onBack: handleBack });
-		if (currentScreen === "support") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SupportScreen, { onBack: handleBack });
+		if (currentScreen === "support") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SupportScreen, {
+			onBack: handleBack,
+			onNavigate: navigateTo
+		});
+		if (currentScreen === "faq") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FAQScreen, {
+			onBack: handleBack,
+			onNavigate: navigateTo
+		});
+		if (currentScreen === "howitworks") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HowItWorksScreen, {
+			onBack: handleBack,
+			onNavigate: navigateTo
+		});
 		if (currentScreen === "admin") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AdminScreen, {
 			onBack: handleBack,
 			onOpenUserManagement: () => navigateTo("usermanagement")
@@ -76799,6 +77280,8 @@ function AppContent() {
 		"chat",
 		"notifications",
 		"support",
+		"faq",
+		"howitworks",
 		"usermanagement",
 		"admin",
 		"createGroup",
