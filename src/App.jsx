@@ -25,6 +25,8 @@ import PartnerScreen from './features/partner/PartnerScreen';
 import NotificationsScreen from './features/notifications/NotificationsScreen';
 import OnboardingScreen from './components/onboarding/OnboardingScreen';
 import SupportScreen from './features/Support/SupportScreen';
+import FAQScreen from './features/Support/FAQScreen';
+import HowItWorksScreen from './features/Support/HowItWorksScreen';
 import GroupsScreen from './features/groups/GroupsScreen';
 import CreateGroupScreen from './features/groups/CreateGroupScreen';
 import MainMenuScreen from './features/home/MainMenuScreen';
@@ -328,7 +330,6 @@ function AppContent() {
   const handleOpenGroup = (group) => { setCurrentGroup(group); navigateTo('groupChat'); };
   const handleOpenGroupInfo = (group) => { setCurrentGroup(group); navigateTo('groupInfo'); };
 
-  // ✅ تم تعديل الترتيب: شرط البصمة أصبح مقيدًا بوجود المستخدم
   if (user && isLocked && lockEnabled) {
     return <PinLockScreen />;
   }
@@ -342,7 +343,6 @@ function AppContent() {
   if (showSplash) return <SplashScreen onFinish={handleSplashFinish} />;
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-white"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>;
 
-  // ✅ تم إصلاح دالة onLogin لتعيين المستخدم بشكل صحيح
   if (!user) return <AuthScreen onLogin={(loggedInUser) => { 
     setUser({
       uid: loggedInUser.uid,
@@ -362,7 +362,7 @@ function AppContent() {
   }
 
   const pagesWithOwnHeader = [
-    'atheer','about','privacy','support','createGroup','data',
+    'atheer','about','privacy','support','faq','howitworks','createGroup','data',
     'lock','changeEmail','resetPasswordProfile','forgotpassword',
     'resetpassword','contacts','chat','groupChat','groupInfo',
     'settings','mainMenu','notifications','usermanagement','groups','admin'
@@ -373,7 +373,8 @@ function AppContent() {
     atheer: 'من هو أثير؟', about: 'من نحن', privacy: 'سياسة الخصوصية', terms: 'شروط الخدمة', data: 'إدارة البيانات',
     lock: 'قفل التطبيق', changeEmail: 'تغيير البريد', resetPasswordProfile: 'إعادة تعيين كلمة المرور', chat: 'المحادثة',
     admin: 'لوحة الإدارة', usermanagement: 'إدارة المستخدمين', notifications: 'الإشعارات', partner: 'تكوين شراكة',
-    support: 'تواصل مع المطور', groups: 'المجموعات', createGroup: 'إنشاء مجموعة', groupChat: 'محادثة المجموعة', groupInfo: 'معلومات المجموعة',
+    support: 'تواصل مع المطور', faq: 'المشاكل الشائعة', howitworks: 'كيفية عمل الدعم',
+    groups: 'المجموعات', createGroup: 'إنشاء مجموعة', groupChat: 'محادثة المجموعة', groupInfo: 'معلومات المجموعة',
   }[currentScreen] || 'LinkUp';
 
   const renderContent = () => {
@@ -381,7 +382,9 @@ function AppContent() {
     if (currentScreen === 'changeEmail') return <ChangeEmailScreen user={user} onBack={handleBack} onSuccess={setUser} />;
     if (currentScreen === 'resetPasswordProfile') return <ResetPasswordProfileScreen onBack={handleBack} onOpenForgotPassword={() => navigateTo('forgotpassword')} />;
     if (currentScreen === 'notifications') return <NotificationsScreen onBack={handleBack} />;
-    if (currentScreen === 'support') return <SupportScreen onBack={handleBack} />;
+    if (currentScreen === 'support') return <SupportScreen onBack={handleBack} onNavigate={navigateTo} />;
+    if (currentScreen === 'faq') return <FAQScreen onBack={handleBack} onNavigate={navigateTo} />;
+    if (currentScreen === 'howitworks') return <HowItWorksScreen onBack={handleBack} onNavigate={navigateTo} />;
     if (currentScreen === 'admin') return <AdminScreen onBack={handleBack} onOpenUserManagement={() => navigateTo('usermanagement')} />;
     if (currentScreen === 'usermanagement') return <UserManagementScreen onBack={handleBack} />;
     if (currentScreen === 'profile') return <ProfileScreen user={user} onUpdateProfile={handleUpdateProfile} onLogout={handleLogout} onChangeEmail={() => navigateTo('changeEmail')} onResetPassword={() => navigateTo('resetPasswordProfile')} onSwitchAccount={handleSwitchAccount} />;
@@ -416,7 +419,7 @@ function AppContent() {
     return <HomeScreen myId={myId} myUsername={myUsername} user={user} />;
   };
 
-  const hideBottomNav = ['chat','notifications','support','usermanagement','admin','createGroup','groupChat','groupInfo','changeEmail','resetPasswordProfile','data','lock','partner','atheer','about','privacy','terms','forgotpassword','resetpassword','settings'].includes(currentScreen);
+  const hideBottomNav = ['chat','notifications','support','faq','howitworks','usermanagement','admin','createGroup','groupChat','groupInfo','changeEmail','resetPasswordProfile','data','lock','partner','atheer','about','privacy','terms','forgotpassword','resetpassword','settings'].includes(currentScreen);
 
   return (
     <>

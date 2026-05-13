@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, ArrowLeft, Clock, LogIn, AlertTriangle, RefreshCw, Heart,
-  ThumbsUp, ThumbsDown, CheckCircle2, XCircle
+  ThumbsUp, ThumbsDown, CheckCircle2, XCircle,
+  HelpCircle, FileText, MoreHorizontal, PlusCircle
 } from 'lucide-react';
 import { db, auth } from '../../firebase/config';
 import {
@@ -29,6 +30,12 @@ const messageVariants = {
   visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 450, damping: 28 } }
 };
 
+const menuVariants = {
+  hidden: { opacity: 0, scale: 0.9, y: -15 },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 450, damping: 28 } },
+  exit: { opacity: 0, scale: 0.9, y: -10, transition: { duration: 0.15 } }
+};
+
 const suggestions = [
   { text: "مشكلة في تسجيل الدخول", icon: LogIn, color: "from-purple-500 to-indigo-600" },
   { text: "التطبيق يتوقف فجأة", icon: AlertTriangle, color: "from-rose-500 to-pink-600" },
@@ -36,7 +43,7 @@ const suggestions = [
   { text: "شكر و تقدير", icon: Heart, color: "from-emerald-500 to-teal-600" },
 ];
 
-export default function SupportScreen({ onBack }) {
+export default function SupportScreen({ onBack, onNavigate }) {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
@@ -44,8 +51,10 @@ export default function SupportScreen({ onBack }) {
   const [ticketId, setTicketId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cooldownMinutes, setCooldownMinutes] = useState(0);
-  const [feedbackState, setFeedbackState] = useState(null); // null, 'liked', 'disliked'
+  const [feedbackState, setFeedbackState] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const bottomRef = useRef(null);
+  const menuRef = useRef(null);
 
   // --- Auth ---
   useEffect(() => {
@@ -100,7 +109,7 @@ export default function SupportScreen({ onBack }) {
           setMessages(msgs);
           setLoading(false);
 
-          // التحقق من حالة التذكرة إذا كانت منتهية
+          // تحقق من حالة التقييم
           const lastAutoReply = [...msgs].reverse().find(m => m.sender === 'admin' && m.autoReply);
           if (lastAutoReply?.feedback) {
             setFeedbackState(lastAutoReply.feedback);
@@ -163,9 +172,9 @@ export default function SupportScreen({ onBack }) {
     }
   }, [inputText, ticketId, user, sending, messages]);
 
-  // --- Feedback Handler (معدل) ---
+  // --- Feedback Handler ---
   const handleFeedback = async (messageId, isPositive) => {
-    if (feedbackState) return; // ممنوع بعد الاختيار
+    if (feedbackState) return;
     const newState = isPositive ? 'liked' : 'disliked';
     setFeedbackState(newState);
 
@@ -174,16 +183,36 @@ export default function SupportScreen({ onBack }) {
       await setDoc(messageRef, { feedback: newState }, { merge: true });
 
       if (isPositive) {
-        // إنهاء الجلسة
         await setDoc(doc(db, 'supportTickets', ticketId), { status: 'resolved' }, { merge: true });
       } else {
-        // طلب مراجعة
         await setDoc(doc(db, 'supportTickets', ticketId), { status: 'needs_review' }, { merge: true });
       }
     } catch (err) {
       console.error('Failed to save feedback:', err);
     }
   };
+
+  // --- إعادة بدء جلسة جديدة ---
+  const handleNewSession = () => {
+    setTicketId(null);
+    setMessages([]);
+    setFeedbackState(null);
+    setLoading(true);
+    // سيقوم useEffect تلقائياً بإنشاء تذكرة جديدة عند تغير ticketId إلى null
+  };
+
+  // --- إغلاق القائمة عند النقر بالخارج ---
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -198,7 +227,7 @@ export default function SupportScreen({ onBack }) {
 
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col" dir="rtl">
-      {/* ─── Header عصري ─── */}
+      {/* ─── Header مع قائمة منسدلة ─── */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -223,7 +252,49 @@ export default function SupportScreen({ onBack }) {
               </span>
             </div>
           </div>
-          <div className="w-10" />
+
+          {/* ─── زر القائمة (ثلاث نقاط) ─── */}
+          <div className="relative" ref={menuRef}>
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="w-10 h-10 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-all"
+            >
+              <MoreHorizontal className="w-5 h-5" />
+            </motion.button>
+
+            <AnimatePresence>
+              {menuOpen && (
+                <motion.div
+                  variants={menuVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="absolute left-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden z-50"
+                >
+                  <button
+                    onClick={() => { setMenuOpen(false); onNavigate('faq'); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-right hover:bg-stone-50 transition-colors"
+                  >
+                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                      <HelpCircle className="w-4 h-4" />
+                    </div>
+                    <span className="text-[14px] font-medium text-stone-700">المشاكل الشائعة</span>
+                  </button>
+                  <button
+                    onClick={() => { setMenuOpen(false); onNavigate('howitworks'); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-right hover:bg-stone-50 transition-colors"
+                  >
+                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <span className="text-[14px] font-medium text-stone-700">كيفية عمل الدعم</span>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </motion.header>
 
@@ -234,7 +305,7 @@ export default function SupportScreen({ onBack }) {
         animate="visible"
         className="flex-1 overflow-y-auto px-4 py-4 pt-28 pb-44 space-y-5"
       >
-        {!loading && messages.length === 0 && (
+        {!loading && messages.length === 0 && feedbackState !== 'liked' && (
           <motion.div variants={itemVariants} className="text-center py-6">
             <motion.div
               initial={{ scale: 0 }}
@@ -251,7 +322,7 @@ export default function SupportScreen({ onBack }) {
           </motion.div>
         )}
 
-        {!loading && messages.length === 0 && (
+        {!loading && messages.length === 0 && feedbackState !== 'liked' && (
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-2 gap-2.5">
             {suggestions.map((s) => (
               <motion.button
@@ -270,6 +341,23 @@ export default function SupportScreen({ onBack }) {
                 </div>
               </motion.button>
             ))}
+          </motion.div>
+        )}
+
+        {/* زر بدء جلسة جديدة */}
+        {feedbackState === 'liked' && (
+          <motion.div variants={itemVariants} className="flex flex-col items-center justify-center py-12 gap-4">
+            <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+            <p className="text-stone-600 font-medium">تم حل مشكلتك بنجاح</p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleNewSession}
+              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-200 font-bold text-sm"
+            >
+              <PlusCircle className="w-5 h-5" />
+              بدء جلسة جديدة
+            </motion.button>
           </motion.div>
         )}
 
@@ -302,7 +390,6 @@ export default function SupportScreen({ onBack }) {
                     </p>
                   </div>
 
-                  {/* أزرار التقييم للردود التلقائية */}
                   {isAutoReply && !isUser && !feedbackGiven && (
                     <motion.div
                       initial={{ opacity: 0, y: 5 }}
@@ -326,7 +413,6 @@ export default function SupportScreen({ onBack }) {
                     </motion.div>
                   )}
 
-                  {/* رسالة بعد التقييم */}
                   {isAutoReply && !isUser && feedbackGiven && (
                     <motion.div
                       initial={{ opacity: 0, y: 5 }}
