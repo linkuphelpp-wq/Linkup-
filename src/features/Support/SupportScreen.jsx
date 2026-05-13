@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Send, ArrowLeft, Clock, LogIn, AlertTriangle, RefreshCw, Heart
+  Send, ArrowLeft, Clock, LogIn, AlertTriangle, RefreshCw, Heart,
+  ThumbsUp, ThumbsDown
 } from 'lucide-react';
 import { db, auth } from '../../firebase/config';
 import {
@@ -28,9 +29,6 @@ const messageVariants = {
   visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 450, damping: 28 } }
 };
 
-/* ================================================================
-   SUGGESTIONS DATA (تم استبدال "مشكلة في الدفع" بـ "مشكلة في تسجيل الدخول")
-   ================================================================ */
 const suggestions = [
   { text: "مشكلة في تسجيل الدخول", icon: LogIn, color: "from-purple-500 to-indigo-600" },
   { text: "التطبيق يتوقف فجأة", icon: AlertTriangle, color: "from-rose-500 to-pink-600" },
@@ -38,9 +36,6 @@ const suggestions = [
   { text: "شكر و تقدير", icon: Heart, color: "from-emerald-500 to-teal-600" },
 ];
 
-/* ================================================================
-   MAIN COMPONENT
-   ================================================================ */
 export default function SupportScreen({ onBack }) {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -161,6 +156,20 @@ export default function SupportScreen({ onBack }) {
     }
   }, [inputText, ticketId, user, sending, messages]);
 
+  // --- Feedback Handler ---
+  const handleFeedback = async (messageId, isPositive) => {
+    try {
+      const messageRef = doc(db, 'supportTickets', ticketId, 'messages', messageId);
+      await setDoc(messageRef, { feedback: isPositive ? 'liked' : 'disliked' }, { merge: true });
+      // عند الضغط على "لم يعجبني" ننشئ تذكرة متابعة أو نغير حالة التذكرة
+      if (!isPositive) {
+        await setDoc(doc(db, 'supportTickets', ticketId), { status: 'needs_review' }, { merge: true });
+      }
+    } catch (err) {
+      console.error('Failed to save feedback:', err);
+    }
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -208,7 +217,6 @@ export default function SupportScreen({ onBack }) {
         animate="visible"
         className="flex-1 overflow-y-auto px-4 py-4 pt-28 pb-44 space-y-5"
       >
-        {/* تنبيه البداية */}
         {!loading && messages.length === 0 && (
           <motion.div variants={itemVariants} className="text-center py-6">
             <motion.div
@@ -226,7 +234,6 @@ export default function SupportScreen({ onBack }) {
           </motion.div>
         )}
 
-        {/* اقتراحات بأيقونات SVG (تم استبدال الدفع بتسجيل الدخول) */}
         {!loading && messages.length === 0 && (
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-2 gap-2.5">
             {suggestions.map((s) => (
@@ -249,10 +256,12 @@ export default function SupportScreen({ onBack }) {
           </motion.div>
         )}
 
-        {/* رسائل المحادثة */}
         <AnimatePresence>
           {messages.map((msg) => {
             const isUser = msg.sender === 'user';
+            const isAutoReply = msg.sender === 'admin' && msg.autoReply === true;
+            const feedbackGiven = msg.feedback != null;
+
             return (
               <motion.div
                 key={msg.id}
@@ -262,17 +271,54 @@ export default function SupportScreen({ onBack }) {
                 exit={{ opacity: 0, scale: 0.9 }}
                 className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
               >
-                <div
-                  className={`max-w-[82%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
-                    isUser
-                      ? 'bg-blue-600 text-white rounded-br-none'
-                      : 'bg-white text-stone-800 rounded-bl-none border border-stone-200'
-                  }`}
-                >
-                  <p>{msg.text}</p>
-                  <p className={`text-[10px] mt-1.5 ${isUser ? 'text-blue-200' : 'text-stone-400'}`}>
-                    {msg.createdAt.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
+                <div className="max-w-[82%] flex flex-col gap-1">
+                  <div
+                    className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                      isUser
+                        ? 'bg-blue-600 text-white rounded-br-none'
+                        : 'bg-white text-stone-800 rounded-bl-none border border-stone-200'
+                    }`}
+                  >
+                    <p>{msg.text}</p>
+                    <p className={`text-[10px] mt-1.5 ${isUser ? 'text-blue-200' : 'text-stone-400'}`}>
+                      {msg.createdAt.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+
+                  {/* ⭐ أزرار التقييم للردود التلقائية فقط */}
+                  {isAutoReply && !isUser && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center gap-2 mt-1"
+                    >
+                      <button
+                        onClick={() => handleFeedback(msg.id, true)}
+                        disabled={feedbackGiven}
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all active:scale-95 ${
+                          msg.feedback === 'liked'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-stone-100 text-stone-500 hover:bg-emerald-50 hover:text-emerald-600'
+                        }`}
+                      >
+                        <ThumbsUp className="w-3.5 h-3.5" />
+                        <span>مفيد</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleFeedback(msg.id, false)}
+                        disabled={feedbackGiven}
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all active:scale-95 ${
+                          msg.feedback === 'disliked'
+                            ? 'bg-rose-100 text-rose-700'
+                            : 'bg-stone-100 text-stone-500 hover:bg-rose-50 hover:text-rose-600'
+                        }`}
+                      >
+                        <ThumbsDown className="w-3.5 h-3.5" />
+                        <span>غير مفيد</span>
+                      </button>
+                    </motion.div>
+                  )}
                 </div>
               </motion.div>
             );
