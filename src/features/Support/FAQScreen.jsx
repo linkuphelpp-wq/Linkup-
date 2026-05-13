@@ -7,6 +7,9 @@ import { db } from '../../firebase/config';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { toast } from 'sonner';
 
+/* ================================================================
+   DESIGN TOKENS
+   ================================================================ */
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.06 } }
@@ -21,7 +24,6 @@ const modalVariants = {
   exit: { opacity: 0, scale: 0.8, transition: { duration: 0.15 } }
 };
 
-// تدرجات لونية للبطاقات
 const gradients = [
   'from-violet-500 to-purple-600',
   'from-blue-500 to-indigo-600',
@@ -30,6 +32,9 @@ const gradients = [
   'from-rose-500 to-pink-600',
 ];
 
+/* ================================================================
+   MAIN COMPONENT
+   ================================================================ */
 export default function FAQScreen({ onBack, onNavigate }) {
   const [problems, setProblems] = useState([]);
   const [detailedId, setDetailedId] = useState(null);
@@ -49,6 +54,12 @@ export default function FAQScreen({ onBack, onNavigate }) {
     }).catch(() => toast.error('تعذر النسخ'));
   };
 
+  const handleSendToSupport = (question) => {
+    // تخزين السؤال في sessionStorage ثم الانتقال لشاشة الدعم
+    sessionStorage.setItem('pendingSupportMessage', question);
+    onNavigate('support');
+  };
+
   const filtered = problems.filter(p => {
     const q = searchQuery.toLowerCase();
     return (p.question?.toLowerCase()||'').includes(q) || (p.answer?.toLowerCase()||'').includes(q);
@@ -56,7 +67,7 @@ export default function FAQScreen({ onBack, onNavigate }) {
 
   return (
     <div className="min-h-screen bg-stone-50 text-right" dir="rtl">
-      {/* Header محسّن */}
+      {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -77,13 +88,14 @@ export default function FAQScreen({ onBack, onNavigate }) {
         </div>
       </motion.header>
 
+      {/* Content */}
       <motion.main
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="px-4 pt-28 pb-8 space-y-4 max-w-2xl mx-auto"
       >
-        {/* شريط البحث */}
+        {/* Search */}
         <motion.div variants={itemVariants} className="relative">
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <Search className="w-4 h-4 text-stone-400" />
@@ -129,7 +141,7 @@ export default function FAQScreen({ onBack, onNavigate }) {
                 exit={{ opacity: 0, y: -10 }}
                 className="overflow-hidden rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-stone-200/80"
               >
-                {/* بطاقة السؤال بتدرج لوني */}
+                {/* Question Card with gradient */}
                 <div className={`bg-gradient-to-r ${gradients[idx % gradients.length]} p-4 text-white`}>
                   <div className="flex items-start justify-between">
                     <h3 className="text-[15px] font-bold leading-snug flex-1 ml-3">{problem.question}</h3>
@@ -144,11 +156,10 @@ export default function FAQScreen({ onBack, onNavigate }) {
                   </div>
                 </div>
 
-                {/* الجواب المختصر */}
+                {/* Answer & Details */}
                 <div className="bg-white p-4">
                   <p className="text-[14px] text-stone-700 leading-relaxed">{problem.answer}</p>
 
-                  {/* صورة توضيحية */}
                   {problem.imageUrl && (
                     <div className="mt-3">
                       <img
@@ -160,7 +171,6 @@ export default function FAQScreen({ onBack, onNavigate }) {
                     </div>
                   )}
 
-                  {/* زر تفاصيل أكثر */}
                   {problem.fullAnswer && (
                     <div className="mt-3 pt-3 border-t border-stone-100">
                       <button
@@ -189,7 +199,7 @@ export default function FAQScreen({ onBack, onNavigate }) {
         </AnimatePresence>
       </motion.main>
 
-      {/* معاينة الصورة */}
+      {/* Image Preview Modal */}
       <AnimatePresence>
         {previewImage && (
           <motion.div

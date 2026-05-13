@@ -19,17 +19,14 @@ const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.07 } }
 };
-
 const itemVariants = {
   hidden: { opacity: 0, y: 14, scale: 0.96 },
   visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 420, damping: 24 } }
 };
-
 const messageVariants = {
   hidden: { opacity: 0, y: 12, scale: 0.94 },
   visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 450, damping: 28 } }
 };
-
 const menuVariants = {
   hidden: { opacity: 0, scale: 0.9, y: -15 },
   visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 450, damping: 28 } },
@@ -68,6 +65,26 @@ export default function SupportScreen({ onBack, onNavigate }) {
     return () => unsub();
   }, []);
 
+  // --- Send initial message from FAQ ---
+  const sendInitialMessage = useCallback(async (text) => {
+    if (!ticketId || !user) return;
+    try {
+      await addDoc(collection(db, 'supportTickets', ticketId, 'messages'), {
+        sender: 'user',
+        text: text.trim(),
+        createdAt: serverTimestamp(),
+        read: false,
+        notifiedAdmin: false,
+      });
+      await setDoc(doc(db, 'supportTickets', ticketId), {
+        updatedAt: serverTimestamp(),
+        status: 'open'
+      }, { merge: true });
+    } catch (e) {
+      console.error(e);
+    }
+  }, [ticketId, user]);
+
   // --- Ticket & Messages ---
   useEffect(() => {
     if (!user?.uid) return;
@@ -95,6 +112,14 @@ export default function SupportScreen({ onBack, onNavigate }) {
         }
         setTicketId(tid);
 
+        // إرسال السؤال المعلق من FAQ
+        const pendingMsg = sessionStorage.getItem('pendingSupportMessage');
+        if (pendingMsg) {
+          sessionStorage.removeItem('pendingSupportMessage');
+          // استخدام setTimeout للتأكد من تعيين ticketId
+          setTimeout(() => sendInitialMessage(pendingMsg), 100);
+        }
+
         const messagesQuery = query(
           collection(db, 'supportTickets', tid, 'messages'),
           orderBy('createdAt', 'asc')
@@ -109,7 +134,6 @@ export default function SupportScreen({ onBack, onNavigate }) {
           setMessages(msgs);
           setLoading(false);
 
-          // تحقق من حالة التقييم
           const lastAutoReply = [...msgs].reverse().find(m => m.sender === 'admin' && m.autoReply);
           if (lastAutoReply?.feedback) {
             setFeedbackState(lastAutoReply.feedback);
@@ -133,7 +157,7 @@ export default function SupportScreen({ onBack, onNavigate }) {
     };
     initTicket();
     return () => unsubMessages();
-  }, [user?.uid]);
+  }, [user?.uid, sendInitialMessage]);
 
   // --- Send Handler ---
   const handleSend = useCallback(async (textOverride) => {
@@ -192,25 +216,22 @@ export default function SupportScreen({ onBack, onNavigate }) {
     }
   };
 
-  // --- إعادة بدء جلسة جديدة ---
+  // --- New Session ---
   const handleNewSession = () => {
     setTicketId(null);
     setMessages([]);
     setFeedbackState(null);
     setLoading(true);
-    // سيقوم useEffect تلقائياً بإنشاء تذكرة جديدة عند تغير ticketId إلى null
   };
 
-  // --- إغلاق القائمة عند النقر بالخارج ---
+  // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
       }
     };
-    if (menuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+    if (menuOpen) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [menuOpen]);
 
@@ -227,7 +248,7 @@ export default function SupportScreen({ onBack, onNavigate }) {
 
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col" dir="rtl">
-      {/* ─── Header مع قائمة منسدلة ─── */}
+      {/* Header with Menu */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -235,12 +256,7 @@ export default function SupportScreen({ onBack, onNavigate }) {
         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
       >
         <div className="flex items-center gap-3 max-w-lg mx-auto">
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={onBack}
-            className="w-10 h-10 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-all"
-          >
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={onBack} className="w-10 h-10 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-all">
             <ArrowLeft className="w-5 h-5" />
           </motion.button>
           <div className="flex-1">
@@ -253,11 +269,10 @@ export default function SupportScreen({ onBack, onNavigate }) {
             </div>
           </div>
 
-          {/* ─── زر القائمة (ثلاث نقاط) ─── */}
+          {/* Menu Button */}
           <div className="relative" ref={menuRef}>
             <motion.button
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
+              whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
               onClick={() => setMenuOpen(!menuOpen)}
               className="w-10 h-10 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-all"
             >
@@ -267,10 +282,7 @@ export default function SupportScreen({ onBack, onNavigate }) {
             <AnimatePresence>
               {menuOpen && (
                 <motion.div
-                  variants={menuVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
+                  variants={menuVariants} initial="hidden" animate="visible" exit="exit"
                   className="absolute left-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden z-50"
                 >
                   <button
@@ -298,41 +310,25 @@ export default function SupportScreen({ onBack, onNavigate }) {
         </div>
       </motion.header>
 
-      {/* ─── Messages Area ─── */}
+      {/* Messages */}
       <motion.main
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+        variants={containerVariants} initial="hidden" animate="visible"
         className="flex-1 overflow-y-auto px-4 py-4 pt-28 pb-44 space-y-5"
       >
         {!loading && messages.length === 0 && feedbackState !== 'liked' && (
           <motion.div variants={itemVariants} className="text-center py-6">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-blue-50 flex items-center justify-center"
-            >
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-blue-50 flex items-center justify-center">
               <AlertTriangle className="w-8 h-8 text-blue-600" />
             </motion.div>
             <h3 className="text-[15px] font-bold text-stone-800 mb-1">كيف نقدر نساعدك؟</h3>
-            <p className="text-[13px] text-stone-500 leading-relaxed">
-              اشرح مشكلتك وسيتم الرد خلال وقت قصير
-            </p>
+            <p className="text-[13px] text-stone-500 leading-relaxed">اشرح مشكلتك وسيتم الرد خلال وقت قصير</p>
           </motion.div>
         )}
 
         {!loading && messages.length === 0 && feedbackState !== 'liked' && (
           <motion.div variants={containerVariants} initial="hidden" animate="visible" className="grid grid-cols-2 gap-2.5">
             {suggestions.map((s) => (
-              <motion.button
-                key={s.text}
-                variants={itemVariants}
-                whileHover={{ y: -3, scale: 1.02 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleSend(s.text)}
-                className="relative overflow-hidden rounded-2xl bg-white border border-stone-200 shadow-sm hover:shadow-md p-3.5 text-right transition-all group"
-              >
+              <motion.button key={s.text} variants={itemVariants} whileHover={{ y: -3, scale: 1.02 }} whileTap={{ scale: 0.95 }} onClick={() => handleSend(s.text)} className="relative overflow-hidden rounded-2xl bg-white border border-stone-200 shadow-sm hover:shadow-md p-3.5 text-right transition-all group">
                 <div className="flex items-start gap-3">
                   <div className={`bg-gradient-to-br ${s.color} rounded-xl p-2 text-white shrink-0 shadow-sm`}>
                     <s.icon className="w-4 h-4" />
@@ -344,17 +340,11 @@ export default function SupportScreen({ onBack, onNavigate }) {
           </motion.div>
         )}
 
-        {/* زر بدء جلسة جديدة */}
         {feedbackState === 'liked' && (
           <motion.div variants={itemVariants} className="flex flex-col items-center justify-center py-12 gap-4">
             <CheckCircle2 className="w-12 h-12 text-emerald-500" />
             <p className="text-stone-600 font-medium">تم حل مشكلتك بنجاح</p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleNewSession}
-              className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-200 font-bold text-sm"
-            >
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleNewSession} className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-200 font-bold text-sm">
               <PlusCircle className="w-5 h-5" />
               بدء جلسة جديدة
             </motion.button>
@@ -368,22 +358,9 @@ export default function SupportScreen({ onBack, onNavigate }) {
             const feedbackGiven = feedbackState != null;
 
             return (
-              <motion.div
-                key={msg.id}
-                variants={messageVariants}
-                initial="hidden"
-                animate="visible"
-                exit={{ opacity: 0, scale: 0.9 }}
-                className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
-              >
+              <motion.div key={msg.id} variants={messageVariants} initial="hidden" animate="visible" exit={{ opacity: 0, scale: 0.9 }} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                 <div className="max-w-[82%] flex flex-col gap-1">
-                  <div
-                    className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
-                      isUser
-                        ? 'bg-blue-600 text-white rounded-br-none'
-                        : 'bg-white text-stone-800 rounded-bl-none border border-stone-200'
-                    }`}
-                  >
+                  <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${isUser ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white text-stone-800 rounded-bl-none border border-stone-200'}`}>
                     <p>{msg.text}</p>
                     <p className={`text-[10px] mt-1.5 ${isUser ? 'text-blue-200' : 'text-stone-400'}`}>
                       {msg.createdAt.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
@@ -391,48 +368,22 @@ export default function SupportScreen({ onBack, onNavigate }) {
                   </div>
 
                   {isAutoReply && !isUser && !feedbackGiven && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center gap-2 mt-1"
-                    >
-                      <button
-                        onClick={() => handleFeedback(msg.id, true)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-stone-100 text-stone-600 hover:bg-emerald-50 hover:text-emerald-700 active:scale-95 transition-all"
-                      >
-                        <ThumbsUp className="w-3.5 h-3.5" />
-                        <span>مفيد</span>
+                    <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 mt-1">
+                      <button onClick={() => handleFeedback(msg.id, true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-stone-100 text-stone-600 hover:bg-emerald-50 hover:text-emerald-700 active:scale-95 transition-all">
+                        <ThumbsUp className="w-3.5 h-3.5" /><span>مفيد</span>
                       </button>
-                      <button
-                        onClick={() => handleFeedback(msg.id, false)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-stone-100 text-stone-600 hover:bg-rose-50 hover:text-rose-700 active:scale-95 transition-all"
-                      >
-                        <ThumbsDown className="w-3.5 h-3.5" />
-                        <span>غير مفيد</span>
+                      <button onClick={() => handleFeedback(msg.id, false)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-stone-100 text-stone-600 hover:bg-rose-50 hover:text-rose-700 active:scale-95 transition-all">
+                        <ThumbsDown className="w-3.5 h-3.5" /><span>غير مفيد</span>
                       </button>
                     </motion.div>
                   )}
 
                   {isAutoReply && !isUser && feedbackGiven && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`flex items-center gap-2 mt-1 px-3 py-2 rounded-xl text-[11px] font-medium ${
-                        feedbackState === 'liked'
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-rose-50 text-rose-700'
-                      }`}
-                    >
+                    <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className={`flex items-center gap-2 mt-1 px-3 py-2 rounded-xl text-[11px] font-medium ${feedbackState === 'liked' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
                       {feedbackState === 'liked' ? (
-                        <>
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>شكراً لتقييمك! سعدنا بخدمتك</span>
-                        </>
+                        <><CheckCircle2 className="w-4 h-4" /><span>شكراً لتقييمك! سعدنا بخدمتك</span></>
                       ) : (
-                        <>
-                          <XCircle className="w-4 h-4" />
-                          <span>نعتذر، سنقوم بمراجعة مشكلتك والتواصل معك</span>
-                        </>
+                        <><XCircle className="w-4 h-4" /><span>نعتذر، سنقوم بمراجعة مشكلتك والتواصل معك</span></>
                       )}
                     </motion.div>
                   )}
@@ -444,7 +395,7 @@ export default function SupportScreen({ onBack, onNavigate }) {
         <div ref={bottomRef} />
       </motion.main>
 
-      {/* ─── Input (يخفي عند إنهاء الجلسة) ─── */}
+      {/* Input */}
       {feedbackState !== 'liked' && (
         <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-xl border-t border-stone-200/60 px-4 py-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
           {cooldownMinutes > 0 && (
@@ -454,31 +405,9 @@ export default function SupportScreen({ onBack, onNavigate }) {
             </div>
           )}
           <div className="flex items-end gap-2 max-w-lg mx-auto">
-            <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="اكتب رسالتك..."
-              rows={1}
-              className="flex-1 bg-stone-100 rounded-2xl px-4 py-3 text-sm text-stone-900 outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all resize-none border border-stone-200"
-              style={{ minHeight: '48px', maxHeight: '120px' }}
-            />
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => handleSend()}
-              disabled={sending || !inputText.trim()}
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all ${
-                sending || !inputText.trim()
-                  ? 'bg-stone-300 cursor-not-allowed shadow-none'
-                  : 'bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 shadow-blue-200'
-              }`}
-            >
-              {sending ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
+            <textarea value={inputText} onChange={(e) => setInputText(e.target.value)} onKeyDown={handleKeyDown} placeholder="اكتب رسالتك..." rows={1} className="flex-1 bg-stone-100 rounded-2xl px-4 py-3 text-sm text-stone-900 outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all resize-none border border-stone-200" style={{ minHeight: '48px', maxHeight: '120px' }} />
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }} onClick={() => handleSend()} disabled={sending || !inputText.trim()} className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all ${sending || !inputText.trim() ? 'bg-stone-300 cursor-not-allowed shadow-none' : 'bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 shadow-blue-200'}`}>
+              {sending ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Send className="w-5 h-5" />}
             </motion.button>
           </div>
         </div>
