@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Copy, Send, MessageCircleQuestion, ChevronDown, ChevronUp } from 'lucide-react';
+import {
+  ArrowLeft, Copy, Send, MessageCircleQuestion, ChevronDown, ChevronUp, BookOpen, ImageIcon
+} from 'lucide-react';
 import { db } from '../../firebase/config';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 
-/* ================================================================
-   DESIGN TOKENS
-   ================================================================ */
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
 };
-
 const itemVariants = {
   hidden: { opacity: 0, y: 12, scale: 0.97 },
   visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 400, damping: 26 } }
@@ -19,29 +17,18 @@ const itemVariants = {
 
 export default function FAQScreen({ onBack, onNavigate }) {
   const [problems, setProblems] = useState([]);
-  const [expandedId, setExpandedId] = useState(null);
+  const [detailedId, setDetailedId] = useState(null);
 
-  // جلب المشاكل الشائعة من Firestore
   useEffect(() => {
     const q = query(collection(db, 'commonProblems'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, (snapshot) => {
-      const list = snapshot.docs.map(d => ({
-        id: d.id,
-        ...d.data(),
-      }));
-      setProblems(list);
+      setProblems(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
     });
     return () => unsub();
   }, []);
 
-  const handleCopy = (text) => {
-    navigator.clipboard.writeText(text).catch(() => {});
-  };
-
-  const handleSendToSupport = (text) => {
-    onNavigate('support');
-    // يمكن تحسينها لاحقاً لتمرير النص تلقائياً
-  };
+  const handleCopy = (text) => navigator.clipboard.writeText(text).catch(() => {});
+  const handleSend = (text) => onNavigate('support');
 
   return (
     <div className="min-h-screen bg-stone-50 text-right" dir="rtl">
@@ -88,47 +75,49 @@ export default function FAQScreen({ onBack, onNavigate }) {
             variants={itemVariants}
             className="bg-white border border-stone-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden"
           >
-            <div className="flex items-center gap-3 p-4">
-              <div className="flex-1 text-right">
-                <h3 className="text-[14px] font-bold text-stone-800 mb-1">{problem.question}</h3>
-                <p className="text-[12px] text-stone-500">
-                  {expandedId === problem.id ? 'اضغط للإخفاء' : 'اضغط لرؤية الجواب'}
-                </p>
+            <div className="flex items-start gap-3 p-4">
+              <div className="flex-1 text-right min-w-0">
+                <h3 className="text-[14px] font-bold text-stone-800 mb-2 leading-snug">{problem.question}</h3>
+                {/* الجواب المختصر */}
+                <div className="bg-stone-50 rounded-xl p-3">
+                  <p className="text-[13px] text-stone-600 leading-relaxed">{problem.answer}</p>
+                  {problem.imageUrl && (
+                    <div className="mt-2">
+                      <img src={problem.imageUrl} alt="توضيح" className="rounded-lg w-full h-auto max-h-48 object-cover border border-stone-200" />
+                    </div>
+                  )}
+                  {problem.fullAnswer && (
+                    <div className="mt-2">
+                      <button
+                        onClick={() => setDetailedId(detailedId === problem.id ? null : problem.id)}
+                        className="flex items-center gap-1 text-[11px] font-medium text-violet-600 hover:text-violet-800 transition-colors"
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        {detailedId === problem.id ? 'إخفاء التفاصيل' : 'تفاصيل أكثر'}
+                        {detailedId === problem.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {problem.fullAnswer && detailedId === problem.id && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    className="mt-2 bg-violet-50 p-3 rounded-xl border border-violet-100"
+                  >
+                    <p className="text-[12px] text-violet-800 leading-relaxed whitespace-pre-line">{problem.fullAnswer}</p>
+                  </motion.div>
+                )}
               </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  onClick={() => handleCopy(problem.question)}
-                  className="p-2 rounded-xl bg-stone-100 text-stone-500 hover:bg-stone-200 transition-all"
-                >
+              <div className="flex items-center gap-1 shrink-0 pt-1">
+                <button onClick={() => handleCopy(problem.question)} className="p-2 rounded-xl bg-stone-100 text-stone-500 hover:bg-stone-200 transition-all" title="نسخ السؤال">
                   <Copy className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => handleSendToSupport(problem.question)}
-                  className="p-2 rounded-xl bg-violet-50 text-violet-700 hover:bg-violet-100 transition-all"
-                >
+                <button onClick={() => handleSend(problem.question)} className="p-2 rounded-xl bg-violet-50 text-violet-700 hover:bg-violet-100 transition-all" title="إرسال للدعم">
                   <Send className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setExpandedId(expandedId === problem.id ? null : problem.id)}
-                  className="p-2 rounded-xl bg-stone-50 text-stone-400 hover:bg-stone-100 transition-all"
-                >
-                  {expandedId === problem.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-            {expandedId === problem.id && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                className="px-4 pb-4"
-              >
-                <div className="pt-3 border-t border-stone-100">
-                  <p className="text-[13px] text-stone-600 leading-relaxed bg-stone-50 p-3 rounded-xl">
-                    {problem.answer || 'لا يوجد جواب مفصل حالياً'}
-                  </p>
-                </div>
-              </motion.div>
-            )}
           </motion.div>
         ))}
       </motion.main>
