@@ -69437,9 +69437,31 @@ var itemVariants$1 = {
 		}
 	}
 };
+var modalVariants = {
+	hidden: {
+		opacity: 0,
+		scale: .8
+	},
+	visible: {
+		opacity: 1,
+		scale: 1,
+		transition: {
+			type: "spring",
+			stiffness: 400,
+			damping: 28
+		}
+	},
+	exit: {
+		opacity: 0,
+		scale: .8,
+		transition: { duration: .15 }
+	}
+};
 function FAQScreen({ onBack, onNavigate }) {
 	const [problems, setProblems] = (0, import_react.useState)([]);
 	const [detailedId, setDetailedId] = (0, import_react.useState)(null);
+	const [searchQuery, setSearchQuery] = (0, import_react.useState)("");
+	const [previewImage, setPreviewImage] = (0, import_react.useState)(null);
 	(0, import_react.useEffect)(() => {
 		const unsub = onSnapshot(query(collection(db, "commonProblems"), orderBy("createdAt", "desc")), (snapshot) => {
 			setProblems(snapshot.docs.map((d) => ({
@@ -69449,134 +69471,227 @@ function FAQScreen({ onBack, onNavigate }) {
 		});
 		return () => unsub();
 	}, []);
-	const handleCopy = (text) => navigator.clipboard.writeText(text).catch(() => {});
-	const handleSend = (text) => onNavigate("support");
+	const filteredProblems = problems.filter((p) => {
+		const qLower = searchQuery.toLowerCase();
+		const question = p.question?.toLowerCase() || "";
+		const answer = p.answer?.toLowerCase() || "";
+		return question.includes(qLower) || answer.includes(qLower);
+	});
+	const handleCopy = (text) => {
+		navigator.clipboard.writeText(text).catch(() => {});
+	};
+	const handleSendToSupport = (text) => {
+		onNavigate("support");
+	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "min-h-screen bg-stone-50 text-right",
 		dir: "rtl",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.header, {
-			initial: {
-				opacity: 0,
-				y: -20
-			},
-			animate: {
-				opacity: 1,
-				y: 0
-			},
-			className: "fixed top-0 left-0 right-0 z-30 bg-white/85 backdrop-blur-xl border-b border-stone-200/60",
-			style: { paddingTop: "max(0.75rem, env(safe-area-inset-top))" },
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "max-w-2xl mx-auto px-5 pt-4 pb-3 flex items-center justify-between",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.header, {
+				initial: {
+					opacity: 0,
+					y: -20
+				},
+				animate: {
+					opacity: 1,
+					y: 0
+				},
+				className: "fixed top-0 left-0 right-0 z-30 bg-white/85 backdrop-blur-xl border-b border-stone-200/60",
+				style: { paddingTop: "max(0.75rem, env(safe-area-inset-top))" },
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "max-w-2xl mx-auto px-5 pt-4 pb-3 flex items-center justify-between",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
+							whileHover: { scale: 1.08 },
+							whileTap: { scale: .92 },
+							onClick: onBack,
+							className: "w-10 h-10 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-600",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5" })
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-center gap-3",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "p-2 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircleQuestionMark, { className: "w-5 h-5" })
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+								className: "text-lg font-black text-stone-900",
+								children: "المشاكل الشائعة"
+							})]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
+					]
+				})
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.main, {
+				variants: containerVariants$1,
+				initial: "hidden",
+				animate: "visible",
+				className: "px-4 pt-28 pb-8 space-y-4 max-w-2xl mx-auto",
 				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.button, {
-						whileHover: { scale: 1.08 },
-						whileTap: { scale: .92 },
-						onClick: onBack,
-						className: "w-10 h-10 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-600",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ArrowLeft, { className: "w-5 h-5" })
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						variants: itemVariants$1,
+						className: "relative",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Search, { className: "w-4 h-4 text-stone-400" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "text",
+								value: searchQuery,
+								onChange: (e) => setSearchQuery(e.target.value),
+								placeholder: "ابحث عن مشكلة...",
+								className: "w-full bg-white border border-stone-200 rounded-2xl py-3 pr-10 pl-4 text-sm text-stone-700 outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-300 transition-all"
+							}),
+							searchQuery && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: () => setSearchQuery(""),
+								className: "absolute inset-y-0 left-0 pl-3 flex items-center",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "w-4 h-4 text-stone-400 hover:text-stone-600" })
+							})
+						]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-3",
+					searchQuery && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.p, {
+						variants: itemVariants$1,
+						className: "text-[12px] text-stone-500 px-1",
+						children: [
+							filteredProblems.length,
+							" من ",
+							problems.length,
+							" نتيجة"
+						]
+					}),
+					problems.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+						variants: itemVariants$1,
+						className: "text-center py-16",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-							className: "p-2 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircleQuestionMark, { className: "w-5 h-5" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-							className: "text-lg font-black text-stone-900",
-							children: "المشاكل الشائعة"
+							className: "w-16 h-16 mx-auto mb-4 rounded-2xl bg-stone-100 flex items-center justify-center",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircleQuestionMark, { className: "w-8 h-8 text-stone-400" })
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-stone-500 font-medium",
+							children: "لا توجد مشاكل شائعة حالياً"
 						})]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-10" })
-				]
-			})
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.main, {
-			variants: containerVariants$1,
-			initial: "hidden",
-			animate: "visible",
-			className: "px-4 pt-28 pb-8 space-y-3 max-w-2xl mx-auto",
-			children: [problems.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-				variants: itemVariants$1,
-				className: "text-center py-16",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "w-16 h-16 mx-auto mb-4 rounded-2xl bg-stone-100 flex items-center justify-center",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircleQuestionMark, { className: "w-8 h-8 text-stone-400" })
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-stone-500 font-medium",
-					children: "لا توجد مشاكل شائعة حالياً"
-				})]
-			}), problems.map((problem) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-				variants: itemVariants$1,
-				className: "bg-white border border-stone-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex items-start gap-3 p-4",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex-1 text-right min-w-0",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-								className: "text-[14px] font-bold text-stone-800 mb-2 leading-snug",
-								children: problem.question
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "bg-stone-50 rounded-xl p-3",
+					problems.length > 0 && filteredProblems.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						variants: itemVariants$1,
+						className: "text-center py-16",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-stone-500",
+							children: "لا توجد نتائج مطابقة للبحث"
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: filteredProblems.map((problem) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+						variants: itemVariants$1,
+						initial: "hidden",
+						animate: "visible",
+						exit: {
+							opacity: 0,
+							y: -10
+						},
+						className: "bg-white border border-stone-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "flex items-start gap-3 p-4",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex-1 text-right min-w-0",
 								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: "text-[13px] text-stone-600 leading-relaxed",
-										children: problem.answer
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+										className: "text-[14px] font-bold text-stone-800 mb-2 leading-snug",
+										children: problem.question
 									}),
-									problem.imageUrl && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "mt-2",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-											src: problem.imageUrl,
-											alt: "توضيح",
-											className: "rounded-lg w-full h-auto max-h-48 object-cover border border-stone-200"
-										})
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "bg-stone-50 rounded-xl p-3",
+										children: [
+											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+												className: "text-[13px] text-stone-600 leading-relaxed",
+												children: problem.answer
+											}),
+											problem.imageUrl && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "mt-2",
+												children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+													src: problem.imageUrl,
+													alt: "توضيح",
+													className: "rounded-lg w-full h-32 object-cover border border-stone-200 cursor-pointer hover:opacity-90 transition-opacity",
+													onClick: () => setPreviewImage(problem.imageUrl)
+												})
+											}),
+											problem.fullAnswer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+												className: "mt-2",
+												children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+													onClick: () => setDetailedId(detailedId === problem.id ? null : problem.id),
+													className: "flex items-center gap-1 text-[11px] font-medium text-violet-600 hover:text-violet-800 transition-colors",
+													children: [
+														/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BookOpen, { className: "w-3.5 h-3.5" }),
+														detailedId === problem.id ? "إخفاء التفاصيل" : "تفاصيل أكثر",
+														detailedId === problem.id ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronUp, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: "w-3.5 h-3.5" })
+													]
+												})
+											})
+										]
 									}),
-									problem.fullAnswer && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-										className: "mt-2",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-											onClick: () => setDetailedId(detailedId === problem.id ? null : problem.id),
-											className: "flex items-center gap-1 text-[11px] font-medium text-violet-600 hover:text-violet-800 transition-colors",
-											children: [
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BookOpen, { className: "w-3.5 h-3.5" }),
-												detailedId === problem.id ? "إخفاء التفاصيل" : "تفاصيل أكثر",
-												detailedId === problem.id ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronUp, { className: "w-3.5 h-3.5" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: "w-3.5 h-3.5" })
-											]
+									problem.fullAnswer && detailedId === problem.id && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+										initial: {
+											height: 0,
+											opacity: 0
+										},
+										animate: {
+											height: "auto",
+											opacity: 1
+										},
+										className: "mt-2 bg-violet-50 p-3 rounded-xl border border-violet-100",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+											className: "text-[12px] text-violet-800 leading-relaxed whitespace-pre-line",
+											children: problem.fullAnswer
 										})
 									})
 								]
-							}),
-							problem.fullAnswer && detailedId === problem.id && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
-								initial: {
-									height: 0,
-									opacity: 0
-								},
-								animate: {
-									height: "auto",
-									opacity: 1
-								},
-								className: "mt-2 bg-violet-50 p-3 rounded-xl border border-violet-100",
-								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: "text-[12px] text-violet-800 leading-relaxed whitespace-pre-line",
-									children: problem.fullAnswer
-								})
-							})
-						]
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-1 shrink-0 pt-1",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: () => handleCopy(problem.question),
-							className: "p-2 rounded-xl bg-stone-100 text-stone-500 hover:bg-stone-200 transition-all",
-							title: "نسخ السؤال",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: () => handleSend(problem.question),
-							className: "p-2 rounded-xl bg-violet-50 text-violet-700 hover:bg-violet-100 transition-all",
-							title: "إرسال للدعم",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-4 h-4" })
-						})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex flex-col items-center gap-1 shrink-0 pt-1",
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										onClick: () => handleCopy(problem.question),
+										className: "p-2 rounded-xl bg-stone-100 text-stone-500 hover:bg-stone-200 transition-all",
+										title: "نسخ السؤال",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" })
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										onClick: () => handleCopy(problem.answer),
+										className: "p-2 rounded-xl bg-stone-100 text-stone-500 hover:bg-stone-200 transition-all",
+										title: "نسخ الجواب",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" })
+									}),
+									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+										onClick: () => handleSendToSupport(problem.question),
+										className: "p-2 rounded-xl bg-violet-50 text-violet-700 hover:bg-violet-100 transition-all",
+										title: "إرسال للدعم",
+										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-4 h-4" })
+									})
+								]
+							})]
+						})
+					}, problem.id)) })
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: previewImage && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+				variants: modalVariants,
+				initial: "hidden",
+				animate: "visible",
+				exit: "exit",
+				className: "fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4",
+				onClick: () => setPreviewImage(null),
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "relative max-w-3xl w-full max-h-[90vh] bg-white rounded-2xl overflow-hidden shadow-2xl",
+					onClick: (e) => e.stopPropagation(),
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						onClick: () => setPreviewImage(null),
+						className: "absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X$1, { className: "w-5 h-5" })
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+						src: previewImage,
+						alt: "معاينة الصورة",
+						className: "w-full h-auto object-contain"
 					})]
 				})
-			}, problem.id))]
-		})]
+			}) })
+		]
 	});
 }
 //#endregion
