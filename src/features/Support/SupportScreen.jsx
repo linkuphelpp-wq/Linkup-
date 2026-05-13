@@ -12,9 +12,6 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
-/* ================================================================
-   DESIGN TOKENS
-   ================================================================ */
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.07 } }
@@ -53,7 +50,6 @@ export default function SupportScreen({ onBack, onNavigate }) {
   const bottomRef = useRef(null);
   const menuRef = useRef(null);
 
-  // --- Auth ---
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
       if (u) {
@@ -65,7 +61,6 @@ export default function SupportScreen({ onBack, onNavigate }) {
     return () => unsub();
   }, []);
 
-  // --- Send initial message from FAQ ---
   const sendInitialMessage = useCallback(async (text) => {
     if (!ticketId || !user) return;
     try {
@@ -85,7 +80,6 @@ export default function SupportScreen({ onBack, onNavigate }) {
     }
   }, [ticketId, user]);
 
-  // --- Ticket & Messages ---
   useEffect(() => {
     if (!user?.uid) return;
     let unsubMessages = () => {};
@@ -112,11 +106,9 @@ export default function SupportScreen({ onBack, onNavigate }) {
         }
         setTicketId(tid);
 
-        // إرسال السؤال المعلق من FAQ
         const pendingMsg = sessionStorage.getItem('pendingSupportMessage');
         if (pendingMsg) {
           sessionStorage.removeItem('pendingSupportMessage');
-          // استخدام setTimeout للتأكد من تعيين ticketId
           setTimeout(() => sendInitialMessage(pendingMsg), 100);
         }
 
@@ -159,20 +151,20 @@ export default function SupportScreen({ onBack, onNavigate }) {
     return () => unsubMessages();
   }, [user?.uid, sendInitialMessage]);
 
-  // --- Send Handler ---
   const handleSend = useCallback(async (textOverride) => {
     const textToSend = typeof textOverride === 'string' ? textOverride : inputText;
     if (!textToSend.trim() || !ticketId || !user || sending) return;
 
-    const lastUserMsg = [...messages].reverse().find(m => m.sender === 'user');
-    if (lastUserMsg && lastUserMsg.createdAt) {
-      const diffMinutes = (Date.now() - lastUserMsg.createdAt.getTime()) / (1000 * 60);
-      if (diffMinutes < 5) {
-        setCooldownMinutes(Math.ceil(5 - diffMinutes));
-        setTimeout(() => setCooldownMinutes(0), 4000);
-        return;
-      }
-    }
+    // ⚠️ تم إلغاء التقييد الزمني
+    // const lastUserMsg = [...messages].reverse().find(m => m.sender === 'user');
+    // if (lastUserMsg && lastUserMsg.createdAt) {
+    //   const diffMinutes = (Date.now() - lastUserMsg.createdAt.getTime()) / (1000 * 60);
+    //   if (diffMinutes < 5) {
+    //     setCooldownMinutes(Math.ceil(5 - diffMinutes));
+    //     setTimeout(() => setCooldownMinutes(0), 4000);
+    //     return;
+    //   }
+    // }
 
     try {
       setSending(true);
@@ -196,7 +188,6 @@ export default function SupportScreen({ onBack, onNavigate }) {
     }
   }, [inputText, ticketId, user, sending, messages]);
 
-  // --- Feedback Handler ---
   const handleFeedback = async (messageId, isPositive) => {
     if (feedbackState) return;
     const newState = isPositive ? 'liked' : 'disliked';
@@ -216,7 +207,6 @@ export default function SupportScreen({ onBack, onNavigate }) {
     }
   };
 
-  // --- New Session ---
   const handleNewSession = () => {
     setTicketId(null);
     setMessages([]);
@@ -224,7 +214,6 @@ export default function SupportScreen({ onBack, onNavigate }) {
     setLoading(true);
   };
 
-  // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -248,7 +237,6 @@ export default function SupportScreen({ onBack, onNavigate }) {
 
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col" dir="rtl">
-      {/* Header with Menu */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -269,7 +257,6 @@ export default function SupportScreen({ onBack, onNavigate }) {
             </div>
           </div>
 
-          {/* Menu Button */}
           <div className="relative" ref={menuRef}>
             <motion.button
               whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
@@ -310,7 +297,6 @@ export default function SupportScreen({ onBack, onNavigate }) {
         </div>
       </motion.header>
 
-      {/* Messages */}
       <motion.main
         variants={containerVariants} initial="hidden" animate="visible"
         className="flex-1 overflow-y-auto px-4 py-4 pt-28 pb-44 space-y-5"
@@ -395,7 +381,6 @@ export default function SupportScreen({ onBack, onNavigate }) {
         <div ref={bottomRef} />
       </motion.main>
 
-      {/* Input */}
       {feedbackState !== 'liked' && (
         <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-xl border-t border-stone-200/60 px-4 py-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
           {cooldownMinutes > 0 && (
