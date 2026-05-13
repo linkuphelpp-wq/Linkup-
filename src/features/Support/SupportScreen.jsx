@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send, ArrowLeft, Clock, LogIn, AlertTriangle, RefreshCw, Heart,
-  ThumbsUp, ThumbsDown
+  ThumbsUp, ThumbsDown, CheckCircle2, XCircle
 } from 'lucide-react';
 import { db, auth } from '../../firebase/config';
 import {
@@ -44,6 +44,7 @@ export default function SupportScreen({ onBack }) {
   const [ticketId, setTicketId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cooldownMinutes, setCooldownMinutes] = useState(0);
+  const [feedbackState, setFeedbackState] = useState(null); // null, 'liked', 'disliked'
   const bottomRef = useRef(null);
 
   // --- Auth ---
@@ -98,6 +99,12 @@ export default function SupportScreen({ onBack }) {
           }));
           setMessages(msgs);
           setLoading(false);
+
+          // التحقق من حالة التذكرة إذا كانت منتهية
+          const lastAutoReply = [...msgs].reverse().find(m => m.sender === 'admin' && m.autoReply);
+          if (lastAutoReply?.feedback) {
+            setFeedbackState(lastAutoReply.feedback);
+          }
 
           const lastMsg = msgs[msgs.length - 1];
           if (lastMsg && lastMsg.sender === 'admin') {
@@ -156,13 +163,21 @@ export default function SupportScreen({ onBack }) {
     }
   }, [inputText, ticketId, user, sending, messages]);
 
-  // --- Feedback Handler ---
+  // --- Feedback Handler (معدل) ---
   const handleFeedback = async (messageId, isPositive) => {
+    if (feedbackState) return; // ممنوع بعد الاختيار
+    const newState = isPositive ? 'liked' : 'disliked';
+    setFeedbackState(newState);
+
     try {
       const messageRef = doc(db, 'supportTickets', ticketId, 'messages', messageId);
-      await setDoc(messageRef, { feedback: isPositive ? 'liked' : 'disliked' }, { merge: true });
-      // عند الضغط على "لم يعجبني" ننشئ تذكرة متابعة أو نغير حالة التذكرة
-      if (!isPositive) {
+      await setDoc(messageRef, { feedback: newState }, { merge: true });
+
+      if (isPositive) {
+        // إنهاء الجلسة
+        await setDoc(doc(db, 'supportTickets', ticketId), { status: 'resolved' }, { merge: true });
+      } else {
+        // طلب مراجعة
         await setDoc(doc(db, 'supportTickets', ticketId), { status: 'needs_review' }, { merge: true });
       }
     } catch (err) {
@@ -202,8 +217,10 @@ export default function SupportScreen({ onBack }) {
           <div className="flex-1">
             <h1 className="text-lg font-black text-stone-900 tracking-tight">الدعم الفني</h1>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-[11px] text-emerald-700 font-medium">متصل</span>
+              <span className={`w-2 h-2 rounded-full animate-pulse ${feedbackState === 'liked' ? 'bg-emerald-500' : 'bg-emerald-500'}`} />
+              <span className="text-[11px] text-emerald-700 font-medium">
+                {feedbackState === 'liked' ? 'انتهت الجلسة' : 'متصل'}
+              </span>
             </div>
           </div>
           <div className="w-10" />
@@ -260,7 +277,7 @@ export default function SupportScreen({ onBack }) {
           {messages.map((msg) => {
             const isUser = msg.sender === 'user';
             const isAutoReply = msg.sender === 'admin' && msg.autoReply === true;
-            const feedbackGiven = msg.feedback != null;
+            const feedbackGiven = feedbackState != null;
 
             return (
               <motion.div
@@ -285,8 +302,8 @@ export default function SupportScreen({ onBack }) {
                     </p>
                   </div>
 
-                  {/* ⭐ أزرار التقييم للردود التلقائية فقط */}
-                  {isAutoReply && !isUser && (
+                  {/* أزرار التقييم للردود التلقائية */}
+                  {isAutoReply && !isUser && !feedbackGiven && (
                     <motion.div
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -294,29 +311,43 @@ export default function SupportScreen({ onBack }) {
                     >
                       <button
                         onClick={() => handleFeedback(msg.id, true)}
-                        disabled={feedbackGiven}
-                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all active:scale-95 ${
-                          msg.feedback === 'liked'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-stone-100 text-stone-500 hover:bg-emerald-50 hover:text-emerald-600'
-                        }`}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-stone-100 text-stone-600 hover:bg-emerald-50 hover:text-emerald-700 active:scale-95 transition-all"
                       >
                         <ThumbsUp className="w-3.5 h-3.5" />
                         <span>مفيد</span>
                       </button>
-
                       <button
                         onClick={() => handleFeedback(msg.id, false)}
-                        disabled={feedbackGiven}
-                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all active:scale-95 ${
-                          msg.feedback === 'disliked'
-                            ? 'bg-rose-100 text-rose-700'
-                            : 'bg-stone-100 text-stone-500 hover:bg-rose-50 hover:text-rose-600'
-                        }`}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-stone-100 text-stone-600 hover:bg-rose-50 hover:text-rose-700 active:scale-95 transition-all"
                       >
                         <ThumbsDown className="w-3.5 h-3.5" />
                         <span>غير مفيد</span>
                       </button>
+                    </motion.div>
+                  )}
+
+                  {/* رسالة بعد التقييم */}
+                  {isAutoReply && !isUser && feedbackGiven && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`flex items-center gap-2 mt-1 px-3 py-2 rounded-xl text-[11px] font-medium ${
+                        feedbackState === 'liked'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-rose-50 text-rose-700'
+                      }`}
+                    >
+                      {feedbackState === 'liked' ? (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>شكراً لتقييمك! سعدنا بخدمتك</span>
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="w-4 h-4" />
+                          <span>نعتذر، سنقوم بمراجعة مشكلتك والتواصل معك</span>
+                        </>
+                      )}
                     </motion.div>
                   )}
                 </div>
@@ -327,43 +358,45 @@ export default function SupportScreen({ onBack }) {
         <div ref={bottomRef} />
       </motion.main>
 
-      {/* ─── Input Modern ─── */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-xl border-t border-stone-200/60 px-4 py-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
-        {cooldownMinutes > 0 && (
-          <div className="flex items-center justify-center gap-2 mb-2 text-rose-600 text-[12px] font-medium">
-            <Clock className="w-4 h-4" />
-            <span>الرجاء الانتظار {cooldownMinutes} دقائق</span>
+      {/* ─── Input (يخفي عند إنهاء الجلسة) ─── */}
+      {feedbackState !== 'liked' && (
+        <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-xl border-t border-stone-200/60 px-4 py-3" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+          {cooldownMinutes > 0 && (
+            <div className="flex items-center justify-center gap-2 mb-2 text-rose-600 text-[12px] font-medium">
+              <Clock className="w-4 h-4" />
+              <span>الرجاء الانتظار {cooldownMinutes} دقائق</span>
+            </div>
+          )}
+          <div className="flex items-end gap-2 max-w-lg mx-auto">
+            <textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="اكتب رسالتك..."
+              rows={1}
+              className="flex-1 bg-stone-100 rounded-2xl px-4 py-3 text-sm text-stone-900 outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all resize-none border border-stone-200"
+              style={{ minHeight: '48px', maxHeight: '120px' }}
+            />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => handleSend()}
+              disabled={sending || !inputText.trim()}
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all ${
+                sending || !inputText.trim()
+                  ? 'bg-stone-300 cursor-not-allowed shadow-none'
+                  : 'bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 shadow-blue-200'
+              }`}
+            >
+              {sending ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
+            </motion.button>
           </div>
-        )}
-        <div className="flex items-end gap-2 max-w-lg mx-auto">
-          <textarea
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="اكتب رسالتك..."
-            rows={1}
-            className="flex-1 bg-stone-100 rounded-2xl px-4 py-3 text-sm text-stone-900 outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all resize-none border border-stone-200"
-            style={{ minHeight: '48px', maxHeight: '120px' }}
-          />
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => handleSend()}
-            disabled={sending || !inputText.trim()}
-            className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg transition-all ${
-              sending || !inputText.trim()
-                ? 'bg-stone-300 cursor-not-allowed shadow-none'
-                : 'bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 shadow-blue-200'
-            }`}
-          >
-            {sending ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Send className="w-5 h-5" />
-            )}
-          </motion.button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
