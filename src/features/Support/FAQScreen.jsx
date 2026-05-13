@@ -1,89 +1,74 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, Copy, Send, MessageCircleQuestion,
-  BookOpen, Search, X, ImageIcon, ChevronDown, ChevronUp
+  ArrowLeft, Send, MessageCircleQuestion, Search, X, ChevronDown, ChevronUp, Copy, BookOpen
 } from 'lucide-react';
 import { db } from '../../firebase/config';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { toast } from 'sonner';
 
-/* ================================================================
-   DESIGN TOKENS
-   ================================================================ */
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+  visible: { opacity: 1, transition: { staggerChildren: 0.06 } }
 };
-
 const itemVariants = {
-  hidden: { opacity: 0, y: 12, scale: 0.97 },
-  visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 400, damping: 26 } }
+  hidden: { opacity: 0, y: 16, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 380, damping: 24 } }
 };
-
 const modalVariants = {
   hidden: { opacity: 0, scale: 0.8 },
   visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 400, damping: 28 } },
   exit: { opacity: 0, scale: 0.8, transition: { duration: 0.15 } }
 };
 
-/* ================================================================
-   MAIN COMPONENT
-   ================================================================ */
+// تدرجات لونية للبطاقات
+const gradients = [
+  'from-violet-500 to-purple-600',
+  'from-blue-500 to-indigo-600',
+  'from-emerald-500 to-teal-600',
+  'from-amber-500 to-orange-600',
+  'from-rose-500 to-pink-600',
+];
+
 export default function FAQScreen({ onBack, onNavigate }) {
   const [problems, setProblems] = useState([]);
   const [detailedId, setDetailedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [previewImage, setPreviewImage] = useState(null); // رابط الصورة للمعاينة
+  const [previewImage, setPreviewImage] = useState(null);
 
-  // جلب المشاكل الشائعة من Firestore
   useEffect(() => {
     const q = query(collection(db, 'commonProblems'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snapshot) => {
-      const list = snapshot.docs.map(d => ({
-        id: d.id,
-        ...d.data(),
-      }));
-      setProblems(list);
+    return onSnapshot(q, (snapshot) => {
+      setProblems(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
     });
-    return () => unsub();
   }, []);
 
-  // تصفية المشاكل حسب البحث
-  const filteredProblems = problems.filter(p => {
-    const qLower = searchQuery.toLowerCase();
-    const question = p.question?.toLowerCase() || '';
-    const answer = p.answer?.toLowerCase() || '';
-    return question.includes(qLower) || answer.includes(qLower);
+  const handleCopy = (text, label) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast.success(`✅ ${label} تم نسخه`, { duration: 2000 });
+    }).catch(() => toast.error('تعذر النسخ'));
+  };
+
+  const filtered = problems.filter(p => {
+    const q = searchQuery.toLowerCase();
+    return (p.question?.toLowerCase()||'').includes(q) || (p.answer?.toLowerCase()||'').includes(q);
   });
-
-  const handleCopy = (text) => {
-    navigator.clipboard.writeText(text).catch(() => {});
-  };
-
-  const handleSendToSupport = (text) => {
-    onNavigate('support');
-  };
 
   return (
     <div className="min-h-screen bg-stone-50 text-right" dir="rtl">
-      {/* ─── Header ─── */}
+      {/* Header محسّن */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="fixed top-0 left-0 right-0 z-30 bg-white/85 backdrop-blur-xl border-b border-stone-200/60"
+        className="fixed top-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-xl border-b border-stone-200/60"
         style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
       >
         <div className="max-w-2xl mx-auto px-5 pt-4 pb-3 flex items-center justify-between">
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
-            onClick={onBack}
-            className="w-10 h-10 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-600"
-          >
+          <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }} onClick={onBack} className="w-10 h-10 rounded-2xl bg-white border border-stone-200 shadow-sm flex items-center justify-center text-stone-600">
             <ArrowLeft className="w-5 h-5" />
           </motion.button>
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md shadow-violet-200">
               <MessageCircleQuestion className="w-5 h-5" />
             </div>
             <h1 className="text-lg font-black text-stone-900">المشاكل الشائعة</h1>
@@ -92,7 +77,6 @@ export default function FAQScreen({ onBack, onNavigate }) {
         </div>
       </motion.header>
 
-      {/* ─── Content ─── */}
       <motion.main
         variants={containerVariants}
         initial="hidden"
@@ -109,130 +93,103 @@ export default function FAQScreen({ onBack, onNavigate }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="ابحث عن مشكلة..."
-            className="w-full bg-white border border-stone-200 rounded-2xl py-3 pr-10 pl-4 text-sm text-stone-700 outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-300 transition-all"
+            className="w-full bg-white border border-stone-200 rounded-2xl py-3 pr-10 pl-10 text-sm outline-none focus:ring-2 focus:ring-violet-200 focus:border-violet-300 transition-all"
           />
           {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute inset-y-0 left-0 pl-3 flex items-center"
-            >
+            <button onClick={() => setSearchQuery('')} className="absolute inset-y-0 left-0 pl-3 flex items-center">
               <X className="w-4 h-4 text-stone-400 hover:text-stone-600" />
             </button>
           )}
         </motion.div>
 
-        {/* عدد النتائج */}
         {searchQuery && (
           <motion.p variants={itemVariants} className="text-[12px] text-stone-500 px-1">
-            {filteredProblems.length} من {problems.length} نتيجة
+            {filtered.length} من {problems.length} نتيجة
           </motion.p>
         )}
 
-        {/* لا توجد مشاكل */}
         {problems.length === 0 && (
-          <motion.div variants={itemVariants} className="text-center py-16">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-stone-100 flex items-center justify-center">
-              <MessageCircleQuestion className="w-8 h-8 text-stone-400" />
+          <motion.div variants={itemVariants} className="text-center py-20">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-3xl bg-stone-100 flex items-center justify-center">
+              <MessageCircleQuestion className="w-10 h-10 text-stone-300" />
             </div>
-            <p className="text-stone-500 font-medium">لا توجد مشاكل شائعة حالياً</p>
+            <p className="text-stone-400 font-medium">لا توجد مشاكل شائعة حالياً</p>
           </motion.div>
         )}
 
-        {/* لا نتائج للبحث */}
-        {problems.length > 0 && filteredProblems.length === 0 && (
-          <motion.div variants={itemVariants} className="text-center py-16">
-            <p className="text-stone-500">لا توجد نتائج مطابقة للبحث</p>
-          </motion.div>
-        )}
-
-        {/* قائمة المشاكل */}
         <AnimatePresence>
-          {filteredProblems.map((problem) => (
-            <motion.div
-              key={problem.id}
-              variants={itemVariants}
-              initial="hidden"
-              animate="visible"
-              exit={{ opacity: 0, y: -10 }}
-              className="bg-white border border-stone-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden"
-            >
-              <div className="flex items-start gap-3 p-4">
-                <div className="flex-1 text-right min-w-0">
-                  <h3 className="text-[14px] font-bold text-stone-800 mb-2 leading-snug">
-                    {problem.question}
-                  </h3>
-                  {/* الجواب المختصر */}
-                  <div className="bg-stone-50 rounded-xl p-3">
-                    <p className="text-[13px] text-stone-600 leading-relaxed">{problem.answer}</p>
-                    {/* صورة توضيحية إن وجدت */}
-                    {problem.imageUrl && (
-                      <div className="mt-2">
-                        <img
-                          src={problem.imageUrl}
-                          alt="توضيح"
-                          className="rounded-lg w-full h-32 object-cover border border-stone-200 cursor-pointer hover:opacity-90 transition-opacity"
-                          onClick={() => setPreviewImage(problem.imageUrl)}
-                        />
-                      </div>
-                    )}
-                    {/* زر تفاصيل أكثر */}
-                    {problem.fullAnswer && (
-                      <div className="mt-2">
-                        <button
-                          onClick={() => setDetailedId(detailedId === problem.id ? null : problem.id)}
-                          className="flex items-center gap-1 text-[11px] font-medium text-violet-600 hover:text-violet-800 transition-colors"
-                        >
-                          <BookOpen className="w-3.5 h-3.5" />
-                          {detailedId === problem.id ? 'إخفاء التفاصيل' : 'تفاصيل أكثر'}
-                          {detailedId === problem.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                        </button>
-                      </div>
-                    )}
+          {filtered.map((problem, idx) => {
+            const isExpanded = detailedId === problem.id;
+            return (
+              <motion.div
+                key={problem.id}
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                exit={{ opacity: 0, y: -10 }}
+                className="overflow-hidden rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-stone-200/80"
+              >
+                {/* بطاقة السؤال بتدرج لوني */}
+                <div className={`bg-gradient-to-r ${gradients[idx % gradients.length]} p-4 text-white`}>
+                  <div className="flex items-start justify-between">
+                    <h3 className="text-[15px] font-bold leading-snug flex-1 ml-3">{problem.question}</h3>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => handleCopy(problem.question, 'السؤال')} className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors" title="نسخ السؤال">
+                        <Copy className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleSendToSupport(problem.question)} className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors" title="إرسال للدعم">
+                        <Send className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                  {/* التفاصيل الكاملة */}
-                  {problem.fullAnswer && detailedId === problem.id && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      className="mt-2 bg-violet-50 p-3 rounded-xl border border-violet-100"
-                    >
-                      <p className="text-[12px] text-violet-800 leading-relaxed whitespace-pre-line">
-                        {problem.fullAnswer}
-                      </p>
-                    </motion.div>
+                </div>
+
+                {/* الجواب المختصر */}
+                <div className="bg-white p-4">
+                  <p className="text-[14px] text-stone-700 leading-relaxed">{problem.answer}</p>
+
+                  {/* صورة توضيحية */}
+                  {problem.imageUrl && (
+                    <div className="mt-3">
+                      <img
+                        src={problem.imageUrl}
+                        alt="توضيح"
+                        className="rounded-xl w-full h-40 object-cover border border-stone-200 cursor-pointer hover:scale-[1.02] transition-transform"
+                        onClick={() => setPreviewImage(problem.imageUrl)}
+                      />
+                    </div>
+                  )}
+
+                  {/* زر تفاصيل أكثر */}
+                  {problem.fullAnswer && (
+                    <div className="mt-3 pt-3 border-t border-stone-100">
+                      <button
+                        onClick={() => setDetailedId(isExpanded ? null : problem.id)}
+                        className="flex items-center gap-2 text-[13px] font-bold text-violet-600 hover:text-violet-800 transition-colors"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        {isExpanded ? 'إخفاء التفاصيل' : 'تفاصيل أكثر'}
+                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          className="mt-3 bg-violet-50 p-4 rounded-xl border border-violet-100"
+                        >
+                          <p className="text-[13px] text-violet-800 leading-relaxed whitespace-pre-line">{problem.fullAnswer}</p>
+                        </motion.div>
+                      )}
+                    </div>
                   )}
                 </div>
-                {/* أزرار الإجراءات */}
-                <div className="flex flex-col items-center gap-1 shrink-0 pt-1">
-                  <button
-                    onClick={() => handleCopy(problem.question)}
-                    className="p-2 rounded-xl bg-stone-100 text-stone-500 hover:bg-stone-200 transition-all"
-                    title="نسخ السؤال"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleCopy(problem.answer)}
-                    className="p-2 rounded-xl bg-stone-100 text-stone-500 hover:bg-stone-200 transition-all"
-                    title="نسخ الجواب"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleSendToSupport(problem.question)}
-                    className="p-2 rounded-xl bg-violet-50 text-violet-700 hover:bg-violet-100 transition-all"
-                    title="إرسال للدعم"
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
       </motion.main>
 
-      {/* ─── معاينة الصورة (Modal) ─── */}
+      {/* معاينة الصورة */}
       <AnimatePresence>
         {previewImage && (
           <motion.div
@@ -244,17 +201,10 @@ export default function FAQScreen({ onBack, onNavigate }) {
             onClick={() => setPreviewImage(null)}
           >
             <div className="relative max-w-3xl w-full max-h-[90vh] bg-white rounded-2xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-              <button
-                onClick={() => setPreviewImage(null)}
-                className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-              >
+              <button onClick={() => setPreviewImage(null)} className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80">
                 <X className="w-5 h-5" />
               </button>
-              <img
-                src={previewImage}
-                alt="معاينة الصورة"
-                className="w-full h-auto object-contain"
-              />
+              <img src={previewImage} alt="معاينة" className="w-full h-auto object-contain" />
             </div>
           </motion.div>
         )}
