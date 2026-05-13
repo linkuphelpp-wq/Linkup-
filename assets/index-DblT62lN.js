@@ -43893,7 +43893,7 @@ function __PRIVATE_createError(e, t, n, r, i) {
 /**
 * Returns a sentinel used with {@link @firebase/firestore/lite#(setDoc:1)} or {@link @firebase/firestore/lite#(updateDoc:1)} to
 * include a server-generated timestamp in the written data.
-*/ function serverTimestamp$2() {
+*/ function serverTimestamp() {
 	return new __PRIVATE_ServerTimestampFieldValueImpl("serverTimestamp");
 }
 /**
@@ -46181,18 +46181,6 @@ var isWindowsStoreApp = function() {
 	return typeof Windows === "object" && typeof Windows.UI === "object";
 };
 /**
-* Converts a server error code to a JavaScript Error
-*/
-function errorForServerCode(code, query) {
-	let reason = "Unknown Error";
-	if (code === "too_big") reason = "The data requested exceeds the maximum size that can be accessed with a single request.";
-	else if (code === "permission_denied") reason = "Client doesn't have permission to access the desired data.";
-	else if (code === "unavailable") reason = "The service is unavailable";
-	const error = /* @__PURE__ */ new Error(code + " at " + query._path.toString() + ": " + reason);
-	error.code = code.toUpperCase();
-	return error;
-}
-/**
 * Used to test for integer-looking strings
 */
 var INTEGER_REGEXP_ = /* @__PURE__ */ new RegExp("^-?(0*)\\d{1,10}$");
@@ -48014,19 +48002,6 @@ function newRelativePath(outerPath, innerPath) {
 	if (outer === null) return innerPath;
 	else if (outer === inner) return newRelativePath(pathPopFront(outerPath), pathPopFront(innerPath));
 	else throw new Error("INTERNAL ERROR: innerPath (" + innerPath + ") is not within outerPath (" + outerPath + ")");
-}
-/**
-* @returns -1, 0, 1 if left is less, equal, or greater than the right.
-*/
-function pathCompare(left, right) {
-	const leftKeys = pathSlice(left, 0);
-	const rightKeys = pathSlice(right, 0);
-	for (let i = 0; i < leftKeys.length && i < rightKeys.length; i++) {
-		const cmp = nameCompare(leftKeys[i], rightKeys[i]);
-		if (cmp !== 0) return cmp;
-	}
-	if (leftKeys.length === rightKeys.length) return 0;
-	return leftKeys.length < rightKeys.length ? -1 : 1;
 }
 /**
 * @returns true if paths are the same.
@@ -50371,275 +50346,6 @@ function changeChildMoved(childName, snapshotNode) {
 * limitations under the License.
 */
 /**
-* Doesn't really filter nodes but applies an index to the node and keeps track of any changes
-*/
-var IndexedFilter = class {
-	constructor(index_) {
-		this.index_ = index_;
-	}
-	updateChild(snap, key, newChild, affectedPath, source, optChangeAccumulator) {
-		assert(snap.isIndexed(this.index_), "A node must be indexed if only a child is updated");
-		const oldChild = snap.getImmediateChild(key);
-		if (oldChild.getChild(affectedPath).equals(newChild.getChild(affectedPath))) {
-			if (oldChild.isEmpty() === newChild.isEmpty()) return snap;
-		}
-		if (optChangeAccumulator != null) if (newChild.isEmpty()) if (snap.hasChild(key)) optChangeAccumulator.trackChildChange(changeChildRemoved(key, oldChild));
-		else assert(snap.isLeafNode(), "A child remove without an old child only makes sense on a leaf node");
-		else if (oldChild.isEmpty()) optChangeAccumulator.trackChildChange(changeChildAdded(key, newChild));
-		else optChangeAccumulator.trackChildChange(changeChildChanged(key, newChild, oldChild));
-		if (snap.isLeafNode() && newChild.isEmpty()) return snap;
-		else return snap.updateImmediateChild(key, newChild).withIndex(this.index_);
-	}
-	updateFullNode(oldSnap, newSnap, optChangeAccumulator) {
-		if (optChangeAccumulator != null) {
-			if (!oldSnap.isLeafNode()) oldSnap.forEachChild(PRIORITY_INDEX, (key, childNode) => {
-				if (!newSnap.hasChild(key)) optChangeAccumulator.trackChildChange(changeChildRemoved(key, childNode));
-			});
-			if (!newSnap.isLeafNode()) newSnap.forEachChild(PRIORITY_INDEX, (key, childNode) => {
-				if (oldSnap.hasChild(key)) {
-					const oldChild = oldSnap.getImmediateChild(key);
-					if (!oldChild.equals(childNode)) optChangeAccumulator.trackChildChange(changeChildChanged(key, childNode, oldChild));
-				} else optChangeAccumulator.trackChildChange(changeChildAdded(key, childNode));
-			});
-		}
-		return newSnap.withIndex(this.index_);
-	}
-	updatePriority(oldSnap, newPriority) {
-		if (oldSnap.isEmpty()) return ChildrenNode.EMPTY_NODE;
-		else return oldSnap.updatePriority(newPriority);
-	}
-	filtersNodes() {
-		return false;
-	}
-	getIndexedFilter() {
-		return this;
-	}
-	getIndex() {
-		return this.index_;
-	}
-};
-/**
-* @license
-* Copyright 2017 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* Filters nodes by range and uses an IndexFilter to track any changes after filtering the node
-*/
-var RangedFilter = class RangedFilter {
-	constructor(params) {
-		this.indexedFilter_ = new IndexedFilter(params.getIndex());
-		this.index_ = params.getIndex();
-		this.startPost_ = RangedFilter.getStartPost_(params);
-		this.endPost_ = RangedFilter.getEndPost_(params);
-		this.startIsInclusive_ = !params.startAfterSet_;
-		this.endIsInclusive_ = !params.endBeforeSet_;
-	}
-	getStartPost() {
-		return this.startPost_;
-	}
-	getEndPost() {
-		return this.endPost_;
-	}
-	matches(node) {
-		const isWithinStart = this.startIsInclusive_ ? this.index_.compare(this.getStartPost(), node) <= 0 : this.index_.compare(this.getStartPost(), node) < 0;
-		const isWithinEnd = this.endIsInclusive_ ? this.index_.compare(node, this.getEndPost()) <= 0 : this.index_.compare(node, this.getEndPost()) < 0;
-		return isWithinStart && isWithinEnd;
-	}
-	updateChild(snap, key, newChild, affectedPath, source, optChangeAccumulator) {
-		if (!this.matches(new NamedNode(key, newChild))) newChild = ChildrenNode.EMPTY_NODE;
-		return this.indexedFilter_.updateChild(snap, key, newChild, affectedPath, source, optChangeAccumulator);
-	}
-	updateFullNode(oldSnap, newSnap, optChangeAccumulator) {
-		if (newSnap.isLeafNode()) newSnap = ChildrenNode.EMPTY_NODE;
-		let filtered = newSnap.withIndex(this.index_);
-		filtered = filtered.updatePriority(ChildrenNode.EMPTY_NODE);
-		const self = this;
-		newSnap.forEachChild(PRIORITY_INDEX, (key, childNode) => {
-			if (!self.matches(new NamedNode(key, childNode))) filtered = filtered.updateImmediateChild(key, ChildrenNode.EMPTY_NODE);
-		});
-		return this.indexedFilter_.updateFullNode(oldSnap, filtered, optChangeAccumulator);
-	}
-	updatePriority(oldSnap, newPriority) {
-		return oldSnap;
-	}
-	filtersNodes() {
-		return true;
-	}
-	getIndexedFilter() {
-		return this.indexedFilter_;
-	}
-	getIndex() {
-		return this.index_;
-	}
-	static getStartPost_(params) {
-		if (params.hasStart()) {
-			const startName = params.getIndexStartName();
-			return params.getIndex().makePost(params.getIndexStartValue(), startName);
-		} else return params.getIndex().minPost();
-	}
-	static getEndPost_(params) {
-		if (params.hasEnd()) {
-			const endName = params.getIndexEndName();
-			return params.getIndex().makePost(params.getIndexEndValue(), endName);
-		} else return params.getIndex().maxPost();
-	}
-};
-/**
-* @license
-* Copyright 2017 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* Applies a limit and a range to a node and uses RangedFilter to do the heavy lifting where possible
-*/
-var LimitedFilter = class {
-	constructor(params) {
-		this.withinDirectionalStart = (node) => this.reverse_ ? this.withinEndPost(node) : this.withinStartPost(node);
-		this.withinDirectionalEnd = (node) => this.reverse_ ? this.withinStartPost(node) : this.withinEndPost(node);
-		this.withinStartPost = (node) => {
-			const compareRes = this.index_.compare(this.rangedFilter_.getStartPost(), node);
-			return this.startIsInclusive_ ? compareRes <= 0 : compareRes < 0;
-		};
-		this.withinEndPost = (node) => {
-			const compareRes = this.index_.compare(node, this.rangedFilter_.getEndPost());
-			return this.endIsInclusive_ ? compareRes <= 0 : compareRes < 0;
-		};
-		this.rangedFilter_ = new RangedFilter(params);
-		this.index_ = params.getIndex();
-		this.limit_ = params.getLimit();
-		this.reverse_ = !params.isViewFromLeft();
-		this.startIsInclusive_ = !params.startAfterSet_;
-		this.endIsInclusive_ = !params.endBeforeSet_;
-	}
-	updateChild(snap, key, newChild, affectedPath, source, optChangeAccumulator) {
-		if (!this.rangedFilter_.matches(new NamedNode(key, newChild))) newChild = ChildrenNode.EMPTY_NODE;
-		if (snap.getImmediateChild(key).equals(newChild)) return snap;
-		else if (snap.numChildren() < this.limit_) return this.rangedFilter_.getIndexedFilter().updateChild(snap, key, newChild, affectedPath, source, optChangeAccumulator);
-		else return this.fullLimitUpdateChild_(snap, key, newChild, source, optChangeAccumulator);
-	}
-	updateFullNode(oldSnap, newSnap, optChangeAccumulator) {
-		let filtered;
-		if (newSnap.isLeafNode() || newSnap.isEmpty()) filtered = ChildrenNode.EMPTY_NODE.withIndex(this.index_);
-		else if (this.limit_ * 2 < newSnap.numChildren() && newSnap.isIndexed(this.index_)) {
-			filtered = ChildrenNode.EMPTY_NODE.withIndex(this.index_);
-			let iterator;
-			if (this.reverse_) iterator = newSnap.getReverseIteratorFrom(this.rangedFilter_.getEndPost(), this.index_);
-			else iterator = newSnap.getIteratorFrom(this.rangedFilter_.getStartPost(), this.index_);
-			let count = 0;
-			while (iterator.hasNext() && count < this.limit_) {
-				const next = iterator.getNext();
-				if (!this.withinDirectionalStart(next)) continue;
-				else if (!this.withinDirectionalEnd(next)) break;
-				else {
-					filtered = filtered.updateImmediateChild(next.name, next.node);
-					count++;
-				}
-			}
-		} else {
-			filtered = newSnap.withIndex(this.index_);
-			filtered = filtered.updatePriority(ChildrenNode.EMPTY_NODE);
-			let iterator;
-			if (this.reverse_) iterator = filtered.getReverseIterator(this.index_);
-			else iterator = filtered.getIterator(this.index_);
-			let count = 0;
-			while (iterator.hasNext()) {
-				const next = iterator.getNext();
-				if (count < this.limit_ && this.withinDirectionalStart(next) && this.withinDirectionalEnd(next)) count++;
-				else filtered = filtered.updateImmediateChild(next.name, ChildrenNode.EMPTY_NODE);
-			}
-		}
-		return this.rangedFilter_.getIndexedFilter().updateFullNode(oldSnap, filtered, optChangeAccumulator);
-	}
-	updatePriority(oldSnap, newPriority) {
-		return oldSnap;
-	}
-	filtersNodes() {
-		return true;
-	}
-	getIndexedFilter() {
-		return this.rangedFilter_.getIndexedFilter();
-	}
-	getIndex() {
-		return this.index_;
-	}
-	fullLimitUpdateChild_(snap, childKey, childSnap, source, changeAccumulator) {
-		let cmp;
-		if (this.reverse_) {
-			const indexCmp = this.index_.getCompare();
-			cmp = (a, b) => indexCmp(b, a);
-		} else cmp = this.index_.getCompare();
-		const oldEventCache = snap;
-		assert(oldEventCache.numChildren() === this.limit_, "");
-		const newChildNamedNode = new NamedNode(childKey, childSnap);
-		const windowBoundary = this.reverse_ ? oldEventCache.getFirstChild(this.index_) : oldEventCache.getLastChild(this.index_);
-		const inRange = this.rangedFilter_.matches(newChildNamedNode);
-		if (oldEventCache.hasChild(childKey)) {
-			const oldChildSnap = oldEventCache.getImmediateChild(childKey);
-			let nextChild = source.getChildAfterChild(this.index_, windowBoundary, this.reverse_);
-			while (nextChild != null && (nextChild.name === childKey || oldEventCache.hasChild(nextChild.name))) nextChild = source.getChildAfterChild(this.index_, nextChild, this.reverse_);
-			const compareNext = nextChild == null ? 1 : cmp(nextChild, newChildNamedNode);
-			if (inRange && !childSnap.isEmpty() && compareNext >= 0) {
-				if (changeAccumulator != null) changeAccumulator.trackChildChange(changeChildChanged(childKey, childSnap, oldChildSnap));
-				return oldEventCache.updateImmediateChild(childKey, childSnap);
-			} else {
-				if (changeAccumulator != null) changeAccumulator.trackChildChange(changeChildRemoved(childKey, oldChildSnap));
-				const newEventCache = oldEventCache.updateImmediateChild(childKey, ChildrenNode.EMPTY_NODE);
-				if (nextChild != null && this.rangedFilter_.matches(nextChild)) {
-					if (changeAccumulator != null) changeAccumulator.trackChildChange(changeChildAdded(nextChild.name, nextChild.node));
-					return newEventCache.updateImmediateChild(nextChild.name, nextChild.node);
-				} else return newEventCache;
-			}
-		} else if (childSnap.isEmpty()) return snap;
-		else if (inRange) if (cmp(windowBoundary, newChildNamedNode) >= 0) {
-			if (changeAccumulator != null) {
-				changeAccumulator.trackChildChange(changeChildRemoved(windowBoundary.name, windowBoundary.node));
-				changeAccumulator.trackChildChange(changeChildAdded(childKey, childSnap));
-			}
-			return oldEventCache.updateImmediateChild(childKey, childSnap).updateImmediateChild(windowBoundary.name, ChildrenNode.EMPTY_NODE);
-		} else return snap;
-		else return snap;
-	}
-};
-/**
-* @license
-* Copyright 2017 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
 * This class is an immutable-from-the-public-api struct containing a set of query parameters defining a
 * range to be returned for a particular location. It is assumed that validation of parameters is done at the
 * user-facing API level, so it is not done here.
@@ -50752,11 +50458,6 @@ var QueryParams = class QueryParams {
 		return copy;
 	}
 };
-function queryParamsGetNodeFilter(queryParams) {
-	if (queryParams.loadsAllData()) return new IndexedFilter(queryParams.getIndex());
-	else if (queryParams.hasLimit()) return new LimitedFilter(queryParams);
-	else return new RangedFilter(queryParams);
-}
 /**
 * Returns a set of REST query string parameters representing this query.
 *
@@ -51016,35 +50717,6 @@ function sparseSnapshotTreeRemember(sparseSnapshotTree, path, data) {
 	}
 }
 /**
-* Purge the data at path from the cache.
-*
-* @param path - Path to look up snapshot for.
-* @returns True if this node should now be removed.
-*/
-function sparseSnapshotTreeForget(sparseSnapshotTree, path) {
-	if (pathIsEmpty(path)) {
-		sparseSnapshotTree.value = null;
-		sparseSnapshotTree.children.clear();
-		return true;
-	} else if (sparseSnapshotTree.value !== null) if (sparseSnapshotTree.value.isLeafNode()) return false;
-	else {
-		const value = sparseSnapshotTree.value;
-		sparseSnapshotTree.value = null;
-		value.forEachChild(PRIORITY_INDEX, (key, tree) => {
-			sparseSnapshotTreeRemember(sparseSnapshotTree, new Path(key), tree);
-		});
-		return sparseSnapshotTreeForget(sparseSnapshotTree, path);
-	}
-	else if (sparseSnapshotTree.children.size > 0) {
-		const childKey = pathGetFront(path);
-		path = pathPopFront(path);
-		if (sparseSnapshotTree.children.has(childKey)) {
-			if (sparseSnapshotTreeForget(sparseSnapshotTree.children.get(childKey), path)) sparseSnapshotTree.children.delete(childKey);
-		}
-		return sparseSnapshotTree.children.size === 0;
-	} else return true;
-}
-/**
 * Recursively iterates through all of the stored tree and calls the
 * callback on each one.
 *
@@ -51254,34 +50926,6 @@ var AckUserWrite = class AckUserWrite {
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-var ListenComplete = class ListenComplete {
-	constructor(source, path) {
-		this.source = source;
-		this.path = path;
-		/** @inheritDoc */
-		this.type = OperationType.LISTEN_COMPLETE;
-	}
-	operationForChild(childName) {
-		if (pathIsEmpty(this.path)) return new ListenComplete(this.source, newEmptyPath());
-		else return new ListenComplete(this.source, pathPopFront(this.path));
-	}
-};
-/**
-* @license
-* Copyright 2017 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
 var Overwrite = class Overwrite {
 	constructor(source, path, snap) {
 		this.source = source;
@@ -51384,34 +51028,6 @@ var CacheNode = class {
 	}
 	getNode() {
 		return this.node_;
-	}
-};
-/**
-* @license
-* Copyright 2017 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* An EventGenerator is used to convert "raw" changes (Change) as computed by the
-* CacheDiffer into actual events (Event) that can be raised.  See generateEventsForChanges()
-* for details.
-*
-*/
-var EventGenerator = class {
-	constructor(query_) {
-		this.query_ = query_;
-		this.index_ = this.query_._queryParams.getIndex();
 	}
 };
 /**
@@ -52323,25 +51939,6 @@ var WriteTreeCompleteChildSource = class {
 		else return nodes[0];
 	}
 };
-/**
-* @license
-* Copyright 2017 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-function newViewProcessor(filter) {
-	return { filter };
-}
 function viewProcessorAssertIndexed(viewProcessor, viewCache) {
 	assert(viewCache.eventCache.getNode().isIndexed(viewProcessor.filter.getIndex()), "Event snap not indexed");
 	assert(viewCache.serverCache.getNode().isIndexed(viewProcessor.filter.getIndex()), "Server snap not indexed");
@@ -52575,96 +52172,12 @@ function viewProcessorRevertUserWrite(viewProcessor, viewCache, path, writesCach
 		return viewCacheUpdateEventSnap(viewCache, newEventCache, complete, viewProcessor.filter.filtersNodes());
 	}
 }
-/**
-* @license
-* Copyright 2017 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* A view represents a specific location and query that has 1 or more event registrations.
-*
-* It does several things:
-*  - Maintains the list of event registrations for this location/query.
-*  - Maintains a cache of the data visible for this location/query.
-*  - Applies new operations (via applyOperation), updates the cache, and based on the event
-*    registrations returns the set of events to be raised.
-*/
-var View = class {
-	constructor(query_, initialViewCache) {
-		this.query_ = query_;
-		this.eventRegistrations_ = [];
-		const params = this.query_._queryParams;
-		const indexFilter = new IndexedFilter(params.getIndex());
-		const filter = queryParamsGetNodeFilter(params);
-		this.processor_ = newViewProcessor(filter);
-		const initialServerCache = initialViewCache.serverCache;
-		const initialEventCache = initialViewCache.eventCache;
-		const serverSnap = indexFilter.updateFullNode(ChildrenNode.EMPTY_NODE, initialServerCache.getNode(), null);
-		const eventSnap = filter.updateFullNode(ChildrenNode.EMPTY_NODE, initialEventCache.getNode(), null);
-		const newServerCache = new CacheNode(serverSnap, initialServerCache.isFullyInitialized(), indexFilter.filtersNodes());
-		const newEventCache = new CacheNode(eventSnap, initialEventCache.isFullyInitialized(), filter.filtersNodes());
-		this.viewCache_ = newViewCache(newEventCache, newServerCache);
-		this.eventGenerator_ = new EventGenerator(this.query_);
-	}
-	get query() {
-		return this.query_;
-	}
-};
-function viewGetServerCache(view) {
-	return view.viewCache_.serverCache.getNode();
-}
 function viewGetCompleteServerCache(view, path) {
 	const cache = viewCacheGetCompleteServerSnap(view.viewCache_);
 	if (cache) {
 		if (view.query._queryParams.loadsAllData() || !pathIsEmpty(path) && !cache.getImmediateChild(pathGetFront(path)).isEmpty()) return cache.getChild(path);
 	}
 	return null;
-}
-function viewIsEmpty(view) {
-	return view.eventRegistrations_.length === 0;
-}
-function viewAddEventRegistration(view, eventRegistration) {
-	view.eventRegistrations_.push(eventRegistration);
-}
-/**
-* @param eventRegistration - If null, remove all callbacks.
-* @param cancelError - If a cancelError is provided, appropriate cancel events will be returned.
-* @returns Cancel events, if cancelError was provided.
-*/
-function viewRemoveEventRegistration(view, eventRegistration, cancelError) {
-	const cancelEvents = [];
-	if (cancelError) {
-		assert(eventRegistration == null, "A cancel should cancel all event registrations.");
-		const path = view.query._path;
-		view.eventRegistrations_.forEach((registration) => {
-			const maybeEvent = registration.createCancelEvent(cancelError, path);
-			if (maybeEvent) cancelEvents.push(maybeEvent);
-		});
-	}
-	if (eventRegistration) {
-		let remaining = [];
-		for (let i = 0; i < view.eventRegistrations_.length; ++i) {
-			const existing = view.eventRegistrations_[i];
-			if (!existing.matches(eventRegistration)) remaining.push(existing);
-			else if (eventRegistration.hasAnyCallback()) {
-				remaining = remaining.concat(view.eventRegistrations_.slice(i + 1));
-				break;
-			}
-		}
-		view.eventRegistrations_ = remaining;
-	} else view.eventRegistrations_ = [];
-	return cancelEvents;
 }
 /**
 * Applies the given Operation, updates our cache, and returns the appropriate events.
@@ -52680,15 +52193,6 @@ function viewApplyOperation(view, operation, writesCache, completeServerCache) {
 	assert(result.viewCache.serverCache.isFullyInitialized() || !oldViewCache.serverCache.isFullyInitialized(), "Once a server snap is complete, it should never go back");
 	view.viewCache_ = result.viewCache;
 	return viewGenerateEventsForChanges_(view, result.changes, result.viewCache.eventCache.getNode(), null);
-}
-function viewGetInitialEvents(view, registration) {
-	const eventSnap = view.viewCache_.eventCache;
-	const initialChanges = [];
-	if (!eventSnap.getNode().isLeafNode()) eventSnap.getNode().forEachChild(PRIORITY_INDEX, (key, childNode) => {
-		initialChanges.push(changeChildAdded(key, childNode));
-	});
-	if (eventSnap.isFullyInitialized()) initialChanges.push(changeValue(eventSnap.getNode()));
-	return viewGenerateEventsForChanges_(view, initialChanges, eventSnap.getNode(), registration);
 }
 function viewGenerateEventsForChanges_(view, changes, eventCache, eventRegistration) {
 	const registrations = eventRegistration ? [eventRegistration] : view.eventRegistrations_;
@@ -52711,37 +52215,9 @@ function viewGenerateEventsForChanges_(view, changes, eventCache, eventRegistrat
 * limitations under the License.
 */
 var referenceConstructor$1;
-/**
-* SyncPoint represents a single location in a SyncTree with 1 or more event registrations, meaning we need to
-* maintain 1 or more Views at this location to cache server data and raise appropriate events for server changes
-* and user writes (set, transaction, update).
-*
-* It's responsible for:
-*  - Maintaining the set of 1 or more views necessary at this location (a SyncPoint with 0 views should be removed).
-*  - Proxying user / server operations to the views as appropriate (i.e. applyServerOverwrite,
-*    applyUserOverwrite, etc.)
-*/
-var SyncPoint = class {
-	constructor() {
-		/**
-		* The Views being tracked at this location in the tree, stored as a map where the key is a
-		* queryId and the value is the View for that query.
-		*
-		* NOTE: This list will be quite small (usually 1, but perhaps 2 or 3; any more is an odd use case).
-		*/
-		this.views = /* @__PURE__ */ new Map();
-	}
-};
 function syncPointSetReferenceConstructor(val) {
 	assert(!referenceConstructor$1, "__referenceConstructor has already been defined");
 	referenceConstructor$1 = val;
-}
-function syncPointGetReferenceConstructor() {
-	assert(referenceConstructor$1, "Reference.ts has not been loaded");
-	return referenceConstructor$1;
-}
-function syncPointIsEmpty(syncPoint) {
-	return syncPoint.views.size === 0;
 }
 function syncPointApplyOperation(syncPoint, operation, writesCache, optCompleteServerCache) {
 	const queryId = operation.source.queryId;
@@ -52756,92 +52232,6 @@ function syncPointApplyOperation(syncPoint, operation, writesCache, optCompleteS
 	}
 }
 /**
-* Get a view for the specified query.
-*
-* @param query - The query to return a view for
-* @param writesCache
-* @param serverCache
-* @param serverCacheComplete
-* @returns Events to raise.
-*/
-function syncPointGetView(syncPoint, query, writesCache, serverCache, serverCacheComplete) {
-	const queryId = query._queryIdentifier;
-	const view = syncPoint.views.get(queryId);
-	if (!view) {
-		let eventCache = writeTreeRefCalcCompleteEventCache(writesCache, serverCacheComplete ? serverCache : null);
-		let eventCacheComplete = false;
-		if (eventCache) eventCacheComplete = true;
-		else if (serverCache instanceof ChildrenNode) {
-			eventCache = writeTreeRefCalcCompleteEventChildren(writesCache, serverCache);
-			eventCacheComplete = false;
-		} else {
-			eventCache = ChildrenNode.EMPTY_NODE;
-			eventCacheComplete = false;
-		}
-		return new View(query, newViewCache(new CacheNode(eventCache, eventCacheComplete, false), new CacheNode(serverCache, serverCacheComplete, false)));
-	}
-	return view;
-}
-/**
-* Add an event callback for the specified query.
-*
-* @param query
-* @param eventRegistration
-* @param writesCache
-* @param serverCache - Complete server cache, if we have it.
-* @param serverCacheComplete
-* @returns Events to raise.
-*/
-function syncPointAddEventRegistration(syncPoint, query, eventRegistration, writesCache, serverCache, serverCacheComplete) {
-	const view = syncPointGetView(syncPoint, query, writesCache, serverCache, serverCacheComplete);
-	if (!syncPoint.views.has(query._queryIdentifier)) syncPoint.views.set(query._queryIdentifier, view);
-	viewAddEventRegistration(view, eventRegistration);
-	return viewGetInitialEvents(view, eventRegistration);
-}
-/**
-* Remove event callback(s).  Return cancelEvents if a cancelError is specified.
-*
-* If query is the default query, we'll check all views for the specified eventRegistration.
-* If eventRegistration is null, we'll remove all callbacks for the specified view(s).
-*
-* @param eventRegistration - If null, remove all callbacks.
-* @param cancelError - If a cancelError is provided, appropriate cancel events will be returned.
-* @returns removed queries and any cancel events
-*/
-function syncPointRemoveEventRegistration(syncPoint, query, eventRegistration, cancelError) {
-	const queryId = query._queryIdentifier;
-	const removed = [];
-	let cancelEvents = [];
-	const hadCompleteView = syncPointHasCompleteView(syncPoint);
-	if (queryId === "default") for (const [viewQueryId, view] of syncPoint.views.entries()) {
-		cancelEvents = cancelEvents.concat(viewRemoveEventRegistration(view, eventRegistration, cancelError));
-		if (viewIsEmpty(view)) {
-			syncPoint.views.delete(viewQueryId);
-			if (!view.query._queryParams.loadsAllData()) removed.push(view.query);
-		}
-	}
-	else {
-		const view = syncPoint.views.get(queryId);
-		if (view) {
-			cancelEvents = cancelEvents.concat(viewRemoveEventRegistration(view, eventRegistration, cancelError));
-			if (viewIsEmpty(view)) {
-				syncPoint.views.delete(queryId);
-				if (!view.query._queryParams.loadsAllData()) removed.push(view.query);
-			}
-		}
-	}
-	if (hadCompleteView && !syncPointHasCompleteView(syncPoint)) removed.push(new (syncPointGetReferenceConstructor())(query._repo, query._path));
-	return {
-		removed,
-		events: cancelEvents
-	};
-}
-function syncPointGetQueryViews(syncPoint) {
-	const result = [];
-	for (const view of syncPoint.views.values()) if (!view.query._queryParams.loadsAllData()) result.push(view);
-	return result;
-}
-/**
 * @param path - The path to the desired complete snapshot
 * @returns A complete cache, if it exists
 */
@@ -52849,23 +52239,6 @@ function syncPointGetCompleteServerCache(syncPoint, path) {
 	let serverCache = null;
 	for (const view of syncPoint.views.values()) serverCache = serverCache || viewGetCompleteServerCache(view, path);
 	return serverCache;
-}
-function syncPointViewForQuery(syncPoint, query) {
-	if (query._queryParams.loadsAllData()) return syncPointGetCompleteView(syncPoint);
-	else {
-		const queryId = query._queryIdentifier;
-		return syncPoint.views.get(queryId);
-	}
-}
-function syncPointViewExistsForQuery(syncPoint, query) {
-	return syncPointViewForQuery(syncPoint, query) != null;
-}
-function syncPointHasCompleteView(syncPoint) {
-	return syncPointGetCompleteView(syncPoint) != null;
-}
-function syncPointGetCompleteView(syncPoint) {
-	for (const view of syncPoint.views.values()) if (view.query._queryParams.loadsAllData()) return view;
-	return null;
 }
 /**
 * @license
@@ -52888,14 +52261,6 @@ function syncTreeSetReferenceConstructor(val) {
 	assert(!referenceConstructor, "__referenceConstructor has already been defined");
 	referenceConstructor = val;
 }
-function syncTreeGetReferenceConstructor() {
-	assert(referenceConstructor, "Reference.ts has not been loaded");
-	return referenceConstructor;
-}
-/**
-* Static tracker for next query tag.
-*/
-var syncTreeNextQueryTag_ = 1;
 /**
 * SyncTree is the central class for managing event callback registration, data caching, views
 * (query processing), and event generation.  There are typically two SyncTree instances for
@@ -52982,80 +52347,6 @@ function syncTreeApplyServerMerge(syncTree, path, changedChildren) {
 	return syncTreeApplyOperationToSyncPoints_(syncTree, new Merge(newOperationSourceServer(), path, changeTree));
 }
 /**
-* Apply a listen complete for a query
-*
-* @returns Events to raise.
-*/
-function syncTreeApplyListenComplete(syncTree, path) {
-	return syncTreeApplyOperationToSyncPoints_(syncTree, new ListenComplete(newOperationSourceServer(), path));
-}
-/**
-* Apply a listen complete for a tagged query
-*
-* @returns Events to raise.
-*/
-function syncTreeApplyTaggedListenComplete(syncTree, path, tag) {
-	const queryKey = syncTreeQueryKeyForTag_(syncTree, tag);
-	if (queryKey) {
-		const r = syncTreeParseQueryKey_(queryKey);
-		const queryPath = r.path, queryId = r.queryId;
-		const relativePath = newRelativePath(queryPath, path);
-		return syncTreeApplyTaggedOperation_(syncTree, queryPath, new ListenComplete(newOperationSourceServerTaggedQuery(queryId), relativePath));
-	} else return [];
-}
-/**
-* Remove event callback(s).
-*
-* If query is the default query, we'll check all queries for the specified eventRegistration.
-* If eventRegistration is null, we'll remove all callbacks for the specified query/queries.
-*
-* @param eventRegistration - If null, all callbacks are removed.
-* @param cancelError - If a cancelError is provided, appropriate cancel events will be returned.
-* @param skipListenerDedup - When performing a `get()`, we don't add any new listeners, so no
-*  deduping needs to take place. This flag allows toggling of that behavior
-* @returns Cancel events, if cancelError was provided.
-*/
-function syncTreeRemoveEventRegistration(syncTree, query, eventRegistration, cancelError, skipListenerDedup = false) {
-	const path = query._path;
-	const maybeSyncPoint = syncTree.syncPointTree_.get(path);
-	let cancelEvents = [];
-	if (maybeSyncPoint && (query._queryIdentifier === "default" || syncPointViewExistsForQuery(maybeSyncPoint, query))) {
-		const removedAndEvents = syncPointRemoveEventRegistration(maybeSyncPoint, query, eventRegistration, cancelError);
-		if (syncPointIsEmpty(maybeSyncPoint)) syncTree.syncPointTree_ = syncTree.syncPointTree_.remove(path);
-		const removed = removedAndEvents.removed;
-		cancelEvents = removedAndEvents.events;
-		if (!skipListenerDedup) {
-			/**
-			* We may have just removed one of many listeners and can short-circuit this whole process
-			* We may also not have removed a default listener, in which case all of the descendant listeners should already be
-			* properly set up.
-			*/
-			const removingDefault = -1 !== removed.findIndex((query) => {
-				return query._queryParams.loadsAllData();
-			});
-			const covered = syncTree.syncPointTree_.findOnPath(path, (relativePath, parentSyncPoint) => syncPointHasCompleteView(parentSyncPoint));
-			if (removingDefault && !covered) {
-				const subtree = syncTree.syncPointTree_.subtree(path);
-				if (!subtree.isEmpty()) {
-					const newViews = syncTreeCollectDistinctViewsForSubTree_(subtree);
-					for (let i = 0; i < newViews.length; ++i) {
-						const view = newViews[i], newQuery = view.query;
-						const listener = syncTreeCreateListenerForView_(syncTree, view);
-						syncTree.listenProvider_.startListening(syncTreeQueryForListening_(newQuery), syncTreeTagForQuery(syncTree, newQuery), listener.hashFn, listener.onComplete);
-					}
-				}
-			}
-			if (!covered && removed.length > 0 && !cancelError) if (removingDefault) syncTree.listenProvider_.stopListening(syncTreeQueryForListening_(query), null);
-			else removed.forEach((queryToRemove) => {
-				const tagToRemove = syncTree.queryToTagMap.get(syncTreeMakeQueryKey_(queryToRemove));
-				syncTree.listenProvider_.stopListening(syncTreeQueryForListening_(queryToRemove), tagToRemove);
-			});
-		}
-		syncTreeRemoveTags_(syncTree, removed);
-	}
-	return cancelEvents;
-}
-/**
 * Apply new server data for the specified tagged query.
 *
 * @returns Events to raise.
@@ -53083,54 +52374,6 @@ function syncTreeApplyTaggedQueryMerge(syncTree, path, changedChildren, tag) {
 		const changeTree = ImmutableTree.fromObject(changedChildren);
 		return syncTreeApplyTaggedOperation_(syncTree, queryPath, new Merge(newOperationSourceServerTaggedQuery(queryId), relativePath, changeTree));
 	} else return [];
-}
-/**
-* Add an event callback for the specified query.
-*
-* @returns Events to raise.
-*/
-function syncTreeAddEventRegistration(syncTree, query, eventRegistration, skipSetupListener = false) {
-	const path = query._path;
-	let serverCache = null;
-	let foundAncestorDefaultView = false;
-	syncTree.syncPointTree_.foreachOnPath(path, (pathToSyncPoint, sp) => {
-		const relativePath = newRelativePath(pathToSyncPoint, path);
-		serverCache = serverCache || syncPointGetCompleteServerCache(sp, relativePath);
-		foundAncestorDefaultView = foundAncestorDefaultView || syncPointHasCompleteView(sp);
-	});
-	let syncPoint = syncTree.syncPointTree_.get(path);
-	if (!syncPoint) {
-		syncPoint = new SyncPoint();
-		syncTree.syncPointTree_ = syncTree.syncPointTree_.set(path, syncPoint);
-	} else {
-		foundAncestorDefaultView = foundAncestorDefaultView || syncPointHasCompleteView(syncPoint);
-		serverCache = serverCache || syncPointGetCompleteServerCache(syncPoint, newEmptyPath());
-	}
-	let serverCacheComplete;
-	if (serverCache != null) serverCacheComplete = true;
-	else {
-		serverCacheComplete = false;
-		serverCache = ChildrenNode.EMPTY_NODE;
-		syncTree.syncPointTree_.subtree(path).foreachChild((childName, childSyncPoint) => {
-			const completeCache = syncPointGetCompleteServerCache(childSyncPoint, newEmptyPath());
-			if (completeCache) serverCache = serverCache.updateImmediateChild(childName, completeCache);
-		});
-	}
-	const viewAlreadyExists = syncPointViewExistsForQuery(syncPoint, query);
-	if (!viewAlreadyExists && !query._queryParams.loadsAllData()) {
-		const queryKey = syncTreeMakeQueryKey_(query);
-		assert(!syncTree.queryToTagMap.has(queryKey), "View does not exist, but we have a tag");
-		const tag = syncTreeGetNextQueryTag_();
-		syncTree.queryToTagMap.set(queryKey, tag);
-		syncTree.tagToQueryMap.set(tag, queryKey);
-	}
-	const writesCache = writeTreeChildWrites(syncTree.pendingWriteTree_, path);
-	let events = syncPointAddEventRegistration(syncPoint, query, eventRegistration, writesCache, serverCache, serverCacheComplete);
-	if (!viewAlreadyExists && !foundAncestorDefaultView && !skipSetupListener) {
-		const view = syncPointViewForQuery(syncPoint, query);
-		events = events.concat(syncTreeSetupListener_(syncTree, query, view));
-	}
-	return events;
 }
 /**
 * Returns a complete cache, if we have one, of the data at a particular path. If the location does not have a
@@ -53204,33 +52447,6 @@ function syncTreeApplyOperationDescendantsHelper_(operation, syncPointTree, serv
 	if (syncPoint) events = events.concat(syncPointApplyOperation(syncPoint, operation, writesCache, serverCache));
 	return events;
 }
-function syncTreeCreateListenerForView_(syncTree, view) {
-	const query = view.query;
-	const tag = syncTreeTagForQuery(syncTree, query);
-	return {
-		hashFn: () => {
-			return (viewGetServerCache(view) || ChildrenNode.EMPTY_NODE).hash();
-		},
-		onComplete: (status) => {
-			if (status === "ok") if (tag) return syncTreeApplyTaggedListenComplete(syncTree, query._path, tag);
-			else return syncTreeApplyListenComplete(syncTree, query._path);
-			else return syncTreeRemoveEventRegistration(syncTree, query, null, errorForServerCode(status, query));
-		}
-	};
-}
-/**
-* Return the tag associated with the given query.
-*/
-function syncTreeTagForQuery(syncTree, query) {
-	const queryKey = syncTreeMakeQueryKey_(query);
-	return syncTree.queryToTagMap.get(queryKey);
-}
-/**
-* Given a query, computes a "queryKey" suitable for use in our queryToTagMap_.
-*/
-function syncTreeMakeQueryKey_(query) {
-	return query._path.toString() + "$" + query._queryIdentifier;
-}
 /**
 * Return the query associated with the given tag, if we have one
 */
@@ -53255,80 +52471,6 @@ function syncTreeApplyTaggedOperation_(syncTree, queryPath, operation) {
 	const syncPoint = syncTree.syncPointTree_.get(queryPath);
 	assert(syncPoint, "Missing sync point for query tag that we're tracking");
 	return syncPointApplyOperation(syncPoint, operation, writeTreeChildWrites(syncTree.pendingWriteTree_, queryPath), null);
-}
-/**
-* This collapses multiple unfiltered views into a single view, since we only need a single
-* listener for them.
-*/
-function syncTreeCollectDistinctViewsForSubTree_(subtree) {
-	return subtree.fold((relativePath, maybeChildSyncPoint, childMap) => {
-		if (maybeChildSyncPoint && syncPointHasCompleteView(maybeChildSyncPoint)) return [syncPointGetCompleteView(maybeChildSyncPoint)];
-		else {
-			let views = [];
-			if (maybeChildSyncPoint) views = syncPointGetQueryViews(maybeChildSyncPoint);
-			each(childMap, (_key, childViews) => {
-				views = views.concat(childViews);
-			});
-			return views;
-		}
-	});
-}
-/**
-* Normalizes a query to a query we send the server for listening
-*
-* @returns The normalized query
-*/
-function syncTreeQueryForListening_(query) {
-	if (query._queryParams.loadsAllData() && !query._queryParams.isDefault()) return new (syncTreeGetReferenceConstructor())(query._repo, query._path);
-	else return query;
-}
-function syncTreeRemoveTags_(syncTree, queries) {
-	for (let j = 0; j < queries.length; ++j) {
-		const removedQuery = queries[j];
-		if (!removedQuery._queryParams.loadsAllData()) {
-			const removedQueryKey = syncTreeMakeQueryKey_(removedQuery);
-			const removedQueryTag = syncTree.queryToTagMap.get(removedQueryKey);
-			syncTree.queryToTagMap.delete(removedQueryKey);
-			syncTree.tagToQueryMap.delete(removedQueryTag);
-		}
-	}
-}
-/**
-* Static accessor for query tags.
-*/
-function syncTreeGetNextQueryTag_() {
-	return syncTreeNextQueryTag_++;
-}
-/**
-* For a given new listen, manage the de-duplication of outstanding subscriptions.
-*
-* @returns This method can return events to support synchronous data sources
-*/
-function syncTreeSetupListener_(syncTree, query, view) {
-	const path = query._path;
-	const tag = syncTreeTagForQuery(syncTree, query);
-	const listener = syncTreeCreateListenerForView_(syncTree, view);
-	const events = syncTree.listenProvider_.startListening(syncTreeQueryForListening_(query), tag, listener.hashFn, listener.onComplete);
-	const subtree = syncTree.syncPointTree_.subtree(path);
-	if (tag) assert(!syncPointHasCompleteView(subtree.value), "If we're adding a query, it shouldn't be shadowed");
-	else {
-		const queriesToStop = subtree.fold((relativePath, maybeChildSyncPoint, childMap) => {
-			if (!pathIsEmpty(relativePath) && maybeChildSyncPoint && syncPointHasCompleteView(maybeChildSyncPoint)) return [syncPointGetCompleteView(maybeChildSyncPoint).query];
-			else {
-				let queries = [];
-				if (maybeChildSyncPoint) queries = queries.concat(syncPointGetQueryViews(maybeChildSyncPoint).map((view) => view.query));
-				each(childMap, (_key, childQueries) => {
-					queries = queries.concat(childQueries);
-				});
-				return queries;
-			}
-		});
-		for (let i = 0; i < queriesToStop.length; ++i) {
-			const queryToStop = queriesToStop[i];
-			syncTree.listenProvider_.stopListening(syncTreeQueryForListening_(queryToStop), syncTreeTagForQuery(syncTree, queryToStop));
-		}
-	}
-	return events;
 }
 /**
 * @license
@@ -53640,16 +52782,6 @@ var isValidRootPathString = function(pathString) {
 	if (pathString) pathString = pathString.replace(/^\/*\.info(\/|$)/, "/");
 	return isValidPathString(pathString);
 };
-var isValidPriority = function(priority) {
-	return priority === null || typeof priority === "string" || typeof priority === "number" && !isInvalidJSONNumber(priority) || priority && typeof priority === "object" && contains(priority, ".sv");
-};
-/**
-* Pre-validate a datum passed as an argument to Firebase function.
-*/
-var validateFirebaseDataArg = function(fnName, value, path, optional) {
-	if (optional && value === void 0) return;
-	validateFirebaseData(errorPrefix(fnName, "value"), value, path);
-};
 /**
 * Validate a data object client-side before sending to server.
 */
@@ -53674,66 +52806,6 @@ var validateFirebaseData = function(errorPrefix, data, path_) {
 		});
 		if (hasDotValue && hasActualChild) throw new Error(errorPrefix + " contains \".value\" child " + validationPathToErrorString(path) + " in addition to actual children.");
 	}
-};
-/**
-* Pre-validate paths passed in the firebase function.
-*/
-var validateFirebaseMergePaths = function(errorPrefix, mergePaths) {
-	let i, curPath;
-	for (i = 0; i < mergePaths.length; i++) {
-		curPath = mergePaths[i];
-		const keys = pathSlice(curPath);
-		for (let j = 0; j < keys.length; j++) if (keys[j] === ".priority" && j === keys.length - 1);
-		else if (!isValidKey(keys[j])) throw new Error(errorPrefix + "contains an invalid key (" + keys[j] + ") in path " + curPath.toString() + ". Keys must be non-empty strings and can't contain \".\", \"#\", \"$\", \"/\", \"[\", or \"]\"");
-	}
-	mergePaths.sort(pathCompare);
-	let prevPath = null;
-	for (i = 0; i < mergePaths.length; i++) {
-		curPath = mergePaths[i];
-		if (prevPath !== null && pathContains(prevPath, curPath)) throw new Error(errorPrefix + "contains a path " + prevPath.toString() + " that is ancestor of another path " + curPath.toString());
-		prevPath = curPath;
-	}
-};
-/**
-* pre-validate an object passed as an argument to firebase function (
-* must be an object - e.g. for firebase.update()).
-*/
-var validateFirebaseMergeDataArg = function(fnName, data, path, optional) {
-	if (optional && data === void 0) return;
-	const errorPrefix$1 = errorPrefix(fnName, "values");
-	if (!(data && typeof data === "object") || Array.isArray(data)) throw new Error(errorPrefix$1 + " must be an object containing the children to replace.");
-	const mergePaths = [];
-	each(data, (key, value) => {
-		const curPath = new Path(key);
-		validateFirebaseData(errorPrefix$1, value, pathChild(path, curPath));
-		if (pathGetBack(curPath) === ".priority") {
-			if (!isValidPriority(value)) throw new Error(errorPrefix$1 + "contains an invalid value for '" + curPath.toString() + "', which must be a valid Firebase priority (a string, finite number, server value, or null).");
-		}
-		mergePaths.push(curPath);
-	});
-	validateFirebaseMergePaths(errorPrefix$1, mergePaths);
-};
-var validatePriority = function(fnName, priority, optional) {
-	if (optional && priority === void 0) return;
-	if (isInvalidJSONNumber(priority)) throw new Error(errorPrefix(fnName, "priority") + "is " + priority.toString() + ", but must be a valid Firebase priority (a string, finite number, server value, or null).");
-	if (!isValidPriority(priority)) throw new Error(errorPrefix(fnName, "priority") + "must be a valid Firebase priority (a string, finite number, server value, or null).");
-};
-/**
-* @internal
-*/
-var validatePathString = function(fnName, argumentName, pathString, optional) {
-	if (optional && pathString === void 0) return;
-	if (!isValidPathString(pathString)) throw new Error(errorPrefix(fnName, argumentName) + "was an invalid path = \"" + pathString + "\". Paths must be non-empty strings and can't contain \".\", \"#\", \"$\", \"[\", or \"]\"");
-};
-var validateRootPathString = function(fnName, argumentName, pathString, optional) {
-	if (pathString) pathString = pathString.replace(/^\/*\.info(\/|$)/, "/");
-	validatePathString(fnName, argumentName, pathString, optional);
-};
-/**
-* @internal
-*/
-var validateWritablePath = function(fnName, path) {
-	if (pathGetFront(path) === ".info") throw new Error(fnName + " failed = Can't modify data under /.info/");
 };
 var validateUrl = function(fnName, parsedUrl) {
 	const pathString = parsedUrl.path.toString();
@@ -53796,19 +52868,6 @@ function eventQueueQueueEvents(eventQueue, eventDataList) {
 		currList.events.push(data);
 	}
 	if (currList) eventQueue.eventLists_.push(currList);
-}
-/**
-* Queues the specified events and synchronously raises all events (including previously queued ones)
-* for the specified path.
-*
-* It is assumed that the new events are all for the specified path.
-*
-* @param path - The path to raise events for.
-* @param eventDataList - The new events to raise.
-*/
-function eventQueueRaiseEventsAtPath(eventQueue, path, eventDataList) {
-	eventQueueQueueEvents(eventQueue, eventDataList);
-	eventQueueRaiseQueuedEventsMatchingPredicate(eventQueue, (eventPath) => pathEquals(eventPath, path));
 }
 /**
 * Queues the specified events and synchronously raises all events (including previously queued ones) for
@@ -54023,29 +53082,6 @@ function repoUpdateInfo(repo, pathString, value) {
 function repoGetNextWriteId(repo) {
 	return repo.nextWriteId_++;
 }
-function repoSetWithPriority(repo, path, newVal, newPriority, onComplete) {
-	repoLog(repo, "set", {
-		path: path.toString(),
-		value: newVal,
-		priority: newPriority
-	});
-	const serverValues = repoGenerateServerValues(repo);
-	const newNodeUnresolved = nodeFromJSON(newVal, newPriority);
-	const newNode = resolveDeferredValueSnapshot(newNodeUnresolved, syncTreeCalcCompleteEventCache(repo.serverSyncTree_, path), serverValues);
-	const writeId = repoGetNextWriteId(repo);
-	const events = syncTreeApplyUserOverwrite(repo.serverSyncTree_, path, newNode, writeId, true);
-	eventQueueQueueEvents(repo.eventQueue_, events);
-	repo.server_.put(path.toString(), newNodeUnresolved.val(true), (status, errorReason) => {
-		const success = status === "ok";
-		if (!success) warn("set at " + path + " failed: " + status);
-		const clearEvents = syncTreeAckUserWrite(repo.serverSyncTree_, writeId, !success);
-		eventQueueRaiseEventsForChangedPath(repo.eventQueue_, path, clearEvents);
-		repoCallOnCompleteCallback(repo, onComplete, status, errorReason);
-	});
-	const affectedPath = repoAbortTransactions(repo, path);
-	repoRerunTransactions(repo, affectedPath);
-	eventQueueRaiseEventsForChangedPath(repo.eventQueue_, affectedPath, []);
-}
 /**
 * Applies all of the changes stored up in the onDisconnect_ tree.
 */
@@ -54064,52 +53100,6 @@ function repoRunOnDisconnectEvents(repo) {
 	repo.onDisconnect_ = newSparseSnapshotTree();
 	eventQueueRaiseEventsForChangedPath(repo.eventQueue_, newEmptyPath(), events);
 }
-function repoOnDisconnectCancel(repo, path, onComplete) {
-	repo.server_.onDisconnectCancel(path.toString(), (status, errorReason) => {
-		if (status === "ok") sparseSnapshotTreeForget(repo.onDisconnect_, path);
-		repoCallOnCompleteCallback(repo, onComplete, status, errorReason);
-	});
-}
-function repoOnDisconnectSet(repo, path, value, onComplete) {
-	const newNode = nodeFromJSON(value);
-	repo.server_.onDisconnectPut(path.toString(), newNode.val(true), (status, errorReason) => {
-		if (status === "ok") sparseSnapshotTreeRemember(repo.onDisconnect_, path, newNode);
-		repoCallOnCompleteCallback(repo, onComplete, status, errorReason);
-	});
-}
-function repoOnDisconnectSetWithPriority(repo, path, value, priority, onComplete) {
-	const newNode = nodeFromJSON(value, priority);
-	repo.server_.onDisconnectPut(path.toString(), newNode.val(true), (status, errorReason) => {
-		if (status === "ok") sparseSnapshotTreeRemember(repo.onDisconnect_, path, newNode);
-		repoCallOnCompleteCallback(repo, onComplete, status, errorReason);
-	});
-}
-function repoOnDisconnectUpdate(repo, path, childrenToMerge, onComplete) {
-	if (isEmpty$1(childrenToMerge)) {
-		log$1("onDisconnect().update() called with empty data.  Don't do anything.");
-		repoCallOnCompleteCallback(repo, onComplete, "ok", void 0);
-		return;
-	}
-	repo.server_.onDisconnectMerge(path.toString(), childrenToMerge, (status, errorReason) => {
-		if (status === "ok") each(childrenToMerge, (childName, childNode) => {
-			const newChildNode = nodeFromJSON(childNode);
-			sparseSnapshotTreeRemember(repo.onDisconnect_, pathChild(path, childName), newChildNode);
-		});
-		repoCallOnCompleteCallback(repo, onComplete, status, errorReason);
-	});
-}
-function repoAddEventCallbackForQuery(repo, query, eventRegistration) {
-	let events;
-	if (pathGetFront(query._path) === ".info") events = syncTreeAddEventRegistration(repo.infoSyncTree_, query, eventRegistration);
-	else events = syncTreeAddEventRegistration(repo.serverSyncTree_, query, eventRegistration);
-	eventQueueRaiseEventsAtPath(repo.eventQueue_, query._path, events);
-}
-function repoRemoveEventCallbackForQuery(repo, query, eventRegistration) {
-	let events;
-	if (pathGetFront(query._path) === ".info") events = syncTreeRemoveEventRegistration(repo.infoSyncTree_, query, eventRegistration);
-	else events = syncTreeRemoveEventRegistration(repo.serverSyncTree_, query, eventRegistration);
-	eventQueueRaiseEventsAtPath(repo.eventQueue_, query._path, events);
-}
 function repoInterrupt(repo) {
 	if (repo.persistentConnection_) repo.persistentConnection_.interrupt(INTERRUPT_REASON);
 }
@@ -54117,19 +53107,6 @@ function repoLog(repo, ...varArgs) {
 	let prefix = "";
 	if (repo.persistentConnection_) prefix = repo.persistentConnection_.id + ":";
 	log$1(prefix, ...varArgs);
-}
-function repoCallOnCompleteCallback(repo, callback, status, errorReason) {
-	if (callback) exceptionGuard(() => {
-		if (status === "ok") callback(null);
-		else {
-			const code = (status || "error").toUpperCase();
-			let message = code;
-			if (errorReason) message += ": " + errorReason;
-			const error = new Error(message);
-			error.code = code;
-			callback(error);
-		}
-	});
 }
 /**
 * @param excludeSets - A specific set to exclude
@@ -54539,250 +53516,6 @@ var PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwx
 })();
 /**
 * @license
-* Copyright 2017 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* Encapsulates the data needed to raise an event
-*/
-var DataEvent = class {
-	/**
-	* @param eventType - One of: value, child_added, child_changed, child_moved, child_removed
-	* @param eventRegistration - The function to call to with the event data. User provided
-	* @param snapshot - The data backing the event
-	* @param prevName - Optional, the name of the previous child for child_* events.
-	*/
-	constructor(eventType, eventRegistration, snapshot, prevName) {
-		this.eventType = eventType;
-		this.eventRegistration = eventRegistration;
-		this.snapshot = snapshot;
-		this.prevName = prevName;
-	}
-	getPath() {
-		const ref = this.snapshot.ref;
-		if (this.eventType === "value") return ref._path;
-		else return ref.parent._path;
-	}
-	getEventType() {
-		return this.eventType;
-	}
-	getEventRunner() {
-		return this.eventRegistration.getEventRunner(this);
-	}
-	toString() {
-		return this.getPath().toString() + ":" + this.eventType + ":" + stringify(this.snapshot.exportVal());
-	}
-};
-var CancelEvent = class {
-	constructor(eventRegistration, error, path) {
-		this.eventRegistration = eventRegistration;
-		this.error = error;
-		this.path = path;
-	}
-	getPath() {
-		return this.path;
-	}
-	getEventType() {
-		return "cancel";
-	}
-	getEventRunner() {
-		return this.eventRegistration.getEventRunner(this);
-	}
-	toString() {
-		return this.path.toString() + ":cancel";
-	}
-};
-/**
-* @license
-* Copyright 2017 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* A wrapper class that converts events from the database@exp SDK to the legacy
-* Database SDK. Events are not converted directly as event registration relies
-* on reference comparison of the original user callback (see `matches()`) and
-* relies on equality of the legacy SDK's `context` object.
-*/
-var CallbackContext = class {
-	constructor(snapshotCallback, cancelCallback) {
-		this.snapshotCallback = snapshotCallback;
-		this.cancelCallback = cancelCallback;
-	}
-	onValue(expDataSnapshot, previousChildName) {
-		this.snapshotCallback.call(null, expDataSnapshot, previousChildName);
-	}
-	onCancel(error) {
-		assert(this.hasCancelCallback, "Raising a cancel event on a listener with no cancel callback");
-		return this.cancelCallback.call(null, error);
-	}
-	get hasCancelCallback() {
-		return !!this.cancelCallback;
-	}
-	matches(other) {
-		return this.snapshotCallback === other.snapshotCallback || this.snapshotCallback.userCallback !== void 0 && this.snapshotCallback.userCallback === other.snapshotCallback.userCallback && this.snapshotCallback.context === other.snapshotCallback.context;
-	}
-};
-/**
-* @license
-* Copyright 2021 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-/**
-* The `onDisconnect` class allows you to write or clear data when your client
-* disconnects from the Database server. These updates occur whether your
-* client disconnects cleanly or not, so you can rely on them to clean up data
-* even if a connection is dropped or a client crashes.
-*
-* The `onDisconnect` class is most commonly used to manage presence in
-* applications where it is useful to detect how many clients are connected and
-* when other clients disconnect. See
-* {@link https://firebase.google.com/docs/database/web/offline-capabilities | Enabling Offline Capabilities in JavaScript}
-* for more information.
-*
-* To avoid problems when a connection is dropped before the requests can be
-* transferred to the Database server, these functions should be called before
-* writing any data.
-*
-* Note that `onDisconnect` operations are only triggered once. If you want an
-* operation to occur each time a disconnect occurs, you'll need to re-establish
-* the `onDisconnect` operations each time you reconnect.
-*/
-var OnDisconnect = class {
-	/** @hideconstructor */
-	constructor(_repo, _path) {
-		this._repo = _repo;
-		this._path = _path;
-	}
-	/**
-	* Cancels all previously queued `onDisconnect()` set or update events for this
-	* location and all children.
-	*
-	* If a write has been queued for this location via a `set()` or `update()` at a
-	* parent location, the write at this location will be canceled, though writes
-	* to sibling locations will still occur.
-	*
-	* @returns Resolves when synchronization to the server is complete.
-	*/
-	cancel() {
-		const deferred = new Deferred();
-		repoOnDisconnectCancel(this._repo, this._path, deferred.wrapCallback(() => {}));
-		return deferred.promise;
-	}
-	/**
-	* Ensures the data at this location is deleted when the client is disconnected
-	* (due to closing the browser, navigating to a new page, or network issues).
-	*
-	* @returns Resolves when synchronization to the server is complete.
-	*/
-	remove() {
-		validateWritablePath("OnDisconnect.remove", this._path);
-		const deferred = new Deferred();
-		repoOnDisconnectSet(this._repo, this._path, null, deferred.wrapCallback(() => {}));
-		return deferred.promise;
-	}
-	/**
-	* Ensures the data at this location is set to the specified value when the
-	* client is disconnected (due to closing the browser, navigating to a new page,
-	* or network issues).
-	*
-	* `set()` is especially useful for implementing "presence" systems, where a
-	* value should be changed or cleared when a user disconnects so that they
-	* appear "offline" to other users. See
-	* {@link https://firebase.google.com/docs/database/web/offline-capabilities | Enabling Offline Capabilities in JavaScript}
-	* for more information.
-	*
-	* Note that `onDisconnect` operations are only triggered once. If you want an
-	* operation to occur each time a disconnect occurs, you'll need to re-establish
-	* the `onDisconnect` operations each time.
-	*
-	* @param value - The value to be written to this location on disconnect (can
-	* be an object, array, string, number, boolean, or null).
-	* @returns Resolves when synchronization to the Database is complete.
-	*/
-	set(value) {
-		validateWritablePath("OnDisconnect.set", this._path);
-		validateFirebaseDataArg("OnDisconnect.set", value, this._path, false);
-		const deferred = new Deferred();
-		repoOnDisconnectSet(this._repo, this._path, value, deferred.wrapCallback(() => {}));
-		return deferred.promise;
-	}
-	/**
-	* Ensures the data at this location is set to the specified value and priority
-	* when the client is disconnected (due to closing the browser, navigating to a
-	* new page, or network issues).
-	*
-	* @param value - The value to be written to this location on disconnect (can
-	* be an object, array, string, number, boolean, or null).
-	* @param priority - The priority to be written (string, number, or null).
-	* @returns Resolves when synchronization to the Database is complete.
-	*/
-	setWithPriority(value, priority) {
-		validateWritablePath("OnDisconnect.setWithPriority", this._path);
-		validateFirebaseDataArg("OnDisconnect.setWithPriority", value, this._path, false);
-		validatePriority("OnDisconnect.setWithPriority", priority, false);
-		const deferred = new Deferred();
-		repoOnDisconnectSetWithPriority(this._repo, this._path, value, priority, deferred.wrapCallback(() => {}));
-		return deferred.promise;
-	}
-	/**
-	* Writes multiple values at this location when the client is disconnected (due
-	* to closing the browser, navigating to a new page, or network issues).
-	*
-	* The `values` argument contains multiple property-value pairs that will be
-	* written to the Database together. Each child property can either be a simple
-	* property (for example, "name") or a relative path (for example, "name/first")
-	* from the current location to the data to update.
-	*
-	* As opposed to the `set()` method, `update()` can be use to selectively update
-	* only the referenced properties at the current location (instead of replacing
-	* all the child properties at the current location).
-	*
-	* @param values - Object containing multiple values.
-	* @returns Resolves when synchronization to the Database is complete.
-	*/
-	update(values) {
-		validateWritablePath("OnDisconnect.update", this._path);
-		validateFirebaseMergeDataArg("OnDisconnect.update", values, this._path, false);
-		const deferred = new Deferred();
-		repoOnDisconnectUpdate(this._repo, this._path, values, deferred.wrapCallback(() => {}));
-		return deferred.promise;
-	}
-};
-/**
-* @license
 * Copyright 2020 Google LLC
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54860,342 +53593,6 @@ var ReferenceImpl = class ReferenceImpl extends QueryImpl {
 		return ref;
 	}
 };
-/**
-* A `DataSnapshot` contains data from a Database location.
-*
-* Any time you read data from the Database, you receive the data as a
-* `DataSnapshot`. A `DataSnapshot` is passed to the event callbacks you attach
-* with `on()` or `once()`. You can extract the contents of the snapshot as a
-* JavaScript object by calling the `val()` method. Alternatively, you can
-* traverse into the snapshot by calling `child()` to return child snapshots
-* (which you could then call `val()` on).
-*
-* A `DataSnapshot` is an efficiently generated, immutable copy of the data at
-* a Database location. It cannot be modified and will never change (to modify
-* data, you always call the `set()` method on a `Reference` directly).
-*/
-var DataSnapshot = class DataSnapshot {
-	/**
-	* @param _node - A SnapshotNode to wrap.
-	* @param ref - The location this snapshot came from.
-	* @param _index - The iteration order for this snapshot
-	* @hideconstructor
-	*/
-	constructor(_node, ref, _index) {
-		this._node = _node;
-		this.ref = ref;
-		this._index = _index;
-	}
-	/**
-	* Gets the priority value of the data in this `DataSnapshot`.
-	*
-	* Applications need not use priority but can order collections by
-	* ordinary properties (see
-	* {@link https://firebase.google.com/docs/database/web/lists-of-data#sorting_and_filtering_data |Sorting and filtering data}
-	* ).
-	*/
-	get priority() {
-		return this._node.getPriority().val();
-	}
-	/**
-	* The key (last part of the path) of the location of this `DataSnapshot`.
-	*
-	* The last token in a Database location is considered its key. For example,
-	* "ada" is the key for the /users/ada/ node. Accessing the key on any
-	* `DataSnapshot` will return the key for the location that generated it.
-	* However, accessing the key on the root URL of a Database will return
-	* `null`.
-	*/
-	get key() {
-		return this.ref.key;
-	}
-	/** Returns the number of child properties of this `DataSnapshot`. */
-	get size() {
-		return this._node.numChildren();
-	}
-	/**
-	* Gets another `DataSnapshot` for the location at the specified relative path.
-	*
-	* Passing a relative path to the `child()` method of a DataSnapshot returns
-	* another `DataSnapshot` for the location at the specified relative path. The
-	* relative path can either be a simple child name (for example, "ada") or a
-	* deeper, slash-separated path (for example, "ada/name/first"). If the child
-	* location has no data, an empty `DataSnapshot` (that is, a `DataSnapshot`
-	* whose value is `null`) is returned.
-	*
-	* @param path - A relative path to the location of child data.
-	*/
-	child(path) {
-		const childPath = new Path(path);
-		const childRef = child(this.ref, path);
-		return new DataSnapshot(this._node.getChild(childPath), childRef, PRIORITY_INDEX);
-	}
-	/**
-	* Returns true if this `DataSnapshot` contains any data. It is slightly more
-	* efficient than using `snapshot.val() !== null`.
-	*/
-	exists() {
-		return !this._node.isEmpty();
-	}
-	/**
-	* Exports the entire contents of the DataSnapshot as a JavaScript object.
-	*
-	* The `exportVal()` method is similar to `val()`, except priority information
-	* is included (if available), making it suitable for backing up your data.
-	*
-	* @returns The DataSnapshot's contents as a JavaScript value (Object,
-	*   Array, string, number, boolean, or `null`).
-	*/
-	exportVal() {
-		return this._node.val(true);
-	}
-	/**
-	* Enumerates the top-level children in the `IteratedDataSnapshot`.
-	*
-	* Because of the way JavaScript objects work, the ordering of data in the
-	* JavaScript object returned by `val()` is not guaranteed to match the
-	* ordering on the server nor the ordering of `onChildAdded()` events. That is
-	* where `forEach()` comes in handy. It guarantees the children of a
-	* `DataSnapshot` will be iterated in their query order.
-	*
-	* If no explicit `orderBy*()` method is used, results are returned
-	* ordered by key (unless priorities are used, in which case, results are
-	* returned by priority).
-	*
-	* @param action - A function that will be called for each child DataSnapshot.
-	* The callback can return true to cancel further enumeration.
-	* @returns true if enumeration was canceled due to your callback returning
-	* true.
-	*/
-	forEach(action) {
-		if (this._node.isLeafNode()) return false;
-		return !!this._node.forEachChild(this._index, (key, node) => {
-			return action(new DataSnapshot(node, child(this.ref, key), PRIORITY_INDEX));
-		});
-	}
-	/**
-	* Returns true if the specified child path has (non-null) data.
-	*
-	* @param path - A relative path to the location of a potential child.
-	* @returns `true` if data exists at the specified child path; else
-	*  `false`.
-	*/
-	hasChild(path) {
-		const childPath = new Path(path);
-		return !this._node.getChild(childPath).isEmpty();
-	}
-	/**
-	* Returns whether or not the `DataSnapshot` has any non-`null` child
-	* properties.
-	*
-	* You can use `hasChildren()` to determine if a `DataSnapshot` has any
-	* children. If it does, you can enumerate them using `forEach()`. If it
-	* doesn't, then either this snapshot contains a primitive value (which can be
-	* retrieved with `val()`) or it is empty (in which case, `val()` will return
-	* `null`).
-	*
-	* @returns true if this snapshot has any children; else false.
-	*/
-	hasChildren() {
-		if (this._node.isLeafNode()) return false;
-		else return !this._node.isEmpty();
-	}
-	/**
-	* Returns a JSON-serializable representation of this object.
-	*/
-	toJSON() {
-		return this.exportVal();
-	}
-	/**
-	* Extracts a JavaScript value from a `DataSnapshot`.
-	*
-	* Depending on the data in a `DataSnapshot`, the `val()` method may return a
-	* scalar type (string, number, or boolean), an array, or an object. It may
-	* also return null, indicating that the `DataSnapshot` is empty (contains no
-	* data).
-	*
-	* @returns The DataSnapshot's contents as a JavaScript value (Object,
-	*   Array, string, number, boolean, or `null`).
-	*/
-	val() {
-		return this._node.val();
-	}
-};
-/**
-*
-* Returns a `Reference` representing the location in the Database
-* corresponding to the provided path. If no path is provided, the `Reference`
-* will point to the root of the Database.
-*
-* @param db - The database instance to obtain a reference for.
-* @param path - Optional path representing the location the returned
-*   `Reference` will point. If not provided, the returned `Reference` will
-*   point to the root of the Database.
-* @returns If a path is provided, a `Reference`
-*   pointing to the provided path. Otherwise, a `Reference` pointing to the
-*   root of the Database.
-*/
-function ref(db, path) {
-	db = getModularInstance(db);
-	db._checkNotDeleted("ref");
-	return path !== void 0 ? child(db._root, path) : db._root;
-}
-/**
-* Gets a `Reference` for the location at the specified relative path.
-*
-* The relative path can either be a simple child name (for example, "ada") or
-* a deeper slash-separated path (for example, "ada/name/first").
-*
-* @param parent - The parent location.
-* @param path - A relative path from this location to the desired child
-*   location.
-* @returns The specified child location.
-*/
-function child(parent, path) {
-	parent = getModularInstance(parent);
-	if (pathGetFront(parent._path) === null) validateRootPathString("child", "path", path, false);
-	else validatePathString("child", "path", path, false);
-	return new ReferenceImpl(parent._repo, pathChild(parent._path, path));
-}
-/**
-* Returns an `OnDisconnect` object - see
-* {@link https://firebase.google.com/docs/database/web/offline-capabilities | Enabling Offline Capabilities in JavaScript}
-* for more information on how to use it.
-*
-* @param ref - The reference to add OnDisconnect triggers for.
-*/
-function onDisconnect(ref) {
-	ref = getModularInstance(ref);
-	return new OnDisconnect(ref._repo, ref._path);
-}
-/**
-* Writes data to this Database location.
-*
-* This will overwrite any data at this location and all child locations.
-*
-* The effect of the write will be visible immediately, and the corresponding
-* events ("value", "child_added", etc.) will be triggered. Synchronization of
-* the data to the Firebase servers will also be started, and the returned
-* Promise will resolve when complete. If provided, the `onComplete` callback
-* will be called asynchronously after synchronization has finished.
-*
-* Passing `null` for the new value is equivalent to calling `remove()`; namely,
-* all data at this location and all child locations will be deleted.
-*
-* `set()` will remove any priority stored at this location, so if priority is
-* meant to be preserved, you need to use `setWithPriority()` instead.
-*
-* Note that modifying data with `set()` will cancel any pending transactions
-* at that location, so extreme care should be taken if mixing `set()` and
-* `transaction()` to modify the same data.
-*
-* A single `set()` will generate a single "value" event at the location where
-* the `set()` was performed.
-*
-* @param ref - The location to write to.
-* @param value - The value to be written (string, number, boolean, object,
-*   array, or null).
-* @returns Resolves when write to server is complete.
-*/
-function set(ref, value) {
-	ref = getModularInstance(ref);
-	validateWritablePath("set", ref._path);
-	validateFirebaseDataArg("set", value, ref._path, false);
-	const deferred = new Deferred();
-	repoSetWithPriority(ref._repo, ref._path, value, null, deferred.wrapCallback(() => {}));
-	return deferred.promise;
-}
-/**
-* Represents registration for 'value' events.
-*/
-var ValueEventRegistration = class ValueEventRegistration {
-	constructor(callbackContext) {
-		this.callbackContext = callbackContext;
-	}
-	respondsTo(eventType) {
-		return eventType === "value";
-	}
-	createEvent(change, query) {
-		const index = query._queryParams.getIndex();
-		return new DataEvent("value", this, new DataSnapshot(change.snapshotNode, new ReferenceImpl(query._repo, query._path), index));
-	}
-	getEventRunner(eventData) {
-		if (eventData.getEventType() === "cancel") return () => this.callbackContext.onCancel(eventData.error);
-		else return () => this.callbackContext.onValue(eventData.snapshot, null);
-	}
-	createCancelEvent(error, path) {
-		if (this.callbackContext.hasCancelCallback) return new CancelEvent(this, error, path);
-		else return null;
-	}
-	matches(other) {
-		if (!(other instanceof ValueEventRegistration)) return false;
-		else if (!other.callbackContext || !this.callbackContext) return true;
-		else return other.callbackContext.matches(this.callbackContext);
-	}
-	hasAnyCallback() {
-		return this.callbackContext !== null;
-	}
-};
-/**
-* Represents the registration of a child_x event.
-*/
-var ChildEventRegistration = class ChildEventRegistration {
-	constructor(eventType, callbackContext) {
-		this.eventType = eventType;
-		this.callbackContext = callbackContext;
-	}
-	respondsTo(eventType) {
-		let eventToCheck = eventType === "children_added" ? "child_added" : eventType;
-		eventToCheck = eventToCheck === "children_removed" ? "child_removed" : eventToCheck;
-		return this.eventType === eventToCheck;
-	}
-	createCancelEvent(error, path) {
-		if (this.callbackContext.hasCancelCallback) return new CancelEvent(this, error, path);
-		else return null;
-	}
-	createEvent(change, query) {
-		assert(change.childName != null, "Child events should have a childName.");
-		const childRef = child(new ReferenceImpl(query._repo, query._path), change.childName);
-		const index = query._queryParams.getIndex();
-		return new DataEvent(change.type, this, new DataSnapshot(change.snapshotNode, childRef, index), change.prevName);
-	}
-	getEventRunner(eventData) {
-		if (eventData.getEventType() === "cancel") return () => this.callbackContext.onCancel(eventData.error);
-		else return () => this.callbackContext.onValue(eventData.snapshot, eventData.prevName);
-	}
-	matches(other) {
-		if (other instanceof ChildEventRegistration) return this.eventType === other.eventType && (!this.callbackContext || !other.callbackContext || this.callbackContext.matches(other.callbackContext));
-		return false;
-	}
-	hasAnyCallback() {
-		return !!this.callbackContext;
-	}
-};
-function addEventListener(query, eventType, callback, cancelCallbackOrListenOptions, options) {
-	let cancelCallback;
-	if (typeof cancelCallbackOrListenOptions === "object") {
-		cancelCallback = void 0;
-		options = cancelCallbackOrListenOptions;
-	}
-	if (typeof cancelCallbackOrListenOptions === "function") cancelCallback = cancelCallbackOrListenOptions;
-	if (options && options.onlyOnce) {
-		const userCallback = callback;
-		const onceCallback = (dataSnapshot, previousChildName) => {
-			repoRemoveEventCallbackForQuery(query._repo, query, container);
-			userCallback(dataSnapshot, previousChildName);
-		};
-		onceCallback.userCallback = callback.userCallback;
-		onceCallback.context = callback.context;
-		callback = onceCallback;
-	}
-	const callbackContext = new CallbackContext(callback, cancelCallback || void 0);
-	const container = eventType === "value" ? new ValueEventRegistration(callbackContext) : new ChildEventRegistration(eventType, callbackContext);
-	repoAddEventCallbackForQuery(query._repo, query, container);
-	return () => repoRemoveEventCallbackForQuery(query._repo, query, container);
-}
-function onValue(query, callback, cancelCallbackOrListenOptions, options) {
-	return addEventListener(query, "value", callback, cancelCallbackOrListenOptions, options);
-}
 /**
 * Define reference constructor in various modules
 *
@@ -55408,31 +53805,6 @@ function registerDatabase(variant) {
 	registerVersion(name, version, variant);
 	registerVersion(name, version, "esm2020");
 }
-/**
-* @license
-* Copyright 2020 Google LLC
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-var SERVER_TIMESTAMP = { ".sv": "timestamp" };
-/**
-* Returns a placeholder value for auto-populating the current timestamp (time
-* since the Unix epoch, in milliseconds) as determined by the Firebase
-* servers.
-*/
-function serverTimestamp() {
-	return SERVER_TIMESTAMP;
-}
 PersistentConnection.prototype.simpleListen = function(pathString, onComplete) {
 	this.sendRequest("q", { p: pathString }, onComplete);
 };
@@ -55460,7 +53832,7 @@ var app = initializeApp({
 var auth = getAuth(app);
 var db = getFirestore(app);
 getStorage(app);
-var rtdb = getDatabase(app);
+getDatabase(app);
 //#endregion
 //#region src/features/auth/AuthScreen.jsx
 var Input$1 = ({ className, ...props }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
@@ -55539,7 +53911,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 					photoURL: "",
 					username: "",
 					status: "online",
-					lastSeen: serverTimestamp$2(),
+					lastSeen: serverTimestamp(),
 					loginDates: [today],
 					loginCount: 1,
 					settings: {
@@ -55550,7 +53922,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 					},
 					contacts: [],
 					blockedUsers: [],
-					createdAt: serverTimestamp$2()
+					createdAt: serverTimestamp()
 				});
 				await sendEmailVerification(user);
 				setSuccess("تم إنشاء الحساب! يرجى التحقق من بريدك الإلكتروني.");
@@ -55584,7 +53956,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 				photoURL: user.photoURL || "",
 				username: "",
 				status: "online",
-				lastSeen: serverTimestamp$2(),
+				lastSeen: serverTimestamp(),
 				loginDates: [(/* @__PURE__ */ new Date()).toISOString().split("T")[0]],
 				loginCount: 1,
 				settings: {
@@ -55595,7 +53967,7 @@ function AuthScreen({ onLogin, onForgotPassword }) {
 				},
 				contacts: [],
 				blockedUsers: [],
-				createdAt: serverTimestamp$2()
+				createdAt: serverTimestamp()
 			});
 			setExiting(true);
 			setTimeout(() => {
@@ -62020,16 +60392,11 @@ var getSafeName = (contact) => {
 	return "مستخدم";
 };
 var ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0, index = 0 }) => {
-	const [status, setStatus] = (0, import_react.useState)("offline");
+	const [status, setStatus] = (0, import_react.useState)(contact.status || "offline");
 	const [expanded, setExpanded] = (0, import_react.useState)(false);
 	(0, import_react.useEffect)(() => {
-		if (!contact.uid) return;
-		const unsub = onSnapshot(doc(db, "users", contact.uid), (snap) => {
-			if (snap.exists()) setStatus(snap.data().status || "offline");
-			else setStatus("offline");
-		});
-		return () => unsub();
-	}, [contact.uid]);
+		setStatus(contact.status || "offline");
+	}, [contact.status]);
 	const safeName = getSafeName(contact);
 	const statusDot = status === "online" ? "bg-emerald-500" : "bg-gray-300";
 	const statusText = status === "online" ? "متصل الآن" : "غير متصل";
@@ -62388,7 +60755,8 @@ function ContactsScreen({ onCall, onChat }) {
 					username: data.username || userData.username || "",
 					photoURL: userData.photoURL || "",
 					localDisplayName: data.displayName || "",
-					displayName: userData.displayName || ""
+					displayName: userData.displayName || "",
+					status: userData.status || "offline"
 				};
 			}))).filter(Boolean));
 		});
@@ -62466,7 +60834,7 @@ function ContactsScreen({ onCall, onChat }) {
 				displayName: targetData.displayName || targetData.email || "",
 				email: targetData.email || "",
 				username: trimmed,
-				createdAt: serverTimestamp$2()
+				createdAt: serverTimestamp()
 			});
 			setAddSuccess("تمت الإضافة بنجاح");
 			setAddUsername("");
@@ -66996,7 +65364,7 @@ function ChatScreen({ contact, onBack, onCall }) {
 			await addDoc(collection(db, "chats", chatId, "messages"), {
 				text,
 				senderId: currentUser.uid,
-				timestamp: serverTimestamp$2(),
+				timestamp: serverTimestamp(),
 				replyTo: replyTo ? {
 					id: replyTo.id,
 					text: replyTo.text,
@@ -67337,7 +65705,7 @@ function AdminScreen({ onBack }) {
 				adminId,
 				targetUserId,
 				details,
-				timestamp: serverTimestamp$2()
+				timestamp: serverTimestamp()
 			});
 		} catch (e) {
 			console.error("log error", e);
@@ -67432,7 +65800,7 @@ function AdminScreen({ onBack }) {
 		try {
 			await addDoc(collection(db, "notifications"), {
 				message: broadcastText.trim(),
-				timestamp: serverTimestamp$2()
+				timestamp: serverTimestamp()
 			});
 			await logAction("broadcast", null, broadcastText.trim());
 			showToast("تم إرسال الإشعار العام");
@@ -67466,7 +65834,7 @@ function AdminScreen({ onBack }) {
 			const key = "ADM-" + Math.random().toString(36).substring(2, 9).toUpperCase();
 			await setDoc(doc(db, "adminInvites", key), {
 				used: false,
-				createdAt: serverTimestamp$2(),
+				createdAt: serverTimestamp(),
 				createdBy: auth.currentUser?.uid
 			});
 			setGeneratedKey(key);
@@ -68495,7 +66863,7 @@ function PartnerScreen({ onBack }) {
 			await setDoc(inviteRef, {
 				used: true,
 				usedBy: currentUser.uid,
-				usedAt: serverTimestamp$2()
+				usedAt: serverTimestamp()
 			}, { merge: true });
 			await setDoc(doc(db, "users", currentUser.uid), {
 				isAdmin: true,
@@ -69032,12 +67400,12 @@ function SupportScreen({ onBack, onNavigate }) {
 			await addDoc(collection(db, "supportTickets", ticketId, "messages"), {
 				sender: "user",
 				text: text.trim(),
-				createdAt: serverTimestamp$2(),
+				createdAt: serverTimestamp(),
 				read: false,
 				notifiedAdmin: false
 			});
 			await setDoc(doc(db, "supportTickets", ticketId), {
-				updatedAt: serverTimestamp$2(),
+				updatedAt: serverTimestamp(),
 				status: "open"
 			}, { merge: true });
 		} catch (e) {
@@ -69062,7 +67430,7 @@ function SupportScreen({ onBack, onNavigate }) {
 						userName: user.displayName || "",
 						userUsername: username,
 						status: "open",
-						createdAt: serverTimestamp$2()
+						createdAt: serverTimestamp()
 					});
 				}
 				setTicketId(tid);
@@ -69107,12 +67475,12 @@ function SupportScreen({ onBack, onNavigate }) {
 			await addDoc(collection(db, "supportTickets", ticketId, "messages"), {
 				sender: "user",
 				text: textToSend.trim(),
-				createdAt: serverTimestamp$2(),
+				createdAt: serverTimestamp(),
 				read: false,
 				notifiedAdmin: false
 			});
 			await setDoc(doc(db, "supportTickets", ticketId), {
-				updatedAt: serverTimestamp$2(),
+				updatedAt: serverTimestamp(),
 				status: "open"
 			}, { merge: true });
 			setInputText("");
@@ -70216,7 +68584,7 @@ function CreateGroupScreen({ onBack }) {
 				isPrivate,
 				createdBy: currentUser.uid,
 				members: memberIds,
-				createdAt: serverTimestamp$2()
+				createdAt: serverTimestamp()
 			});
 			const batch = [];
 			for (const memberId of selectedContacts) {
@@ -70228,7 +68596,7 @@ function CreateGroupScreen({ onBack }) {
 					recipientId: memberId,
 					senderId: currentUser.uid,
 					read: false,
-					createdAt: serverTimestamp$2()
+					createdAt: serverTimestamp()
 				}));
 			}
 			await Promise.all(batch);
@@ -71532,7 +69900,7 @@ function GroupChatScreen({ group, onBack, onOpenGroupInfo }) {
 				senderId: currentUser.uid,
 				senderName: senderName(currentUser.uid),
 				text,
-				timestamp: serverTimestamp$2(),
+				timestamp: serverTimestamp(),
 				replyTo: replyTo ? {
 					id: replyTo.id,
 					text: replyTo.text,
@@ -71887,7 +70255,7 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 				senderId: currentUser.uid,
 				senderName: "النظام",
 				text: systemText,
-				timestamp: serverTimestamp$2(),
+				timestamp: serverTimestamp(),
 				system: true
 			});
 			ue.success("تم التحديث");
@@ -71931,7 +70299,7 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 				senderId: currentUser.uid,
 				senderName: "النظام",
 				text: `أزال ${removedName}`,
-				timestamp: serverTimestamp$2(),
+				timestamp: serverTimestamp(),
 				system: true
 			});
 			ue.success("تم الإزالة");
@@ -71954,7 +70322,7 @@ function GroupInfoScreen({ group, onBack, onOpenChat }) {
 				senderId: currentUser.uid,
 				senderName: "النظام",
 				text: `أضاف ${contact.displayName || contact.username}`,
-				timestamp: serverTimestamp$2(),
+				timestamp: serverTimestamp(),
 				system: true
 			});
 			ue.success("تمت الإضافة");
@@ -76474,7 +74842,9 @@ var usePeer = () => {
 			setDoc(doc(db, "peers", currentUserId), {
 				peerId: id,
 				updatedAt: /* @__PURE__ */ new Date()
-			}).catch(() => {});
+			}).catch((err) => {
+				console.error("فشل كتابة peerId:", err);
+			});
 		});
 		peer.on("connection", (conn) => {
 			dataConnectionRef.current = conn;
@@ -76663,7 +75033,16 @@ var usePeer = () => {
 		switchCamera,
 		toggleVideo,
 		isVideoEnabled,
-		getRemotePeerId: (0, import_react.useCallback)(async (uid) => {}, []),
+		getRemotePeerId: (0, import_react.useCallback)(async (uid) => {
+			try {
+				const snap = await getDoc(doc(db, "peers", uid));
+				if (snap.exists()) return snap.data().peerId || null;
+				return null;
+			} catch (err) {
+				console.error("فشل جلب peerId:", err);
+				return null;
+			}
+		}, []),
 		incomingCall,
 		incomingCallerInfo,
 		incomingCallType,
@@ -76675,40 +75054,48 @@ var usePeer = () => {
 //#region src/hooks/usePresence.js
 var usePresence = () => {
 	const user = auth.currentUser;
-	const isUpdating = (0, import_react.useRef)(false);
+	const heartbeatRef = (0, import_react.useRef)(null);
 	(0, import_react.useEffect)(() => {
 		if (!user?.uid) return;
-		const userStatusRef = ref(rtdb, `status/${user.uid}`);
-		const unsubscribeConnected = onValue(ref(rtdb, ".info/connected"), (snap) => {
-			if (snap.val() === false || isUpdating.current) return;
-			isUpdating.current = true;
-			onDisconnect(userStatusRef).set({
-				state: "offline",
-				lastChanged: serverTimestamp()
-			}).then(() => {
-				return set(userStatusRef, {
-					state: "online",
-					lastChanged: serverTimestamp()
-				});
-			}).then(() => {
-				return updateDoc(doc(db, "users", user.uid), {
+		const userRef = doc(db, "users", user.uid);
+		let isMounted = true;
+		const setOnline = async () => {
+			try {
+				await setDoc(userRef, {
 					status: "online",
 					lastSeen: /* @__PURE__ */ new Date()
-				});
-			}).catch((err) => console.error("خطأ في إعداد الحضور:", err)).finally(() => {
-				isUpdating.current = false;
-			});
+				}, { merge: true });
+			} catch (error) {
+				console.error("فشل تعيين الحالة متصل:", error);
+			}
+		};
+		const setOffline = async () => {
+			try {
+				await setDoc(userRef, {
+					status: "offline",
+					lastSeen: /* @__PURE__ */ new Date()
+				}, { merge: true });
+			} catch (error) {
+				console.error("فشل تعيين الحالة غير متصل:", error);
+			}
+		};
+		setOnline();
+		heartbeatRef.current = setInterval(setOnline, 3e4);
+		const unsubscribe = onSnapshot(userRef, (snap) => {
+			if (snap.exists()) snap.data();
 		});
-		const unsubscribeStatus = onValue(userStatusRef, (snap) => {
-			const data = snap.val();
-			if (data && data.state && !isUpdating.current) updateDoc(doc(db, "users", user.uid), {
-				status: data.state,
-				lastSeen: data.lastChanged ? new Date(data.lastChanged) : /* @__PURE__ */ new Date()
-			}).catch(console.error);
-		});
+		const handleBeforeUnload = () => setOffline();
+		window.addEventListener("beforeunload", handleBeforeUnload);
+		window.addEventListener("pagehide", handleBeforeUnload);
 		return () => {
-			unsubscribeConnected();
-			unsubscribeStatus();
+			clearInterval(heartbeatRef.current);
+			unsubscribe();
+			window.removeEventListener("beforeunload", handleBeforeUnload);
+			window.removeEventListener("pagehide", handleBeforeUnload);
+			if (isMounted) {
+				setOffline();
+				isMounted = false;
+			}
 		};
 	}, [user?.uid]);
 };
@@ -77022,7 +75409,7 @@ function AppContent() {
 				if (!loginDates.includes(today)) loginDates.push(today);
 				await setDoc(userRef, {
 					status: "online",
-					lastSeen: serverTimestamp$2(),
+					lastSeen: serverTimestamp(),
 					loginDates: loginDates.slice(-30),
 					loginCount: (data.loginCount || 0) + 1
 				}, { merge: true });
@@ -77049,7 +75436,7 @@ function AppContent() {
 			try {
 				await setDoc(userRef, {
 					status,
-					lastSeen: serverTimestamp$2()
+					lastSeen: serverTimestamp()
 				}, { merge: true });
 			} catch (e) {}
 		};
@@ -77074,7 +75461,7 @@ function AppContent() {
 		if (user?.uid) try {
 			await setDoc(doc(db, "users", user.uid), {
 				status: "offline",
-				lastSeen: serverTimestamp$2()
+				lastSeen: serverTimestamp()
 			}, { merge: true });
 		} catch (e) {}
 		sessionStorage.removeItem("vibecall_has_seen_welcome");
@@ -77153,7 +75540,7 @@ function AppContent() {
 			await setDoc(doc(db, "users", user.uid), { username }, { merge: true });
 			await setDoc(doc(db, "usernames", username), {
 				uid: user.uid,
-				createdAt: serverTimestamp$2()
+				createdAt: serverTimestamp()
 			}, { merge: true });
 			setMyUsername(username);
 			localStorage.setItem("my_username", username);
