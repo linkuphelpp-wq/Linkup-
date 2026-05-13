@@ -69102,15 +69102,6 @@ function SupportScreen({ onBack, onNavigate }) {
 	const handleSend = (0, import_react.useCallback)(async (textOverride) => {
 		const textToSend = typeof textOverride === "string" ? textOverride : inputText;
 		if (!textToSend.trim() || !ticketId || !user || sending) return;
-		const lastUserMsg = [...messages].reverse().find((m) => m.sender === "user");
-		if (lastUserMsg && lastUserMsg.createdAt) {
-			const diffMinutes = (Date.now() - lastUserMsg.createdAt.getTime()) / (1e3 * 60);
-			if (diffMinutes < 5) {
-				setCooldownMinutes(Math.ceil(5 - diffMinutes));
-				setTimeout(() => setCooldownMinutes(0), 4e3);
-				return;
-			}
-		}
 		try {
 			setSending(true);
 			await addDoc(collection(db, "supportTickets", ticketId, "messages"), {
