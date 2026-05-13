@@ -69410,7 +69410,7 @@ var containerVariants$1 = {
 	hidden: { opacity: 0 },
 	visible: {
 		opacity: 1,
-		transition: { staggerChildren: .04 }
+		transition: { staggerChildren: .05 }
 	}
 };
 var itemVariants$1 = {
@@ -69430,17 +69430,20 @@ var itemVariants$1 = {
 		}
 	}
 };
-var COMMON_PROBLEMS = Array.from({ length: 30 }, (_, i) => ({
-	id: i + 1,
-	question: `المشكلة الشائعة رقم ${i + 1} - هذا مثال لسؤال متكرر من المستخدمين`
-}));
 function FAQScreen({ onBack, onNavigate }) {
-	const [copiedId, setCopiedId] = (0, import_react.useState)(null);
+	const [problems, setProblems] = (0, import_react.useState)([]);
+	const [expandedId, setExpandedId] = (0, import_react.useState)(null);
+	(0, import_react.useEffect)(() => {
+		const unsub = onSnapshot(query(collection(db, "commonProblems"), orderBy("createdAt", "desc")), (snapshot) => {
+			setProblems(snapshot.docs.map((d) => ({
+				id: d.id,
+				...d.data()
+			})));
+		});
+		return () => unsub();
+	}, []);
 	const handleCopy = (text) => {
-		navigator.clipboard.writeText(text).then(() => {
-			setCopiedId(text);
-			setTimeout(() => setCopiedId(null), 2e3);
-		}).catch(() => alert("تعذر النسخ"));
+		navigator.clipboard.writeText(text).catch(() => {});
 	};
 	const handleSendToSupport = (text) => {
 		onNavigate("support");
@@ -69486,37 +69489,69 @@ function FAQScreen({ onBack, onNavigate }) {
 			variants: containerVariants$1,
 			initial: "hidden",
 			animate: "visible",
-			className: "px-4 pt-28 pb-6 space-y-2 max-w-2xl mx-auto",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "text-[13px] text-stone-500 px-2 mb-4",
-				children: "اضغط على أي مشكلة لنسخها، أو اضغط زر الإرسال للذهاب مباشرة للدعم."
-			}), COMMON_PROBLEMS.map((problem) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+			className: "px-4 pt-28 pb-8 space-y-3 max-w-2xl mx-auto",
+			children: [problems.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 				variants: itemVariants$1,
-				className: "flex items-center gap-3 bg-white border border-stone-200 rounded-2xl p-3 shadow-sm hover:shadow-md transition-all group",
-				children: [
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "text-[11px] font-bold text-stone-400 w-6 text-center",
-						children: problem.id
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-						className: "flex-1 text-[14px] font-medium text-stone-700 text-right leading-relaxed",
-						children: problem.question
-					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-						className: "flex items-center gap-1 shrink-0",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: () => handleCopy(problem.question),
-							className: `p-2 rounded-xl transition-all ${copiedId === problem.question ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-500 hover:bg-stone-200"}`,
-							title: "نسخ",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" })
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							onClick: () => handleSendToSupport(problem.question),
-							className: "p-2 rounded-xl bg-violet-50 text-violet-700 hover:bg-violet-100 transition-all",
-							title: "إرسال للدعم",
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-4 h-4" })
+				className: "text-center py-16",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "w-16 h-16 mx-auto mb-4 rounded-2xl bg-stone-100 flex items-center justify-center",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MessageCircleQuestionMark, { className: "w-8 h-8 text-stone-400" })
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-stone-500 font-medium",
+					children: "لا توجد مشاكل شائعة حالياً"
+				})]
+			}), problems.map((problem) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+				variants: itemVariants$1,
+				className: "bg-white border border-stone-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center gap-3 p-4",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex-1 text-right",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+							className: "text-[14px] font-bold text-stone-800 mb-1",
+							children: problem.question
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-[12px] text-stone-500",
+							children: expandedId === problem.id ? "اضغط للإخفاء" : "اضغط لرؤية الجواب"
 						})]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex items-center gap-1 shrink-0",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: () => handleCopy(problem.question),
+								className: "p-2 rounded-xl bg-stone-100 text-stone-500 hover:bg-stone-200 transition-all",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Copy, { className: "w-4 h-4" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: () => handleSendToSupport(problem.question),
+								className: "p-2 rounded-xl bg-violet-50 text-violet-700 hover:bg-violet-100 transition-all",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Send, { className: "w-4 h-4" })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								onClick: () => setExpandedId(expandedId === problem.id ? null : problem.id),
+								className: "p-2 rounded-xl bg-stone-50 text-stone-400 hover:bg-stone-100 transition-all",
+								children: expandedId === problem.id ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronUp, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)(ChevronDown, { className: "w-4 h-4" })
+							})
+						]
+					})]
+				}), expandedId === problem.id && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+					initial: {
+						height: 0,
+						opacity: 0
+					},
+					animate: {
+						height: "auto",
+						opacity: 1
+					},
+					className: "px-4 pb-4",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "pt-3 border-t border-stone-100",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+							className: "text-[13px] text-stone-600 leading-relaxed bg-stone-50 p-3 rounded-xl",
+							children: problem.answer || "لا يوجد جواب مفصل حالياً"
+						})
 					})
-				]
+				})]
 			}, problem.id))]
 		})]
 	});
