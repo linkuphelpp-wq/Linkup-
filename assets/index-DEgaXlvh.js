@@ -68872,6 +68872,7 @@ function SupportScreen({ onBack }) {
 	const [ticketId, setTicketId] = (0, import_react.useState)(null);
 	const [loading, setLoading] = (0, import_react.useState)(true);
 	const [cooldownMinutes, setCooldownMinutes] = (0, import_react.useState)(0);
+	const [feedbackState, setFeedbackState] = (0, import_react.useState)(null);
 	const bottomRef = (0, import_react.useRef)(null);
 	(0, import_react.useEffect)(() => {
 		const unsub = onAuthStateChanged(auth, (u) => {
@@ -68915,6 +68916,8 @@ function SupportScreen({ onBack }) {
 					}));
 					setMessages(msgs);
 					setLoading(false);
+					const lastAutoReply = [...msgs].reverse().find((m) => m.sender === "admin" && m.autoReply);
+					if (lastAutoReply?.feedback) setFeedbackState(lastAutoReply.feedback);
 					const lastMsg = msgs[msgs.length - 1];
 					if (lastMsg && lastMsg.sender === "admin") {
 						if ((Date.now() - lastMsg.createdAt.getTime()) / (1e3 * 60) >= 15) {
@@ -68973,9 +68976,13 @@ function SupportScreen({ onBack }) {
 		messages
 	]);
 	const handleFeedback = async (messageId, isPositive) => {
+		if (feedbackState) return;
+		const newState = isPositive ? "liked" : "disliked";
+		setFeedbackState(newState);
 		try {
-			await setDoc(doc(db, "supportTickets", ticketId, "messages", messageId), { feedback: isPositive ? "liked" : "disliked" }, { merge: true });
-			if (!isPositive) await setDoc(doc(db, "supportTickets", ticketId), { status: "needs_review" }, { merge: true });
+			await setDoc(doc(db, "supportTickets", ticketId, "messages", messageId), { feedback: newState }, { merge: true });
+			if (isPositive) await setDoc(doc(db, "supportTickets", ticketId), { status: "resolved" }, { merge: true });
+			else await setDoc(doc(db, "supportTickets", ticketId), { status: "needs_review" }, { merge: true });
 		} catch (err) {
 			console.error("Failed to save feedback:", err);
 		}
@@ -69026,9 +69033,9 @@ function SupportScreen({ onBack }) {
 								children: "الدعم الفني"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "flex items-center gap-1.5 mt-0.5",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "w-2 h-2 bg-emerald-500 rounded-full animate-pulse" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `w-2 h-2 rounded-full animate-pulse ${feedbackState === "liked" ? "bg-emerald-500" : "bg-emerald-500"}` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 									className: "text-[11px] text-emerald-700 font-medium",
-									children: "متصل"
+									children: feedbackState === "liked" ? "انتهت الجلسة" : "متصل"
 								})]
 							})]
 						}),
@@ -69096,7 +69103,7 @@ function SupportScreen({ onBack }) {
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: messages.map((msg) => {
 						const isUser = msg.sender === "user";
 						const isAutoReply = msg.sender === "admin" && msg.autoReply === true;
-						const feedbackGiven = msg.feedback != null;
+						const feedbackGiven = feedbackState != null;
 						return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 							variants: messageVariants,
 							initial: "hidden",
@@ -69108,44 +69115,57 @@ function SupportScreen({ onBack }) {
 							className: `flex ${isUser ? "justify-end" : "justify-start"}`,
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 								className: "max-w-[82%] flex flex-col gap-1",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: `px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${isUser ? "bg-blue-600 text-white rounded-br-none" : "bg-white text-stone-800 rounded-bl-none border border-stone-200"}`,
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: msg.text }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-										className: `text-[10px] mt-1.5 ${isUser ? "text-blue-200" : "text-stone-400"}`,
-										children: msg.createdAt.toLocaleTimeString("ar-SA", {
-											hour: "2-digit",
-											minute: "2-digit"
-										})
-									})]
-								}), isAutoReply && !isUser && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
-									initial: {
-										opacity: 0,
-										y: 5
-									},
-									animate: {
-										opacity: 1,
-										y: 0
-									},
-									className: "flex items-center gap-2 mt-1",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-										onClick: () => handleFeedback(msg.id, true),
-										disabled: feedbackGiven,
-										className: `flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all active:scale-95 ${msg.feedback === "liked" ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-500 hover:bg-emerald-50 hover:text-emerald-600"}`,
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ThumbsUp, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "مفيد" })]
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-										onClick: () => handleFeedback(msg.id, false),
-										disabled: feedbackGiven,
-										className: `flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all active:scale-95 ${msg.feedback === "disliked" ? "bg-rose-100 text-rose-700" : "bg-stone-100 text-stone-500 hover:bg-rose-50 hover:text-rose-600"}`,
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ThumbsDown, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "غير مفيد" })]
-									})]
-								})]
+								children: [
+									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: `px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${isUser ? "bg-blue-600 text-white rounded-br-none" : "bg-white text-stone-800 rounded-bl-none border border-stone-200"}`,
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: msg.text }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+											className: `text-[10px] mt-1.5 ${isUser ? "text-blue-200" : "text-stone-400"}`,
+											children: msg.createdAt.toLocaleTimeString("ar-SA", {
+												hour: "2-digit",
+												minute: "2-digit"
+											})
+										})]
+									}),
+									isAutoReply && !isUser && !feedbackGiven && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+										initial: {
+											opacity: 0,
+											y: 5
+										},
+										animate: {
+											opacity: 1,
+											y: 0
+										},
+										className: "flex items-center gap-2 mt-1",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+											onClick: () => handleFeedback(msg.id, true),
+											className: "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-stone-100 text-stone-600 hover:bg-emerald-50 hover:text-emerald-700 active:scale-95 transition-all",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ThumbsUp, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "مفيد" })]
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+											onClick: () => handleFeedback(msg.id, false),
+											className: "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-stone-100 text-stone-600 hover:bg-rose-50 hover:text-rose-700 active:scale-95 transition-all",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ThumbsDown, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "غير مفيد" })]
+										})]
+									}),
+									isAutoReply && !isUser && feedbackGiven && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
+										initial: {
+											opacity: 0,
+											y: 5
+										},
+										animate: {
+											opacity: 1,
+											y: 0
+										},
+										className: `flex items-center gap-2 mt-1 px-3 py-2 rounded-xl text-[11px] font-medium ${feedbackState === "liked" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`,
+										children: feedbackState === "liked" ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleCheck, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "شكراً لتقييمك! سعدنا بخدمتك" })] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CircleX, { className: "w-4 h-4" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "نعتذر، سنقوم بمراجعة مشكلتك والتواصل معك" })] })
+									})
+								]
 							})
 						}, msg.id);
 					}) }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { ref: bottomRef })
 				]
 			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			feedbackState !== "liked" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-xl border-t border-stone-200/60 px-4 py-3",
 				style: { paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" },
 				children: [cooldownMinutes > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {

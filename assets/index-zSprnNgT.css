@@ -157,7 +157,6 @@
     --color-pink-500: oklch(65.6% .241 354.308);
     --color-pink-600: oklch(59.2% .249 .584);
     --color-rose-50: oklch(96.9% .015 12.422);
-    --color-rose-100: oklch(94.1% .03 12.58);
     --color-rose-500: oklch(64.5% .246 16.439);
     --color-rose-600: oklch(58.6% .253 17.585);
     --color-rose-700: oklch(51.4% .222 16.935);
@@ -2443,8 +2442,8 @@
     background-color: var(--color-red-600);
   }
 
-  .bg-rose-100 {
-    background-color: var(--color-rose-100);
+  .bg-rose-50 {
+    background-color: var(--color-rose-50);
   }
 
   .bg-rose-600 {
@@ -5035,8 +5034,8 @@
       color: var(--color-blue-600);
     }
 
-    .hover\:text-emerald-600:hover {
-      color: var(--color-emerald-600);
+    .hover\:text-emerald-700:hover {
+      color: var(--color-emerald-700);
     }
 
     .hover\:text-gray-300:hover {
@@ -5071,8 +5070,8 @@
       color: var(--color-red-600);
     }
 
-    .hover\:text-rose-600:hover {
-      color: var(--color-rose-600);
+    .hover\:text-rose-700:hover {
+      color: var(--color-rose-700);
     }
 
     .hover\:text-stone-900:hover {
