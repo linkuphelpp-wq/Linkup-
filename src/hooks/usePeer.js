@@ -4,7 +4,6 @@ import {
   getPeer,
   callPeer,
   answerCall,
-  getCurrentCall,
   endCall,
   destroyPeer,
 } from '../services/peerService';
@@ -26,6 +25,7 @@ export const usePeer = () => {
   const [incomingCallerInfo, setIncomingCallerInfo] = useState(null);
   const [incomingCallType, setIncomingCallType] = useState('audio');
 
+  // إنشاء PeerJS وكتابة peerId
   useEffect(() => {
     if (!currentUserId) return;
 
@@ -33,7 +33,10 @@ export const usePeer = () => {
 
     peer.on('open', (id) => {
       setMyId(id);
-      setDoc(doc(db, 'peers', currentUserId), { peerId: id, updatedAt: new Date() }).catch(() => {});
+      // كتابة peerId في Firestore بشكل موثوق
+      setDoc(doc(db, 'peers', currentUserId), { peerId: id, updatedAt: new Date() }).catch(err => {
+        console.error('فشل كتابة peerId:', err);
+      });
     });
 
     peer.on('connection', (conn) => {
@@ -41,7 +44,7 @@ export const usePeer = () => {
       conn.on('data', (data) => setRemoteUserData(data));
     });
 
-    // 📥 التعامل مع المكالمة الواردة (بدون رد تلقائي)
+    // 📥 التعامل مع المكالمة الواردة
     peer.on('call', (call) => {
       const callType = call.metadata?.video ? 'video' : 'audio';
       setIncomingCall(call);
@@ -86,12 +89,13 @@ export const usePeer = () => {
     return () => {
       destroyPeer();
       if (currentUserId) {
+        // إزالة peerId عند الخروج (اختياري، لكن يمنع البقاء)
         setDoc(doc(db, 'peers', currentUserId), { peerId: null, updatedAt: new Date() }).catch(() => {});
       }
     };
   }, [currentUserId]);
 
-  // ✅ قبول المكالمة مع fallback إلى الصوت فقط عند فشل الفيديو
+  // قبول المكالمة الواردة
   const acceptIncomingCall = useCallback(async () => {
     if (!incomingCall) return;
     const tryGetMedia = async (video) => {
@@ -102,7 +106,6 @@ export const usePeer = () => {
         });
       } catch (e) {
         if (video) {
-          // إذا فشل الفيديو، جرّب الصوت فقط
           console.warn('فشل الوصول للكاميرا، سيتم الرد بالصوت فقط.');
           return await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         }
@@ -134,10 +137,9 @@ export const usePeer = () => {
     }
   }, [incomingCall, incomingCallType]);
 
-  // ✅ رفض المكالمة مع إرسال إشعار "مرفوض" إلى المتصل
+  // رفض المكالمة
   const rejectIncomingCall = useCallback(() => {
     if (incomingCall) {
-      // إرسال رسالة "مرفوض" عبر قناة البيانات إن وُجدت
       if (dataConnectionRef.current && dataConnectionRef.current.open) {
         dataConnectionRef.current.send({ type: 'rejected' });
       }
@@ -148,7 +150,7 @@ export const usePeer = () => {
     }
   }, [incomingCall]);
 
-  // ✅ بدء مكالمة مع دعم الـ fallback إلى الصوت عند فشل الكاميرا
+  // بدء مكالمة صادرة
   const startCall = useCallback(async (remotePeerId, userData, callType = 'audio') => {
     if (!remotePeerId) return;
     const peer = getPeer();
@@ -186,7 +188,7 @@ export const usePeer = () => {
       conn.on('data', (data) => {
         if (data?.type === 'rejected') {
           setCallStatus('تم رفض المكالمة');
-          stopCall(); // إنهاء الاتصال من جهة المتصل
+          stopCall();
         } else {
           setRemoteUserData(data);
         }
@@ -227,17 +229,27 @@ export const usePeer = () => {
   }, []);
 
   const switchCamera = useCallback(async () => {
-    // ... (دالة switchCamera تبقى كما هي بدون تغيير)
+    // ... (تبقى كما هي)
   }, []);
 
   const toggleVideo = useCallback(() => {
-    // ... (دالة toggleVideo تبقى كما هي بدون تغيير)
+    // ... (تبقى كما هي)
   }, []);
 
   const isVideoEnabled = () => localStreamRef.current?.getVideoTracks()[0]?.enabled ?? false;
 
   const getRemotePeerId = useCallback(async (uid) => {
-    // ... (دالة getRemotePeerId تبقى كما هي بدون تغيير)
+    try {
+      const snap = await getDoc(doc(db, 'peers', uid));
+      if (snap.exists()) {
+        const data = snap.data();
+        return data.peerId || null;
+      }
+      return null;
+    } catch (err) {
+      console.error('فشل جلب peerId:', err);
+      return null;
+    }
   }, []);
 
   return {

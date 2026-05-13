@@ -30,7 +30,6 @@ export default function CallScreen({
   const timerRef = useRef(null);
   const appliedMuteRef = useRef(false);
 
-  // بدء المكالمة عند الفتح (للمكالمات الصادرة فقط)
   useEffect(() => {
     if (open && contact?.uid) {
       setVideoEnabled(callType === 'video');
@@ -57,7 +56,6 @@ export default function CallScreen({
     }
   }, [open, contact?.uid, callType, startCall, getRemotePeerId, onClose]);
 
-  // كتم الميكروفون تلقائياً
   useEffect(() => {
     if (muteMicOnJoin && localStream && !appliedMuteRef.current) {
       const audioTrack = localStream.getAudioTracks()[0];
@@ -69,21 +67,18 @@ export default function CallScreen({
     }
   }, [localStream, muteMicOnJoin]);
 
-  // ربط الفيديو المحلي
   useEffect(() => {
     if (localVideoRef.current && localStream) {
       localVideoRef.current.srcObject = localStream;
     }
   }, [localStream]);
 
-  // ربط الفيديو البعيد
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
       remoteVideoRef.current.srcObject = remoteStream;
     }
   }, [remoteStream]);
 
-  // مؤقت المكالمة
   useEffect(() => {
     if (callStatus?.includes('متصل')) {
       timerRef.current = setInterval(() => setCallTimer((p) => p + 1), 1000);

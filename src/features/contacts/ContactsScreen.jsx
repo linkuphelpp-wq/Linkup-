@@ -48,22 +48,15 @@ const getSafeName = (contact) => {
   return 'مستخدم';
 };
 
-// ───────── بطاقة جهة الاتصال (معدّلة بتأثيرات حركية) ─────────
+// ───────── بطاقة جهة الاتصال (معدّلة مع إظهار الحالة بشكل صحيح) ─────────
 const ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFavorite, onEdit, unreadCount = 0, index = 0 }) => {
-  const [status, setStatus] = useState('offline');
+  const [status, setStatus] = useState(contact.status || 'offline');
   const [expanded, setExpanded] = useState(false);
 
+  // تحديث الحالة عند تغير بيانات contact (التي تأتي من onSnapshot للقائمة)
   useEffect(() => {
-    if (!contact.uid) return;
-    const unsub = onSnapshot(doc(db, 'users', contact.uid), (snap) => {
-      if (snap.exists()) {
-        setStatus(snap.data().status || 'offline');
-      } else {
-        setStatus('offline');
-      }
-    });
-    return () => unsub();
-  }, [contact.uid]);
+    setStatus(contact.status || 'offline');
+  }, [contact.status]);
 
   const safeName = getSafeName(contact);
   const statusDot = status === 'online' ? 'bg-emerald-500' : 'bg-gray-300';
@@ -156,7 +149,7 @@ const ContactCard = ({ contact, onCall, onChat, onDelete, onToggleFavorite, isFa
         </div>
       </div>
 
-      {/* شريط الأزرار المنسدل (مع حركة انسيابية) */}
+      {/* شريط الأزرار المنسدل */}
       <AnimatePresence>
         {expanded && (
           <motion.div
@@ -330,7 +323,7 @@ export default function ContactsScreen({ onCall, onChat }) {
 
   const currentUser = auth.currentUser;
 
-  // جلب جهات الاتصال
+  // جلب جهات الاتصال مع تضمين الحالة من Firestore
   useEffect(() => {
     if (!currentUser?.uid) return;
     const q = query(collection(db, 'contacts'), where('participants', 'array-contains', currentUser.uid));
@@ -356,6 +349,7 @@ export default function ContactsScreen({ onCall, onChat }) {
           photoURL: userData.photoURL || '',
           localDisplayName: data.displayName || '',
           displayName: userData.displayName || '',
+          status: userData.status || 'offline', // 🟢 إدراج الحالة مباشرة
         };
       }));
       setContacts(contactsList.filter(Boolean));
@@ -363,7 +357,7 @@ export default function ContactsScreen({ onCall, onChat }) {
     return () => unsub();
   }, [currentUser]);
 
-  // عداد غير المقروء
+  // عداد غير المقروء (يبقى كما هو)
   useEffect(() => {
     if (!currentUser?.uid) return;
     const chatsQuery = query(collection(db, 'chats'), where('participants', 'array-contains', currentUser.uid));
