@@ -11151,6 +11151,20 @@ var TabletSmartphone = createLucideIcon("tablet-smartphone", [
 		key: "lrp35t"
 	}]
 ]);
+var ThumbsDown = createLucideIcon("thumbs-down", [["path", {
+	d: "M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z",
+	key: "m61m77"
+}], ["path", {
+	d: "M17 14V2",
+	key: "8ymqnk"
+}]]);
+var ThumbsUp = createLucideIcon("thumbs-up", [["path", {
+	d: "M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z",
+	key: "emmmcr"
+}], ["path", {
+	d: "M7 10v12",
+	key: "1qc93n"
+}]]);
 var Trash2 = createLucideIcon("trash-2", [
 	["path", {
 		d: "M10 11v6",
@@ -68958,6 +68972,14 @@ function SupportScreen({ onBack }) {
 		sending,
 		messages
 	]);
+	const handleFeedback = async (messageId, isPositive) => {
+		try {
+			await setDoc(doc(db, "supportTickets", ticketId, "messages", messageId), { feedback: isPositive ? "liked" : "disliked" }, { merge: true });
+			if (!isPositive) await setDoc(doc(db, "supportTickets", ticketId), { status: "needs_review" }, { merge: true });
+		} catch (err) {
+			console.error("Failed to save feedback:", err);
+		}
+	};
 	const handleKeyDown = (e) => {
 		if (e.key === "Enter" && !e.shiftKey) {
 			e.preventDefault();
@@ -69073,6 +69095,8 @@ function SupportScreen({ onBack }) {
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(AnimatePresence, { children: messages.map((msg) => {
 						const isUser = msg.sender === "user";
+						const isAutoReply = msg.sender === "admin" && msg.autoReply === true;
+						const feedbackGiven = msg.feedback != null;
 						return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(motion.div, {
 							variants: messageVariants,
 							initial: "hidden",
@@ -69083,13 +69107,37 @@ function SupportScreen({ onBack }) {
 							},
 							className: `flex ${isUser ? "justify-end" : "justify-start"}`,
 							children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: `max-w-[82%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${isUser ? "bg-blue-600 text-white rounded-br-none" : "bg-white text-stone-800 rounded-bl-none border border-stone-200"}`,
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: msg.text }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-									className: `text-[10px] mt-1.5 ${isUser ? "text-blue-200" : "text-stone-400"}`,
-									children: msg.createdAt.toLocaleTimeString("ar-SA", {
-										hour: "2-digit",
-										minute: "2-digit"
-									})
+								className: "max-w-[82%] flex flex-col gap-1",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: `px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${isUser ? "bg-blue-600 text-white rounded-br-none" : "bg-white text-stone-800 rounded-bl-none border border-stone-200"}`,
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { children: msg.text }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+										className: `text-[10px] mt-1.5 ${isUser ? "text-blue-200" : "text-stone-400"}`,
+										children: msg.createdAt.toLocaleTimeString("ar-SA", {
+											hour: "2-digit",
+											minute: "2-digit"
+										})
+									})]
+								}), isAutoReply && !isUser && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
+									initial: {
+										opacity: 0,
+										y: 5
+									},
+									animate: {
+										opacity: 1,
+										y: 0
+									},
+									className: "flex items-center gap-2 mt-1",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										onClick: () => handleFeedback(msg.id, true),
+										disabled: feedbackGiven,
+										className: `flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all active:scale-95 ${msg.feedback === "liked" ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-500 hover:bg-emerald-50 hover:text-emerald-600"}`,
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ThumbsUp, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "مفيد" })]
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+										onClick: () => handleFeedback(msg.id, false),
+										disabled: feedbackGiven,
+										className: `flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium transition-all active:scale-95 ${msg.feedback === "disliked" ? "bg-rose-100 text-rose-700" : "bg-stone-100 text-stone-500 hover:bg-rose-50 hover:text-rose-600"}`,
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(ThumbsDown, { className: "w-3.5 h-3.5" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "غير مفيد" })]
+									})]
 								})]
 							})
 						}, msg.id);
